@@ -3013,7 +3013,12 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
     if(!state.days[state.date]) state.days[state.date] = makeDay();
 
     saveLocalState();
-    renderAll();
+    renderStats();
+    renderBoard();
+    refreshAllCards();
+    updateDogBar();
+    updateMainBtn();
+    if(isAdminMode) renderAdminPanel();
     populateLessonSelects();
 
     // 导入后同时同步到云端，保持家长端/孩子端一致
