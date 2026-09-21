@@ -1031,7 +1031,7 @@
 /* ============================================================
    🔥 Firebase 配置 — 请替换为你自己的配置
 ============================================================ */
-const firebaseConfig = {
+const FIREBASE_CONFIG = {
   apiKey: "AIzaSyAGtDcOvTmHPsltv8HaHAaWyt174kCqIsQ",
   authDomain: "study-391ef.firebaseapp.com",
   databaseURL: "https://study-391ef-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -1040,8 +1040,11 @@ const firebaseConfig = {
   messagingSenderId: "717172976280",
   appId: "1:717172976280:web:859d041050a5fa553dfeed"
 };
+
 const FAMILY_ID = 'x7k2m9q4';
 const PARENT_PASSWORD = '0702';
+
+const FIREBASE_READY = !!(FIREBASE_CONFIG.apiKey && !/^YOUR_/.test(FIREBASE_CONFIG.apiKey));
 /* ============================================================
    Firebase SDK
 ============================================================ */
