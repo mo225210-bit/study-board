@@ -32,7 +32,7 @@
     --c-main:#8FD14F;--c-dark:#74B93A;--c-deep:#5EA22C;--c-border:#4E8A22;
     --c-btn:#68B32E;--c-btn-shade:#4E8A22;--c-light:#EAF6E6;--c-soft:#F1F8EE;--c-text:#2E7D32;
     position:relative;z-index:1;width:100%;max-width:820px;margin:0 auto;
-    padding:10px 12px;display:flex;flex-direction:column;gap:12px;min-height:100vh;
+    padding:6px 8px;display:flex;flex-direction:column;gap:7px;min-height:100vh;
   }
   .app.theme-math{
     --c-main:#6FC3E8;--c-dark:#4FA8D8;--c-deep:#3D8FC0;--c-border:#2E7FA8;
@@ -42,7 +42,7 @@
   .topbar{
     display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
     background:rgba(255,255,255,.86);backdrop-filter:blur(12px);
-    border:2px solid rgba(255,255,255,.95);border-radius:20px;padding:10px 14px;
+    border:2px solid rgba(255,255,255,.95);border-radius:15px;padding:6px 10px;
     box-shadow:0 6px 20px rgba(60,110,60,.18);
   }
   .brand{display:flex;align-items:center;gap:10px}
@@ -88,12 +88,12 @@
     background:repeating-linear-gradient(90deg,rgba(255,255,255,.08) 0 24px,transparent 24px 48px),
       linear-gradient(180deg,rgba(255,255,255,.96) 0%,var(--c-soft) 100%);
     backdrop-filter:blur(12px);border:3px solid var(--c-border);border-radius:22px;
-    padding:12px 16px 12px;
+    padding:8px 10px 8px;
     box-shadow:inset 0 -6px 14px rgba(0,0,0,.06),0 6px 20px rgba(60,110,60,.18);
-    display:flex;flex-direction:column;gap:10px;transition:all .3s;
+    display:flex;flex-direction:column;gap:6px;transition:all .3s;
   }
   .timer-row{display:flex;gap:10px;align-items:stretch}
-  .track{position:relative;flex:1;min-width:0;height:68px;border-radius:34px;overflow:hidden;
+  .track{position:relative;flex:1;min-width:0;height:58px;border-radius:29px;overflow:hidden;
     background:linear-gradient(180deg,var(--c-light),var(--c-soft));
     border:3px solid var(--c-border);box-shadow:inset 0 4px 10px rgba(40,90,30,.12);transition:all .3s}
   .track.paused{border-color:#FFB74D;background:linear-gradient(180deg,#FFF8E1,#FFE0B2)}
@@ -105,7 +105,7 @@
   .sun-anchor.eaten{animation:sunEaten .65s ease forwards}
   @keyframes sunEaten{0%{transform:translateY(-50%) scale(1);opacity:1}40%{transform:translateY(-50%) scale(1.5);opacity:1}100%{transform:translateY(-50%) scale(0);opacity:0}}
   .track-time{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    font-size:22px;font-weight:900;color:var(--c-text);z-index:4;font-variant-numeric:tabular-nums;
+    font-size:19px;font-weight:900;color:var(--c-text);z-index:4;font-variant-numeric:tabular-nums;
     pointer-events:none;text-shadow:0 1px 0 #fff,0 0 10px rgba(255,255,255,.98);transition:color .3s}
   .track-time.paused{color:#E65100}
   .track-time.chomping{color:#BF360C}
@@ -139,8 +139,8 @@
     background:linear-gradient(180deg,#BDBDBD,#9E9E9E);border-color:#9E9E9E;box-shadow:0 4px 0 #757575;color:#fff}
 
   .subject-tabs{display:flex;gap:0;background:rgba(255,255,255,.9);border:2px solid #fff;
-    border-radius:18px;padding:4px;box-shadow:0 4px 14px rgba(60,110,60,.14)}
-  .subject-tab{flex:1;font-family:inherit;font-size:14px;font-weight:900;padding:10px 8px;
+    border-radius:14px;padding:3px;box-shadow:0 4px 14px rgba(60,110,60,.14)}
+  .subject-tab{flex:1;font-family:inherit;font-size:13px;font-weight:900;padding:7px 6px;
     border-radius:14px;cursor:pointer;border:none;background:transparent;color:#7a8f7a;
     transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
   .subject-tab.active{background:linear-gradient(180deg,#8FD14F,#68B32E);color:#fff;box-shadow:0 3px 0 #4E8A22}
@@ -150,7 +150,7 @@
   .tab-panel{display:none}
   .tab-panel.active{display:block}
 
-  .subject-col{border:3px solid #4E8A22;border-radius:22px;padding:10px;
+  .subject-col{border:2px solid #4E8A22;border-radius:16px;padding:6px;
     background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 24px,transparent 24px 48px),
       linear-gradient(180deg,#8FD14F 0%,#74B93A 55%,#5EA22C 100%);
     box-shadow:inset 0 -8px 18px rgba(0,0,0,.10),0 8px 22px rgba(40,90,30,.20);position:relative;overflow:hidden}
@@ -162,20 +162,20 @@
     border-color:#2E7FA8;box-shadow:inset 0 -8px 18px rgba(0,0,0,.10),0 8px 22px rgba(30,70,100,.22)}
   .col-head{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;
     gap:6px;background:rgba(255,255,255,.92);border:2px solid #fff;border-radius:15px;
-    padding:7px 10px;margin-bottom:9px;box-shadow:0 3px 10px rgba(0,0,0,.12)}
+    padding:5px 8px;margin-bottom:5px;box-shadow:0 3px 10px rgba(0,0,0,.12)}
   .col-title{font-size:13px;font-weight:900;color:#2E7D32;white-space:nowrap}
   .subject-col[data-subject="math"] .col-title{color:#0277BD}
   .col-count{font-size:10.5px;font-weight:900;color:#fff;background:#68B32E;padding:2px 8px;
     border-radius:999px;margin-left:4px}
   .subject-col[data-subject="math"] .col-count{background:#29A3D6}
 
-  .card-list{position:relative;z-index:2;display:flex;flex-direction:column;gap:7px;min-height:100px}
+  .card-list{position:relative;z-index:2;display:flex;flex-direction:column;gap:5px;min-height:70px}
   .empty-tip{text-align:center;font-size:11.5px;font-weight:700;color:rgba(255,255,255,.92);
     background:rgba(0,0,0,.16);border:2px dashed rgba(255,255,255,.5);
     border-radius:14px;padding:18px 8px;line-height:1.7}
 
   .task-card{position:relative;overflow:hidden;background:rgba(255,255,255,.97);
-    border:2px solid #fff;border-radius:15px;padding:10px 12px 9px;
+    border:2px solid #fff;border-radius:12px;padding:7px 9px 6px;
     transition:all .16s;box-shadow:0 3px 9px rgba(0,0,0,.13)}
   .task-card.active{border-color:#FFC107;box-shadow:0 0 0 3px rgba(255,193,7,.4),0 6px 16px rgba(0,0,0,.16)}
   .task-card.active.paused-card{border-color:#FFB74D;box-shadow:0 0 0 3px rgba(255,183,77,.4)}
@@ -184,7 +184,7 @@
   @keyframes cardDone{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,193,7,.75)}
     50%{transform:scale(1.03);box-shadow:0 0 0 9px rgba(255,193,7,0)}100%{transform:scale(1)}}
   .card-top{display:flex;gap:10px;align-items:flex-start}
-  .checkbox{flex:none;width:26px;height:26px;border-radius:8px;border:2.5px solid #A5D6A7;
+  .checkbox{flex:none;width:23px;height:23px;border-radius:7px;border:2.5px solid #A5D6A7;
     background:#fff;display:grid;place-items:center;margin-top:1px;cursor:pointer;transition:all .2s}
   .subject-col[data-subject="math"] .checkbox{border-color:#90CAF9}
   .checkbox .tick{color:#fff;font-size:16px;font-weight:900;line-height:1;opacity:0;
@@ -437,7 +437,7 @@
     gap:16px;margin-bottom:20px;flex-wrap:wrap;
   }
   .admin-header h2{
-    font-size:22px;font-weight:900;color:#FFD54F;letter-spacing:1px;
+    font-size:19px;font-weight:900;color:#FFD54F;letter-spacing:1px;
     display:flex;align-items:center;gap:10px;
   }
   .admin-header .admin-close{
@@ -607,6 +607,22 @@
     .admin-add-row.inline-row .aa-unit{font-size:9px;letter-spacing:-.3px}
     .admin-add-row.inline-row .aa-btn{padding:8px 8px;font-size:11px}
   }
+
+/* 首页紧凑布局 */
+.home-compact .col-head{padding:2px 4px;margin-bottom:4px;background:transparent;border:0;box-shadow:none}
+.home-compact .col-title{font-size:12px}
+.home-compact .col-count{font-size:9px;padding:1px 6px}
+.home-compact .subject-col{padding:5px;border-radius:14px}
+.home-compact .card-list{gap:4px;min-height:55px}
+.home-compact .task-card{padding:6px 8px 5px;border-radius:10px}
+.home-compact .task-text{font-size:12px;line-height:1.35}
+.home-compact .task-info{margin-top:3px;font-size:9.5px;gap:6px}
+.home-compact .checkbox{width:21px;height:21px;border-radius:6px}
+.home-compact .checkbox .tick{font-size:13px}
+.home-compact .timer-hint{font-size:10.5px;min-height:13px}
+.home-compact .toolbar{gap:6px}
+.home-compact .btn-ghost{padding:6px 12px;font-size:11.5px}
+
 </style>
 </head>
 <body>
@@ -617,7 +633,7 @@
 
 <div class="sync-status" id="syncStatus"></div>
 
-<div class="app" id="appRoot">
+<div class="app home-compact" id="appRoot">
 
   <header class="topbar">
     <div class="brand">
@@ -649,8 +665,6 @@
     <div class="timer-hint" id="timerHint">点击右侧按钮开始倒计时</div>
   </div>
 
-  <div class="section-label">🌻 今日作业</div>
-
   <div class="subject-tabs">
     <button class="subject-tab active" data-tab="chinese">
       📖 语文 <span class="tab-count" id="chineseTabCount">0</span>
@@ -664,7 +678,7 @@
     <section class="subject-col" data-subject="chinese">
       <div class="col-head">
         <div>
-          <span class="col-title">📖 语文作业</span>
+          <span class="col-title">📖 语文</span>
           <span class="col-count" id="chineseCount">0</span>
         </div>
       </div>
@@ -676,7 +690,7 @@
     <section class="subject-col" data-subject="math">
       <div class="col-head">
         <div>
-          <span class="col-title">🔢 数学作业</span>
+          <span class="col-title">🔢 数学</span>
           <span class="col-count" id="mathCount">0</span>
         </div>
       </div>
@@ -1019,6 +1033,9 @@
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button class="aa-btn" id="adminForceSyncBtn">🔄 强制上传本地数据</button>
         <button class="aa-btn" id="adminForcePullBtn" style="background:linear-gradient(180deg,#90CAF9,#42A5F5);border-color:#42A5F5;box-shadow:0 3px 0 #1976D2;color:#fff">⬇️ 强制拉取云端数据</button>
+        <button class="aa-btn" id="adminLocalUploadBtn">📤 本地上传</button>
+        <button class="aa-btn" id="adminLocalDownloadBtn">📥 本地下载</button>
+        <input type="file" id="adminLocalUploadFile" accept=".json,application/json" style="display:none">
       </div>
       <div style="font-size:11px;color:#5a7a8a;font-weight:700;margin-top:10px" id="adminSyncInfo">
         最后同步：—
@@ -2931,6 +2948,83 @@ $('adminDateInput').addEventListener('change', e => {
   if(v) switchDate(v);
 });
 $('adminGoToday').addEventListener('click', () => switchDate(todayStr()));
+
+// 本地下载：把当前学习数据完整保存为 JSON 文件
+$('adminLocalDownloadBtn').addEventListener('click', () => {
+  try{
+    saveLocalState();
+    const backup = JSON.parse(JSON.stringify(state));
+    backup.__backupType = 'study_board_local_backup';
+    backup.__backupVersion = 1;
+    backup.__backupTime = new Date().toISOString();
+
+    const blob = new Blob([JSON.stringify(backup, null, 2)], {
+      type: 'application/json;charset=utf-8'
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '学习打卡台_本地备份_' +
+      new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast('✅ 本地数据已下载');
+  }catch(e){
+    console.error(e);
+    toast('⚠️ 本地下载失败');
+  }
+});
+
+// 本地上传：从 JSON 备份恢复当前学习数据
+$('adminLocalUploadBtn').addEventListener('click', () => {
+  $('adminLocalUploadFile').value = '';
+  $('adminLocalUploadFile').click();
+});
+
+$('adminLocalUploadFile').addEventListener('change', async (e) => {
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+
+  try{
+    const text = await file.text();
+    const imported = JSON.parse(text);
+
+    if(!imported || !imported.days){
+      throw new Error('不是有效的学习打卡台本地备份文件');
+    }
+
+    if(!confirm('确定要导入这份本地数据吗？\\n导入后会覆盖当前本地学习数据。')) return;
+
+    // 走现有的数据标准化逻辑，兼容当前版本的数据结构
+    const newDays = {};
+    Object.keys(imported.days).forEach(k => {
+      newDays[k] = normalizeDay(imported.days[k]);
+    });
+
+    state.days = newDays;
+    state.date = imported.date || todayStr();
+    state.sun = Number(imported.sun) || 0;
+    state.checkins = Array.isArray(imported.checkins) ? imported.checkins : [];
+    state.settings = normalizeSettings(imported.settings);
+    state.lessonLibrary = normalizeLessonLibrary(imported.lessonLibrary);
+
+    if(!state.days[state.date]) state.days[state.date] = makeDay();
+
+    saveLocalState();
+    renderAll();
+    populateLessonSelects();
+
+    // 导入后同时同步到云端，保持家长端/孩子端一致
+    try{ uploadToCloud(); }catch(err){ console.warn('导入后云端同步失败', err); }
+
+    toast('✅ 本地数据导入成功');
+  }catch(err){
+    console.error(err);
+    toast('⚠️ 本地上传失败：' + err.message);
+  }
+});
 
 $('adminForceSyncBtn').addEventListener('click', () => {
   uploadToCloud();
