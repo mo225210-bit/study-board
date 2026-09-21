@@ -1046,25 +1046,12 @@
    如果保持占位符不填，程序会运行在「纯本地模式」，
    换设备、清缓存、iOS 7 天未访问都会被清空，请务必配置！
 ============================================================ */
- /*
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyAGtDcOvTmHPsltv8HaHAaWyt174kCqIsQ",
-  authDomain: "study-391ef.firebaseapp.com",
-  databaseURL: "https://study-391ef-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "YOUR_PROJECT",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-*/
-//新加
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
+//新加
+/* ============================================================
+   🔥 Firebase 配置 — 已配置
+============================================================ */
+const FIREBASE_CONFIG = {
   apiKey: "AIzaSyAGtDcOvTmHPsltv8HaHAaWyt174kCqIsQ",
   authDomain: "study-391ef.firebaseapp.com",
   databaseURL: "https://study-391ef-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -1074,19 +1061,14 @@ const firebaseConfig = {
   appId: "1:717172976280:web:859d041050a5fa553dfeed"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-//新加
-
- 
-const FAMILY_ID = 'x7k2m9q4';          // ← 建议改成一串随机字符串，例如 'x7k2m9q4'
+const FAMILY_ID = 'x7k2m9q4';          // 建议改成别人猜不到的随机串
 const PARENT_PASSWORD = '0702';
 
 /* 是否真正配置了 Firebase */
 const FIREBASE_READY = !!(FIREBASE_CONFIG.apiKey && !/^YOUR_/.test(FIREBASE_CONFIG.apiKey));
 
 /* ============================================================
-   Firebase SDK
+   Firebase SDK（只加载一次，且只用 CDN 完整路径）
 ============================================================ */
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js';
 import {
@@ -1099,13 +1081,15 @@ if(FIREBASE_READY){
     firebaseApp = initializeApp(FIREBASE_CONFIG);
     db = getDatabase(firebaseApp);
     dataRef = ref(db, 'families/' + FAMILY_ID + '/data');
+    console.log('✅ Firebase 已连接：', FIREBASE_CONFIG.projectId);
   }catch(e){
     console.warn('Firebase 初始化失败，将使用纯本地模式', e);
     dataRef = null;
   }
 } else {
-  console.warn('⚠️ 未配置 Firebase，运行在纯本地模式（换设备不同步、清缓存会丢失）。请替换文件顶部的 FIREBASE_CONFIG。');
+  console.warn('⚠️ 未配置 Firebase，运行在纯本地模式');
 }
+//新加 
 
 /* ============================================================
    常量
