@@ -1046,16 +1046,39 @@
    如果保持占位符不填，程序会运行在「纯本地模式」，
    换设备、清缓存、iOS 7 天未访问都会被清空，请务必配置！
 ============================================================ */
+ /*
 const FIREBASE_CONFIG = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+  apiKey: "AIzaSyAGtDcOvTmHPsltv8HaHAaWyt174kCqIsQ",
+  authDomain: "study-391ef.firebaseapp.com",
+  databaseURL: "https://study-391ef-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "YOUR_PROJECT",
   storageBucket: "YOUR_PROJECT.appspot.com",
   messagingSenderId: "YOUR_SENDER_ID",
   appId: "YOUR_APP_ID"
 };
+*/
+//新加
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAGtDcOvTmHPsltv8HaHAaWyt174kCqIsQ",
+  authDomain: "study-391ef.firebaseapp.com",
+  databaseURL: "https://study-391ef-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "study-391ef",
+  storageBucket: "study-391ef.firebasestorage.app",
+  messagingSenderId: "717172976280",
+  appId: "1:717172976280:web:859d041050a5fa553dfeed"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+//新加
+
+ 
 const FAMILY_ID = 'x7k2m9q4';          // ← 建议改成一串随机字符串，例如 'x7k2m9q4'
 const PARENT_PASSWORD = '0702';
 
