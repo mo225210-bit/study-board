@@ -1043,7 +1043,7 @@ const FIREBASE_CONFIG = {
   appId: "YOUR_APP_ID"
 };
 
-const FAMILY_ID = 'default';
+const FAMILY_ID = 'Kx7mQ2pL9vR3';
 const PARENT_PASSWORD = '0702';
 
 /* ============================================================
@@ -1058,7 +1058,7 @@ let firebaseApp, db, dataRef;
 try{
   firebaseApp = initializeApp(FIREBASE_CONFIG);
   db = getDatabase(firebaseApp);
-  dataRef = ref(db, 'families/' + FAMILY_ID + '/data');
+  dataRef = ref(db, 'families/' + Kx7mQ2pL9vR3 + '/data');
 }catch(e){
   console.warn('Firebase 初始化失败，将使用纯本地模式', e);
 }
