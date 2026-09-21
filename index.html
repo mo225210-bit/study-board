@@ -1054,13 +1054,16 @@ import {
   getDatabase, ref, onValue, set
 } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js';
 
+const FIREBASE_READY = /^AIza/.test(FIREBASE_CONFIG.apiKey || '');
 let firebaseApp, db, dataRef;
-try{
-  firebaseApp = initializeApp(FIREBASE_CONFIG);
-  db = getDatabase(firebaseApp);
-  dataRef = ref(db, 'families/' + Kx7mQ2pL9vR3 + '/data');
-}catch(e){
-  console.warn('Firebase 初始化失败，将使用纯本地模式', e);
+if(FIREBASE_READY){
+  try{
+    firebaseApp = initializeApp(FIREBASE_CONFIG);
+    db = getDatabase(firebaseApp);
+    dataRef = ref(db, 'families/' + FAMILY_ID + '/data');
+  }catch(e){ console.warn('Firebase 初始化失败', e); }
+} else {
+  console.warn('⚠️ 未配置 Firebase，运行在纯本地模式（换设备不同步）');
 }
 
 /* ============================================================
