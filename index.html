@@ -1533,6 +1533,7 @@ function loadLocalState(){
   if(!Object.keys(s.lessonLibrary).length){
     s.lessonLibrary = JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY));
   }
+  s.updatedAt = Number(s.updatedAt) || 0;
   return s;
 }
 
@@ -1548,8 +1549,10 @@ function attachSubjectsProxy(s){
   return s;
 }
 
-function saveLocalState(){
+/* ✅ touch=false 时不刷新 updatedAt（启动初始化用） */
+function saveLocalState(touch){
   pruneDays();
+  if(touch !== false && !isRemoteUpdate) state.updatedAt = Date.now();
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
 }
 function pruneDays(){
@@ -1573,6 +1576,8 @@ function findTask(id){
 ============================================================ */
 function uploadToCloud(){
   if(isRemoteUpdate || !dataRef) return;
+  const now = Date.now();
+  state.updatedAt = now;
   const payload = {
     days: state.days,
     date: state.date,
@@ -1580,14 +1585,30 @@ function uploadToCloud(){
     sun: state.sun,
     checkins: state.checkins,
     lessonLibrary: state.lessonLibrary,
-    updatedAt: Date.now()
+    updatedAt: now
   };
-  try{ set(dataRef, payload).catch(e => console.warn('云端上传失败', e)); }catch(e){}
+  try{
+    set(dataRef, payload).catch(e => console.warn('云端上传失败', e));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(e){}
   updateSyncInfo();
 }
 
-function applyRemoteState(remote){
-  if(!remote || !remote.days) return;
+/* ✅ force=true 时忽略本地时间戳，强制用云端覆盖（家长手动拉取） */
+function applyRemoteState(remote, force){
+  if(!remote || !remote.days || !Object.keys(remote.days).length) return;
+
+  const remoteTime = Number(remote.updatedAt) || 0;
+  const localTime  = Number(state.updatedAt) || 0;
+
+  /* ✅ 本地数据比云端新（例如云端上传失败过）→ 以本地为准，不覆盖 */
+  if(!force && localTime > remoteTime + 3000){
+    console.log('本地数据比云端新，改为上传本地数据');
+    isRemoteUpdate = false;
+    uploadToCloud();
+    return;
+  }
+
   isRemoteUpdate = true;
   const newDays = {};
   Object.keys(remote.days).forEach(k => { newDays[k] = normalizeDay(remote.days[k]); });
@@ -1596,7 +1617,11 @@ function applyRemoteState(remote){
   if(remote.settings) state.settings = normalizeSettings(remote.settings);
   if(typeof remote.sun === 'number') state.sun = remote.sun;
   if(Array.isArray(remote.checkins)) state.checkins = remote.checkins;
-  if(remote.lessonLibrary) state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary);
+  /* ✅ 只有云端确实有课文库时才覆盖，避免空对象把本地清空 */
+  if(remote.lessonLibrary && Object.keys(remote.lessonLibrary).length){
+    state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary);
+  }
+  state.updatedAt = remoteTime;
   saveLocalState();
   renderStats(); renderBoard(); refreshAllCards();
   updateDogBar(); updateMainBtn(); updateDateText();
@@ -1605,12 +1630,23 @@ function applyRemoteState(remote){
   showSyncStatus('☁️ 已从云端更新', 'online');
 }
 
+/* ✅ 云端监听：首帧若云端为空，才把本地数据上传上去 */
 let cloudListener = null;
+let cloudFirstSnapshot = true;
 function startCloudSync(){
   if(!dataRef || cloudListener) return;
   cloudListener = onValue(dataRef, snapshot => {
     const remote = snapshot.val();
-    if(!remote) return;
+    const empty = !remote || !remote.days || !Object.keys(remote.days).length;
+    if(empty){
+      if(cloudFirstSnapshot){
+        cloudFirstSnapshot = false;
+        console.log('☁️ 云端暂无数据，上传本地数据');
+        uploadToCloud();
+      }
+      return;
+    }
+    cloudFirstSnapshot = false;
     applyRemoteState(remote);
   }, err => {
     console.warn('云端监听失败', err);
@@ -3188,7 +3224,7 @@ $('adminForcePullBtn').addEventListener('click', () => {
   onValue(dataRef, snapshot => {
     const remote = snapshot.val();
     if(remote && remote.days){
-      applyRemoteState(remote);
+      applyRemoteState(remote, true);   /* ✅ 强制以云端为准 */
       toast('✅ 已从云端拉取最新数据');
     } else {
       toast('⚠️ 云端暂无数据');
@@ -3261,25 +3297,16 @@ if(!state.days[state.date]) state.days[state.date] = makeDay();
 
 dateTextEl.textContent = dateLabel(state.date);
 updateDateText();
-saveLocalState();
+/* ✅ touch=false：初始化存档不刷新 updatedAt，避免本地“假新” */
+saveLocalState(false);
 renderStats(); renderBoard();
 switchSubject('chinese');
 refreshAllCards();
 requestAnimationFrame(() => { updateDogBar(); updateMainBtn(); });
 
+/* ✅ 先拉云端，云端为空才上传本地 —— 防止旧/空数据覆盖云端 */
 if(dataRef){
   startCloudSync();
-  uploadToCloud();
-  onValue(dataRef, snapshot => {
-    const remote = snapshot.val();
-    if(remote && remote.days){
-      applyRemoteState(remote);
-      console.log('✅ 已从云端加载数据');
-    } else {
-      console.log('☁️ 云端暂无数据，使用本地数据并上传');
-      uploadToCloud();
-    }
-  }, {onlyOnce: true});
 }
 </script>
 </body>
