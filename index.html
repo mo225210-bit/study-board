@@ -249,8 +249,8 @@
     display:flex;gap:3px;
     padding:3px;border-radius:6px;background:rgba(143,209,79,.08);
   }
-  .word-group .mizi{width:44px;height:44px}
-  .word-group .mizi-char{font-size:28px}
+  /* ✅ 会识字 / 抄写词语的田字格与「会写字」保持一致尺寸 */
+  .word-group .mizi{flex:none}
 
   .toolbar{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
   .btn-ghost{font-family:inherit;font-size:12.5px;font-weight:800;color:#3d5a3d;
@@ -597,8 +597,6 @@
     .char-card{width:56px}
     .char-pinyin{max-width:56px}
     .char-info{font-size:8.5px}
-    .word-group .mizi{width:38px;height:38px}
-    .word-group .mizi-char{font-size:24px}
     .admin-add-row:not(.inline-row) .aa-text{min-width:100%}
     .admin-add-row:not(.inline-row) .aa-select{min-width:100%}
     .admin-add-row .aa-num{width:58px}
@@ -693,10 +691,7 @@
   <div class="toolbar">
     <button class="btn-ghost" id="resetBtn">🔄 重置当天打卡</button>
     <button class="btn-ghost" id="adminEntryBtn">🔑 家长入口</button>
-    <button class="btn-ghost" id="exportBtn">💾 导出备份</button>
-    <button class="btn-ghost" id="importBtn">📥 导入备份</button>
   </div>
-  <input type="file" id="importFile" accept=".json,application/json" style="display:none">
 
 </div>
 
@@ -834,7 +829,8 @@
       上传 PDF 后自动解析：<br>
       · <b>写字表</b> → 同步为「会写字」<br>
       · <b>识字表</b> → 同步为「会识字」<br>
-      · 课文名自动采用「章节名 + 编号」，例如 <b>阅读1</b>、<b>识字1</b>、<b>阅读语文园地一</b>
+      · 课文名自动采用「章节名 + 编号」，例如 <b>阅读1</b>、<b>识字1</b>、<b>阅读语文园地一</b><br>
+      · 同一课的汉字如果排成多行，会自动合并为一课
     </p>
     <div class="form-field">
       <label>📄 写字表（PDF，选填）</label>
@@ -1030,24 +1026,27 @@
         最后同步：—
       </div>
     </div>
+
+    <!-- ✅ 数据备份（从主界面移入家长入口） -->
+    <div class="admin-section">
+      <h3>💾 数据备份</h3>
+      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+        导出备份文件保存到网盘 / 微信收藏，换手机、换浏览器或清缓存后可以导入恢复。<br>
+        <b style="color:#FFD54F">建议每周导出一次。</b>
+      </p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="aa-btn" id="exportBtn">💾 导出备份</button>
+        <button class="aa-btn" id="importBtn"
+          style="background:linear-gradient(180deg,#90CAF9,#42A5F5);border-color:#42A5F5;box-shadow:0 3px 0 #1976D2;color:#fff">
+          📥 导入备份
+        </button>
+      </div>
+      <input type="file" id="importFile" accept=".json,application/json" style="display:none">
+    </div>
   </div>
 </div>
 
 <script type="module">
-/* ============================================================
-   🔥 Firebase 配置 — 请替换为你自己的配置
-   ------------------------------------------------------------
-   1) 打开 https://console.firebase.google.com/ 新建项目
-   2) 左侧「构建 → Realtime Database」→ 创建数据库（测试模式）
-   3) 左侧「项目设置 → 你的应用」→ 添加 Web 应用 → 复制配置
-   4) 把下面的占位符替换掉，并把 FAMILY_ID 改成一串别人猜不到的随机字符
-   5) 数据库规则里加上 families/$familyId 的读写权限
-   ------------------------------------------------------------
-   如果保持占位符不填，程序会运行在「纯本地模式」，
-   换设备、清缓存、iOS 7 天未访问都会被清空，请务必配置！
-============================================================ */
-
-//新加
 /* ============================================================
    🔥 Firebase 配置 — 已配置
 ============================================================ */
@@ -1089,7 +1088,6 @@ if(FIREBASE_READY){
 } else {
   console.warn('⚠️ 未配置 Firebase，运行在纯本地模式');
 }
-//新加 
 
 /* ============================================================
    常量
@@ -1138,6 +1136,12 @@ const DEFAULT_LESSON_LIBRARY = {
 
 /* ============================================================
    ✅ 汉字部首 / 结构 数据
+   ------------------------------------------------------------
+   说明：这里是内置的精简数据表（覆盖常用生字）。
+   如果你手上有原来那份「覆盖 20957 个常用汉字」的完整数据，
+   只需按下面同样的格式（每段：部首 + 结构编号 + 若干汉字）
+   追加到 HZ_RAW 里即可，程序会自动建立索引。
+   结构编号：1 左右 / 2 上下 / 3 独体 / 4 半包围 / 5 全包围 / 6 上中下 / 7 左中右
 ============================================================ */
 const HZ_STRUCT_NAME = {'1':'左右','2':'上下','3':'独体','4':'半包围','5':'全包围','6':'上中下','7':'左中右'};
 const HZ_RAW = [
@@ -2850,41 +2854,83 @@ function collectHanzi(src, start){
   }
   return s;
 }
+/* 提取整行中的所有汉字（用于同一课的续行） */
+function collectAllHanzi(src){
+  let s = '';
+  const str = String(src || '');
+  for(let i = 0; i < str.length; i++){
+    const c = str.charAt(i);
+    if(/[\u4e00-\u9fa5]/.test(c)) s += c;
+  }
+  return s;
+}
 
-/* 解析写字表 / 识字表文本 → [{ label, hanzi }] */
+/* ✅ 解析写字表 / 识字表文本 → [{ label, hanzi }]
+   ------------------------------------------------------------
+   规则：
+   1) 「#阅读」「#识字」这类独立成行的标记 → 切换当前章节
+   2) 以「数字」或「语文园地X」或「阅读X / 识字X」开头的行 → 开始新的一课
+   3) 其余行（开头不是数字，也不是 阅读 / 语文园地 / 识字）
+      → 视为当前这一课的续行，汉字自动并入同一课
+============================================================ */
 function parseHanziSheet(text){
   const src = String(text || '').replace(/\r/g, '');
   if(!src.trim()) return [];
 
-  /* 1) 章节标记：# 阅读 / # 识字 */
-  const secMarks = [];
-  const secRe = /^[#\s\u3000]*(阅读|识字)[\s\u3000]*$/gm;
-  let sm;
-  while((sm = secRe.exec(src)) !== null){
-    secMarks.push({ idx: sm.index, name: sm[1] });
-  }
-
-  /* 2) 锚点：课号数字 或 语文园地X */
+  const lines = src.split('\n');
   const out = [];
-  const anchorRe = /(\d{1,2})(?=[\s\u3000\u4e00-\u9fa5])|语文园地[一二三四五六七八九十]+/g;
-  let m;
-  while((m = anchorRe.exec(src)) !== null){
-    const tok = m[0];
-    /* 数字锚点：前面不能是数字（避免 12 被拆成 1、2） */
-    if(/^\d/.test(tok) && m.index > 0 && /\d/.test(src.charAt(m.index - 1))) continue;
+  let section = '';      // '阅读' / '识字' / ''
+  let cur = null;        // { label, hanzi }
 
-    let sec = '';
-    for(let i = 0; i < secMarks.length; i++){
-      if(secMarks[i].idx <= m.index) sec = secMarks[i].name;
-      else break;
+  const finish = () => {
+    if(cur && cur.hanzi){
+      out.push({ label: cur.label.slice(0, 60), hanzi: cur.hanzi });
+    }
+    cur = null;
+  };
+
+  const SEC_ONLY_RE = /^[#＃\s]*[（(【\[]?\s*(阅读|识字)\s*[)）】\]]?\s*$/;
+  const SEC_NUM_RE  = /^[#＃\s]*[（(【\[]?\s*(阅读|识字)\s*(\d{1,2})/;
+  const LESSON_RE   = /^[#＃\s]*[（(【\[]?\s*(\d{1,2}|语文园地[一二三四五六七八九十]+)/;
+  const TRIM_HEAD   = /^[\s、．.。,:：;；)）】\]\-—_]+/;
+
+  for(let i = 0; i < lines.length; i++){
+    const line = lines[i].replace(/\u3000/g, ' ').trim();
+    if(!line) continue;
+
+    /* 1) 独立成行的章节标记：#阅读 / 识字 */
+    if(SEC_ONLY_RE.test(line)){
+      finish();
+      section = line.match(SEC_ONLY_RE)[1];
+      continue;
     }
 
-    const start = m.index + tok.length;
-    const hanzi = collectHanzi(src, start);
-    if(!hanzi) continue;
-    const label = (sec + tok).slice(0, 60);
-    out.push({ label, hanzi });
+    /* 2) 新的一课 */
+    let label = null, rest = '';
+    const snm = line.match(SEC_NUM_RE);
+    const lm  = line.match(LESSON_RE);
+    if(snm){
+      section = snm[1];
+      label = snm[1] + snm[2];
+      rest = line.slice(snm[0].length);
+    } else if(lm){
+      label = section + lm[1];
+      rest = line.slice(lm[0].length);
+    }
+
+    if(label !== null){
+      finish();
+      rest = rest.replace(TRIM_HEAD, '');
+      cur = { label, hanzi: collectHanzi(rest, 0) };
+      continue;
+    }
+
+    /* 3) 续行：开头不是数字 / 阅读 / 语文园地 / 识字 → 归入当前课 */
+    if(cur){
+      cur.hanzi += collectAllHanzi(line);
+    }
   }
+  finish();
   return out;
 }
 
@@ -3261,7 +3307,7 @@ $('adminForcePullBtn').addEventListener('click', () => {
 });
 
 /* ============================================================
-   ✅ 导出 / 导入备份
+   ✅ 导出 / 导入备份（按钮已移入家长入口）
 ============================================================ */
 $('exportBtn').addEventListener('click', () => {
   const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
@@ -3325,15 +3371,27 @@ document.querySelectorAll('.subject-tab').forEach(tab => {
 
 mainBtn.addEventListener('click', onMainBtnClick);
 
+/* ✅ 重置当天打卡：同时把当天赚到的阳光扣回去 */
 $('resetBtn').addEventListener('click', () => {
-  if(!confirm('确定要重置当天的打卡吗？')) return;
-  ['chinese','math'].forEach(k => state.subjects[k].forEach(t => { t.done = false; }));
+  if(!confirm('确定要重置当天的打卡吗？\n当天获得的阳光会一并扣除。')) return;
+
+  let refund = 0;
+  ['chinese','math'].forEach(k => state.subjects[k].forEach(t => {
+    if(t.done){ refund += t.sun; t.done = false; }
+  }));
+  /* 当天「全部完成」奖励的 100 阳光也一并回收 */
+  const ci = state.checkins.indexOf(state.date);
+  if(ci >= 0){ state.checkins.splice(ci, 1); refund += 100; }
+
+  state.sun -= refund;
+
   stopTick(); activeId = null; runtimeMap = {};
   saveLocalState(); uploadToCloud();
-  renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
+  renderStats(); renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
   const first = allTasks().find(t=>!t.done);
   if(first){ activeId = first.id; ensureRuntime(first); refreshAllCards(); updateDogBar(); updateMainBtn(); }
   if(isAdminMode) renderAdminPanel();
+  toast(refund > 0 ? '🔄 已重置当天打卡，扣回 '+refund+' ☀️' : '🔄 已重置当天打卡', 2600);
 });
 window.addEventListener('resize', updateDogBar);
 
