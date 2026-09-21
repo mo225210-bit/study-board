@@ -501,6 +501,13 @@
   .aa-hint.ok{color:#9CCC65}
   .aa-hint.warn{color:#FFB74D}
 
+  /* ✅ 单行版添加行：课文选择 + 分钟 + 阳光 + 按钮 同一行 */
+  .admin-add-row.inline-row{flex-wrap:nowrap;gap:5px}
+  .admin-add-row.inline-row .aa-select{flex:1 1 90px;min-width:0}
+  .admin-add-row.inline-row .aa-num{width:54px;flex:none;padding-left:4px;padding-right:4px}
+  .admin-add-row.inline-row .aa-unit{font-size:10.5px;flex:none}
+  .admin-add-row.inline-row .aa-btn{padding:10px 12px;flex:none;font-size:12.5px}
+
   .admin-stats{
     display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;
   }
@@ -571,9 +578,15 @@
     .char-info{font-size:8.5px}
     .word-group .mizi{width:38px;height:38px}
     .word-group .mizi-char{font-size:24px}
-    .admin-add-row .aa-text{min-width:100%}
+    .admin-add-row:not(.inline-row) .aa-text{min-width:100%}
+    .admin-add-row:not(.inline-row) .aa-select{min-width:100%}
     .admin-add-row .aa-num{width:58px}
-    .admin-add-row .aa-select{min-width:100%}
+    /* ✅ 单行版在小屏下继续压紧 */
+    .admin-add-row.inline-row{gap:4px}
+    .admin-add-row.inline-row .aa-select{flex:1 1 70px;font-size:12px;padding:8px 5px}
+    .admin-add-row.inline-row .aa-num{width:42px;font-size:11px;padding:8px 2px}
+    .admin-add-row.inline-row .aa-unit{font-size:9px;letter-spacing:-.3px}
+    .admin-add-row.inline-row .aa-btn{padding:8px 8px;font-size:11px}
   }
 </style>
 </head>
@@ -735,17 +748,17 @@
 <div class="modal" id="libEditModal">
   <div class="modal-card">
     <h3>✏️ 编辑课文库</h3>
-    <p>修改课文名、预习生字、生字组词、抄写词语后保存即可</p>
+    <p>修改课文名、会写字、会识字、抄写词语后保存即可</p>
     <div class="form-field">
       <label>课文名</label>
       <input type="text" id="libEditName" maxlength="60" placeholder="例：小蝌蚪找妈妈">
     </div>
     <div class="form-field">
-      <label>预习生字（空格分隔）</label>
+      <label>会写字（空格分隔）</label>
       <input type="text" id="libEditChars" maxlength="600" placeholder="例：蝌 蚪 妈 塘 脑">
     </div>
     <div class="form-field">
-      <label>生字组词（空格分隔）</label>
+      <label>会识字（空格分隔）</label>
       <input type="text" id="libEditWordgroups" maxlength="600" placeholder="例：蝌蚪 脑袋 池塘">
     </div>
     <div class="form-field">
@@ -769,7 +782,7 @@
       <input type="text" id="taskEditText" maxlength="200" placeholder="任务内容">
     </div>
     <div class="form-field" id="taskEditExtraWrap">
-      <label id="taskEditExtraLabel">生字（空格分隔）</label>
+      <label id="taskEditExtraLabel">会写字（空格分隔）</label>
       <input type="text" id="taskEditExtra" maxlength="600" placeholder="空格分隔">
     </div>
     <div class="form-row">
@@ -846,13 +859,11 @@
       <p style="font-size:11.5px;color:#5a7a8a;font-weight:700;margin-bottom:8px">💡 双击任务条目可重新编辑</p>
       <div id="adminChineseList"></div>
 
-      <div class="admin-sub-label">➕ 添加预习生字</div>
-      <div class="admin-add-row">
+      <div class="admin-sub-label">➕ 添加会写字</div>
+      <div class="admin-add-row inline-row">
         <select class="aa-select" id="adminPreviewLessonSelect">
           <option value="">— 选择课文 —</option>
         </select>
-      </div>
-      <div class="admin-add-row">
         <input class="aa-num" id="unitPreviewMin" type="number" step="0.5" min="0.5" max="20" placeholder="分钟">
         <span class="aa-unit">分钟/字</span>
         <input class="aa-num" id="unitPreviewSun" type="number" step="0.5" min="0.5" max="50" placeholder="阳光">
@@ -861,13 +872,11 @@
       </div>
       <div class="aa-hint" id="previewLessonHint">选好课文直接点「添加」即可，不用手动输入</div>
 
-      <div class="admin-sub-label">➕ 添加生字组词</div>
-      <div class="admin-add-row">
+      <div class="admin-sub-label">➕ 添加会识字</div>
+      <div class="admin-add-row inline-row">
         <select class="aa-select" id="adminWordgroupLessonSelect">
           <option value="">— 选择课文 —</option>
         </select>
-      </div>
-      <div class="admin-add-row">
         <input class="aa-num" id="unitWordgroupMin" type="number" step="0.5" min="0.5" max="20" placeholder="分钟">
         <span class="aa-unit">分钟/组</span>
         <input class="aa-num" id="unitWordgroupSun" type="number" step="0.5" min="0.5" max="50" placeholder="阳光">
@@ -877,12 +886,10 @@
       <div class="aa-hint" id="wordgroupLessonHint">选好课文直接点「添加」即可，不用手动输入</div>
 
       <div class="admin-sub-label">➕ 添加抄写词语</div>
-      <div class="admin-add-row">
+      <div class="admin-add-row inline-row">
         <select class="aa-select" id="adminCopyLessonSelect">
           <option value="">— 选择课文 —</option>
         </select>
-      </div>
-      <div class="admin-add-row">
         <input class="aa-num" id="unitCopyMin" type="number" step="0.5" min="0.5" max="20" placeholder="分钟">
         <span class="aa-unit">分钟/组</span>
         <input class="aa-num" id="unitCopySun" type="number" step="0.5" min="0.5" max="50" placeholder="阳光">
@@ -919,11 +926,11 @@
       </div>
     </div>
 
-    <!-- ✅ 课文生字 / 组词 / 词语库 -->
+    <!-- ✅ 课文库 -->
     <div class="admin-section">
-      <h3>📚 课文生字 / 组词 / 词语库 <span class="badge" id="adminLibBadge">0 条</span></h3>
+      <h3>📚 课文库（会写字 / 会识字 / 抄写词语） <span class="badge" id="adminLibBadge">0 条</span></h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
-        保存「课文名 → 预习生字 / 生字组词 / 抄写词语」。添加任务时只需在上方选择课文名，点「添加」即可生成，无需手动输入。
+        保存「课文名 → 会写字 / 会识字 / 抄写词语」。添加任务时只需在上方选择课文名，点「添加」即可生成，无需手动输入。
         <b style="color:#FFD54F">双击条目可重新编辑。</b>
       </p>
       <div id="adminLibList"></div>
@@ -933,10 +940,10 @@
         <input class="aa-text" id="adminLibLesson" placeholder="课文名，例：小蝌蚪找妈妈">
       </div>
       <div class="admin-add-row">
-        <input class="aa-text" id="adminLibChars" placeholder="预习生字，空格分隔，例：蝌 蚪 妈 塘 脑 袋">
+        <input class="aa-text" id="adminLibChars" placeholder="会写字，空格分隔，例：蝌 蚪 妈 塘 脑 袋">
       </div>
       <div class="admin-add-row">
-        <input class="aa-text" id="adminLibWordgroups" placeholder="生字组词，空格分隔，例：蝌蚪 脑袋 池塘 欢迎">
+        <input class="aa-text" id="adminLibWordgroups" placeholder="会识字，空格分隔，例：蝌蚪 脑袋 池塘 欢迎">
       </div>
       <div class="admin-add-row">
         <input class="aa-text" id="adminLibWords" placeholder="抄写词语，空格分隔，例：青蛙 池塘 妈妈 阿姨">
@@ -1172,7 +1179,7 @@ function getUnitCfg(type){
 }
 
 /* ============================================================
-   ✅ 课文库规范化（新增 wordgroups 生字组词）
+   ✅ 课文库规范化（新增 wordgroups 会识字）
 ============================================================ */
 function normalizeLessonLibrary(raw){
   const out = {};
@@ -2351,7 +2358,7 @@ UNIT_FIELDS.forEach(([t, minId, sunId]) => {
 });
 
 /* ============================================================
-   ✅ 课文库管理（生字 / 生字组词 / 抄写词语）
+   ✅ 课文库管理（会写字 / 会识字 / 抄写词语）
 ============================================================ */
 function renderLessonLibrary(){
   const list = $('adminLibList');
@@ -2370,8 +2377,8 @@ function renderLessonLibrary(){
     return `<div class="lib-row" data-lib-edit="${escapeAttr(name)}" title="双击编辑">
       <div class="lib-lesson">📖 ${escapeHtml(name)}</div>
       <div class="lib-info">
-        <div><b>预习生字：</b>${escapeHtml(preview(item.chars))}</div>
-        <div><b>生字组词：</b>${escapeHtml(preview(item.wordgroups))}</div>
+        <div><b>会写字：</b>${escapeHtml(preview(item.chars))}</div>
+        <div><b>会识字：</b>${escapeHtml(preview(item.wordgroups))}</div>
         <div><b>抄写词语：</b>${escapeHtml(preview(item.words))}</div>
       </div>
       <button class="lib-del" data-lib-del="${escapeAttr(name)}">删除</button>
@@ -2432,7 +2439,7 @@ $('adminLibAddBtn').addEventListener('click', () => {
   const chars = charsEl.value.trim().slice(0,600);
   const wordgroups = wgEl.value.trim().slice(0,600);
   const words = wordsEl.value.trim().slice(0,600);
-  if(!chars && !wordgroups && !words){ toast('生字 / 生字组词 / 抄写词语至少填一项'); return; }
+  if(!chars && !wordgroups && !words){ toast('会写字 / 会识字 / 抄写词语至少填一项'); return; }
   state.lessonLibrary[name] = { chars, wordgroups, words };
   saveLocalState(); uploadToCloud();
   nameEl.value = ''; charsEl.value = ''; wgEl.value = ''; wordsEl.value = '';
@@ -2463,7 +2470,7 @@ $('libEditSave').addEventListener('click', () => {
   const chars = $('libEditChars').value.trim().slice(0,600);
   const wordgroups = $('libEditWordgroups').value.trim().slice(0,600);
   const words = $('libEditWords').value.trim().slice(0,600);
-  if(!chars && !wordgroups && !words){ toast('生字 / 生字组词 / 抄写词语至少填一项'); return; }
+  if(!chars && !wordgroups && !words){ toast('会写字 / 会识字 / 抄写词语至少填一项'); return; }
   if(newName !== editingLibName) delete state.lessonLibrary[editingLibName];
   state.lessonLibrary[newName] = { chars, wordgroups, words };
   saveLocalState(); uploadToCloud();
@@ -2487,11 +2494,11 @@ function openTaskEdit(id){
   const wrap = $('taskEditExtraWrap');
   if(t.type === 'preview'){
     wrap.style.display = '';
-    $('taskEditExtraLabel').textContent = '预习生字（空格分隔）';
+    $('taskEditExtraLabel').textContent = '会写字（空格分隔）';
     $('taskEditExtra').value = (t.chars || []).join(' ');
   } else if(t.type === 'wordgroup'){
     wrap.style.display = '';
-    $('taskEditExtraLabel').textContent = '生字组词（空格分隔）';
+    $('taskEditExtraLabel').textContent = '会识字（空格分隔）';
     $('taskEditExtra').value = (t.words || []).join(' ');
   } else if(t.type === 'copy'){
     wrap.style.display = '';
@@ -2548,8 +2555,8 @@ $('taskEditSave').addEventListener('click', () => {
 ============================================================ */
 /* ✅ 三种“选课文 → 直接添加”的配置 */
 const LESSON_PICK = {
-  preview:   { sel:'adminPreviewLessonSelect',   hint:'previewLessonHint',   field:'chars',      unit:'字', label:'预习生字' },
-  wordgroup: { sel:'adminWordgroupLessonSelect', hint:'wordgroupLessonHint', field:'wordgroups', unit:'组', label:'生字组词' },
+  preview:   { sel:'adminPreviewLessonSelect',   hint:'previewLessonHint',   field:'chars',      unit:'字', label:'会写字' },
+  wordgroup: { sel:'adminWordgroupLessonSelect', hint:'wordgroupLessonHint', field:'wordgroups', unit:'组', label:'会识字' },
   copy:      { sel:'adminCopyLessonSelect',      hint:'copyLessonHint',      field:'words',      unit:'组', label:'抄写词语' }
 };
 /* 取某课文里某类内容（生字按字拆分去重，词语按词拆分） */
@@ -2594,35 +2601,35 @@ Object.keys(LESSON_PICK).forEach(kind => {
 $('adminAddPreviewBtn').addEventListener('click', () => {
   const { name, items } = lessonPickItems('preview');
   if(!name){ toast('请先选择课文'); return; }
-  if(!items.length){ toast('「'+escapeHtml(name)+'」还没有预习生字，请到「课文库」补充'); return; }
+  if(!items.length){ toast('「'+escapeHtml(name)+'」还没有会写字，请到「课文库」补充'); return; }
   const chars = items.slice(0, 60);
   const cfg = getUnitCfg('preview');
   const minutes = clamp(Math.round(chars.length * cfg.min), 1, 120);
   const sun = clamp(Math.round(chars.length * cfg.sun), 1, 500);
-  const task = makeTask(`预习生字（${chars.length}字）`, minutes, sun, { type:'preview', chars });
+  const task = makeTask(`会写字（${chars.length}字）`, minutes, sun, { type:'preview', chars });
   state.subjects.chinese.push(task);
   saveLocalState(); uploadToCloud();
   const sel = $('adminPreviewLessonSelect'); if(sel) sel.value = '';
   renderLessonHint('preview');
   renderBoard(); refreshAllCards(); renderAdminPanel();
-  toast('✅ 已添加「'+escapeHtml(name)+'」预习生字（'+chars.length+'字）');
+  toast('✅ 已添加「'+escapeHtml(name)+'」会写字（'+chars.length+'字）');
 });
 
 $('adminAddWordgroupBtn').addEventListener('click', () => {
   const { name, items } = lessonPickItems('wordgroup');
   if(!name){ toast('请先选择课文'); return; }
-  if(!items.length){ toast('「'+escapeHtml(name)+'」还没有生字组词，请到「课文库」补充'); return; }
+  if(!items.length){ toast('「'+escapeHtml(name)+'」还没有会识字，请到「课文库」补充'); return; }
   const words = items.slice(0, 60);
   const cfg = getUnitCfg('wordgroup');
   const minutes = clamp(Math.round(words.length * cfg.min), 1, 120);
   const sun = clamp(Math.round(words.length * cfg.sun), 1, 500);
-  const task = makeTask(`生字组词（${words.length}组）`, minutes, sun, { type:'wordgroup', words });
+  const task = makeTask(`会识字（${words.length}组）`, minutes, sun, { type:'wordgroup', words });
   state.subjects.chinese.push(task);
   saveLocalState(); uploadToCloud();
   const sel = $('adminWordgroupLessonSelect'); if(sel) sel.value = '';
   renderLessonHint('wordgroup');
   renderBoard(); refreshAllCards(); renderAdminPanel();
-  toast('✅ 已添加「'+escapeHtml(name)+'」生字组词（'+words.length+'组）');
+  toast('✅ 已添加「'+escapeHtml(name)+'」会识字（'+words.length+'组）');
 });
 
 $('adminAddCopyBtn').addEventListener('click', () => {
