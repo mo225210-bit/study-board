@@ -693,7 +693,10 @@
   <div class="toolbar">
     <button class="btn-ghost" id="resetBtn">🔄 重置当天打卡</button>
     <button class="btn-ghost" id="adminEntryBtn">🔑 家长入口</button>
+    <button class="btn-ghost" id="exportBtn">💾 导出备份</button>
+    <button class="btn-ghost" id="importBtn">📥 导入备份</button>
   </div>
+  <input type="file" id="importFile" accept=".json,application/json" style="display:none">
 
 </div>
 
@@ -854,7 +857,7 @@
 <!-- 管理视图 -->
 <div class="admin-bar" id="adminBar">
   <div class="admin-label">🔓 家长管理模式</div>
-  <div class="admin-status" id="adminSyncStatus">☁️ 已连接云端</div>
+  <div class="admin-status" id="adminSyncStatus">☁️ 云同步状态检查中…</div>
   <button class="admin-btn" id="adminExitBtn">退出管理</button>
 </div>
 
@@ -1016,7 +1019,8 @@
     <div class="admin-section">
       <h3>☁️ 云端同步</h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
-        数据会自动同步到 Firebase 云端。孩子端刷新页面即可看到最新任务。
+        数据会自动同步到 Firebase 云端。孩子端刷新页面即可看到最新任务。<br>
+        <b style="color:#FFD54F">未配置 Firebase 时，数据仅保存在本机浏览器，换设备或清缓存会丢失。</b>
       </p>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button class="aa-btn" id="adminForceSyncBtn">🔄 强制上传本地数据</button>
@@ -1032,6 +1036,15 @@
 <script type="module">
 /* ============================================================
    🔥 Firebase 配置 — 请替换为你自己的配置
+   ------------------------------------------------------------
+   1) 打开 https://console.firebase.google.com/ 新建项目
+   2) 左侧「构建 → Realtime Database」→ 创建数据库（测试模式）
+   3) 左侧「项目设置 → 你的应用」→ 添加 Web 应用 → 复制配置
+   4) 把下面的占位符替换掉，并把 FAMILY_ID 改成一串别人猜不到的随机字符
+   5) 数据库规则里加上 families/$familyId 的读写权限
+   ------------------------------------------------------------
+   如果保持占位符不填，程序会运行在「纯本地模式」，
+   换设备、清缓存、iOS 7 天未访问都会被清空，请务必配置！
 ============================================================ */
 const FIREBASE_CONFIG = {
   apiKey: "YOUR_API_KEY",
@@ -1043,8 +1056,11 @@ const FIREBASE_CONFIG = {
   appId: "YOUR_APP_ID"
 };
 
-const FAMILY_ID = 'Kx7mQ2pL9vR3';
+const FAMILY_ID = 'x7k2m9q4';          // ← 建议改成一串随机字符串，例如 'x7k2m9q4'
 const PARENT_PASSWORD = '0702';
+
+/* 是否真正配置了 Firebase */
+const FIREBASE_READY = !!(FIREBASE_CONFIG.apiKey && !/^YOUR_/.test(FIREBASE_CONFIG.apiKey));
 
 /* ============================================================
    Firebase SDK
@@ -1054,16 +1070,18 @@ import {
   getDatabase, ref, onValue, set
 } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js';
 
-const FIREBASE_READY = /^AIza/.test(FIREBASE_CONFIG.apiKey || '');
-let firebaseApp, db, dataRef;
+let firebaseApp = null, db = null, dataRef = null;
 if(FIREBASE_READY){
   try{
     firebaseApp = initializeApp(FIREBASE_CONFIG);
     db = getDatabase(firebaseApp);
     dataRef = ref(db, 'families/' + FAMILY_ID + '/data');
-  }catch(e){ console.warn('Firebase 初始化失败', e); }
+  }catch(e){
+    console.warn('Firebase 初始化失败，将使用纯本地模式', e);
+    dataRef = null;
+  }
 } else {
-  console.warn('⚠️ 未配置 Firebase，运行在纯本地模式（换设备不同步）');
+  console.warn('⚠️ 未配置 Firebase，运行在纯本地模式（换设备不同步、清缓存会丢失）。请替换文件顶部的 FIREBASE_CONFIG。');
 }
 
 /* ============================================================
@@ -1511,7 +1529,8 @@ function loadLocalState(){
       sun: s.sun || 0,
       checkins: s.dates || [],
       settings: s.settings,
-      lessonLibrary: s.lessonLibrary
+      lessonLibrary: s.lessonLibrary,
+      updatedAt: 0
     };
   }
   if(!s || !s.days){
@@ -1521,7 +1540,8 @@ function loadLocalState(){
       sun: 0,
       checkins: [],
       settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
-      lessonLibrary: JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY))
+      lessonLibrary: JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY)),
+      updatedAt: 0
     };
     s.days[todayStr()] = normalizeDay(DEFAULT_DATA);
   }
@@ -1531,12 +1551,12 @@ function loadLocalState(){
   if(!s.days[s.date]) s.days[s.date] = makeDay();
   if(!Array.isArray(s.checkins)) s.checkins = [];
   if(typeof s.sun !== 'number') s.sun = 0;
+  if(typeof s.updatedAt !== 'number') s.updatedAt = 0;
   s.settings = normalizeSettings(s.settings);
   s.lessonLibrary = normalizeLessonLibrary(s.lessonLibrary);
   if(!Object.keys(s.lessonLibrary).length){
     s.lessonLibrary = JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY));
   }
-  s.updatedAt = Number(s.updatedAt) || 0;
   return s;
 }
 
@@ -1552,10 +1572,10 @@ function attachSubjectsProxy(s){
   return s;
 }
 
-/* ✅ touch=false 时不刷新 updatedAt（启动初始化用） */
+/* ✅ touch=true 时刷新 updatedAt；同步云端数据时传 false，避免覆盖云端时间戳 */
 function saveLocalState(touch){
   pruneDays();
-  if(touch !== false && !isRemoteUpdate) state.updatedAt = Date.now();
+  if(touch !== false) state.updatedAt = Date.now();
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
 }
 function pruneDays(){
@@ -1579,8 +1599,7 @@ function findTask(id){
 ============================================================ */
 function uploadToCloud(){
   if(isRemoteUpdate || !dataRef) return;
-  const now = Date.now();
-  state.updatedAt = now;
+  state.updatedAt = Date.now();
   const payload = {
     days: state.days,
     date: state.date,
@@ -1588,30 +1607,16 @@ function uploadToCloud(){
     sun: state.sun,
     checkins: state.checkins,
     lessonLibrary: state.lessonLibrary,
-    updatedAt: now
+    updatedAt: state.updatedAt
   };
-  try{
-    set(dataRef, payload).catch(e => console.warn('云端上传失败', e));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }catch(e){}
+  try{ set(dataRef, payload).catch(e => console.warn('云端上传失败', e)); }catch(e){}
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
   updateSyncInfo();
 }
 
-/* ✅ force=true 时忽略本地时间戳，强制用云端覆盖（家长手动拉取） */
-function applyRemoteState(remote, force){
-  if(!remote || !remote.days || !Object.keys(remote.days).length) return;
-
-  const remoteTime = Number(remote.updatedAt) || 0;
-  const localTime  = Number(state.updatedAt) || 0;
-
-  /* ✅ 本地数据比云端新（例如云端上传失败过）→ 以本地为准，不覆盖 */
-  if(!force && localTime > remoteTime + 3000){
-    console.log('本地数据比云端新，改为上传本地数据');
-    isRemoteUpdate = false;
-    uploadToCloud();
-    return;
-  }
-
+function applyRemoteState(remote){
+  if(!remote || !remote.days) return;
+  if(typeof remote.updatedAt === 'number') state.updatedAt = remote.updatedAt;
   isRemoteUpdate = true;
   const newDays = {};
   Object.keys(remote.days).forEach(k => { newDays[k] = normalizeDay(remote.days[k]); });
@@ -1620,37 +1625,41 @@ function applyRemoteState(remote, force){
   if(remote.settings) state.settings = normalizeSettings(remote.settings);
   if(typeof remote.sun === 'number') state.sun = remote.sun;
   if(Array.isArray(remote.checkins)) state.checkins = remote.checkins;
-  /* ✅ 只有云端确实有课文库时才覆盖，避免空对象把本地清空 */
-  if(remote.lessonLibrary && Object.keys(remote.lessonLibrary).length){
-    state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary);
-  }
-  state.updatedAt = remoteTime;
-  saveLocalState();
+  if(remote.lessonLibrary) state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary);
+  saveLocalState(false);
   renderStats(); renderBoard(); refreshAllCards();
   updateDogBar(); updateMainBtn(); updateDateText();
   if(isAdminMode) renderAdminPanel();
   isRemoteUpdate = false;
-  showSyncStatus('☁️ 已从云端更新', 'online');
 }
 
-/* ✅ 云端监听：首帧若云端为空，才把本地数据上传上去 */
 let cloudListener = null;
-let cloudFirstSnapshot = true;
+let cloudReady = false;
+
 function startCloudSync(){
   if(!dataRef || cloudListener) return;
   cloudListener = onValue(dataRef, snapshot => {
     const remote = snapshot.val();
-    const empty = !remote || !remote.days || !Object.keys(remote.days).length;
-    if(empty){
-      if(cloudFirstSnapshot){
-        cloudFirstSnapshot = false;
-        console.log('☁️ 云端暂无数据，上传本地数据');
+
+    /* 首次连接：谁的数据新就用谁，避免本地空数据覆盖云端 */
+    if(!cloudReady){
+      cloudReady = true;
+      if(remote && remote.days && (remote.updatedAt || 0) > (state.updatedAt || 0)){
+        applyRemoteState(remote);
+        showSyncStatus('☁️ 已从云端加载', 'online');
+      } else {
         uploadToCloud();
+        showSyncStatus('☁️ 已上传本地数据', 'online');
       }
       return;
     }
-    cloudFirstSnapshot = false;
+
+    if(!remote || !remote.days) return;
+    /* 时间戳不比本地新 → 是自己写入的回声，忽略 */
+    if(remote.updatedAt && remote.updatedAt <= (state.updatedAt || 0)) return;
+
     applyRemoteState(remote);
+    showSyncStatus('☁️ 已同步云端更新', 'online');
   }, err => {
     console.warn('云端监听失败', err);
     showSyncStatus('⚠️ 云端连接失败', 'offline');
@@ -2533,7 +2542,11 @@ function enterAdminMode(){
   adminPanel.classList.add('show');
   document.body.style.paddingBottom = '70px';
   renderAdminPanel();
-  toast('🔓 已进入家长管理模式', 2500);
+  if(!FIREBASE_READY){
+    toast('⚠️ 未配置 Firebase，数据仅存本机<br>换设备 / 清缓存会丢失，请先导出备份', 4200);
+  } else {
+    toast('🔓 已进入家长管理模式', 2500);
+  }
 }
 function exitAdminMode(){
   isAdminMode = false;
@@ -2552,7 +2565,7 @@ function renderAdminPanel(){
   $('adminStatDone').textContent = doneCount + '/' + all.length;
   $('adminStatStreak').textContent = calcStreak();
   $('adminTodayBadge').textContent = state.date;
-  $('adminSyncStatus').textContent = '☁️ 已连接云端';
+  $('adminSyncStatus').textContent = FIREBASE_READY ? '☁️ 已连接云端' : '💾 本地模式（未配置云端）';
   const dateInput = $('adminDateInput');
   if(dateInput) dateInput.value = state.date;
 
@@ -3219,6 +3232,11 @@ $('adminDateInput').addEventListener('change', e => {
 $('adminGoToday').addEventListener('click', () => switchDate(todayStr()));
 
 $('adminForceSyncBtn').addEventListener('click', () => {
+  if(!dataRef){
+    saveLocalState();
+    toast('⚠️ 未配置云端，数据已保存到本机');
+    return;
+  }
   uploadToCloud();
   toast('✅ 已上传本地数据到云端');
 });
@@ -3227,12 +3245,59 @@ $('adminForcePullBtn').addEventListener('click', () => {
   onValue(dataRef, snapshot => {
     const remote = snapshot.val();
     if(remote && remote.days){
-      applyRemoteState(remote, true);   /* ✅ 强制以云端为准 */
+      applyRemoteState(remote);
       toast('✅ 已从云端拉取最新数据');
     } else {
       toast('⚠️ 云端暂无数据');
     }
   }, {onlyOnce: true});
+});
+
+/* ============================================================
+   ✅ 导出 / 导入备份
+============================================================ */
+$('exportBtn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '学习打卡台备份_' + todayStr() + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+  toast('💾 备份已导出<br>建议存到网盘或微信收藏', 3200);
+});
+
+$('importBtn').addEventListener('click', () => $('importFile').click());
+$('importFile').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const obj = JSON.parse(reader.result);
+      if(!obj || !obj.days) throw new Error('文件格式不正确');
+      const newDays = {};
+      Object.keys(obj.days).forEach(k => { newDays[k] = normalizeDay(obj.days[k]); });
+      state.days = newDays;
+      state.date = todayStr();
+      if(!state.days[state.date]) state.days[state.date] = makeDay();
+      if(obj.settings) state.settings = normalizeSettings(obj.settings);
+      if(typeof obj.sun === 'number') state.sun = obj.sun;
+      if(Array.isArray(obj.checkins)) state.checkins = obj.checkins;
+      if(obj.lessonLibrary) state.lessonLibrary = normalizeLessonLibrary(obj.lessonLibrary);
+      saveLocalState(); uploadToCloud();
+      stopTick(); activeId = null; runtimeMap = {};
+      renderStats(); renderBoard(); refreshAllCards(); updateDateText();
+      updateDogBar(); updateMainBtn();
+      if(isAdminMode) renderAdminPanel();
+      toast('✅ 备份已导入');
+    }catch(err){
+      toast('❌ 导入失败：' + escapeHtml(err && err.message ? err.message : '未知错误'), 3200);
+    }
+  };
+  reader.readAsText(f);
+  e.target.value = '';
 });
 
 /* ============================================================
@@ -3300,17 +3365,15 @@ if(!state.days[state.date]) state.days[state.date] = makeDay();
 
 dateTextEl.textContent = dateLabel(state.date);
 updateDateText();
-/* ✅ touch=false：初始化存档不刷新 updatedAt，避免本地“假新” */
+/* ✅ 启动时不刷新 updatedAt，避免本地空数据把云端覆盖掉 */
 saveLocalState(false);
 renderStats(); renderBoard();
 switchSubject('chinese');
 refreshAllCards();
 requestAnimationFrame(() => { updateDogBar(); updateMainBtn(); });
 
-/* ✅ 先拉云端，云端为空才上传本地 —— 防止旧/空数据覆盖云端 */
-if(dataRef){
-  startCloudSync();
-}
+/* ✅ 交给 startCloudSync 统一判断「先比新旧再决定上传/下载」 */
+if(dataRef) startCloudSync();
 </script>
 </body>
 </html>
