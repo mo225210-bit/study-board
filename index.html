@@ -1,0 +1,3286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#7EC8F0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="学习打卡台">
+<title>学习打卡台</title>
+<link rel="manifest" href="manifest.json">
+<script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5.0/dist/hanzi-writer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.26.0/dist/index.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:linear-gradient(180deg,#7EC8F0 0%,#A8DDF5 30%,#CDEFFF 60%,#EAF9FF 100%);
+    min-height:100vh;overflow-x:hidden;user-select:none;color:#2b3a2b;
+  }
+  .cloud{position:fixed;background:#fff;border-radius:100px;opacity:.7;z-index:0;pointer-events:none}
+  .cloud::before,.cloud::after{content:'';position:absolute;background:#fff;border-radius:50%}
+  .cloud::before{width:60%;height:150%;top:-70%;left:15%}
+  .cloud::after{width:45%;height:120%;top:-50%;left:55%}
+  .c1{width:130px;height:38px;top:8%;left:-160px;animation:drift 48s linear infinite}
+  .c2{width:90px;height:26px;top:26%;left:-160px;animation:drift 66s linear infinite 8s;opacity:.5}
+  .c3{width:160px;height:44px;top:3%;left:-200px;animation:drift 80s linear infinite 20s;opacity:.55}
+  @keyframes drift{to{transform:translateX(calc(100vw + 260px))}}
+
+  .app{
+    --c-main:#8FD14F;--c-dark:#74B93A;--c-deep:#5EA22C;--c-border:#4E8A22;
+    --c-btn:#68B32E;--c-btn-shade:#4E8A22;--c-light:#EAF6E6;--c-soft:#F1F8EE;--c-text:#2E7D32;
+    position:relative;z-index:1;width:100%;max-width:820px;margin:0 auto;
+    padding:10px 12px;display:flex;flex-direction:column;gap:12px;min-height:100vh;
+  }
+  .app.theme-math{
+    --c-main:#6FC3E8;--c-dark:#4FA8D8;--c-deep:#3D8FC0;--c-border:#2E7FA8;
+    --c-btn:#29A3D6;--c-btn-shade:#1B7FA8;--c-light:#E1F5FE;--c-soft:#E8F5FE;--c-text:#0277BD;
+  }
+
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    background:rgba(255,255,255,.86);backdrop-filter:blur(12px);
+    border:2px solid rgba(255,255,255,.95);border-radius:20px;padding:10px 14px;
+    box-shadow:0 6px 20px rgba(60,110,60,.18);
+  }
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand-icon{font-size:28px;animation:sway 3s ease-in-out infinite}
+  @keyframes sway{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+  .brand-title{font-size:16px;font-weight:900;color:#2E7D32;letter-spacing:.5px}
+  .brand-sub{font-size:11px;color:#7a8f7a;font-weight:600;margin-top:1px}
+  .stats{display:flex;gap:8px;align-items:center}
+  .pill{display:flex;align-items:center;gap:5px;font-weight:900;font-size:14px;
+        padding:6px 12px;border-radius:999px;white-space:nowrap;
+        transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .3s,box-shadow .3s}
+  .sun-pill{background:linear-gradient(180deg,#FFE082,#FFC107);color:#7a5300;box-shadow:0 3px 0 #E0A800}
+  .sun-pill.negative{background:linear-gradient(180deg,#EF9A9A,#E53935);color:#fff;box-shadow:0 3px 0 #B71C1C}
+  .streak-pill{background:linear-gradient(180deg,#FFAB91,#FF7043);color:#fff;box-shadow:0 3px 0 #D84315}
+  .pill.bump{transform:scale(1.22)}
+
+  .cal-btn{
+    font-family:inherit;font-size:16px;line-height:1;
+    width:40px;height:40px;border-radius:14px;cursor:pointer;
+    background:linear-gradient(180deg,#fff,#EAF6E6);
+    border:2px solid #fff;color:#2E7D32;
+    display:inline-flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 12px rgba(60,110,60,.18);
+    transition:all .18s;position:relative;
+  }
+  .cal-btn:active{transform:translateY(2px)}
+  .cal-btn.has-other{
+    background:linear-gradient(180deg,#FFE082,#FFC107);
+    border-color:#FFC107;
+  }
+  .cal-btn .cal-dot{
+    position:absolute;top:4px;right:4px;width:9px;height:9px;border-radius:50%;
+    background:#FF5252;border:2px solid #fff;display:none;
+  }
+  .cal-btn.has-other .cal-dot{display:block}
+
+  .section-label{display:flex;align-items:center;gap:8px;
+    font-size:13px;font-weight:900;color:#2E7D32;letter-spacing:.5px;padding-left:4px}
+  .section-label::after{content:'';flex:1;height:2px;border-radius:2px;
+    background:linear-gradient(90deg,rgba(46,125,50,.35),transparent)}
+
+  .timer-card{
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.08) 0 24px,transparent 24px 48px),
+      linear-gradient(180deg,rgba(255,255,255,.96) 0%,var(--c-soft) 100%);
+    backdrop-filter:blur(12px);border:3px solid var(--c-border);border-radius:22px;
+    padding:12px 16px 12px;
+    box-shadow:inset 0 -6px 14px rgba(0,0,0,.06),0 6px 20px rgba(60,110,60,.18);
+    display:flex;flex-direction:column;gap:10px;transition:all .3s;
+  }
+  .timer-row{display:flex;gap:10px;align-items:stretch}
+  .track{position:relative;flex:1;min-width:0;height:68px;border-radius:34px;overflow:hidden;
+    background:linear-gradient(180deg,var(--c-light),var(--c-soft));
+    border:3px solid var(--c-border);box-shadow:inset 0 4px 10px rgba(40,90,30,.12);transition:all .3s}
+  .track.paused{border-color:#FFB74D;background:linear-gradient(180deg,#FFF8E1,#FFE0B2)}
+  .track.chomping{border-color:#FF7043;background:linear-gradient(180deg,#FFF3E0,#FFCCBC)}
+  .track-fill{position:absolute;top:0;right:0;bottom:0;width:0;
+    background:linear-gradient(90deg,rgba(255,183,77,.18),rgba(255,152,0,.40));pointer-events:none;transition:all .3s}
+  .sun-anchor{position:absolute;left:8px;top:50%;transform:translateY(-50%);
+    font-size:28px;line-height:1;z-index:2;filter:drop-shadow(0 0 9px rgba(255,200,0,.9))}
+  .sun-anchor.eaten{animation:sunEaten .65s ease forwards}
+  @keyframes sunEaten{0%{transform:translateY(-50%) scale(1);opacity:1}40%{transform:translateY(-50%) scale(1.5);opacity:1}100%{transform:translateY(-50%) scale(0);opacity:0}}
+  .track-time{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    font-size:22px;font-weight:900;color:var(--c-text);z-index:4;font-variant-numeric:tabular-nums;
+    pointer-events:none;text-shadow:0 1px 0 #fff,0 0 10px rgba(255,255,255,.98);transition:color .3s}
+  .track-time.paused{color:#E65100}
+  .track-time.chomping{color:#BF360C}
+  .dog-wrap{position:absolute;top:0;left:0;height:100%;width:42px;
+    display:flex;align-items:center;justify-content:center;will-change:transform;z-index:3}
+  .dog{font-size:32px;line-height:1;transform-origin:50% 100%}
+  .dog.running{animation:dogRun .34s ease-in-out infinite}
+  .dog.paused{animation:dogPause 2.2s ease-in-out infinite}
+  @keyframes dogRun{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-7px) rotate(4deg)}}
+  @keyframes dogPause{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+  .dog.chomp{animation:chomp .55s ease}
+  @keyframes chomp{0%{transform:scale(1)}30%{transform:scale(1.45) rotate(-12deg)}60%{transform:scale(.86) rotate(9deg)}100%{transform:scale(1)}}
+  .timer-hint{font-size:12px;font-weight:800;color:#7a8f7a;text-align:center;min-height:16px}
+  .timer-hint .highlight{color:var(--c-text);font-weight:900}
+  .timer-hint .paused-t{color:#E65100;font-weight:900}
+  .timer-hint .chomp-t{color:#BF360C;font-weight:900}
+
+  .timer-btn{
+    flex:none;display:inline-flex;align-items:center;justify-content:center;
+    font-family:inherit;font-size:14px;font-weight:900;
+    padding:0 18px;border-radius:24px;cursor:pointer;
+    border:3px solid transparent;letter-spacing:1px;min-width:112px;
+    white-space:nowrap;transition:all .15s;
+  }
+  .timer-btn:active{transform:translateY(2px)}
+  .timer-btn.start{background:linear-gradient(180deg,var(--c-main),var(--c-btn));color:#fff;
+    border-color:var(--c-btn);box-shadow:0 4px 0 var(--c-btn-shade);transition:all .3s}
+  .timer-btn.pause{background:linear-gradient(180deg,#FFCC80,#FB8C00);color:#fff;border-color:#FB8C00;box-shadow:0 4px 0 #E65100}
+  .timer-btn.resume{background:linear-gradient(180deg,#4FC3F7,#0288D1);color:#fff;border-color:#0288D1;box-shadow:0 4px 0 #01579B}
+  .timer-btn:disabled{opacity:.55;cursor:not-allowed;transform:none!important;
+    background:linear-gradient(180deg,#BDBDBD,#9E9E9E);border-color:#9E9E9E;box-shadow:0 4px 0 #757575;color:#fff}
+
+  .subject-tabs{display:flex;gap:0;background:rgba(255,255,255,.9);border:2px solid #fff;
+    border-radius:18px;padding:4px;box-shadow:0 4px 14px rgba(60,110,60,.14)}
+  .subject-tab{flex:1;font-family:inherit;font-size:14px;font-weight:900;padding:10px 8px;
+    border-radius:14px;cursor:pointer;border:none;background:transparent;color:#7a8f7a;
+    transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+  .subject-tab.active{background:linear-gradient(180deg,#8FD14F,#68B32E);color:#fff;box-shadow:0 3px 0 #4E8A22}
+  .subject-tab.active[data-tab="math"]{background:linear-gradient(180deg,#6FC3E8,#29A3D6);box-shadow:0 3px 0 #1B7FA8}
+  .subject-tab .tab-count{font-size:11px;background:rgba(255,255,255,.35);padding:1px 7px;border-radius:999px}
+  .subject-tab.active .tab-count{background:rgba(255,255,255,.3)}
+  .tab-panel{display:none}
+  .tab-panel.active{display:block}
+
+  .subject-col{border:3px solid #4E8A22;border-radius:22px;padding:10px;
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 24px,transparent 24px 48px),
+      linear-gradient(180deg,#8FD14F 0%,#74B93A 55%,#5EA22C 100%);
+    box-shadow:inset 0 -8px 18px rgba(0,0,0,.10),0 8px 22px rgba(40,90,30,.20);position:relative;overflow:hidden}
+  .subject-col::after{content:'';position:absolute;inset:0;border-radius:19px;pointer-events:none;
+    background:radial-gradient(circle at 18% 8%,rgba(255,255,255,.24),transparent 46%)}
+  .subject-col[data-subject="math"]{
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 24px,transparent 24px 48px),
+      linear-gradient(180deg,#6FC3E8 0%,#4FA8D8 55%,#3D8FC0 100%);
+    border-color:#2E7FA8;box-shadow:inset 0 -8px 18px rgba(0,0,0,.10),0 8px 22px rgba(30,70,100,.22)}
+  .col-head{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;
+    gap:6px;background:rgba(255,255,255,.92);border:2px solid #fff;border-radius:15px;
+    padding:7px 10px;margin-bottom:9px;box-shadow:0 3px 10px rgba(0,0,0,.12)}
+  .col-title{font-size:13px;font-weight:900;color:#2E7D32;white-space:nowrap}
+  .subject-col[data-subject="math"] .col-title{color:#0277BD}
+  .col-count{font-size:10.5px;font-weight:900;color:#fff;background:#68B32E;padding:2px 8px;
+    border-radius:999px;margin-left:4px}
+  .subject-col[data-subject="math"] .col-count{background:#29A3D6}
+
+  .card-list{position:relative;z-index:2;display:flex;flex-direction:column;gap:7px;min-height:100px}
+  .empty-tip{text-align:center;font-size:11.5px;font-weight:700;color:rgba(255,255,255,.92);
+    background:rgba(0,0,0,.16);border:2px dashed rgba(255,255,255,.5);
+    border-radius:14px;padding:18px 8px;line-height:1.7}
+
+  .task-card{position:relative;overflow:hidden;background:rgba(255,255,255,.97);
+    border:2px solid #fff;border-radius:15px;padding:10px 12px 9px;
+    transition:all .16s;box-shadow:0 3px 9px rgba(0,0,0,.13)}
+  .task-card.active{border-color:#FFC107;box-shadow:0 0 0 3px rgba(255,193,7,.4),0 6px 16px rgba(0,0,0,.16)}
+  .task-card.active.paused-card{border-color:#FFB74D;box-shadow:0 0 0 3px rgba(255,183,77,.4)}
+  .task-card.active.chomping-card{border-color:#FF7043;box-shadow:0 0 0 3px rgba(255,112,67,.4)}
+  .task-card.done{background:rgba(238,248,236,.97);border-color:#B7E0A8;animation:cardDone .6s ease}
+  @keyframes cardDone{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,193,7,.75)}
+    50%{transform:scale(1.03);box-shadow:0 0 0 9px rgba(255,193,7,0)}100%{transform:scale(1)}}
+  .card-top{display:flex;gap:10px;align-items:flex-start}
+  .checkbox{flex:none;width:26px;height:26px;border-radius:8px;border:2.5px solid #A5D6A7;
+    background:#fff;display:grid;place-items:center;margin-top:1px;cursor:pointer;transition:all .2s}
+  .subject-col[data-subject="math"] .checkbox{border-color:#90CAF9}
+  .checkbox .tick{color:#fff;font-size:16px;font-weight:900;line-height:1;opacity:0;
+    transform:scale(.4);transition:all .25s cubic-bezier(.34,1.56,.64,1)}
+  .task-card.done .checkbox{background:#43A047;border-color:#43A047}
+  .subject-col[data-subject="math"] .task-card.done .checkbox{background:#039BE5;border-color:#039BE5}
+  .task-card.done .checkbox .tick{opacity:1;transform:scale(1)}
+  .card-body{flex:1;min-width:0}
+  .task-text{font-size:13px;font-weight:800;color:#2b3a2b;line-height:1.5;word-break:break-word}
+  .task-card.done .task-text{text-decoration:line-through;color:#9aad9a}
+  .task-info{display:flex;align-items:center;gap:8px;margin-top:5px;font-size:10.5px;
+    font-weight:900;flex-wrap:wrap}
+  .task-info .t-min{color:#5b7a5b}
+  .task-info .t-sun{color:#B8860B}
+  .task-info .t-time{color:#2E7D32;font-variant-numeric:tabular-nums;font-size:13px}
+  .task-info .t-time.paused{color:#EF6C00}
+  .task-info .t-time.chomping{color:#BF360C}
+  .task-info .t-time.done-t{color:#43A047}
+  .stars-mini{color:#FFA000;letter-spacing:-.6px;font-size:10px}
+  .card-progress{position:absolute;left:0;bottom:0;height:3.5px;width:0;
+    background:linear-gradient(90deg,#FFD54F,#FFA000);transition:width .3s linear}
+  .card-progress.paused{background:linear-gradient(90deg,#FFB74D,#FB8C00)}
+  .card-progress.chomping{background:linear-gradient(90deg,#FF7043,#BF360C)}
+  .task-card.done .card-progress{background:#66BB6A;width:100%!important}
+
+  .char-grid{
+    display:flex;flex-wrap:wrap;gap:7px;margin-top:9px;padding-top:9px;
+    border-top:1px dashed #DCEED4;position:relative;z-index:2;
+  }
+  .char-card{
+    display:flex;flex-direction:column;align-items:center;gap:1px;
+    width:66px;
+  }
+  .mizi{
+    position:relative;width:52px;height:52px;flex:none;
+    display:grid;place-items:center;
+    background:#E8F5E9;border:1.5px solid #EF9A9A;border-radius:3px;
+    cursor:pointer;transition:transform .15s,box-shadow .15s;
+    overflow:hidden;
+  }
+  .mizi:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.14)}
+  .mizi:active{transform:scale(.95)}
+  .mizi-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .mizi-svg line{stroke:rgba(229,115,115,.55);stroke-width:1;stroke-dasharray:4 3;vector-effect:non-scaling-stroke}
+  .mizi-char{
+    position:relative;z-index:2;font-size:34px;line-height:1;
+    font-family:"Kaiti SC","KaiTi","STKaiti","楷体","PingFang SC","Microsoft YaHei",serif;
+    font-weight:700;color:#2E7D32;
+  }
+  .task-card.done .mizi{background:#F1F8E9;border-color:#C5E1A5}
+  .task-card.done .mizi-char{color:#9aad9a}
+  .char-pinyin{
+    font-size:10px;font-weight:800;color:#5b7a5b;letter-spacing:.3px;
+    max-width:66px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    text-align:center;
+  }
+  .char-info{
+    font-size:9px;font-weight:700;color:#8aa88a;white-space:nowrap;text-align:center;
+    line-height:1.35;letter-spacing:-.2px;
+  }
+  .word-group{
+    display:flex;gap:3px;
+    padding:3px;border-radius:6px;background:rgba(143,209,79,.08);
+  }
+  .word-group .mizi{width:44px;height:44px}
+  .word-group .mizi-char{font-size:28px}
+
+  .toolbar{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .btn-ghost{font-family:inherit;font-size:12.5px;font-weight:800;color:#3d5a3d;
+    background:rgba(255,255,255,.88);border:2px solid #fff;padding:8px 16px;border-radius:999px;
+    cursor:pointer;box-shadow:0 4px 12px rgba(60,110,60,.16);transition:all .15s}
+  .btn-ghost:hover{background:#fff;transform:translateY(-2px)}
+
+  .modal{position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;
+    padding:20px;background:rgba(20,40,20,.5);backdrop-filter:blur(4px)}
+  .modal.show{display:flex;animation:fadeIn .2s ease}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .modal-card{width:100%;max-width:560px;background:#fff;border-radius:22px;padding:22px;
+    box-shadow:0 20px 50px rgba(0,0,0,.3);animation:cardIn .3s cubic-bezier(.34,1.56,.64,1);
+    max-height:88vh;overflow-y:auto}
+  @keyframes cardIn{from{transform:scale(.85) translateY(20px);opacity:0}to{transform:scale(1) translateY(0)}}
+  .modal-card h3{font-size:17px;color:#2E7D32;margin-bottom:6px}
+  .modal-card p{font-size:12px;color:#8a9a8a;margin-bottom:12px;line-height:1.65}
+  .modal-actions{display:flex;gap:10px;margin-top:14px}
+  .modal-actions button{flex:1;text-align:center}
+  .btn-main{font-family:inherit;font-size:13.5px;font-weight:900;color:#fff;
+    background:linear-gradient(180deg,#8FD14F,#68B32E);border:2px solid #68B32E;
+    padding:9px 20px;border-radius:999px;cursor:pointer;box-shadow:0 3px 0 #4E8A22;
+    transition:all .15s;white-space:nowrap}
+  .btn-main:active{transform:translateY(2px)}
+  .btn-main:disabled{opacity:.6;cursor:not-allowed;transform:none!important}
+
+  /* ✅ 弹窗内表单 */
+  .form-field{margin-bottom:10px}
+  .form-field>label{display:block;font-size:12px;font-weight:800;color:#5b7a5b;margin-bottom:5px;padding-left:2px}
+  .form-field input{
+    width:100%;font-family:inherit;font-size:13.5px;font-weight:700;color:#2b3a2b;
+    background:#F6FBF6;border:2px solid #D7E8D7;padding:10px 12px;border-radius:12px;
+    outline:none;transition:all .15s;
+  }
+  .form-field input:focus{border-color:#7CC47C;background:#fff}
+  .form-field input[type="file"]{padding:8px 10px;font-size:12.5px;cursor:pointer}
+  .form-field select{
+    width:100%;font-family:inherit;font-size:13.5px;font-weight:700;color:#2b3a2b;
+    background:#F6FBF6;border:2px solid #D7E8D7;padding:10px 12px;border-radius:12px;
+    outline:none;transition:all .15s;cursor:pointer;
+  }
+  .form-field select:focus{border-color:#7CC47C;background:#fff}
+  .form-row{display:flex;gap:10px}
+  .form-row .form-field{flex:1}
+
+  .cal-card{max-width:380px;padding:18px}
+  .cal-head{display:flex;align-items:center;justify-content:space-between;
+    gap:10px;margin-bottom:12px}
+  .cal-head button{
+    font-family:inherit;font-size:15px;font-weight:900;width:36px;height:36px;
+    border-radius:10px;cursor:pointer;border:2px solid #E8F5E9;background:#fff;
+    color:#2E7D32;transition:all .15s;
+  }
+  .cal-head button:active{transform:scale(.94)}
+  .cal-title{font-size:15px;font-weight:900;color:#2E7D32;letter-spacing:.5px}
+  .cal-week{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:6px}
+  .cal-week div{
+    text-align:center;font-size:11px;font-weight:900;color:#8aa88a;padding:4px 0;
+  }
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+  .cal-day{
+    position:relative;aspect-ratio:1;border-radius:10px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    font-size:13.5px;font-weight:800;color:#2b3a2b;
+    background:#F6FBF6;border:2px solid transparent;transition:all .15s;
+  }
+  .cal-day:hover{background:#EAF6E6}
+  .cal-day.empty{background:transparent;cursor:default;pointer-events:none}
+  .cal-day.other-month{color:#c8d8c8;background:transparent}
+  .cal-day.today{
+    border-color:#FFC107;
+    box-shadow:inset 0 0 0 1px rgba(255,193,7,.3);
+  }
+  .cal-day.selected{
+    background:linear-gradient(180deg,#8FD14F,#68B32E);color:#fff;
+    box-shadow:0 3px 0 #4E8A22;
+  }
+  .cal-day.selected .cal-mark{background:#fff}
+  .cal-mark{
+    position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
+    width:5px;height:5px;border-radius:50%;background:#FF9800;
+  }
+  .cal-mark.done{background:#4CAF50}
+  .cal-actions{display:flex;gap:10px;margin-top:14px}
+  .cal-actions button{flex:1}
+
+  .stroke-card{max-width:340px;text-align:center;padding:20px}
+  .stroke-char-big{
+    font-size:26px;font-weight:900;color:#2E7D32;
+    font-family:"Kaiti SC","KaiTi","STKaiti","楷体",serif;
+  }
+  .stroke-pinyin{font-size:14px;font-weight:800;color:#5b7a5b;margin-top:2px}
+  .stroke-meta{font-size:12px;font-weight:800;color:#8aa88a;margin-top:4px}
+  .stroke-stage{
+    width:220px;height:220px;margin:14px auto 0;
+    background:#E8F5E9;border:2px solid #EF9A9A;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;position:relative;
+  }
+  .stroke-stage svg{display:block}
+
+  .pwd-lock{font-size:42px;text-align:center;line-height:1;margin-bottom:8px}
+  .pwd-input-wrap{position:relative;margin:6px 0 4px}
+  .pwd-input{width:100%;font-family:inherit;font-size:26px;font-weight:900;letter-spacing:14px;
+    text-align:center;color:#2E7D32;padding:12px 14px 12px 26px;border:2px solid #D7E8D7;
+    border-radius:14px;outline:none;background:#F6FBF6;font-variant-numeric:tabular-nums}
+  .pwd-input:focus{border-color:#7CC47C;background:#fff}
+  .pwd-input.error{border-color:#EF5350;background:#FFEBEE;animation:shake .4s}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}
+    40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+  .pwd-tip{font-size:11.5px;font-weight:800;text-align:center;color:#8a9a8a;margin-top:6px;height:16px}
+  .pwd-tip.err{color:#EF5350}
+
+  .pause-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(94px,1fr));gap:9px;margin-bottom:10px}
+  .pause-opt{font-family:inherit;font-size:15px;font-weight:900;padding:14px 8px;border-radius:14px;
+    cursor:pointer;background:linear-gradient(180deg,#FFF8E1,#FFECB3);border:2px solid #FFD54F;
+    color:#7a5300;box-shadow:0 3px 0 #FFC107;transition:all .15s}
+
+  .toast{
+    position:fixed;left:50%;bottom:36px;transform:translateX(-50%) translateY(18px);
+    background:rgba(30,52,30,.95);color:#fff;font-size:13.5px;font-weight:800;
+    padding:12px 22px;border-radius:999px;z-index:9998;opacity:0;
+    transition:opacity .3s,transform .3s;pointer-events:none;
+    max-width:88vw;text-align:center;box-shadow:0 10px 28px rgba(0,0,0,.3);line-height:1.55;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .fly-sun{position:fixed;width:28px;height:28px;display:grid;place-items:center;font-size:24px;
+    line-height:1;pointer-events:none;z-index:9999;
+    transition:transform .85s cubic-bezier(.45,-0.25,.6,1),opacity .85s ease-in}
+  .fly-sun-away{position:fixed;width:28px;height:28px;display:grid;place-items:center;font-size:22px;
+    line-height:1;pointer-events:none;z-index:9999;font-weight:900;color:#C62828;
+    text-shadow:0 1px 3px rgba(255,255,255,.9);
+    transition:transform .8s ease-out,opacity .8s ease-out}
+  .confetti{position:fixed;top:-44px;z-index:10000;pointer-events:none;animation:fall 2.6s linear forwards}
+  @keyframes fall{to{transform:translateY(108vh) rotate(720deg);opacity:0}}
+
+  .admin-bar{
+    position:fixed;bottom:0;left:0;right:0;z-index:200;
+    background:linear-gradient(180deg,#1a2a3a,#0d1a26);
+    display:none;align-items:center;justify-content:center;gap:20px;
+    padding:12px 20px;box-shadow:0 -4px 20px rgba(0,0,0,.3);
+  }
+  .admin-bar.show{display:flex}
+  .admin-bar .admin-label{
+    font-size:13px;font-weight:900;color:#FFD54F;letter-spacing:1px;
+    display:flex;align-items:center;gap:6px;
+  }
+  .admin-bar .admin-status{
+    font-size:11px;font-weight:700;color:#7a9aaa;
+  }
+  .admin-bar .admin-btn{
+    font-family:inherit;font-size:12.5px;font-weight:900;color:#fff;
+    background:linear-gradient(180deg,#EF9A9A,#E53935);
+    border:2px solid #E53935;padding:8px 18px;border-radius:999px;cursor:pointer;
+    box-shadow:0 3px 0 #B71C1C;transition:all .15s;white-space:nowrap;
+  }
+  .admin-bar .admin-btn:active{transform:translateY(2px)}
+
+  .admin-panel{
+    position:fixed;inset:0;z-index:300;display:none;
+    background:linear-gradient(180deg,#0d1a26,#1a2a3a);
+    overflow-y:auto;padding:20px;
+  }
+  .admin-panel.show{display:block}
+  .admin-panel-inner{
+    max-width:1100px;margin:0 auto;
+  }
+  .admin-header{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:16px;margin-bottom:20px;flex-wrap:wrap;
+  }
+  .admin-header h2{
+    font-size:22px;font-weight:900;color:#FFD54F;letter-spacing:1px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .admin-header .admin-close{
+    font-family:inherit;font-size:13.5px;font-weight:900;color:#fff;
+    background:linear-gradient(180deg,#EF9A9A,#E53935);
+    border:2px solid #E53935;padding:10px 24px;border-radius:999px;cursor:pointer;
+    box-shadow:0 3px 0 #B71C1C;transition:all .15s;
+  }
+  .admin-section{
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+    border-radius:18px;padding:18px;margin-bottom:16px;
+  }
+  .admin-section h3{
+    font-size:15px;font-weight:900;color:#E0E8F0;margin-bottom:12px;
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  }
+  .admin-section h3 .badge{
+    font-size:10.5px;background:rgba(255,213,79,.2);color:#FFD54F;
+    padding:2px 10px;border-radius:999px;font-weight:900;
+  }
+
+  .admin-task-row{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;
+    background:rgba(255,255,255,.05);border-radius:12px;margin-bottom:6px;
+    transition:all .15s;cursor:pointer;
+  }
+  .admin-task-row:hover{background:rgba(255,255,255,.1)}
+  .admin-task-row .at-check{
+    width:22px;height:22px;border-radius:6px;border:2px solid rgba(255,255,255,.3);
+    background:transparent;display:grid;place-items:center;flex:none;
+    font-size:13px;color:transparent;cursor:pointer;transition:all .2s;
+  }
+  .admin-task-row .at-check.done{
+    background:#43A047;border-color:#43A047;color:#fff;
+  }
+  .admin-task-row .at-text{
+    flex:1;font-size:13px;font-weight:800;color:#E0E8F0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .admin-task-row .at-text.done{text-decoration:line-through;color:#6a8a6a}
+  .admin-task-row .at-meta{
+    font-size:11px;font-weight:700;color:#7a9aaa;white-space:nowrap;
+  }
+  .admin-task-row .at-del{
+    font-family:inherit;font-size:11px;font-weight:900;color:#EF5350;
+    background:rgba(239,83,80,.15);border:1px solid rgba(239,83,80,.3);
+    padding:4px 10px;border-radius:8px;cursor:pointer;transition:all .15s;
+    white-space:nowrap;
+  }
+  .admin-task-row .at-del:hover{background:rgba(239,83,80,.3)}
+  .admin-add-row{
+    display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;
+  }
+  .admin-add-row input, .admin-add-row select{
+    font-family:inherit;font-size:13px;font-weight:700;color:#E0E8F0;
+    background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);
+    padding:10px 12px;border-radius:10px;outline:none;transition:all .15s;
+  }
+  .admin-add-row input:focus, .admin-add-row select:focus{border-color:#FFD54F;background:rgba(255,255,255,.12)}
+  .admin-add-row input::placeholder{color:#5a7a8a;font-weight:600}
+  .admin-add-row .aa-text{flex:1;min-width:130px}
+  .admin-add-row .aa-num{width:64px;text-align:center;padding-left:6px;padding-right:6px}
+  .admin-add-row .aa-unit{
+    font-size:11px;font-weight:800;color:#8aa8c8;white-space:nowrap;
+  }
+  .admin-add-row .aa-select{
+    flex:1;min-width:180px;cursor:pointer;
+    background-color:rgba(255,255,255,.08);
+  }
+  .admin-add-row .aa-select option{
+    background:#1a2a3a;color:#E0E8F0;font-weight:700;
+  }
+  .admin-add-row .aa-btn{
+    font-family:inherit;font-size:13px;font-weight:900;color:#0d1a26;
+    background:linear-gradient(180deg,#FFE082,#FFC107);
+    border:2px solid #FFC107;padding:10px 16px;border-radius:10px;cursor:pointer;
+    box-shadow:0 3px 0 #E0A800;transition:all .15s;white-space:nowrap;
+  }
+  .admin-add-row .aa-btn:active{transform:translateY(2px)}
+  .aa-hint{
+    font-size:11.5px;font-weight:700;color:#7a9aaa;line-height:1.7;
+    margin:6px 2px 12px;word-break:break-all;
+  }
+  .aa-hint.ok{color:#9CCC65}
+  .aa-hint.warn{color:#FFB74D}
+
+  /* ✅ 单行版添加行：课文选择 + 分钟 + 阳光 + 按钮 同一行 */
+  .admin-add-row.inline-row{flex-wrap:nowrap;gap:5px}
+  .admin-add-row.inline-row .aa-select{flex:1 1 90px;min-width:0}
+  .admin-add-row.inline-row .aa-num{width:54px;flex:none;padding-left:4px;padding-right:4px}
+  .admin-add-row.inline-row .aa-unit{font-size:10.5px;flex:none}
+  .admin-add-row.inline-row .aa-btn{padding:10px 12px;flex:none;font-size:12.5px}
+
+  .admin-stats{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;
+  }
+  .admin-stat-card{
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+    border-radius:14px;padding:16px;text-align:center;
+  }
+  .admin-stat-card .asc-num{
+    font-size:28px;font-weight:900;color:#FFD54F;font-variant-numeric:tabular-nums;
+  }
+  .admin-stat-card .asc-label{
+    font-size:11.5px;font-weight:800;color:#7a9aaa;margin-top:4px;
+  }
+
+  .admin-empty{
+    text-align:center;font-size:12.5px;font-weight:700;color:#5a7a8a;
+    padding:20px;border:2px dashed rgba(255,255,255,.1);border-radius:14px;
+  }
+
+  .admin-sub-label{
+    font-size:12px;font-weight:800;color:#8aa8c8;
+    margin:14px 0 6px;padding-left:4px;
+  }
+  .admin-sub-label:first-of-type{margin-top:6px}
+
+  /* ✅ 课文库行 */
+  .lib-row{
+    display:flex;align-items:flex-start;gap:10px;padding:10px 12px;
+    background:rgba(255,255,255,.05);border-radius:12px;margin-bottom:6px;
+    flex-wrap:wrap;cursor:pointer;transition:all .15s;
+  }
+  .lib-row:hover{background:rgba(255,255,255,.11);box-shadow:inset 0 0 0 1px rgba(255,213,79,.25)}
+  .lib-row .lib-lesson{
+    font-size:13px;font-weight:900;color:#FFD54F;
+    min-width:120px;flex:none;padding-top:1px;
+  }
+  .lib-row .lib-info{
+    font-size:11.5px;font-weight:700;color:#8aa8c8;flex:1;line-height:1.7;
+    min-width:180px;word-break:break-word;
+  }
+  .lib-row .lib-info b{color:#B0D888;font-weight:900}
+  .lib-row .lib-del{
+    font-family:inherit;font-size:11px;font-weight:900;color:#EF5350;
+    background:rgba(239,83,80,.15);border:1px solid rgba(239,83,80,.3);
+    padding:4px 10px;border-radius:8px;cursor:pointer;transition:all .15s;
+    white-space:nowrap;flex:none;
+  }
+  .lib-row .lib-del:hover{background:rgba(239,83,80,.3)}
+
+  .sync-status{
+    position:fixed;top:10px;right:10px;z-index:250;
+    font-size:11px;font-weight:800;padding:4px 12px;border-radius:999px;
+    transition:all .3s;pointer-events:none;opacity:0;
+  }
+  .sync-status.show{opacity:1}
+  .sync-status.online{background:rgba(76,175,80,.9);color:#fff}
+  .sync-status.offline{background:rgba(239,83,80,.9);color:#fff}
+
+  /* ✅ 上传解析进度 */
+  .upload-progress{
+    margin-top:10px;font-size:12px;font-weight:800;color:#5b7a5b;
+    text-align:center;min-height:18px;line-height:1.6;
+  }
+  .upload-progress.busy{color:#0288D1}
+  .upload-progress.ok{color:#2E7D32}
+  .upload-progress.err{color:#E53935}
+  .upload-files{
+    font-size:11.5px;font-weight:800;color:#2E7D32;
+    margin-top:4px;padding-left:2px;word-break:break-all;
+  }
+
+  @media (max-width: 500px){
+    .app{padding:10px}
+    .timer-btn{min-width:86px;font-size:13px;padding:0 12px;border-radius:20px}
+    .track{height:60px;border-radius:30px}
+    .track-time{font-size:19px}
+    .mizi{width:44px;height:44px}
+    .mizi-char{font-size:28px}
+    .char-card{width:56px}
+    .char-pinyin{max-width:56px}
+    .char-info{font-size:8.5px}
+    .word-group .mizi{width:38px;height:38px}
+    .word-group .mizi-char{font-size:24px}
+    .admin-add-row:not(.inline-row) .aa-text{min-width:100%}
+    .admin-add-row:not(.inline-row) .aa-select{min-width:100%}
+    .admin-add-row .aa-num{width:58px}
+    /* ✅ 单行版在小屏下继续压紧 */
+    .admin-add-row.inline-row{gap:4px}
+    .admin-add-row.inline-row .aa-select{flex:1 1 70px;font-size:12px;padding:8px 5px}
+    .admin-add-row.inline-row .aa-num{width:42px;font-size:11px;padding:8px 2px}
+    .admin-add-row.inline-row .aa-unit{font-size:9px;letter-spacing:-.3px}
+    .admin-add-row.inline-row .aa-btn{padding:8px 8px;font-size:11px}
+  }
+</style>
+</head>
+<body>
+
+<div class="cloud c1"></div>
+<div class="cloud c2"></div>
+<div class="cloud c3"></div>
+
+<div class="sync-status" id="syncStatus"></div>
+
+<div class="app" id="appRoot">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">🌻</div>
+      <div>
+        <div class="brand-title">学习打卡台</div>
+        <div class="brand-sub" id="dateText">今天也要加油哦！</div>
+      </div>
+    </div>
+    <div class="stats">
+      <button class="cal-btn" id="calBtn" title="切换日期">
+        📅<span class="cal-dot"></span>
+      </button>
+      <div class="pill sun-pill" id="sunPill">☀️ <span id="sunCount">0</span></div>
+      <div class="pill streak-pill">🔥 <span id="streakCount">0</span>天</div>
+    </div>
+  </header>
+
+  <div class="timer-card">
+    <div class="timer-row">
+      <div class="track" id="track">
+        <div class="track-fill" id="trackFill"></div>
+        <div class="sun-anchor" id="sunAnchor">☀️</div>
+        <div class="track-time" id="trackTime">--:--</div>
+        <div class="dog-wrap" id="dogWrap"><div class="dog" id="dog">🐕</div></div>
+      </div>
+      <button class="timer-btn start" id="mainBtn">▶ 开始</button>
+    </div>
+    <div class="timer-hint" id="timerHint">点击右侧按钮开始倒计时</div>
+  </div>
+
+  <div class="section-label">🌻 今日作业</div>
+
+  <div class="subject-tabs">
+    <button class="subject-tab active" data-tab="chinese">
+      📖 语文 <span class="tab-count" id="chineseTabCount">0</span>
+    </button>
+    <button class="subject-tab" data-tab="math">
+      🔢 数学 <span class="tab-count" id="mathTabCount">0</span>
+    </button>
+  </div>
+
+  <div class="tab-panel active" id="panel-chinese">
+    <section class="subject-col" data-subject="chinese">
+      <div class="col-head">
+        <div>
+          <span class="col-title">📖 语文作业</span>
+          <span class="col-count" id="chineseCount">0</span>
+        </div>
+      </div>
+      <div class="card-list" id="chineseList"></div>
+    </section>
+  </div>
+
+  <div class="tab-panel" id="panel-math">
+    <section class="subject-col" data-subject="math">
+      <div class="col-head">
+        <div>
+          <span class="col-title">🔢 数学作业</span>
+          <span class="col-count" id="mathCount">0</span>
+        </div>
+      </div>
+      <div class="card-list" id="mathList"></div>
+    </section>
+  </div>
+
+  <div class="timer-hint" style="margin-top:-3px">
+    打勾 ✓ 表示完成 · 倒计时归零扣 1 颗阳光并自动重新开始
+  </div>
+
+  <div class="toolbar">
+    <button class="btn-ghost" id="resetBtn">🔄 重置当天打卡</button>
+    <button class="btn-ghost" id="adminEntryBtn">🔑 家长入口</button>
+  </div>
+
+</div>
+
+<!-- 日历弹窗 -->
+<div class="modal" id="calModal">
+  <div class="modal-card cal-card">
+    <div class="cal-head">
+      <button id="calPrev">◀</button>
+      <div class="cal-title" id="calTitle">2026年9月</div>
+      <button id="calNext">▶</button>
+    </div>
+    <div class="cal-week">
+      <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-actions">
+      <button class="btn-ghost" id="calTodayBtn">📌 回到今天</button>
+      <button class="btn-main" id="calCloseBtn">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 笔顺弹窗 -->
+<div class="modal" id="strokeModal">
+  <div class="modal-card stroke-card">
+    <div class="stroke-char-big" id="strokeCharBig">字</div>
+    <div class="stroke-pinyin" id="strokePinyinEl"></div>
+    <div class="stroke-meta" id="strokeMetaEl"></div>
+    <div class="stroke-stage" id="strokeStage"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="strokeReplay">🔄 重播</button>
+      <button class="btn-main" id="strokeClose">关闭</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="pwdModal">
+  <div class="modal-card">
+    <div class="pwd-lock">🔒</div>
+    <h3 style="text-align:center" id="pwdTitle">家长验证</h3>
+    <p style="text-align:center;margin-bottom:10px" id="pwdSub">请输入家长密码</p>
+    <div class="pwd-input-wrap">
+      <input type="password" id="pwdInput" class="pwd-input" maxlength="4" inputmode="numeric" autocomplete="off" placeholder="••••">
+    </div>
+    <div class="pwd-tip" id="pwdTip"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="pwdCancel">取消</button>
+      <button class="btn-main" id="pwdConfirm">确认</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="pauseDurationModal">
+  <div class="modal-card">
+    <h3>⏸ 选择暂停时长</h3>
+    <p>暂停时间到后会自动继续倒计时</p>
+    <div class="pause-options">
+      <button class="pause-opt" data-min="1">1 分钟</button>
+      <button class="pause-opt" data-min="2">2 分钟</button>
+      <button class="pause-opt" data-min="5">5 分钟</button>
+      <button class="pause-opt" data-min="10">10 分钟</button>
+      <button class="pause-opt" data-min="20">20 分钟</button>
+      <button class="pause-opt" data-min="30">30 分钟</button>
+      <button class="pause-opt" data-min="60">60 分钟</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="cancelPauseDuration">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ 课文库编辑弹窗 -->
+<div class="modal" id="libEditModal">
+  <div class="modal-card">
+    <h3>✏️ 编辑课文库</h3>
+    <p>修改课文名、会写字、会识字、抄写词语后保存即可</p>
+    <div class="form-field">
+      <label>课文名</label>
+      <input type="text" id="libEditName" maxlength="60" placeholder="例：阅读1 / 识字1 / 阅读语文园地一">
+    </div>
+    <div class="form-field">
+      <label>会写字（空格分隔）</label>
+      <input type="text" id="libEditChars" maxlength="1200" placeholder="例：两 条 哪 宽 那 短 孩 成">
+    </div>
+    <div class="form-field">
+      <label>会识字（空格分隔）</label>
+      <input type="text" id="libEditWordgroups" maxlength="1200" placeholder="例：蝌 蚪 脑 袋 灰">
+    </div>
+    <div class="form-field">
+      <label>抄写词语（空格分隔）</label>
+      <input type="text" id="libEditWords" maxlength="1200" placeholder="例：青蛙 池塘 妈妈">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="libEditCancel">取消</button>
+      <button class="btn-main" id="libEditSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ 任务编辑弹窗 -->
+<div class="modal" id="taskEditModal">
+  <div class="modal-card">
+    <h3>✏️ 编辑任务</h3>
+    <p>双击任务条目可随时修改内容、时长与阳光</p>
+    <div class="form-field">
+      <label>任务内容</label>
+      <input type="text" id="taskEditText" maxlength="200" placeholder="任务内容">
+    </div>
+    <div class="form-field" id="taskEditExtraWrap">
+      <label id="taskEditExtraLabel">会写字（空格分隔）</label>
+      <input type="text" id="taskEditExtra" maxlength="1200" placeholder="空格分隔">
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label>时长（分钟）</label>
+        <input type="number" id="taskEditMin" min="0.5" max="120" step="0.5">
+      </div>
+      <div class="form-field">
+        <label>阳光奖励 ☀️</label>
+        <input type="number" id="taskEditSun" min="1" max="500" step="1">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="taskEditCancel">取消</button>
+      <button class="btn-main" id="taskEditSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ 上传写字表 / 识字表弹窗 -->
+<div class="modal" id="uploadSyncModal">
+  <div class="modal-card">
+    <h3>📤 上传写字表 / 识字表</h3>
+    <p>
+      上传 PDF 后自动解析：<br>
+      · <b>写字表</b> → 同步为「会写字」<br>
+      · <b>识字表</b> → 同步为「会识字」<br>
+      · 课文名自动采用「章节名 + 编号」，例如 <b>阅读1</b>、<b>识字1</b>、<b>阅读语文园地一</b>
+    </p>
+    <div class="form-field">
+      <label>📄 写字表（PDF，选填）</label>
+      <input type="file" id="uploadWriteFile" accept=".pdf,application/pdf">
+      <div class="upload-files" id="uploadWriteName"></div>
+    </div>
+    <div class="form-field">
+      <label>📄 识字表（PDF，选填）</label>
+      <input type="file" id="uploadReadFile" accept=".pdf,application/pdf">
+      <div class="upload-files" id="uploadReadName"></div>
+    </div>
+    <div class="upload-progress" id="uploadProgress">可只上传其中一个，也可以两个一起上传</div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="uploadCancel">取消</button>
+      <button class="btn-main" id="uploadSyncBtn">开始解析并同步</button>
+    </div>
+  </div>
+</div>
+
+<!-- 管理视图 -->
+<div class="admin-bar" id="adminBar">
+  <div class="admin-label">🔓 家长管理模式</div>
+  <div class="admin-status" id="adminSyncStatus">☁️ 已连接云端</div>
+  <button class="admin-btn" id="adminExitBtn">退出管理</button>
+</div>
+
+<div class="admin-panel" id="adminPanel">
+  <div class="admin-panel-inner">
+    <div class="admin-header">
+      <h2>🔑 家长管理面板</h2>
+      <button class="admin-close" id="adminCloseBtn">✕ 关闭</button>
+    </div>
+
+    <div class="admin-section">
+      <h3>📊 进度总览 <span class="badge" id="adminTodayBadge"></span></h3>
+      <div class="admin-stats">
+        <div class="admin-stat-card">
+          <div class="asc-num" id="adminStatSun">0</div>
+          <div class="asc-label">☀️ 当前阳光</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="asc-num" id="adminStatDone">0/0</div>
+          <div class="asc-label">✅ 已完成任务</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="asc-num" id="adminStatStreak">0</div>
+          <div class="asc-label">🔥 连续打卡天数</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <h3>📅 日期选择</h3>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <input type="date" id="adminDateInput"
+          style="font-family:inherit;font-size:13px;font-weight:800;color:#E0E8F0;
+                 background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);
+                 padding:8px 12px;border-radius:10px;outline:none">
+        <button class="aa-btn" id="adminGoToday"
+          style="font-family:inherit;font-size:12.5px;font-weight:900;color:#0d1a26;
+                 background:linear-gradient(180deg,#FFE082,#FFC107);border:2px solid #FFC107;
+                 padding:8px 18px;border-radius:10px;cursor:pointer;box-shadow:0 3px 0 #E0A800">
+          回到今天
+        </button>
+      </div>
+      <p style="font-size:11.5px;color:#5a7a8a;font-weight:700;line-height:1.8;margin-top:10px">
+        每一天的任务都会单独保存，切换到过去的日期可以查看或补录当天的作业。
+      </p>
+    </div>
+
+    <!-- ✅ 语文任务 -->
+    <div class="admin-section">
+      <h3>📖 语文任务 <span class="badge" id="adminChineseBadge">0</span></h3>
+      <p style="font-size:11.5px;color:#5a7a8a;font-weight:700;margin-bottom:8px">💡 双击任务条目可重新编辑</p>
+      <div id="adminChineseList"></div>
+
+      <div class="admin-sub-label">➕ 添加会写字</div>
+      <div class="admin-add-row inline-row">
+        <select class="aa-select" id="adminPreviewLessonSelect">
+          <option value="">— 选择课文 —</option>
+        </select>
+        <input class="aa-num" id="unitPreviewMin" type="number" step="0.5" min="0.5" max="20" placeholder="分钟">
+        <span class="aa-unit">分钟/字</span>
+        <input class="aa-num" id="unitPreviewSun" type="number" step="0.5" min="0.5" max="50" placeholder="阳光">
+        <span class="aa-unit">阳光/字</span>
+        <button class="aa-btn" id="adminAddPreviewBtn">添加</button>
+      </div>
+      <div class="aa-hint" id="previewLessonHint">选好课文直接点「添加」即可，不用手动输入</div>
+
+      <div class="admin-sub-label">➕ 添加会识字</div>
+      <div class="admin-add-row inline-row">
+        <select class="aa-select" id="adminWordgroupLessonSelect">
+          <option value="">— 选择课文 —</option>
+        </select>
+        <input class="aa-num" id="unitWordgroupMin" type="number" step="0.5" min="0.5" max="20" placeholder="分钟">
+        <span class="aa-unit">分钟/组</span>
+        <input class="aa-num" id="unitWordgroupSun" type="number" step="0.5" min="0.5" max="50" placeholder="阳光">
+        <span class="aa-unit">阳光/组</span>
+        <button class="aa-btn" id="adminAddWordgroupBtn">添加</button>
+      </div>
+      <div class="aa-hint" id="wordgroupLessonHint">选好课文直接点「添加」即可，不用手动输入</div>
+
+      <div class="admin-sub-label">➕ 添加抄写词语</div>
+      <div class="admin-add-row inline-row">
+        <select class="aa-select" id="adminCopyLessonSelect">
+          <option value="">— 选择课文 —</option>
+        </select>
+        <input class="aa-num" id="unitCopyMin" type="number" step="0.5" min="0.5" max="20" placeholder="分钟">
+        <span class="aa-unit">分钟/组</span>
+        <input class="aa-num" id="unitCopySun" type="number" step="0.5" min="0.5" max="50" placeholder="阳光">
+        <span class="aa-unit">阳光/组</span>
+        <button class="aa-btn" id="adminAddCopyBtn">添加</button>
+      </div>
+      <div class="aa-hint" id="copyLessonHint">选好课文直接点「添加」即可，不用手动输入</div>
+
+      <div class="admin-sub-label">➕ 添加自定义任务</div>
+      <div class="admin-add-row">
+        <input class="aa-text" id="adminAddChineseText" placeholder="任务内容，例：背诵《静夜思》">
+        <input class="aa-num" id="adminAddChineseMin" type="number" value="10" min="1" max="120" placeholder="分钟">
+        <span class="aa-unit">分钟</span>
+        <input class="aa-num" id="adminAddChineseSun" type="number" value="30" min="1" max="500" placeholder="阳光">
+        <span class="aa-unit">阳光</span>
+        <button class="aa-btn" id="adminAddChineseBtn">添加</button>
+      </div>
+    </div>
+
+    <!-- ✅ 数学任务 -->
+    <div class="admin-section">
+      <h3>🔢 数学任务 <span class="badge" id="adminMathBadge">0</span></h3>
+      <p style="font-size:11.5px;color:#5a7a8a;font-weight:700;margin-bottom:8px">💡 双击任务条目可重新编辑</p>
+      <div id="adminMathList"></div>
+
+      <div class="admin-sub-label">➕ 添加数学任务</div>
+      <div class="admin-add-row">
+        <input class="aa-text" id="adminAddMathText" placeholder="任务内容，例：口算练习30题">
+        <input class="aa-num" id="adminAddMathMin" type="number" value="10" min="1" max="120" placeholder="分钟">
+        <span class="aa-unit">分钟</span>
+        <input class="aa-num" id="adminAddMathSun" type="number" value="30" min="1" max="500" placeholder="阳光">
+        <span class="aa-unit">阳光</span>
+        <button class="aa-btn" id="adminAddMathBtn">添加</button>
+      </div>
+    </div>
+
+    <!-- ✅ 课文库 -->
+    <div class="admin-section">
+      <h3>
+        📚 课文库（会写字 / 会识字 / 抄写词语）
+        <span class="badge" id="adminLibBadge">0 条</span>
+        <button id="adminLibSyncBtn"
+          style="font-family:inherit;font-size:12px;font-weight:900;color:#0d1a26;
+                 background:linear-gradient(180deg,#FFE082,#FFC107);
+                 border:2px solid #FFC107;padding:6px 14px;border-radius:10px;
+                 cursor:pointer;box-shadow:0 3px 0 #E0A800;margin-left:auto;white-space:nowrap">
+          📤 上传写字表/识字表
+        </button>
+      </h3>
+      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+        上传「写字表.pdf」自动填「会写字」，上传「识字表.pdf」自动填「会识字」，
+        课文名自动取「章节名 + 编号」（阅读1 / 识字1 / 阅读语文园地一）。
+        <b style="color:#FFD54F">双击条目可重新编辑。</b>
+      </p>
+      <div id="adminLibList"></div>
+
+      <div class="admin-sub-label">➕ 手动添加课文库条目</div>
+      <div class="admin-add-row">
+        <input class="aa-text" id="adminLibLesson" placeholder="课文名，例：阅读1">
+      </div>
+      <div class="admin-add-row">
+        <input class="aa-text" id="adminLibChars" placeholder="会写字，空格分隔，例：两 条 哪 宽 那 短 孩 成">
+      </div>
+      <div class="admin-add-row">
+        <input class="aa-text" id="adminLibWordgroups" placeholder="会识字，空格分隔，例：蝌 蚪 脑 袋 灰">
+      </div>
+      <div class="admin-add-row">
+        <input class="aa-text" id="adminLibWords" placeholder="抄写词语，空格分隔，例：青蛙 池塘 妈妈">
+      </div>
+      <div class="admin-add-row">
+        <button class="aa-btn" id="adminLibAddBtn" style="flex:1">💾 保存到课文库</button>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <h3>☁️ 云端同步</h3>
+      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+        数据会自动同步到 Firebase 云端。孩子端刷新页面即可看到最新任务。
+      </p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="aa-btn" id="adminForceSyncBtn">🔄 强制上传本地数据</button>
+        <button class="aa-btn" id="adminForcePullBtn" style="background:linear-gradient(180deg,#90CAF9,#42A5F5);border-color:#42A5F5;box-shadow:0 3px 0 #1976D2;color:#fff">⬇️ 强制拉取云端数据</button>
+      </div>
+      <div style="font-size:11px;color:#5a7a8a;font-weight:700;margin-top:10px" id="adminSyncInfo">
+        最后同步：—
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+/* ============================================================
+   🔥 Firebase 配置 — 请替换为你自己的配置
+============================================================ */
+const FIREBASE_CONFIG = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const FAMILY_ID = 'default';
+const PARENT_PASSWORD = '0702';
+
+/* ============================================================
+   Firebase SDK
+============================================================ */
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js';
+import {
+  getDatabase, ref, onValue, set
+} from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js';
+
+let firebaseApp, db, dataRef;
+try{
+  firebaseApp = initializeApp(FIREBASE_CONFIG);
+  db = getDatabase(firebaseApp);
+  dataRef = ref(db, 'families/' + FAMILY_ID + '/data');
+}catch(e){
+  console.warn('Firebase 初始化失败，将使用纯本地模式', e);
+}
+
+/* ============================================================
+   常量
+============================================================ */
+const STORAGE_KEY = 'study_board_v9';
+const MAX_DAYS_KEPT = 180;
+const CHOMP_HOLD_MS = 700;
+const SUBJECTS = { chinese:{key:'chinese',name:'语文'}, math:{key:'math',name:'数学'} };
+
+const DEFAULT_DATA = {
+  chinese:[
+    {text:'抄写第3课生字',minutes:10,sun:30},
+    {text:'背诵《静夜思》',minutes:15,sun:45},
+    {text:'朗读课文3遍',minutes:5,sun:15},
+    {text:'课外阅读20分钟',minutes:20,sun:60}
+  ],
+  math:[
+    {text:'口算练习30题',minutes:10,sun:30},
+    {text:'数学书第15页',minutes:15,sun:45},
+    {text:'订正昨天错题',minutes:10,sun:30}
+  ]
+};
+
+/* ✅ 语文任务默认：每字/每组的时间与阳光 */
+const DEFAULT_SETTINGS = {
+  unit: {
+    preview:   { min: 2,   sun: 6 },
+    wordgroup: { min: 2.5, sun: 7.5 },
+    copy:      { min: 2,   sun: 6 }
+  }
+};
+
+/* ✅ 默认课文库（示例，可编辑） */
+const DEFAULT_LESSON_LIBRARY = {
+  "阅读1": {
+    chars: "两 条 哪 宽 那 短 孩 成",
+    wordgroups: "蝌 蚪 脑 袋 灰 甩 活 腿 教 迎 嘴 龟 披",
+    words: "青蛙 池塘 妈妈 阿姨 乌龟"
+  },
+  "阅读2": {
+    chars: "升 连 起 海 洋 许 作 法",
+    wordgroups: "汽 越 温 滴 奔 海 洋 发 坏 没 庄 稼 屋",
+    words: "傍晚 越过 水滴 小溪 奔跑 海洋 冲毁"
+  }
+};
+
+/* ============================================================
+   ✅ 汉字部首 / 结构 数据
+============================================================ */
+const HZ_STRUCT_NAME = {'1':'左右','2':'上下','3':'独体','4':'半包围','5':'全包围','6':'上中下','7':'左中右'};
+const HZ_RAW = [
+  '一3一三上下万无天世更事不两东头',
+  '一2丝丛画',
+  '二3二五井',
+  '十3半午千',
+  '十2南',
+  '丨3串',
+  '丿3乐',
+  '丶3主',
+  '丷2单弟',
+  '亠2京',
+  '人1以',
+  '人3人',
+  '人2会伞众个',
+  '亻1你他们作休保伙伴位化做低傍催修仙依何',
+  '儿3儿',
+  '儿2兔光先',
+  '入3入',
+  '八2公分兴其',
+  '冖2写',
+  '冖3农',
+  '冫1冲',
+  '冂4周',
+  '冂3再',
+  '凵3出',
+  '讠1词语说谁课诗请让诉讲论评话该议',
+  '刂1到削',
+  '刂2前',
+  '力3力',
+  '力1动',
+  '勹4包句',
+  '匕1北',
+  '匚4区',
+  '卩1却',
+  '又1对双观戏',
+  '又3发',
+  '又4友',
+  '口3口',
+  '口1听叫吃喊呼啪吗吧吹哄味蛙',
+  '口2员号只古吴告喜虽名商吾哥',
+  '口4右后可',
+  '囗5四回园圆因国',
+  '土1地场块坡塘洼坏境',
+  '土2去坐尘',
+  '土4在',
+  '士3士',
+  '士2声',
+  '士1壮',
+  '夂2冬处备各夏',
+  '夕1外',
+  '大3大太头',
+  '大2奔奖',
+  '女1好妈妹奶姓如娃姨',
+  '女2要',
+  '子1孙孔',
+  '子3子',
+  '宀2字它安官害客宽守',
+  '小3小尔',
+  '小2少尝',
+  '尢4就',
+  '尢3尤',
+  '尸4层屋尽尾居',
+  '山1屿',
+  '山3山',
+  '山4岛',
+  '工4左',
+  '巾1幅',
+  '巾3巾',
+  '巾2常带',
+  '巾4布',
+  '干3干',
+  '广4广座床席底',
+  '廴4建',
+  '廾2开',
+  '弓1张',
+  '弓2弯弟',
+  '彐2归当',
+  '彡1彩',
+  '彳1行得',
+  '心2忘念想怎总急思忽',
+  '心3心',
+  '忄1情快忙',
+  '戈3我',
+  '戈1战',
+  '戈4成戴',
+  '扌1打提招接拍披把排报护捉据',
+  '攵1数放故',
+  '斤1砍',
+  '方3方',
+  '方1旅族',
+  '日1明时晚晴晒暖',
+  '日3日',
+  '日2早是星春景最',
+  '月1期脑肥朋脏朦胧',
+  '月3月',
+  '月2肯',
+  '木1树松柏杨桐枫桂桦林根柱杆梯楼村样极杉棋',
+  '木2杏李果森条桌',
+  '木3木本束',
+  '欠1歌欲',
+  '止3止正',
+  '殳1毁',
+  '母3母每',
+  '比1比',
+  '气4气',
+  '水3水',
+  '氵1江河池洋溪滴洒浇汗沙游清没温深淹瀑',
+  '火1灯炉烟炸',
+  '火2灵',
+  '火4灰',
+  '灬2点照然',
+  '父2爸',
+  '牛3牛',
+  '牜1物',
+  '犭1猫狗独猜',
+  '王1珠环球玲',
+  '王3王',
+  '生3生',
+  '田3田',
+  '田1疆',
+  '田2界留',
+  '皮4皮',
+  '皿2盘',
+  '目1眼睛睡',
+  '目3目直',
+  '目2看',
+  '矢1短知',
+  '石3石',
+  '禾1秋稻称种粒秤',
+  '禾3禾',
+  '禾2秀香',
+  '穴2空穷',
+  '竹2笔篮笑筋',
+  '米3米',
+  '米1粒粽粗糟粘',
+  '纟1红绿绳线纷经纸给纱维',
+  '舟1船',
+  '色2色',
+  '艹2花苹落莲苦蓝葡萄节',
+  '虫1蝌蚪',
+  '虫3虫',
+  '衣2装袋',
+  '见2觉',
+  '见3见',
+  '走4走越趣起赵',
+  '足3足',
+  '足1跳路蹦',
+  '身3身',
+  '车3车',
+  '辶4边道送过还远近追连运迎遥',
+  '采2采',
+  '里3里重',
+  '里2量',
+  '钅1铜银锦锅钱镜',
+  '长3长',
+  '门4门问闪闭闻',
+  '阝1队阿阳降邻',
+  '隹1谁雄雁',
+  '隹2雀',
+  '雨2雨雪霜',
+  '青2青',
+  '青1静',
+  '非3非',
+  '页1顶领颜',
+  '风4风',
+  '风1飘',
+  '飞3飞',
+  '马3马',
+  '鱼2鱼',
+  '鱼1鲜',
+  '鸟1鸡鸭鹊鹰',
+  '黄2黄',
+  '黑2黑',
+  '鼓1鼓',
+  '龟2龟',
+  '齐2齐',
+  '氏3氏',
+  '乡3乡',
+  '毛3毛',
+  '甘1甜',
+  '而1耐',
+  '谷2谷',
+  '豆3豆',
+  '肉3肉',
+  '立1端',
+  '立2亲童',
+  '白3白',
+  '白1的',
+  '巳3巴',
+  '己3已',
+  '川3川',
+  '羽3羽',
+  '乙3也',
+  '西3西'
+].join(';');
+
+const HZ_INFO = (function(){
+  const map = {};
+  const segs = HZ_RAW.split(';');
+  for(let i = 0; i < segs.length; i++){
+    const seg = segs[i];
+    if(seg.length < 3) continue;
+    const rad = seg.charAt(0);
+    const st  = HZ_STRUCT_NAME[seg.charAt(1)] || '独体';
+    for(let j = 2; j < seg.length; j++) map[seg.charAt(j)] = [rad, st];
+  }
+  return map;
+})();
+
+/* ============================================================
+   工具函数
+============================================================ */
+const pad2 = n => String(n).padStart(2,'0');
+const fmtDate = d => d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+const todayStr = () => fmtDate(new Date());
+function dateLabel(dateStr){
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const dt = new Date(y, m-1, d);
+  const w = ['日','一','二','三','四','五','六'][dt.getDay()];
+  const today = todayStr();
+  let prefix = '';
+  if(dateStr === today) prefix = '今天 · ';
+  else {
+    const yest = new Date(); yest.setDate(yest.getDate()-1);
+    if(dateStr === fmtDate(yest)) prefix = '昨天 · ';
+  }
+  return `${prefix}${y}年${m}月${d}日 星期${w}`;
+}
+function fmtMs(ms){
+  const s = Math.max(0, Math.ceil(Math.abs(ms)/1000));
+  return Math.floor(s/60)+':'+pad2(s%60);
+}
+const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+let uid = 0;
+const newId = () => 't' + Date.now().toString(36) + (uid++).toString(36);
+
+function sunToStars(sun){
+  if(sun>=70)return 5; if(sun>=50)return 4; if(sun>=30)return 3;
+  if(sun>=15)return 2; return 1;
+}
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escapeAttr(s){
+  return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function getPinyin(char){
+  try{
+    if(window.pinyinPro && window.pinyinPro.pinyin){
+      const r = window.pinyinPro.pinyin(char, { toneType:'symbol', type:'array' });
+      return (r && r[0]) || '';
+    }
+  }catch(e){}
+  return '';
+}
+/* ✅ 解析生字 */
+function parseChars(str){
+  const out = [];
+  const norm = String(str||'').replace(/[^\u4e00-\u9fa5]/g, ' ').trim();
+  norm.split(/\s+/).filter(Boolean).forEach(seg => {
+    for(const c of seg) if(/[\u4e00-\u9fa5]/.test(c)) out.push(c);
+  });
+  return out;
+}
+/* ✅ 解析词语（放宽上限到 300） */
+function parseWords(str){
+  return String(str||'').split(/\s+/).map(s => s.trim()).filter(Boolean)
+    .map(s => s.replace(/[^\u4e00-\u9fa5]/g,''))
+    .filter(Boolean)
+    .slice(0, 300);
+}
+
+/* ============================================================
+   状态
+============================================================ */
+let state = null;
+let runtimeMap = {};
+let activeId = null;
+let running = false;
+let rafId = null;
+let lastTs = 0;
+let cardRefs = {};
+const pauseState = {active:false,totalMs:0,leftMs:0,wasRunning:false};
+let currentSubject = 'chinese';
+let isAdminMode = false;
+let isRemoteUpdate = false;
+let currentWriter = null;
+
+/* ============================================================
+   ✅ 设置规范化
+============================================================ */
+function normalizeSettings(raw){
+  const d = DEFAULT_SETTINGS;
+  const r = (raw && typeof raw === 'object') ? raw : {};
+  const unit = (r.unit && typeof r.unit === 'object') ? r.unit : {};
+  const pick = (t) => {
+    const u = (unit[t] && typeof unit[t] === 'object') ? unit[t] : {};
+    const m = Number(u.min);
+    const s = Number(u.sun);
+    return {
+      min: clamp(isFinite(m) && m > 0 ? m : d.unit[t].min, 0.5, 20),
+      sun: clamp(isFinite(s) && s > 0 ? s : d.unit[t].sun, 0.5, 50)
+    };
+  };
+  return {
+    unit: {
+      preview:   pick('preview'),
+      wordgroup: pick('wordgroup'),
+      copy:      pick('copy')
+    }
+  };
+}
+function getUnitCfg(type){
+  const st = state.settings || DEFAULT_SETTINGS;
+  const u = (st.unit && st.unit[type]) || DEFAULT_SETTINGS.unit[type];
+  return {
+    min: clamp(Number(u.min) || DEFAULT_SETTINGS.unit[type].min, 0.5, 20),
+    sun: clamp(Number(u.sun) || DEFAULT_SETTINGS.unit[type].sun, 0.5, 50)
+  };
+}
+
+/* ============================================================
+   ✅ 课文库规范化
+============================================================ */
+function normalizeLessonLibrary(raw){
+  const out = {};
+  if(!raw || typeof raw !== 'object') return out;
+  Object.keys(raw).forEach(k => {
+    const v = raw[k];
+    if(!v || typeof v !== 'object') return;
+    const name = String(k).slice(0,60).trim();
+    if(!name) return;
+    out[name] = {
+      chars: String(v.chars || '').slice(0,1200),
+      wordgroups: String(v.wordgroups || v.wordgroup || v.groups || '').slice(0,1200),
+      words: String(v.words || '').slice(0,1200)
+    };
+  });
+  return out;
+}
+
+/* ============================================================
+   State 构建 / 迁移
+============================================================ */
+function makeTask(text, minutes, sun, extra){
+  const task = {
+    id: newId(),
+    type: (extra && extra.type) || 'custom',
+    text: String(text).slice(0,200),
+    done: false,
+    minutes: clamp(Number(minutes)||10, 0.5, 120),
+    sun: clamp(Math.round(Number(sun)||30), 1, 500)
+  };
+  if(extra && extra.chars) task.chars = extra.chars.slice(0, 300);
+  if(extra && extra.words) task.words = extra.words.slice(0, 300);
+  return task;
+}
+
+function makeDay(){ return { chinese: [], math: [] }; }
+
+function normalizeDay(day){
+  const out = makeDay();
+  ['chinese','math'].forEach(k => {
+    if(!Array.isArray(day[k])) return;
+    out[k] = day[k].map(t => {
+      const type = t.type || 'custom';
+      const item = {
+        id: t.id || newId(),
+        type,
+        text: String(t.text || '作业').slice(0,200),
+        done: !!t.done,
+        minutes: clamp(Number(t.minutes)||10, 0.5, 120),
+        sun: clamp(Math.round(Number(t.sun)||30), 1, 500)
+      };
+      if(type === 'preview' && Array.isArray(t.chars)) item.chars = t.chars.slice(0, 300);
+      if((type === 'wordgroup' || type === 'copy') && Array.isArray(t.words)) item.words = t.words.slice(0, 300);
+      return item;
+    });
+  });
+  return out;
+}
+
+function loadLocalState(){
+  let s = null;
+  try{ s = JSON.parse(localStorage.getItem(STORAGE_KEY)); }catch(e){ s = null; }
+  if(!s){
+    try{ s = JSON.parse(localStorage.getItem('study_board_v8')); }catch(e){ s = null; }
+  }
+  if(s && s.subjects && !s.days){
+    const oldDate = s.date || todayStr();
+    s = {
+      days: { [oldDate]: normalizeDay(s.subjects) },
+      date: oldDate,
+      sun: s.sun || 0,
+      checkins: s.dates || [],
+      settings: s.settings,
+      lessonLibrary: s.lessonLibrary
+    };
+  }
+  if(!s || !s.days){
+    s = {
+      days: {},
+      date: todayStr(),
+      sun: 0,
+      checkins: [],
+      settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
+      lessonLibrary: JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY))
+    };
+    s.days[todayStr()] = normalizeDay(DEFAULT_DATA);
+  }
+  const newDays = {};
+  Object.keys(s.days).forEach(k => { newDays[k] = normalizeDay(s.days[k]); });
+  s.days = newDays;
+  if(!s.days[s.date]) s.days[s.date] = makeDay();
+  if(!Array.isArray(s.checkins)) s.checkins = [];
+  if(typeof s.sun !== 'number') s.sun = 0;
+  s.settings = normalizeSettings(s.settings);
+  s.lessonLibrary = normalizeLessonLibrary(s.lessonLibrary);
+  if(!Object.keys(s.lessonLibrary).length){
+    s.lessonLibrary = JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY));
+  }
+  return s;
+}
+
+function attachSubjectsProxy(s){
+  Object.defineProperty(s, 'subjects', {
+    get(){
+      if(!s.days[s.date]) s.days[s.date] = makeDay();
+      return s.days[s.date];
+    },
+    configurable: true,
+    enumerable: false
+  });
+  return s;
+}
+
+function saveLocalState(){
+  pruneDays();
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+}
+function pruneDays(){
+  const keys = Object.keys(state.days).sort();
+  if(keys.length > MAX_DAYS_KEPT){
+    keys.slice(0, keys.length - MAX_DAYS_KEPT).forEach(k => delete state.days[k]);
+  }
+}
+
+function allTasks(){ return [...state.subjects.chinese, ...state.subjects.math]; }
+function findTask(id){
+  for(const k of ['chinese','math']){
+    const t = state.subjects[k].find(x => x.id === id);
+    if(t) return {task:t, subject:k};
+  }
+  return null;
+}
+
+/* ============================================================
+   云端同步
+============================================================ */
+function uploadToCloud(){
+  if(isRemoteUpdate || !dataRef) return;
+  const payload = {
+    days: state.days,
+    date: state.date,
+    settings: state.settings,
+    sun: state.sun,
+    checkins: state.checkins,
+    lessonLibrary: state.lessonLibrary,
+    updatedAt: Date.now()
+  };
+  try{ set(dataRef, payload).catch(e => console.warn('云端上传失败', e)); }catch(e){}
+  updateSyncInfo();
+}
+
+function applyRemoteState(remote){
+  if(!remote || !remote.days) return;
+  isRemoteUpdate = true;
+  const newDays = {};
+  Object.keys(remote.days).forEach(k => { newDays[k] = normalizeDay(remote.days[k]); });
+  state.days = newDays;
+  if(!state.days[state.date]) state.days[state.date] = makeDay();
+  if(remote.settings) state.settings = normalizeSettings(remote.settings);
+  if(typeof remote.sun === 'number') state.sun = remote.sun;
+  if(Array.isArray(remote.checkins)) state.checkins = remote.checkins;
+  if(remote.lessonLibrary) state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary);
+  saveLocalState();
+  renderStats(); renderBoard(); refreshAllCards();
+  updateDogBar(); updateMainBtn(); updateDateText();
+  if(isAdminMode) renderAdminPanel();
+  isRemoteUpdate = false;
+  showSyncStatus('☁️ 已从云端更新', 'online');
+}
+
+let cloudListener = null;
+function startCloudSync(){
+  if(!dataRef || cloudListener) return;
+  cloudListener = onValue(dataRef, snapshot => {
+    const remote = snapshot.val();
+    if(!remote) return;
+    applyRemoteState(remote);
+  }, err => {
+    console.warn('云端监听失败', err);
+    showSyncStatus('⚠️ 云端连接失败', 'offline');
+  });
+}
+
+let syncInfoTimer = null;
+function updateSyncInfo(){
+  const el = document.getElementById('adminSyncInfo');
+  if(el) el.textContent = '最后同步：' + new Date().toLocaleTimeString();
+}
+function showSyncStatus(text, cls){
+  const el = document.getElementById('syncStatus');
+  if(!el) return;
+  el.textContent = text;
+  el.className = 'sync-status show ' + cls;
+  clearTimeout(syncInfoTimer);
+  syncInfoTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+/* ============================================================
+   音效
+============================================================ */
+let audioCtx = null;
+function ensureAudio(){
+  if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){audioCtx=null;} }
+  if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function tone(freq,start,dur,type,vol){
+  if(!audioCtx) return;
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = type||'sine';
+  o.frequency.setValueAtTime(freq,start);
+  g.gain.setValueAtTime(0.0001,start);
+  g.gain.linearRampToValueAtTime(vol||0.12,start+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001,start+dur);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(start); o.stop(start+dur+0.02);
+}
+function playSound(kind){
+  if(!ensureAudio()) return;
+  const now = audioCtx.currentTime;
+  if(kind==='hit'){
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.type='square'; o.frequency.setValueAtTime(340,now);
+    o.frequency.exponentialRampToValueAtTime(70,now+0.18);
+    g.gain.setValueAtTime(0.10,now);
+    g.gain.exponentialRampToValueAtTime(0.0001,now+0.2);
+    o.connect(g);g.connect(audioCtx.destination);
+    o.start(now);o.stop(now+0.22);
+  }
+  else if(kind==='plant'){[523.25,659.25,783.99].forEach((f,i)=>tone(f,now+i*0.075,0.22,'triangle',0.10));}
+  else if(kind==='start'){[660,880].forEach((f,i)=>tone(f,now+i*0.08,0.18,'triangle',0.09));}
+  else if(kind==='pause'){[520,400].forEach((f,i)=>tone(f,now+i*0.10,0.20,'sine',0.09));}
+  else if(kind==='chomp'){
+    tone(320,now,0.07,'square',0.16); tone(180,now+0.06,0.09,'square',0.18);
+    tone(90,now+0.13,0.16,'sawtooth',0.16); tone(60,now+0.15,0.20,'sine',0.10);
+  }
+  else if(kind==='fail'){tone(300,now,0.16,'sine',0.08);tone(200,now+0.16,0.26,'sine',0.08);}
+  else if(kind==='win'){[523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>tone(f,now+i*0.11,0.4,'triangle',0.12));tone(1568,now+0.6,0.8,'sine',0.08);}
+}
+
+/* ============================================================
+   DOM
+============================================================ */
+const $ = id => document.getElementById(id);
+const appRootEl = $('appRoot');
+const chineseListEl = $('chineseList');
+const mathListEl    = $('mathList');
+const chineseCountEl= $('chineseCount');
+const mathCountEl   = $('mathCount');
+const chineseTabCountEl = $('chineseTabCount');
+const mathTabCountEl    = $('mathTabCount');
+const sunCountEl = $('sunCount');
+const sunPillEl  = $('sunPill');
+const streakEl   = $('streakCount');
+const dateTextEl = $('dateText');
+const pwdModalEl = $('pwdModal');
+const pwdTitle   = $('pwdTitle');
+const pwdSub     = $('pwdSub');
+const pwdInput   = $('pwdInput');
+const pwdTip     = $('pwdTip');
+const pauseDurModalEl = $('pauseDurationModal');
+const trackEl    = $('track');
+const trackFill  = $('trackFill');
+const trackTime  = $('trackTime');
+const dogWrap    = $('dogWrap');
+const dogEl      = $('dog');
+const sunAnchor  = $('sunAnchor');
+const timerHint  = $('timerHint');
+const mainBtn    = $('mainBtn');
+const calBtn     = $('calBtn');
+const calModal   = $('calModal');
+const calGrid    = $('calGrid');
+const calTitle   = $('calTitle');
+const adminBar = $('adminBar');
+const adminPanel = $('adminPanel');
+const libEditModal = $('libEditModal');
+const taskEditModal = $('taskEditModal');
+const uploadSyncModal = $('uploadSyncModal');
+
+/* ============================================================
+   Toast
+============================================================ */
+let toastTimer = null;
+function toast(msg, ms){
+  let el = document.querySelector('.toast');
+  if(!el){ el = document.createElement('div'); el.className='toast'; document.body.appendChild(el); }
+  el.innerHTML = msg;
+  requestAnimationFrame(() => el.classList.add('show'));
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), ms||2800);
+}
+
+/* ============================================================
+   统计 & 日期文案
+============================================================ */
+function calcStreak(){
+  const set = new Set(state.checkins);
+  const d = new Date();
+  if(!set.has(fmtDate(d))) d.setDate(d.getDate()-1);
+  let n = 0;
+  while(set.has(fmtDate(d))){ n++; d.setDate(d.getDate()-1); }
+  return n;
+}
+function renderStats(){
+  sunCountEl.textContent = state.sun;
+  streakEl.textContent = calcStreak();
+  sunPillEl.classList.toggle('negative', state.sun < 0);
+}
+function updateDateText(){
+  const isToday = state.date === todayStr();
+  dateTextEl.textContent = dateLabel(state.date);
+  calBtn.classList.toggle('has-other', !isToday);
+}
+
+/* ============================================================
+   ✅ 米字格渲染
+============================================================ */
+function miziSvg(){
+  return `<svg class="mizi-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <line x1="0" y1="50" x2="100" y2="50"/>
+    <line x1="50" y1="0" x2="50" y2="100"/>
+    <line x1="0" y1="0" x2="100" y2="100"/>
+    <line x1="100" y1="0" x2="0" y2="100"/>
+  </svg>`;
+}
+function renderCharCard(char){
+  const info = HZ_INFO[char] || ['—','—'];
+  const py = getPinyin(char);
+  return `<div class="char-card">
+    <div class="mizi" data-char="${escapeAttr(char)}" title="点击查看笔顺">
+      ${miziSvg()}
+      <span class="mizi-char">${escapeHtml(char)}</span>
+    </div>
+    <div class="char-pinyin">${py ? escapeHtml(py) : '&nbsp;'}</div>
+    <div class="char-info">部首：${escapeHtml(info[0])}</div>
+    <div class="char-info">结构：${escapeHtml(info[1])}</div>
+  </div>`;
+}
+function renderWordGroup(word){
+  const chars = [...word].filter(c => /[\u4e00-\u9fa5]/.test(c));
+  if(!chars.length) return '';
+  return `<div class="word-group">${chars.map(c => `
+    <div class="mizi" data-char="${escapeAttr(c)}" title="点击查看笔顺">
+      ${miziSvg()}
+      <span class="mizi-char">${escapeHtml(c)}</span>
+    </div>
+  `).join('')}</div>`;
+}
+function bindMiziClicks(container){
+  container.querySelectorAll('.mizi[data-char]').forEach(el => {
+    el.addEventListener('click', e => { e.stopPropagation(); showStroke(el.dataset.char); });
+  });
+}
+
+/* ============================================================
+   作业板
+============================================================ */
+function renderBoard(){
+  cardRefs = {};
+  renderSubjectCards('chinese', chineseListEl);
+  renderSubjectCards('math', mathListEl);
+  chineseCountEl.textContent = state.subjects.chinese.length;
+  mathCountEl.textContent    = state.subjects.math.length;
+  chineseTabCountEl.textContent = state.subjects.chinese.filter(t=>!t.done).length;
+  mathTabCountEl.textContent    = state.subjects.math.filter(t=>!t.done).length;
+}
+function renderSubjectCards(subject, listEl){
+  listEl.innerHTML = '';
+  const tasks = state.subjects[subject];
+  if(!tasks.length){
+    const tip = document.createElement('div');
+    tip.className = 'empty-tip';
+    tip.innerHTML = '还没有作业<br>请家长在 🔑 家长入口 里添加';
+    listEl.appendChild(tip);
+    return;
+  }
+  tasks.forEach(task => {
+    const card = document.createElement('div');
+    card.className = 'task-card' + (task.done?' done':'');
+
+    const top = document.createElement('div');
+    top.className = 'card-top';
+
+    const cb = document.createElement('div');
+    cb.className = 'checkbox';
+    cb.innerHTML = '<span class="tick">✓</span>';
+    cb.addEventListener('click', e => { e.stopPropagation(); if(!task.done) completeTask(task.id); });
+
+    const body = document.createElement('div');
+    body.className = 'card-body';
+
+    const textEl = document.createElement('div');
+    textEl.className = 'task-text';
+    textEl.textContent = task.text;
+
+    const info = document.createElement('div');
+    info.className = 'task-info';
+    const stars = document.createElement('span');
+    stars.className = 'stars-mini';
+    const st = sunToStars(task.sun);
+    stars.textContent = '★'.repeat(st)+'☆'.repeat(5-st);
+    const minEl = document.createElement('span');
+    minEl.className = 't-min';
+    minEl.textContent = '⏱'+task.minutes+'分钟';
+    const sunEl = document.createElement('span');
+    sunEl.className = 't-sun';
+    sunEl.textContent = '☀️'+task.sun;
+    const timeEl = document.createElement('span');
+    timeEl.className = 't-time';
+    timeEl.textContent = task.done ? '✓ 已完成' : (task.minutes+'分钟');
+    info.appendChild(stars); info.appendChild(minEl); info.appendChild(sunEl); info.appendChild(timeEl);
+
+    body.appendChild(textEl); body.appendChild(info);
+    top.appendChild(cb); top.appendChild(body);
+    card.appendChild(top);
+
+    if(task.type === 'preview' && Array.isArray(task.chars) && task.chars.length){
+      const grid = document.createElement('div');
+      grid.className = 'char-grid';
+      grid.innerHTML = task.chars.map(c => renderCharCard(c)).join('');
+      card.appendChild(grid);
+      bindMiziClicks(grid);
+    } else if((task.type === 'wordgroup' || task.type === 'copy')
+              && Array.isArray(task.words) && task.words.length){
+      const grid = document.createElement('div');
+      grid.className = 'char-grid';
+      grid.innerHTML = task.words.map(w => renderWordGroup(w)).join('');
+      card.appendChild(grid);
+      bindMiziClicks(grid);
+    }
+
+    const prog = document.createElement('div');
+    prog.className = 'card-progress';
+    card.appendChild(prog);
+
+    listEl.appendChild(card);
+    cardRefs[task.id] = {el:card, timeEl, progressEl:prog};
+  });
+  tasks.forEach(t => updateCardVisual(t.id));
+}
+
+function updateCardVisual(id){
+  const ref = cardRefs[id];
+  if(!ref) return;
+  const info = findTask(id);
+  if(!info) return;
+  const task = info.task;
+  const rt = runtimeMap[id];
+  if(task.done){
+    ref.el.className = 'task-card done';
+    ref.timeEl.className = 't-time done-t';
+    ref.timeEl.textContent = '✓ 已完成';
+    ref.progressEl.className = 'card-progress';
+    ref.progressEl.style.width = '100%';
+    return;
+  }
+  const isActive = activeId === id;
+  let cls = 'task-card';
+  if(isActive){
+    cls += ' active';
+    if(pauseState.active) cls += ' paused-card';
+    if(rt && rt.holdDogAtEnd) cls += ' chomping-card';
+  }
+  ref.el.className = cls;
+  if(rt && isActive){
+    if(pauseState.active){
+      ref.timeEl.className = 't-time paused';
+      ref.timeEl.textContent = fmtMs(rt.leftMs);
+      const p = rt.totalMs>0 ? 1-rt.leftMs/rt.totalMs : 0;
+      ref.progressEl.className = 'card-progress paused';
+      ref.progressEl.style.width = (clamp(p,0,1)*100)+'%';
+    } else if(rt.holdDogAtEnd){
+      ref.timeEl.className = 't-time chomping';
+      ref.timeEl.textContent = '00:00';
+      ref.progressEl.className = 'card-progress chomping';
+      ref.progressEl.style.width = '100%';
+    } else {
+      ref.timeEl.className = 't-time';
+      ref.timeEl.textContent = fmtMs(rt.leftMs);
+      const p = rt.totalMs>0 ? 1-rt.leftMs/rt.totalMs : 0;
+      ref.progressEl.className = 'card-progress';
+      ref.progressEl.style.width = (clamp(p,0,1)*100)+'%';
+    }
+  } else {
+    ref.timeEl.className = 't-time';
+    ref.timeEl.textContent = task.minutes+'分钟';
+    ref.progressEl.className = 'card-progress';
+    ref.progressEl.style.width = '0%';
+  }
+}
+function refreshAllCards(){ Object.keys(cardRefs).forEach(id => updateCardVisual(id)); }
+
+/* ============================================================
+   倒计时
+============================================================ */
+function ensureRuntime(task){
+  if(!runtimeMap[task.id]){
+    const ms = clamp(Number(task.minutes)||10,0.5,120)*60000;
+    runtimeMap[task.id] = {totalMs:ms,leftMs:ms,rounds:0,holdDogAtEnd:false};
+  }
+  return runtimeMap[task.id];
+}
+function cleanupRuntime(){
+  const ids = new Set(allTasks().map(t=>t.id));
+  for(const id in runtimeMap){ if(!ids.has(id)) delete runtimeMap[id]; }
+  if(activeId && !ids.has(activeId)){ stopTick(); activeId = null; }
+}
+function setDogProgress(p){
+  const trackW = trackEl.clientWidth || 300;
+  const dogW = dogWrap.offsetWidth || 42;
+  const startX = Math.max(0, trackW-dogW-6);
+  const endX = 2;
+  const t = clamp(p,0,1);
+  dogWrap.style.transform = `translateX(${startX+(endX-startX)*t}px)`;
+}
+function updateDogBar(){
+  if(!activeId){
+    trackEl.className='track';
+    setDogProgress(0);
+    trackFill.className='track-fill';
+    trackFill.style.width='0%';
+    trackTime.className='track-time';
+    trackTime.textContent='--:--';
+    timerHint.innerHTML = '点击右侧「<span class="highlight">▶ 开始</span>」启动倒计时';
+    return;
+  }
+  const info = findTask(activeId);
+  const rt = runtimeMap[activeId];
+  if(!info || !rt){ activeId=null; updateDogBar(); return; }
+  const name = info.task.text;
+  if(pauseState.active){
+    trackEl.className = 'track paused';
+    const p = rt.totalMs>0 ? 1-rt.leftMs/rt.totalMs : 0;
+    setDogProgress(p);
+    trackFill.className = 'track-fill';
+    trackFill.style.width = (p*100)+'%';
+    trackTime.className = 'track-time paused';
+    trackTime.textContent = fmtMs(pauseState.leftMs);
+    timerHint.innerHTML = '⏸ <span class="paused-t">暂停中</span>：'+escapeHtml(name)+' · 剩余 '+fmtMs(pauseState.leftMs)+' 后自动继续';
+    return;
+  }
+  if(rt.holdDogAtEnd){
+    trackEl.className = 'track chomping';
+    setDogProgress(1);
+    trackFill.className = 'track-fill';
+    trackFill.style.width = '100%';
+    trackTime.className = 'track-time chomping';
+    trackTime.textContent = '00:00';
+    timerHint.innerHTML = '😋 <span class="chomp-t">正在扣阳光…</span>';
+    return;
+  }
+  trackEl.className = 'track';
+  const p = rt.totalMs>0 ? 1-rt.leftMs/rt.totalMs : 0;
+  setDogProgress(p);
+  trackFill.className = 'track-fill';
+  trackFill.style.width = (p*100)+'%';
+  trackTime.className = 'track-time';
+  trackTime.textContent = fmtMs(rt.leftMs);
+  const roundText = rt.rounds>0 ? ' · 已扣 '+rt.rounds+' 颗' : '';
+  if(running){ timerHint.innerHTML = '⏳ 正在进行：<span class="highlight">'+escapeHtml(name)+'</span>'+roundText; }
+  else {
+    if(rt.leftMs < rt.totalMs && rt.leftMs > 0){
+      timerHint.innerHTML = '⏸ 已暂停：<span class="highlight">'+escapeHtml(name)+'</span>（点「▶ 继续」恢复）';
+    } else {
+      timerHint.innerHTML = '待开始：<span class="highlight">'+escapeHtml(name)+'</span>（点「▶ 开始」）';
+    }
+  }
+}
+function updateMainBtn(){
+  mainBtn.classList.remove('start','pause','resume');
+  if(!activeId){
+    const first = allTasks().find(t=>!t.done);
+    if(first){ mainBtn.classList.add('start'); mainBtn.textContent='▶ 开始'; mainBtn.disabled=false; }
+    else { mainBtn.classList.add('start'); mainBtn.textContent='🎉 完成'; mainBtn.disabled=true; }
+    return;
+  }
+  const info = findTask(activeId);
+  if(!info || info.task.done){ mainBtn.classList.add('start'); mainBtn.textContent='▶ 开始'; mainBtn.disabled=false; return; }
+  if(pauseState.active){
+    mainBtn.classList.add('resume');
+    mainBtn.textContent = '▶ 继续';
+    mainBtn.disabled = false;
+    return;
+  }
+  if(running){ mainBtn.classList.add('pause'); mainBtn.textContent='⏸ 暂停'; mainBtn.disabled=false; return; }
+  const rt = runtimeMap[activeId];
+  if(rt && rt.leftMs < rt.totalMs && rt.leftMs > 0){ mainBtn.classList.add('resume'); mainBtn.textContent='▶ 继续'; }
+  else { mainBtn.classList.add('start'); mainBtn.textContent='▶ 开始'; }
+  mainBtn.disabled = false;
+}
+function eatSun(count, msg){
+  if(count <= 0) return;
+  state.sun -= count;
+  saveLocalState(); uploadToCloud();
+  renderStats();
+  sunAnchor.classList.add('eaten');
+  dogEl.classList.remove('running');
+  dogEl.classList.add('chomp');
+  playSound('chomp');
+  bumpPill(sunPillEl);
+  flySunAway(count);
+  setTimeout(() => { sunAnchor.classList.remove('eaten'); dogEl.classList.remove('chomp'); }, 650);
+  if(msg) toast(msg, 3200);
+}
+function flySunAway(n){
+  const rect = sunPillEl.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'fly-sun-away';
+  el.textContent = '−'+n+'☀️';
+  el.style.left = (rect.left+rect.width/2-26)+'px';
+  el.style.top  = (rect.top+rect.height/2-12)+'px';
+  document.body.appendChild(el);
+  requestAnimationFrame(() => { el.style.transform='translateY(-56px) scale(1.15)'; el.style.opacity='0'; });
+  setTimeout(() => el.remove(), 850);
+}
+function tick(now){
+  const dt = now - lastTs;
+  lastTs = now;
+  if(pauseState.active){
+    pauseState.leftMs -= dt;
+    if(pauseState.leftMs <= 0){
+      pauseState.leftMs = 0;
+      const shouldResume = pauseState.wasRunning;
+      pauseState.active = false;
+      if(shouldResume && activeId){
+        const info = findTask(activeId);
+        if(info && !info.task.done){
+          running = true;
+          dogEl.classList.remove('paused');
+          dogEl.classList.add('running');
+          playSound('start');
+          toast('⏰ 暂停结束，倒计时自动继续！', 2400);
+        }
+      }
+    }
+  }
+  else if(running && activeId){
+    const rt = runtimeMap[activeId];
+    if(rt && !rt.holdDogAtEnd){
+      rt.leftMs -= dt;
+      if(rt.leftMs <= 0){
+        rt.rounds = (rt.rounds||0)+1;
+        rt.leftMs = rt.totalMs;
+        rt.holdDogAtEnd = true;
+        eatSun(1, '⏰ 第 <b>'+rt.rounds+'</b> 轮结束，任务未完成！<br>扣掉 1 颗阳光 ☀️');
+        const myRound = rt.rounds;
+        setTimeout(() => {
+          if(!activeId || !runtimeMap[activeId]) return;
+          if(runtimeMap[activeId].rounds !== myRound) return;
+          runtimeMap[activeId].holdDogAtEnd = false;
+          if(running){ dogEl.classList.remove('chomp'); dogEl.classList.add('running'); }
+          updateDogBar();
+          if(activeId) updateCardVisual(activeId);
+        }, CHOMP_HOLD_MS);
+      }
+    }
+  }
+  updateDogBar();
+  if(activeId) updateCardVisual(activeId);
+  updateMainBtn();
+  const needsTick = pauseState.active || (running && activeId);
+  if(needsTick) rafId = requestAnimationFrame(tick);
+  else rafId = null;
+}
+function ensureTickRunning(){ if(!rafId){ lastTs = performance.now(); rafId = requestAnimationFrame(tick); } }
+function stopTick(){
+  running=false; pauseState.active=false; pauseState.leftMs=0;
+  cancelAnimationFrame(rafId); rafId=null;
+  dogEl.classList.remove('running','paused','chomp');
+}
+function startTask(id){
+  const info = findTask(id);
+  if(!info || info.task.done) return;
+  if(activeId && activeId !== id && running){ running=false; dogEl.classList.remove('running'); }
+  activeId = id;
+  ensureRuntime(info.task);
+  const rt = runtimeMap[id];
+  if(rt.leftMs <= 0){ rt.leftMs = rt.totalMs; rt.rounds=0; rt.holdDogAtEnd=false; }
+  pauseState.active = false; pauseState.leftMs = 0;
+  running = true;
+  dogEl.classList.remove('paused','chomp');
+  dogEl.classList.add('running');
+  playSound('start');
+  ensureTickRunning();
+  refreshAllCards(); updateDogBar(); updateMainBtn();
+  scrollToCard(id);
+}
+let pwdPurpose = 'pause';
+function requestPause(){
+  if(!activeId || !running) return;
+  pwdPurpose = 'pause';
+  pwdTitle.textContent = '家长验证';
+  pwdSub.textContent = '暂停倒计时需要家长密码';
+  pwdInput.value='';
+  pwdInput.classList.remove('error');
+  pwdTip.textContent=''; pwdTip.classList.remove('err');
+  pwdModalEl.classList.add('show');
+  setTimeout(() => pwdInput.focus(), 120);
+}
+function confirmPassword(){
+  const val = (pwdInput.value||'').trim();
+  if(val !== PARENT_PASSWORD){
+    pwdInput.classList.remove('error');
+    void pwdInput.offsetWidth;
+    pwdInput.classList.add('error');
+    pwdTip.textContent = '密码不正确，请再试一次';
+    pwdTip.classList.add('err');
+    pwdInput.value='';
+    pwdInput.focus();
+    playSound('fail');
+    return;
+  }
+  pwdModalEl.classList.remove('show');
+  if(pwdPurpose === 'pause') pauseDurModalEl.classList.add('show');
+  else if(pwdPurpose === 'admin') enterAdminMode();
+}
+function startPause(minutes){
+  if(!activeId) return;
+  pauseState.active = true;
+  pauseState.totalMs = minutes*60*1000;
+  pauseState.leftMs = pauseState.totalMs;
+  pauseState.wasRunning = running;
+  running = false;
+  pauseDurModalEl.classList.remove('show');
+  dogEl.classList.remove('running','chomp');
+  dogEl.classList.add('paused');
+  playSound('pause');
+  ensureTickRunning();
+  refreshAllCards(); updateDogBar(); updateMainBtn();
+  toast('⏸ 已暂停 <b>'+minutes+' 分钟</b>，到时自动继续', 2800);
+}
+function resumeFromPause(){
+  if(!pauseState.active) return;
+  const wasRunning = pauseState.wasRunning;
+  pauseState.active = false; pauseState.leftMs = 0;
+  dogEl.classList.remove('paused');
+  if(wasRunning && activeId){
+    const info = findTask(activeId);
+    if(info && !info.task.done){
+      running = true;
+      dogEl.classList.add('running');
+      playSound('start');
+      toast('▶ 已恢复倒计时', 2000);
+    }
+  }
+  ensureTickRunning();
+  refreshAllCards(); updateDogBar(); updateMainBtn();
+}
+function onMainBtnClick(){
+  if(pauseState.active){ resumeFromPause(); return; }
+  if(!activeId){
+    const first = allTasks().find(t=>!t.done);
+    if(first){ activeId=first.id; ensureRuntime(first); startTask(first.id); }
+    return;
+  }
+  const info = findTask(activeId);
+  if(!info || info.task.done){
+    const next = allTasks().find(t=>!t.done);
+    if(next){ activeId=next.id; ensureRuntime(next); startTask(next.id); }
+    return;
+  }
+  if(running){ requestPause(); return; }
+  startTask(activeId);
+}
+function completeTask(id){
+  const info = findTask(id);
+  if(!info || info.task.done) return;
+  const task = info.task;
+  if(activeId === id){
+    running=false; pauseState.active=false; pauseState.leftMs=0;
+    dogEl.classList.remove('running','paused','chomp');
+    cancelAnimationFrame(rafId); rafId=null;
+  }
+  const reward = task.sun;
+  task.done = true;
+  state.sun += reward;
+  saveLocalState(); uploadToCloud();
+  const ref = cardRefs[id];
+  if(ref){ flySun(ref.el); playSound('hit'); setTimeout(() => playSound('plant'), 420); }
+  bumpPill(sunPillEl);
+  renderStats();
+  renderBoard();
+  toast('✅ 「'+escapeHtml(task.text)+'」完成！<br>结算 +'+reward+' ☀️', 2400);
+  setTimeout(() => autoStartNext(), 700);
+}
+function autoStartNext(){
+  const next = allTasks().find(t=>!t.done);
+  if(!next){
+    activeId=null; running=false; pauseState.active=false; pauseState.leftMs=0;
+    dogEl.classList.remove('running','paused','chomp');
+    cancelAnimationFrame(rafId); rafId=null;
+    updateDogBar(); updateMainBtn(); refreshAllCards();
+    setTimeout(celebrate, 900);
+    return false;
+  }
+  activeId = next.id;
+  const rt = ensureRuntime(next);
+  rt.leftMs = rt.totalMs; rt.rounds=0; rt.holdDogAtEnd=false;
+  pauseState.active=false; pauseState.leftMs=0;
+  running = true;
+  dogEl.classList.remove('paused','chomp');
+  dogEl.classList.add('running');
+  playSound('start');
+  ensureTickRunning();
+  refreshAllCards(); updateDogBar(); updateMainBtn();
+  scrollToCard(next.id);
+  toast('▶ 自动开始下一条：<b>'+escapeHtml(next.text)+'</b>', 2600);
+  return true;
+}
+function scrollToCard(id){
+  const ref = cardRefs[id];
+  if(ref && ref.el && ref.el.scrollIntoView){
+    try{ ref.el.scrollIntoView({behavior:'smooth', block:'center'}); }catch(e){}
+  }
+}
+function bumpPill(el){
+  el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+  setTimeout(() => el.classList.remove('bump'), 260);
+}
+function flySun(fromEl){
+  const from = fromEl.getBoundingClientRect();
+  const to = sunPillEl.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'fly-sun';
+  el.textContent = '☀️';
+  el.style.left = (from.left+from.width/2-14)+'px';
+  el.style.top  = (from.top+from.height/2-14)+'px';
+  document.body.appendChild(el);
+  const dx = (to.left+to.width/2)-(from.left+from.width/2);
+  const dy = (to.top+to.height/2)-(from.top+from.height/2);
+  requestAnimationFrame(() => {
+    el.style.transform=`translate(${dx}px, ${dy}px) scale(.45)`;
+    el.style.opacity='0.15';
+  });
+  setTimeout(() => el.remove(), 950);
+}
+function celebrate(){
+  if(!state.checkins.includes(state.date)) state.checkins.push(state.date);
+  state.sun += 100;
+  saveLocalState(); uploadToCloud();
+  renderStats();
+  playSound('win');
+  confetti();
+  toast('🎉 全部完成啦！<br>奖励 +100 ☀️', 4200);
+}
+function confetti(){
+  const emojis = ['⭐','☀️','✨','🎉','🌈','💚','🌟','🍀'];
+  for(let i=0;i<28;i++){
+    const el = document.createElement('div');
+    el.className='confetti';
+    el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    el.style.left = (Math.random()*96)+'vw';
+    el.style.fontSize = (16+Math.random()*20)+'px';
+    el.style.animationDelay = (Math.random()*0.7)+'s';
+    el.style.animationDuration = (2.2+Math.random()*1.2)+'s';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 4200);
+  }
+}
+
+/* ============================================================
+   学科切换
+============================================================ */
+function switchSubject(subject){
+  currentSubject = subject;
+  document.querySelectorAll('.subject-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === subject);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    p.classList.toggle('active', p.id === 'panel-' + subject);
+  });
+  appRootEl.classList.toggle('theme-math', subject === 'math');
+}
+
+/* ============================================================
+   ✅ 日期切换（每天的任务单独保存）
+============================================================ */
+function switchDate(dateStr){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return;
+  stopTick();
+  activeId = null;
+  runtimeMap = {};
+  state.date = dateStr;
+  if(!state.days[state.date]) state.days[state.date] = makeDay();
+  saveLocalState(); uploadToCloud();
+  updateDateText();
+  renderBoard(); renderStats();
+  refreshAllCards(); updateDogBar(); updateMainBtn();
+  if(isAdminMode) renderAdminPanel();
+  const isToday = dateStr === todayStr();
+  toast(isToday ? '📅 已切换到今天' : '📅 已切换到 ' + dateLabel(dateStr).replace('今天 · ','').replace('昨天 · ',''), 2200);
+}
+
+/* ============================================================
+   日历
+============================================================ */
+let calYear = 0, calMonth = 0;
+
+function openCalendar(){
+  const d = new Date(state.date + 'T00:00:00');
+  calYear = d.getFullYear();
+  calMonth = d.getMonth();
+  renderCalendar();
+  calModal.classList.add('show');
+}
+function renderCalendar(){
+  calTitle.textContent = `${calYear}年${calMonth+1}月`;
+  calGrid.innerHTML = '';
+  const firstDay = new Date(calYear, calMonth, 1);
+  const startWeek = firstDay.getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const prevMonthDays = new Date(calYear, calMonth, 0).getDate();
+  const today = todayStr();
+
+  for(let i = startWeek - 1; i >= 0; i--){
+    const cell = document.createElement('div');
+    cell.className = 'cal-day other-month';
+    cell.textContent = prevMonthDays - i;
+    calGrid.appendChild(cell);
+  }
+  for(let d = 1; d <= daysInMonth; d++){
+    const dateStr = `${calYear}-${pad2(calMonth+1)}-${pad2(d)}`;
+    const cell = document.createElement('div');
+    cell.className = 'cal-day';
+    cell.textContent = d;
+    if(dateStr === today) cell.classList.add('today');
+    if(dateStr === state.date) cell.classList.add('selected');
+
+    const day = state.days[dateStr];
+    if(day){
+      const all = [...(day.chinese||[]), ...(day.math||[])];
+      if(all.length > 0){
+        const done = all.filter(t => t.done).length;
+        const mark = document.createElement('span');
+        mark.className = 'cal-mark' + (done === all.length ? ' done' : '');
+        cell.appendChild(mark);
+      }
+    }
+    cell.addEventListener('click', () => {
+      switchDate(dateStr);
+      calModal.classList.remove('show');
+    });
+    calGrid.appendChild(cell);
+  }
+  const totalCells = startWeek + daysInMonth;
+  const remain = (7 - totalCells % 7) % 7;
+  for(let i = 1; i <= remain; i++){
+    const cell = document.createElement('div');
+    cell.className = 'cal-day other-month';
+    cell.textContent = i;
+    calGrid.appendChild(cell);
+  }
+}
+calBtn.addEventListener('click', openCalendar);
+$('calPrev').addEventListener('click', () => {
+  calMonth--; if(calMonth < 0){ calMonth = 11; calYear--; }
+  renderCalendar();
+});
+$('calNext').addEventListener('click', () => {
+  calMonth++; if(calMonth > 11){ calMonth = 0; calYear++; }
+  renderCalendar();
+});
+$('calTodayBtn').addEventListener('click', () => {
+  switchDate(todayStr());
+  calModal.classList.remove('show');
+});
+$('calCloseBtn').addEventListener('click', () => calModal.classList.remove('show'));
+calModal.addEventListener('click', e => { if(e.target === calModal) calModal.classList.remove('show'); });
+
+/* ============================================================
+   ✅ 笔顺弹窗
+============================================================ */
+const strokeModal = $('strokeModal');
+const strokeStage = $('strokeStage');
+const strokeCharBig = $('strokeCharBig');
+const strokePinyinEl = $('strokePinyinEl');
+const strokeMetaEl = $('strokeMetaEl');
+let lastStrokeChar = '';
+
+function showStroke(char){
+  if(!char || !/[\u4e00-\u9fa5]/.test(char)) return;
+  lastStrokeChar = char;
+  strokeCharBig.textContent = char;
+  const py = getPinyin(char);
+  strokePinyinEl.textContent = py || '';
+  const info = HZ_INFO[char] || ['—','—'];
+  strokeMetaEl.textContent = `部首：${info[0]} · 结构：${info[1]}`;
+  strokeStage.innerHTML = '';
+  strokeModal.classList.add('show');
+  setTimeout(() => playStroke(char), 60);
+}
+function playStroke(char){
+  strokeStage.innerHTML = '';
+  if(!window.HanziWriter){
+    strokeStage.innerHTML = `<div style="font-size:130px;line-height:1;color:#2E7D32;
+      font-family:'Kaiti SC','KaiTi','STKaiti','楷体',serif">${escapeHtml(char)}</div>`;
+    return;
+  }
+  try{
+    const size = Math.min(200, strokeStage.clientWidth || 200);
+    currentWriter = HanziWriter.create(strokeStage, char, {
+      width: size, height: size, padding: 6,
+      showOutline: true, showCharacter: false,
+      strokeColor: '#2E7D32', outlineColor: '#A5D6A7', radicalColor: '#1B5E20',
+      strokeAnimationSpeed: 1, delayBetweenStrokes: 220,
+      charDataLoader: (c, onComplete, onError) => {
+        fetch(`https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0.1/${c}.json`)
+          .then(r => { if(!r.ok) throw new Error('no data'); return r.json(); })
+          .then(onComplete)
+          .catch(err => {
+            strokeStage.innerHTML = `<div style="font-size:130px;line-height:1;color:#2E7D32;
+              font-family:'Kaiti SC','KaiTi','STKaiti','楷体',serif">${escapeHtml(c)}</div>`;
+            if(onError) onError(err);
+          });
+      }
+    });
+    currentWriter.animateCharacter();
+  }catch(e){
+    console.warn('笔顺渲染失败', e);
+    strokeStage.innerHTML = `<div style="font-size:130px;line-height:1.2;color:#2E7D32;
+      font-family:'Kaiti SC','KaiTi','STKaiti','楷体',serif">${escapeHtml(char)}</div>`;
+  }
+}
+$('strokeReplay').addEventListener('click', () => { if(lastStrokeChar) playStroke(lastStrokeChar); });
+$('strokeClose').addEventListener('click', () => {
+  strokeModal.classList.remove('show'); strokeStage.innerHTML = ''; currentWriter = null;
+});
+strokeModal.addEventListener('click', e => {
+  if(e.target === strokeModal){
+    strokeModal.classList.remove('show'); strokeStage.innerHTML = ''; currentWriter = null;
+  }
+});
+
+/* ============================================================
+   密码 & 管理视图
+============================================================ */
+$('pwdConfirm').addEventListener('click', confirmPassword);
+$('pwdCancel').addEventListener('click', () => pwdModalEl.classList.remove('show'));
+pwdInput.addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); confirmPassword(); } });
+pwdInput.addEventListener('input', () => { pwdInput.classList.remove('error'); pwdTip.textContent=''; pwdTip.classList.remove('err'); });
+pwdModalEl.addEventListener('click', e => { if(e.target===pwdModalEl) pwdModalEl.classList.remove('show'); });
+
+$('adminEntryBtn').addEventListener('click', () => {
+  pwdPurpose = 'admin';
+  pwdTitle.textContent = '🔑 家长验证';
+  pwdSub.textContent = '请输入家长密码进入管理面板';
+  pwdInput.value='';
+  pwdInput.classList.remove('error');
+  pwdTip.textContent=''; pwdTip.classList.remove('err');
+  pwdModalEl.classList.add('show');
+  setTimeout(() => pwdInput.focus(), 120);
+});
+
+function enterAdminMode(){
+  isAdminMode = true;
+  adminBar.classList.add('show');
+  adminPanel.classList.add('show');
+  document.body.style.paddingBottom = '70px';
+  renderAdminPanel();
+  toast('🔓 已进入家长管理模式', 2500);
+}
+function exitAdminMode(){
+  isAdminMode = false;
+  adminBar.classList.remove('show');
+  adminPanel.classList.remove('show');
+  document.body.style.paddingBottom = '';
+}
+$('adminExitBtn').addEventListener('click', exitAdminMode);
+$('adminCloseBtn').addEventListener('click', exitAdminMode);
+
+function renderAdminPanel(){
+  if(!isAdminMode) return;
+  const all = allTasks();
+  const doneCount = all.filter(t => t.done).length;
+  $('adminStatSun').textContent = state.sun;
+  $('adminStatDone').textContent = doneCount + '/' + all.length;
+  $('adminStatStreak').textContent = calcStreak();
+  $('adminTodayBadge').textContent = state.date;
+  $('adminSyncStatus').textContent = '☁️ 已连接云端';
+  const dateInput = $('adminDateInput');
+  if(dateInput) dateInput.value = state.date;
+
+  const st = state.settings || DEFAULT_SETTINGS;
+  UNIT_FIELDS.forEach(([t, minId, sunId]) => {
+    const u = (st.unit && st.unit[t]) || DEFAULT_SETTINGS.unit[t];
+    const minEl = document.getElementById(minId);
+    const sunEl = document.getElementById(sunId);
+    if(minEl) minEl.value = u.min;
+    if(sunEl) sunEl.value = u.sun;
+  });
+
+  renderAdminTaskList('chinese', 'adminChineseList', 'adminChineseBadge');
+  renderAdminTaskList('math', 'adminMathList', 'adminMathBadge');
+  renderLessonLibrary();
+  populateLessonSelects();
+}
+
+function renderAdminTaskList(subject, listId, badgeId){
+  const list = document.getElementById(listId);
+  const badge = document.getElementById(badgeId);
+  const tasks = state.subjects[subject];
+  badge.textContent = tasks.filter(t => !t.done).length + ' 待完成';
+  if(!tasks.length){
+    list.innerHTML = '<div class="admin-empty">暂无任务，在下方添加</div>';
+    return;
+  }
+  list.innerHTML = tasks.map(t => `
+    <div class="admin-task-row" data-id="${escapeAttr(t.id)}" title="双击编辑">
+      <div class="at-check ${t.done?'done':''}" data-toggle="${escapeAttr(t.id)}">✓</div>
+      <div class="at-text ${t.done?'done':''}">${escapeHtml(t.text)}</div>
+      <div class="at-meta">⏱${t.minutes}分钟 · ☀️${t.sun}</div>
+      <button class="at-del" data-del="${escapeAttr(t.id)}" data-subject="${subject}">删除</button>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('[data-toggle]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.toggle;
+      const info = findTask(id);
+      if(!info) return;
+      info.task.done = !info.task.done;
+      if(info.task.done) state.sun += info.task.sun;
+      else state.sun -= info.task.sun;
+      saveLocalState(); uploadToCloud();
+      renderStats(); renderBoard(); refreshAllCards();
+      renderAdminPanel();
+    });
+  });
+  list.querySelectorAll('[data-del]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = el.dataset.del;
+      const subj = el.dataset.subject;
+      state.subjects[subj] = state.subjects[subj].filter(t => t.id !== id);
+      if(activeId === id){ stopTick(); activeId = null; }
+      cleanupRuntime();
+      saveLocalState(); uploadToCloud();
+      renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
+      renderAdminPanel();
+    });
+  });
+
+  /* ✅ 双击任务条目 → 打开编辑弹窗 */
+  list.querySelectorAll('.admin-task-row').forEach(row => {
+    row.addEventListener('dblclick', (e) => {
+      if(e.target.closest('[data-toggle],[data-del]')) return;
+      openTaskEdit(row.dataset.id);
+    });
+  });
+}
+
+/* ✅ 语文单位时间/阳光设置 */
+const UNIT_FIELDS = [
+  ['preview','unitPreviewMin','unitPreviewSun'],
+  ['wordgroup','unitWordgroupMin','unitWordgroupSun'],
+  ['copy','unitCopyMin','unitCopySun']
+];
+UNIT_FIELDS.forEach(([t, minId, sunId]) => {
+  const minEl = document.getElementById(minId);
+  const sunEl = document.getElementById(sunId);
+  if(!minEl || !sunEl) return;
+  const save = () => {
+    const d = DEFAULT_SETTINGS.unit[t];
+    const m = parseFloat(minEl.value);
+    const s = parseFloat(sunEl.value);
+    state.settings.unit[t] = {
+      min: clamp(isFinite(m) && m > 0 ? m : d.min, 0.5, 20),
+      sun: clamp(isFinite(s) && s > 0 ? s : d.sun, 0.5, 50)
+    };
+    minEl.value = state.settings.unit[t].min;
+    sunEl.value = state.settings.unit[t].sun;
+    saveLocalState(); uploadToCloud();
+  };
+  minEl.addEventListener('change', save);
+  sunEl.addEventListener('change', save);
+});
+
+/* ============================================================
+   ✅ 课文库管理（会写字 / 会识字 / 抄写词语）
+============================================================ */
+function renderLessonLibrary(){
+  const list = $('adminLibList');
+  const badge = $('adminLibBadge');
+  const lib = state.lessonLibrary || {};
+  const keys = Object.keys(lib).sort(lessonSort);
+  if(badge) badge.textContent = keys.length + ' 条';
+  if(!list) return;
+  if(!keys.length){
+    list.innerHTML = '<div class="admin-empty">还没有课文库，点右上角「📤 上传写字表/识字表」自动生成</div>';
+    return;
+  }
+  const preview = s => (s && String(s).trim()) ? String(s).slice(0,90) : '（无）';
+  list.innerHTML = keys.map(name => {
+    const item = lib[name] || {};
+    return `<div class="lib-row" data-lib-edit="${escapeAttr(name)}" title="双击编辑">
+      <div class="lib-lesson">📖 ${escapeHtml(name)}</div>
+      <div class="lib-info">
+        <div><b>会写字：</b>${escapeHtml(preview(item.chars))}</div>
+        <div><b>会识字：</b>${escapeHtml(preview(item.wordgroups))}</div>
+        <div><b>抄写词语：</b>${escapeHtml(preview(item.words))}</div>
+      </div>
+      <button class="lib-del" data-lib-del="${escapeAttr(name)}">删除</button>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('[data-lib-del]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const name = el.dataset.libDel;
+      if(!confirm('确定要删除课文「'+name+'」吗？')) return;
+      delete state.lessonLibrary[name];
+      saveLocalState(); uploadToCloud();
+      renderLessonLibrary(); populateLessonSelects();
+      toast('已删除课文库条目');
+    });
+  });
+
+  /* ✅ 双击课文库条目 → 打开编辑弹窗 */
+  list.querySelectorAll('[data-lib-edit]').forEach(el => {
+    el.addEventListener('dblclick', () => openLibEdit(el.dataset.libEdit));
+  });
+}
+
+/* 课文名排序：阅读1、阅读2…、阅读语文园地X、识字1… */
+function lessonSort(a, b){
+  const parse = s => {
+    const m = s.match(/^(阅读|识字)(.*)$/);
+    if(!m) return [2, s, 0];
+    const secRank = m[1] === '阅读' ? 0 : 1;
+    let rest = m[2];
+    if(rest.startsWith('语文园地')) return [secRank, 'zz', 0];
+    const n = parseInt(rest, 10);
+    return [secRank, 'a', isFinite(n) ? n : 9999];
+  };
+  const pa = parse(a), pb = parse(b);
+  if(pa[0] !== pb[0]) return pa[0] - pb[0];
+  if(pa[1] !== pb[1]) return pa[1] < pb[1] ? -1 : 1;
+  return pa[2] - pb[2];
+}
+
+function populateLessonSelects(){
+  const lib = state.lessonLibrary || {};
+  const keys = Object.keys(lib).sort(lessonSort);
+  const fill = (sel, placeholder) => {
+    if(!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '';
+    const opt0 = document.createElement('option');
+    opt0.value = ''; opt0.textContent = placeholder;
+    sel.appendChild(opt0);
+    keys.forEach(name => {
+      const o = document.createElement('option');
+      o.value = name; o.textContent = name;
+      sel.appendChild(o);
+    });
+    if(cur && keys.includes(cur)) sel.value = cur;
+  };
+  fill($('adminPreviewLessonSelect'),    '— 选择课文 —');
+  fill($('adminWordgroupLessonSelect'),  '— 选择课文 —');
+  fill($('adminCopyLessonSelect'),       '— 选择课文 —');
+  try{
+    renderLessonHint('preview'); renderLessonHint('wordgroup'); renderLessonHint('copy');
+  }catch(e){}
+}
+
+/* ✅ 课文库：添加 */
+$('adminLibAddBtn').addEventListener('click', () => {
+  const nameEl = $('adminLibLesson');
+  const charsEl = $('adminLibChars');
+  const wgEl = $('adminLibWordgroups');
+  const wordsEl = $('adminLibWords');
+  const name = nameEl.value.trim().slice(0,60);
+  if(!name){ toast('请输入课文名'); return; }
+  const chars = charsEl.value.trim().slice(0,1200);
+  const wordgroups = wgEl.value.trim().slice(0,1200);
+  const words = wordsEl.value.trim().slice(0,1200);
+  if(!chars && !wordgroups && !words){ toast('会写字 / 会识字 / 抄写词语至少填一项'); return; }
+  state.lessonLibrary[name] = { chars, wordgroups, words };
+  saveLocalState(); uploadToCloud();
+  nameEl.value = ''; charsEl.value = ''; wgEl.value = ''; wordsEl.value = '';
+  renderLessonLibrary(); populateLessonSelects();
+  toast('✅ 已保存课文库：'+escapeHtml(name));
+});
+
+/* ============================================================
+   ✅ 上传写字表 / 识字表 → 自动解析生成课文库
+============================================================ */
+let pdfJsLoading = null;
+function loadPdfJs(){
+  if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if(pdfJsLoading) return pdfJsLoading;
+  pdfJsLoading = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
+    s.onload = () => {
+      if(window.pdfjsLib){
+        try{
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+            'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+        }catch(e){}
+        resolve(window.pdfjsLib);
+      } else {
+        reject(new Error('PDF 解析组件未就绪'));
+      }
+    };
+    s.onerror = () => reject(new Error('PDF 组件加载失败，请检查网络'));
+    document.head.appendChild(s);
+  });
+  return pdfJsLoading;
+}
+
+/* 从 PDF 提取文本（按行重建） */
+async function extractPdfText(file){
+  const lib = await loadPdfJs();
+  const buf = await file.arrayBuffer();
+  const pdf = await lib.getDocument({ data: new Uint8Array(buf) }).promise;
+  let all = '';
+  for(let p = 1; p <= pdf.numPages; p++){
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    const items = (content.items || []).filter(it => typeof it.str === 'string' && it.str.length);
+    items.sort((a, b) => {
+      const ya = a.transform[5], yb = b.transform[5];
+      if(Math.abs(ya - yb) > 3) return yb - ya;
+      return a.transform[4] - b.transform[4];
+    });
+    let lastY = null, lastRight = null;
+    for(const it of items){
+      const y = it.transform[5];
+      const x = it.transform[4];
+      if(lastY !== null && Math.abs(y - lastY) > 3){
+        all += '\n';
+        lastRight = null;
+      } else if(lastRight !== null && (x - lastRight) > 1.5 && !/\s$/.test(all)){
+        all += ' ';
+      }
+      all += it.str;
+      lastY = y;
+      lastRight = x + (Number(it.width) || 0);
+    }
+    all += '\n';
+  }
+  return all;
+}
+
+/* 从某个位置开始，向后收集连续汉字（跳过空格） */
+function collectHanzi(src, start){
+  let s = '';
+  for(let i = start; i < src.length; i++){
+    const c = src.charAt(i);
+    if(/[\u4e00-\u9fa5]/.test(c)) s += c;
+    else if(c === ' ' || c === '\t' || c === '\u3000' || c === '\n') continue;
+    else break;
+  }
+  return s;
+}
+
+/* 解析写字表 / 识字表文本 → [{ label, hanzi }] */
+function parseHanziSheet(text){
+  const src = String(text || '').replace(/\r/g, '');
+  if(!src.trim()) return [];
+
+  /* 1) 章节标记：# 阅读 / # 识字 */
+  const secMarks = [];
+  const secRe = /^[#\s\u3000]*(阅读|识字)[\s\u3000]*$/gm;
+  let sm;
+  while((sm = secRe.exec(src)) !== null){
+    secMarks.push({ idx: sm.index, name: sm[1] });
+  }
+
+  /* 2) 锚点：课号数字 或 语文园地X */
+  const out = [];
+  const anchorRe = /(\d{1,2})(?=[\s\u3000\u4e00-\u9fa5])|语文园地[一二三四五六七八九十]+/g;
+  let m;
+  while((m = anchorRe.exec(src)) !== null){
+    const tok = m[0];
+    /* 数字锚点：前面不能是数字（避免 12 被拆成 1、2） */
+    if(/^\d/.test(tok) && m.index > 0 && /\d/.test(src.charAt(m.index - 1))) continue;
+
+    let sec = '';
+    for(let i = 0; i < secMarks.length; i++){
+      if(secMarks[i].idx <= m.index) sec = secMarks[i].name;
+      else break;
+    }
+
+    const start = m.index + tok.length;
+    const hanzi = collectHanzi(src, start);
+    if(!hanzi) continue;
+    const label = (sec + tok).slice(0, 60);
+    out.push({ label, hanzi });
+  }
+  return out;
+}
+
+/* 把解析结果合并进课文库 */
+function mergeSheet(entries, field){
+  const grouped = new Map();
+  entries.forEach(({ label, hanzi }) => {
+    if(!label || !hanzi) return;
+    if(!grouped.has(label)) grouped.set(label, []);
+    grouped.get(label).push(hanzi);
+  });
+  let added = 0, updated = 0;
+  grouped.forEach((list, label) => {
+    const name = label.slice(0, 60);
+    const uniq = [...new Set(parseChars(list.join('')))];
+    if(!uniq.length) return;
+    if(!state.lessonLibrary[name]){
+      state.lessonLibrary[name] = { chars:'', wordgroups:'', words:'' };
+      added++;
+    } else {
+      updated++;
+    }
+    const item = state.lessonLibrary[name];
+    const oldList = (field === 'chars') ? parseChars(item.chars) : parseChars(item.wordgroups);
+    const merged = [...oldList];
+    uniq.forEach(c => { if(!merged.includes(c)) merged.push(c); });
+    item[field] = merged.join(' ');
+  });
+  return { added, updated };
+}
+
+/* 打开上传弹窗 */
+$('adminLibSyncBtn').addEventListener('click', () => {
+  $('uploadWriteFile').value = '';
+  $('uploadReadFile').value = '';
+  $('uploadWriteName').textContent = '';
+  $('uploadReadName').textContent = '';
+  const prog = $('uploadProgress');
+  prog.className = 'upload-progress';
+  prog.textContent = '可只上传其中一个，也可以两个一起上传';
+  $('uploadSyncBtn').disabled = false;
+  uploadSyncModal.classList.add('show');
+});
+$('uploadWriteFile').addEventListener('change', e => {
+  const f = e.target.files[0];
+  $('uploadWriteName').textContent = f ? ('已选择：' + f.name) : '';
+});
+$('uploadReadFile').addEventListener('change', e => {
+  const f = e.target.files[0];
+  $('uploadReadName').textContent = f ? ('已选择：' + f.name) : '';
+});
+$('uploadCancel').addEventListener('click', () => uploadSyncModal.classList.remove('show'));
+uploadSyncModal.addEventListener('click', e => {
+  if(e.target === uploadSyncModal) uploadSyncModal.classList.remove('show');
+});
+
+/* 执行解析同步 */
+$('uploadSyncBtn').addEventListener('click', async () => {
+  const writeFile = $('uploadWriteFile').files[0];
+  const readFile  = $('uploadReadFile').files[0];
+  const prog = $('uploadProgress');
+  if(!writeFile && !readFile){
+    prog.className = 'upload-progress err';
+    prog.textContent = '请至少选择一个 PDF 文件';
+    return;
+  }
+  $('uploadSyncBtn').disabled = true;
+  try{
+    let writeEntries = [], readEntries = [];
+    if(writeFile){
+      prog.className = 'upload-progress busy';
+      prog.textContent = '正在解析写字表…';
+      const text = await extractPdfText(writeFile);
+      writeEntries = parseHanziSheet(text);
+    }
+    if(readFile){
+      prog.className = 'upload-progress busy';
+      prog.textContent = '正在解析识字表…';
+      const text = await extractPdfText(readFile);
+      readEntries = parseHanziSheet(text);
+    }
+    if(!writeEntries.length && !readEntries.length){
+      prog.className = 'upload-progress err';
+      prog.textContent = '未能从 PDF 中解析出内容，请确认文件格式是否与示例一致';
+      toast('⚠️ 解析失败，请检查 PDF 内容');
+      return;
+    }
+    const r1 = mergeSheet(writeEntries, 'chars');
+    const r2 = mergeSheet(readEntries, 'wordgroups');
+    saveLocalState(); uploadToCloud();
+    renderLessonLibrary(); populateLessonSelects();
+
+    prog.className = 'upload-progress ok';
+    prog.textContent =
+      `✅ 写字表 ${writeEntries.length} 条 · 识字表 ${readEntries.length} 条` +
+      ` · 新增 ${r1.added + r2.added} 篇 · 更新 ${r1.updated + r2.updated} 篇`;
+
+    toast(
+      `✅ 同步完成<br>` +
+      `写字表：${writeEntries.length} 条 · 识字表：${readEntries.length} 条<br>` +
+      `新增 ${r1.added + r2.added} 篇 · 更新 ${r1.updated + r2.updated} 篇<br>` +
+      `抄写词语请自行在课文库里补充`,
+      4200
+    );
+    setTimeout(() => uploadSyncModal.classList.remove('show'), 1200);
+  }catch(err){
+    console.error(err);
+    prog.className = 'upload-progress err';
+    prog.textContent = '解析失败：' + (err && err.message ? err.message : '未知错误');
+    toast('⚠️ 解析失败：' + escapeHtml(err && err.message ? err.message : '未知错误'));
+  }finally{
+    $('uploadSyncBtn').disabled = false;
+  }
+});
+
+/* ============================================================
+   ✅ 课文库编辑弹窗
+============================================================ */
+let editingLibName = '';
+function openLibEdit(name){
+  const item = (state.lessonLibrary || {})[name];
+  if(!item) return;
+  editingLibName = name;
+  $('libEditName').value = name;
+  $('libEditChars').value = item.chars || '';
+  $('libEditWordgroups').value = item.wordgroups || '';
+  $('libEditWords').value = item.words || '';
+  libEditModal.classList.add('show');
+  setTimeout(() => $('libEditName').focus(), 120);
+}
+$('libEditCancel').addEventListener('click', () => libEditModal.classList.remove('show'));
+libEditModal.addEventListener('click', e => { if(e.target === libEditModal) libEditModal.classList.remove('show'); });
+$('libEditSave').addEventListener('click', () => {
+  const newName = $('libEditName').value.trim().slice(0,60);
+  if(!newName){ toast('请输入课文名'); return; }
+  const chars = $('libEditChars').value.trim().slice(0,1200);
+  const wordgroups = $('libEditWordgroups').value.trim().slice(0,1200);
+  const words = $('libEditWords').value.trim().slice(0,1200);
+  if(!chars && !wordgroups && !words){ toast('会写字 / 会识字 / 抄写词语至少填一项'); return; }
+  if(newName !== editingLibName) delete state.lessonLibrary[editingLibName];
+  state.lessonLibrary[newName] = { chars, wordgroups, words };
+  saveLocalState(); uploadToCloud();
+  libEditModal.classList.remove('show');
+  renderLessonLibrary(); populateLessonSelects();
+  toast('✅ 已更新课文库：'+escapeHtml(newName));
+});
+
+/* ============================================================
+   ✅ 任务编辑弹窗（双击任务条目）
+============================================================ */
+let editingTaskId = null;
+function openTaskEdit(id){
+  const info = findTask(id);
+  if(!info) return;
+  editingTaskId = id;
+  const t = info.task;
+  $('taskEditText').value = t.text;
+  $('taskEditMin').value = t.minutes;
+  $('taskEditSun').value = t.sun;
+  const wrap = $('taskEditExtraWrap');
+  if(t.type === 'preview'){
+    wrap.style.display = '';
+    $('taskEditExtraLabel').textContent = '会写字（空格分隔）';
+    $('taskEditExtra').value = (t.chars || []).join(' ');
+  } else if(t.type === 'wordgroup'){
+    wrap.style.display = '';
+    $('taskEditExtraLabel').textContent = '会识字（空格分隔）';
+    $('taskEditExtra').value = (t.words || []).join(' ');
+  } else if(t.type === 'copy'){
+    wrap.style.display = '';
+    $('taskEditExtraLabel').textContent = '抄写词语（空格分隔）';
+    $('taskEditExtra').value = (t.words || []).join(' ');
+  } else {
+    wrap.style.display = 'none';
+    $('taskEditExtra').value = '';
+  }
+  taskEditModal.classList.add('show');
+  setTimeout(() => $('taskEditText').focus(), 120);
+}
+$('taskEditCancel').addEventListener('click', () => taskEditModal.classList.remove('show'));
+taskEditModal.addEventListener('click', e => { if(e.target === taskEditModal) taskEditModal.classList.remove('show'); });
+$('taskEditSave').addEventListener('click', () => {
+  if(!editingTaskId) return;
+  const info = findTask(editingTaskId);
+  if(!info) return;
+  const t = info.task;
+  const text = $('taskEditText').value.trim();
+  if(!text){ toast('请输入任务内容'); return; }
+  t.text = text.slice(0,200);
+  const m = parseFloat($('taskEditMin').value);
+  const s = parseInt($('taskEditSun').value, 10);
+  t.minutes = clamp(isFinite(m) && m > 0 ? m : 10, 0.5, 120);
+  t.sun = clamp(isFinite(s) && s > 0 ? s : 30, 1, 500);
+
+  if(t.type === 'preview'){
+    const chars = [...new Set(parseChars($('taskEditExtra').value))].slice(0, 300);
+    if(chars.length) t.chars = chars;
+  } else if(t.type === 'wordgroup' || t.type === 'copy'){
+    const words = parseWords($('taskEditExtra').value).slice(0, 300);
+    if(words.length) t.words = words;
+  }
+
+  /* 修改时长后重置计时 */
+  if(runtimeMap[t.id]){
+    const ms = t.minutes*60000;
+    const rt = runtimeMap[t.id];
+    if(rt.totalMs !== ms){
+      rt.totalMs = ms; rt.leftMs = ms; rt.rounds = 0; rt.holdDogAtEnd = false;
+    }
+  }
+  saveLocalState(); uploadToCloud();
+  taskEditModal.classList.remove('show');
+  editingTaskId = null;
+  renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
+  renderAdminPanel();
+  toast('✅ 已保存修改');
+});
+
+/* ============================================================
+   ✅ 课文选择 → 直接生成任务
+============================================================ */
+const LESSON_PICK = {
+  preview:   { sel:'adminPreviewLessonSelect',   hint:'previewLessonHint',   field:'chars',      unit:'字', label:'会写字' },
+  wordgroup: { sel:'adminWordgroupLessonSelect', hint:'wordgroupLessonHint', field:'wordgroups', unit:'组', label:'会识字' },
+  copy:      { sel:'adminCopyLessonSelect',      hint:'copyLessonHint',      field:'words',      unit:'组', label:'抄写词语' }
+};
+function lessonPickItems(kind){
+  const cfg = LESSON_PICK[kind];
+  const sel = $(cfg.sel);
+  const name = sel ? sel.value : '';
+  if(!name) return { name:'', items:[] };
+  const item = (state.lessonLibrary || {})[name] || {};
+  const raw = String(item[cfg.field] || '');
+  const items = (kind === 'preview') ? [...new Set(parseChars(raw))] : parseWords(raw);
+  return { name, items };
+}
+function renderLessonHint(kind){
+  const cfg = LESSON_PICK[kind];
+  const hint = $(cfg.hint);
+  if(!hint) return;
+  const { name, items } = lessonPickItems(kind);
+  if(!name){
+    hint.className = 'aa-hint';
+    hint.textContent = '选好课文直接点「添加」即可，不用手动输入';
+    return;
+  }
+  if(!items.length){
+    hint.className = 'aa-hint warn';
+    hint.textContent = '「' + name + '」还没有' + cfg.label + '内容，请到下面「课文库」里补充';
+    return;
+  }
+  const shown = items.slice(0, 24).join(' ');
+  hint.className = 'aa-hint ok';
+  hint.textContent = '将添加 ' + items.length + ' ' + cfg.unit + '：' + shown + (items.length > 24 ? ' …' : '');
+}
+Object.keys(LESSON_PICK).forEach(kind => {
+  const cfg = LESSON_PICK[kind];
+  const sel = $(cfg.sel);
+  if(sel) sel.addEventListener('change', () => renderLessonHint(kind));
+});
+
+/* ============================================================
+   ✅ 家长入口：添加任务（选课文后直接生成，无需手输）
+============================================================ */
+$('adminAddPreviewBtn').addEventListener('click', () => {
+  const { name, items } = lessonPickItems('preview');
+  if(!name){ toast('请先选择课文'); return; }
+  if(!items.length){ toast('「'+escapeHtml(name)+'」还没有会写字，请到「课文库」补充'); return; }
+  const chars = items.slice(0, 300);
+  const cfg = getUnitCfg('preview');
+  const minutes = clamp(Math.round(chars.length * cfg.min), 1, 120);
+  const sun = clamp(Math.round(chars.length * cfg.sun), 1, 500);
+  const task = makeTask(`会写字（${chars.length}字）`, minutes, sun, { type:'preview', chars });
+  state.subjects.chinese.push(task);
+  saveLocalState(); uploadToCloud();
+  const sel = $('adminPreviewLessonSelect'); if(sel) sel.value = '';
+  renderLessonHint('preview');
+  renderBoard(); refreshAllCards(); renderAdminPanel();
+  toast('✅ 已添加「'+escapeHtml(name)+'」会写字（'+chars.length+'字）');
+});
+
+$('adminAddWordgroupBtn').addEventListener('click', () => {
+  const { name, items } = lessonPickItems('wordgroup');
+  if(!name){ toast('请先选择课文'); return; }
+  if(!items.length){ toast('「'+escapeHtml(name)+'」还没有会识字，请到「课文库」补充'); return; }
+  const words = items.slice(0, 300);
+  const cfg = getUnitCfg('wordgroup');
+  const minutes = clamp(Math.round(words.length * cfg.min), 1, 120);
+  const sun = clamp(Math.round(words.length * cfg.sun), 1, 500);
+  const task = makeTask(`会识字（${words.length}组）`, minutes, sun, { type:'wordgroup', words });
+  state.subjects.chinese.push(task);
+  saveLocalState(); uploadToCloud();
+  const sel = $('adminWordgroupLessonSelect'); if(sel) sel.value = '';
+  renderLessonHint('wordgroup');
+  renderBoard(); refreshAllCards(); renderAdminPanel();
+  toast('✅ 已添加「'+escapeHtml(name)+'」会识字（'+words.length+'组）');
+});
+
+$('adminAddCopyBtn').addEventListener('click', () => {
+  const { name, items } = lessonPickItems('copy');
+  if(!name){ toast('请先选择课文'); return; }
+  if(!items.length){ toast('「'+escapeHtml(name)+'」还没有抄写词语，请到「课文库」补充'); return; }
+  const words = items.slice(0, 300);
+  const cfg = getUnitCfg('copy');
+  const minutes = clamp(Math.round(words.length * cfg.min), 1, 120);
+  const sun = clamp(Math.round(words.length * cfg.sun), 1, 500);
+  const task = makeTask(`抄写词语（${words.length}组）`, minutes, sun, { type:'copy', words });
+  state.subjects.chinese.push(task);
+  saveLocalState(); uploadToCloud();
+  const sel = $('adminCopyLessonSelect'); if(sel) sel.value = '';
+  renderLessonHint('copy');
+  renderBoard(); refreshAllCards(); renderAdminPanel();
+  toast('✅ 已添加「'+escapeHtml(name)+'」抄写词语（'+words.length+'组）');
+});
+
+$('adminAddChineseBtn').addEventListener('click', () => {
+  const textEl = $('adminAddChineseText');
+  const minEl = $('adminAddChineseMin');
+  const sunEl = $('adminAddChineseSun');
+  const text = textEl.value.trim();
+  if(!text){ toast('请输入任务内容'); return; }
+  const minutes = clamp(parseFloat(minEl.value)||10, 1, 120);
+  const sun = clamp(parseInt(sunEl.value,10)||30, 1, 500);
+  const task = makeTask(text, minutes, sun);
+  state.subjects.chinese.push(task);
+  saveLocalState(); uploadToCloud();
+  textEl.value = '';
+  renderBoard(); refreshAllCards(); renderAdminPanel();
+  toast('✅ 已添加任务：「'+escapeHtml(text)+'」');
+});
+
+$('adminAddMathBtn').addEventListener('click', () => {
+  const textEl = $('adminAddMathText');
+  const minEl = $('adminAddMathMin');
+  const sunEl = $('adminAddMathSun');
+  const text = textEl.value.trim();
+  if(!text){ toast('请输入任务内容'); return; }
+  const minutes = clamp(parseFloat(minEl.value)||10, 1, 120);
+  const sun = clamp(parseInt(sunEl.value,10)||30, 1, 500);
+  const task = makeTask(text, minutes, sun);
+  state.subjects.math.push(task);
+  saveLocalState(); uploadToCloud();
+  textEl.value = '';
+  renderBoard(); refreshAllCards(); renderAdminPanel();
+  toast('✅ 已添加任务：「'+escapeHtml(text)+'」');
+});
+
+$('adminDateInput').addEventListener('change', e => {
+  const v = e.target.value;
+  if(v) switchDate(v);
+});
+$('adminGoToday').addEventListener('click', () => switchDate(todayStr()));
+
+$('adminForceSyncBtn').addEventListener('click', () => {
+  uploadToCloud();
+  toast('✅ 已上传本地数据到云端');
+});
+$('adminForcePullBtn').addEventListener('click', () => {
+  if(!dataRef){ toast('⚠️ 云端未连接'); return; }
+  onValue(dataRef, snapshot => {
+    const remote = snapshot.val();
+    if(remote && remote.days){
+      applyRemoteState(remote);
+      toast('✅ 已从云端拉取最新数据');
+    } else {
+      toast('⚠️ 云端暂无数据');
+    }
+  }, {onlyOnce: true});
+});
+
+/* ============================================================
+   其他事件
+============================================================ */
+document.querySelectorAll('.pause-opt').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const min = parseFloat(btn.dataset.min);
+    if(isFinite(min) && min>0) startPause(min);
+  });
+});
+$('cancelPauseDuration').addEventListener('click', () => pauseDurModalEl.classList.remove('show'));
+pauseDurModalEl.addEventListener('click', e => { if(e.target===pauseDurModalEl) pauseDurModalEl.classList.remove('show'); });
+
+document.querySelectorAll('.subject-tab').forEach(tab => {
+  tab.addEventListener('click', () => switchSubject(tab.dataset.tab));
+});
+
+mainBtn.addEventListener('click', onMainBtnClick);
+
+$('resetBtn').addEventListener('click', () => {
+  if(!confirm('确定要重置当天的打卡吗？')) return;
+  ['chinese','math'].forEach(k => state.subjects[k].forEach(t => { t.done = false; }));
+  stopTick(); activeId = null; runtimeMap = {};
+  saveLocalState(); uploadToCloud();
+  renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
+  const first = allTasks().find(t=>!t.done);
+  if(first){ activeId = first.id; ensureRuntime(first); refreshAllCards(); updateDogBar(); updateMainBtn(); }
+  if(isAdminMode) renderAdminPanel();
+});
+window.addEventListener('resize', updateDogBar);
+
+let wasRunning = false;
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'hidden'){
+    if(running){ wasRunning = true; running = false; cancelAnimationFrame(rafId); rafId = null; dogEl.classList.remove('running'); }
+  } else {
+    if(wasRunning && activeId){
+      wasRunning = false;
+      const rt = runtimeMap[activeId];
+      if(rt && rt.leftMs > 0){
+        running = true; lastTs = performance.now();
+        rafId = requestAnimationFrame(tick);
+        dogEl.classList.add('running');
+        refreshAllCards(); updateDogBar(); updateMainBtn();
+      }
+    } else { updateDogBar(); updateMainBtn(); }
+  }
+});
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('SW 注册成功:', reg.scope))
+      .catch(err => console.log('SW 注册失败:', err));
+  });
+}
+
+/* ============================================================
+   启动
+============================================================ */
+state = attachSubjectsProxy(loadLocalState());
+state.date = todayStr();
+if(!state.days[state.date]) state.days[state.date] = makeDay();
+
+dateTextEl.textContent = dateLabel(state.date);
+updateDateText();
+saveLocalState();
+renderStats(); renderBoard();
+switchSubject('chinese');
+refreshAllCards();
+requestAnimationFrame(() => { updateDogBar(); updateMainBtn(); });
+
+if(dataRef){
+  startCloudSync();
+  uploadToCloud();
+  onValue(dataRef, snapshot => {
+    const remote = snapshot.val();
+    if(remote && remote.days){
+      applyRemoteState(remote);
+      console.log('✅ 已从云端加载数据');
+    } else {
+      console.log('☁️ 云端暂无数据，使用本地数据并上传');
+      uploadToCloud();
+    }
+  }, {onlyOnce: true});
+}
+</script>
+</body>
+</html>
