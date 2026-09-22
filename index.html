@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -1027,8 +1028,15 @@
 
     <div class="admin-section">
       <h3>☁️ 云端同步</h3>
-      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:8px">
         数据会自动同步到 Firebase 云端。孩子端刷新页面即可看到最新任务。
+      </p>
+      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+        房间号：<b id="familyIdText" style="color:#2e7d32">—</b>
+        <span style="color:#b07a2a">（家长端和孩子端必须是同一个房间号，否则永远看不到对方的数据）</span>
+      </p>
+      <p style="font-size:12px;color:#5a7a8a;font-weight:700;line-height:1.8;margin-bottom:12px">
+        打开页面时「以云端为准」；云端为空才用本机数据初始化。想用本机覆盖云端，点「强制上传本地数据」。
       </p>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button class="aa-btn" id="adminForceSyncBtn">🔄 强制上传本地数据</button>
@@ -1305,12 +1313,17 @@ function normalizeDay(day){
   return out;
 }
 
+/* 本机没有历史存档（新设备 / 换了浏览器 / 清过缓存）时为 true。
+   这类设备里只有内置示例任务，绝不允许把示例任务推到云端去覆盖真实任务。 */
+let freshBoot = false;
+
 function loadLocalState(){
   let s = null;
   try{ s = JSON.parse(localStorage.getItem(STORAGE_KEY)); }catch(e){ s = null; }
   if(!s){
     try{ s = JSON.parse(localStorage.getItem('study_board_v8')); }catch(e){ s = null; }
   }
+  freshBoot = !s;
   if(s && s.subjects && !s.days){
     const oldDate = s.date || todayStr();
     s = {
@@ -1379,8 +1392,28 @@ function findTask(id){
   return null;
 }
 
-function uploadToCloud(){
-  if(isRemoteUpdate || !dataRef) return;
+/* ============================================================
+   ☁️ 云端同步核心
+   顺序规则（以前顺序反了，导致云端任务被清空）：
+     ① 打开页面：先「读」云端
+          · 云端有数据 → 以云端为准
+          · 云端为空   → 才用本地数据初始化
+     ② 读完之后，才注册实时监听
+     ③ 本机无存档的新设备，在读到云端之前禁止上传
+     ④ 跳过自己写入的回声；忽略比已知云端更旧的数据
+============================================================ */
+let lastPushedUpdatedAt = 0;   // 本机最近一次写入云端的时间戳
+let lastRemoteUpdatedAt = 0;   // 已知的云端最新时间戳
+let uploadFailedNotified = false;
+
+function uploadToCloud(force){
+  if(!dataRef) return Promise.resolve(false);
+  if(isRemoteUpdate && !force) return Promise.resolve(false);
+  // 空设备保护：新设备还没读到云端之前，绝不把内置示例任务推上去
+  if(freshBoot && !force && !lastRemoteUpdatedAt){
+    console.warn('已跳过上传：本机无历史存档，等待云端数据');
+    return Promise.resolve(false);
+  }
   const payload = {
     days: state.days,
     date: state.date,
@@ -1390,13 +1423,33 @@ function uploadToCloud(){
     lessonLibrary: state.lessonLibrary,
     updatedAt: Date.now()
   };
-  try{ set(dataRef, payload).catch(e => console.warn('云端上传失败', e)); }catch(e){}
+  lastPushedUpdatedAt = payload.updatedAt;
   updateSyncInfo();
+  try{
+    return set(dataRef, payload).then(() => {
+      uploadFailedNotified = false;
+      return true;
+    }).catch(e => {
+      console.warn('云端上传失败', e);
+      if(!uploadFailedNotified){
+        uploadFailedNotified = true;
+        showSyncStatus('⚠️ 云端上传失败，请检查网络', 'offline');
+      }
+      return false;
+    });
+  }catch(e){
+    return Promise.resolve(false);
+  }
 }
 
 function applyRemoteState(remote){
   if(!remote || !remote.days) return;
+  const rAt = Number(remote.updatedAt) || 0;
+  if(rAt && rAt === lastPushedUpdatedAt) return;   // 自己刚写上去的回声，不用再套一遍
+  if(rAt && rAt < lastRemoteUpdatedAt) return;     // 比已知的还旧，忽略
   isRemoteUpdate = true;
+  // 应用云端之前，先把当前数据留一份快照，万一拉回来的不对还能找回上一版
+  try{ localStorage.setItem(STORAGE_KEY + '_before_remote', JSON.stringify(state)); }catch(e){}
   const newDays = {};
   Object.keys(remote.days).forEach(k => { newDays[k] = normalizeDay(remote.days[k]); });
   state.days = newDays;
@@ -1405,12 +1458,14 @@ function applyRemoteState(remote){
   if(typeof remote.sun === 'number') state.sun = remote.sun;
   if(Array.isArray(remote.checkins)) state.checkins = remote.checkins;
   if(remote.lessonLibrary) state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary);
+  if(rAt) lastRemoteUpdatedAt = rAt;
   saveLocalState();
   renderStats(); renderBoard(); refreshAllCards();
   updateDogBar(); updateMainBtn(); updateDateText();
   if(isAdminMode) renderAdminPanel();
   isRemoteUpdate = false;
   showSyncStatus('☁️ 已从云端更新', 'online');
+  updateSyncInfo();
 }
 
 let cloudListener = null;
@@ -1426,10 +1481,29 @@ function startCloudSync(){
   });
 }
 
+/* 读一次云端（Promise 封装，超时返回 null） */
+function readCloudOnce(timeoutMs){
+  return new Promise(resolve => {
+    if(!dataRef){ resolve(null); return; }
+    let done = false;
+    const finish = v => { if(!done){ done = true; resolve(v); } };
+    try{
+      onValue(dataRef, snapshot => finish(snapshot.val()), {onlyOnce: true});
+    }catch(e){ finish(null); }
+    setTimeout(() => finish(null), timeoutMs || 8000);
+  });
+}
+
 let syncInfoTimer = null;
-function updateSyncInfo(){
+function updateSyncInfo(text){
   const el = document.getElementById('adminSyncInfo');
-  if(el) el.textContent = '最后同步：' + new Date().toLocaleTimeString();
+  if(!el) return;
+  if(text){ el.textContent = text; return; }
+  const fmt = t => t ? new Date(t).toLocaleTimeString() : '—';
+  const mine = lastPushedUpdatedAt >= lastRemoteUpdatedAt;
+  el.textContent = '最后同步：' + fmt(mine ? lastPushedUpdatedAt : lastRemoteUpdatedAt) +
+    (mine ? '（已上传）' : '（已接收）') +
+    '　云端时间：' + fmt(lastRemoteUpdatedAt);
 }
 function showSyncStatus(text, cls){
   const el = document.getElementById('syncStatus');
@@ -3021,31 +3095,38 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
     if(isAdminMode) renderAdminPanel();
     populateLessonSelects();
 
-    // 导入后同时同步到云端，保持家长端/孩子端一致
-    try{ uploadToCloud(); }catch(err){ console.warn('导入后云端同步失败', err); }
+    // 导入后同时同步到云端，保持家长端/孩子端一致（用户主动导入 → 强制上传）
+    let synced = false;
+    try{ synced = await uploadToCloud(true); }catch(err){ console.warn('导入后云端同步失败', err); }
 
-    toast('✅ 本地数据导入成功');
+    toast(synced ? '✅ 本地数据导入成功，已同步到云端' : '✅ 本地数据导入成功（云端同步失败，请点「强制上传本地数据」）');
   }catch(err){
     console.error(err);
     toast('⚠️ 本地上传失败：' + err.message);
   }
 });
 
-$('adminForceSyncBtn').addEventListener('click', () => {
-  uploadToCloud();
-  toast('✅ 已上传本地数据到云端');
-});
-$('adminForcePullBtn').addEventListener('click', () => {
+$('adminForceSyncBtn').addEventListener('click', async () => {
   if(!dataRef){ toast('⚠️ 云端未连接'); return; }
-  onValue(dataRef, snapshot => {
-    const remote = snapshot.val();
-    if(remote && remote.days){
-      applyRemoteState(remote);
-      toast('✅ 已从云端拉取最新数据');
-    } else {
-      toast('⚠️ 云端暂无数据');
-    }
-  }, {onlyOnce: true});
+  updateSyncInfo('正在上传…');
+  const ok = await uploadToCloud(true);
+  toast(ok ? '✅ 已上传本地数据到云端' : '⚠️ 上传失败：请检查网络或云端权限');
+  if(!ok) updateSyncInfo('上传失败：请检查网络或云端权限');
+});
+$('adminForcePullBtn').addEventListener('click', async () => {
+  if(!dataRef){ toast('⚠️ 云端未连接'); return; }
+  updateSyncInfo('正在读取云端…');
+  const remote = await readCloudOnce(10000);
+  if(remote && remote.days && Object.keys(remote.days).length){
+    // 手动拉取：强制采用云端数据，跳过时间戳保护
+    lastPushedUpdatedAt = 0;
+    lastRemoteUpdatedAt = 0;
+    applyRemoteState(remote);
+    toast('✅ 已从云端拉取最新数据');
+  } else {
+    toast('⚠️ 云端暂无数据');
+    updateSyncInfo('云端暂无数据');
+  }
 });
 
 document.querySelectorAll('.pause-opt').forEach(btn => {
@@ -3113,19 +3194,30 @@ switchSubject('chinese');
 refreshAllCards();
 requestAnimationFrame(() => { updateDogBar(); updateMainBtn(); });
 
+/* ============================================================
+   ☁️ 启动同步：先读云端 → 云端有数据就以云端为准 → 最后才挂实时监听
+   （顺序绝对不能反：先上传会把云端的真实任务覆盖成本机的示例任务）
+============================================================ */
+const familyIdEl = document.getElementById('familyIdText');
+if(familyIdEl) familyIdEl.textContent = FAMILY_ID;
+
 if(dataRef){
-  startCloudSync();
-  uploadToCloud();
-  onValue(dataRef, snapshot => {
-    const remote = snapshot.val();
-    if(remote && remote.days){
+  (async () => {
+    let remote = null;
+    try{ remote = await readCloudOnce(10000); }catch(e){ console.warn('云端读取失败', e); }
+    if(remote && remote.days && Object.keys(remote.days).length){
       applyRemoteState(remote);
-      console.log('✅ 已从云端加载数据');
+      console.log('✅ 已从云端加载数据（以云端为准）');
     } else {
       console.log('☁️ 云端暂无数据，使用本地数据并上传');
-      uploadToCloud();
+      await uploadToCloud(true);
     }
-  }, {onlyOnce: true});
+    freshBoot = false;
+    startCloudSync();
+    updateSyncInfo();
+  })();
+} else {
+  updateSyncInfo('未连接云端（纯本地模式）');
 }
 </script>
 </body>
