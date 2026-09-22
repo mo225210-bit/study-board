@@ -2206,12 +2206,12 @@ function flySun(fromEl){
 }
 function celebrate(){
   if(!state.checkins.includes(state.date)) state.checkins.push(state.date);
-  state.sun += 50;
+  state.sun += 100;
   saveLocalState(); uploadToCloud();
   renderStats();
   playSound('win');
   confetti();
-  toast('🎉 全部完成啦！<br>奖励 +50 ☀️', 4200);
+  toast('🎉 全部完成啦！<br>奖励 +100 ☀️', 4200);
 }
 function confetti(){
   const emojis = ['⭐','☀️','✨','🎉','🌈','💚','🌟','🍀'];
