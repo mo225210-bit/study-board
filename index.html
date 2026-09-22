@@ -529,6 +529,21 @@
   }
   .aa-hint.ok{color:#9CCC65}
   .aa-hint.warn{color:#FFB74D}
+  .sun-log{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+  .sun-log-empty{font-size:11.5px;font-weight:700;color:#5a7a8a;text-align:center;padding:8px 0}
+  .sun-log-row{
+    display:flex;align-items:center;gap:8px;
+    background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08);
+    border-radius:10px;padding:7px 10px;
+  }
+  .sun-log-row .sl-time{font-size:11px;font-weight:800;color:#7a9aaa;flex:none}
+  .sun-log-row .sl-reason{
+    font-size:11.5px;font-weight:800;color:#cfd8e3;flex:1;min-width:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .sun-log-row .sl-delta{font-size:12px;font-weight:900;flex:none}
+  .sun-log-row .sl-delta.minus{color:#FF8A80}
+  .sun-log-row .sl-delta.plus{color:#9CCC65}
 
   .admin-stats{
     display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;
@@ -782,17 +797,17 @@
 <div class="modal" id="libEditModal">
   <div class="modal-card">
     <h3>✏️ 编辑课文库</h3>
-    <p>修改课文名、预习生字、生字组词、抄写词语后保存即可</p>
+    <p>修改课文名、会写字、会识字、抄写词语后保存即可</p>
     <div class="form-field">
       <label>课文名</label>
       <input type="text" id="libEditName" maxlength="60" placeholder="例：小蝌蚪找妈妈">
     </div>
     <div class="form-field">
-      <label>预习生字（空格分隔）</label>
+      <label>会写字（空格分隔）</label>
       <input type="text" id="libEditChars" maxlength="600" placeholder="例：蝌 蚪 妈 塘 脑">
     </div>
     <div class="form-field">
-      <label>生字组词（空格分隔）</label>
+      <label>会识字（空格分隔）</label>
       <input type="text" id="libEditWordgroups" maxlength="600" placeholder="例：蝌蚪 脑袋 池塘">
     </div>
     <div class="form-field">
@@ -842,8 +857,8 @@
     <h3>📤 上传写字表 / 识字表</h3>
     <p>
       上传 PDF 后自动解析：<br>
-      · <b>写字表</b> → 同步为「预习生字」<br>
-      · <b>识字表</b> → 同步为「生字组词」<br>
+      · <b>写字表</b> → 同步为「会写字」<br>
+      · <b>识字表</b> → 同步为「会识字」<br>
       · 课文名自动采用「章节名 + 编号」，例如 <b>阅读1</b>、<b>识字1</b>、<b>阅读语文园地一</b><br>
       · 同一课的汉字如果排成多行，会自动合并为一课
     </p>
@@ -898,6 +913,25 @@
     </div>
 
     <div class="admin-section">
+      <h3>☀️ 阳光调整 <span class="badge" id="adminSunBadge">0 ☀️</span></h3>
+      <div class="admin-add-row inline-row">
+        <select class="aa-select" id="adminSunReason">
+          <option value="兑换奖励">🎁 兑换奖励</option>
+          <option value="手动扣除">➖ 手动扣除</option>
+          <option value="手动增加">➕ 手动增加</option>
+        </select>
+        <input class="aa-num" id="adminSunAmount" type="number" min="1" max="9999" step="1" value="30" placeholder="阳光">
+        <span class="aa-unit">☀️</span>
+        <button class="aa-btn" id="adminSunMinusBtn"
+          style="background:linear-gradient(180deg,#FF8A80,#EF5350);border-color:#EF5350;box-shadow:0 3px 0 #C62828;color:#fff">➖ 扣除</button>
+        <button class="aa-btn" id="adminSunPlusBtn"
+          style="background:linear-gradient(180deg,#A5D6A7,#66BB6A);border-color:#66BB6A;box-shadow:0 3px 0 #2E7D32;color:#fff">➕ 增加</button>
+      </div>
+      <div class="aa-hint" id="adminSunHint">孩子兑换奖励时点「扣除」；每次调整都会记进下面的流水，孩子端立刻同步</div>
+      <div class="sun-log" id="adminSunLog"></div>
+    </div>
+
+    <div class="admin-section">
       <h3>📅 日期选择</h3>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <input type="date" id="adminDateInput"
@@ -922,7 +956,7 @@
       <p style="font-size:11.5px;color:#5a7a8a;font-weight:700;margin-bottom:8px">💡 双击任务条目可重新编辑</p>
       <div id="adminChineseList"></div>
 
-      <div class="admin-sub-label">➕ 添加预习生字</div>
+      <div class="admin-sub-label">➕ 添加会写字</div>
       <div class="admin-add-row inline-row">
         <select class="aa-select" id="adminPreviewLessonSelect">
           <option value="">— 选择课文 —</option>
@@ -935,7 +969,7 @@
       </div>
       <div class="aa-hint" id="previewLessonHint">选好课文直接点「添加」即可，不用手动输入</div>
 
-      <div class="admin-sub-label">➕ 添加生字组词</div>
+      <div class="admin-sub-label">➕ 添加会识字</div>
       <div class="admin-add-row inline-row">
         <select class="aa-select" id="adminWordgroupLessonSelect">
           <option value="">— 选择课文 —</option>
@@ -1003,7 +1037,7 @@
         </button>
       </h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
-        保存「课文名 → 预习生字 / 生字组词 / 抄写词语」。添加任务时只需在上方选择课文名，点「添加」即可生成，无需手动输入。
+        保存「课文名 → 会写字 / 会识字 / 抄写词语」。添加任务时只需在上方选择课文名，点「添加」即可生成，无需手动输入。
         <b style="color:#FFD54F">双击条目可重新编辑。</b>
       </p>
       <div id="adminLibList"></div>
@@ -1013,10 +1047,10 @@
         <input class="aa-text" id="adminLibLesson" placeholder="课文名，例：小蝌蚪找妈妈">
       </div>
       <div class="admin-add-row">
-        <input class="aa-text" id="adminLibChars" placeholder="预习生字，空格分隔，例：蝌 蚪 妈 塘 脑 袋">
+        <input class="aa-text" id="adminLibChars" placeholder="会写字，空格分隔，例：蝌 蚪 妈 塘 脑 袋">
       </div>
       <div class="admin-add-row">
-        <input class="aa-text" id="adminLibWordgroups" placeholder="生字组词，空格分隔，例：蝌蚪 脑袋 池塘 欢迎">
+        <input class="aa-text" id="adminLibWordgroups" placeholder="会识字，空格分隔，例：蝌蚪 脑袋 池塘 欢迎">
       </div>
       <div class="admin-add-row">
         <input class="aa-text" id="adminLibWords" placeholder="抄写词语，空格分隔，例：青蛙 池塘 妈妈 阿姨">
@@ -1075,7 +1109,7 @@ const FIREBASE_READY = !!(FIREBASE_CONFIG.apiKey && !/^YOUR_/.test(FIREBASE_CONF
 ============================================================ */
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js';
 import {
-  getDatabase, ref, onValue, set
+  getDatabase, ref, onValue, set, get
 } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js';
 
 let firebaseApp, db, dataRef;
@@ -1289,6 +1323,16 @@ function makeTask(text, minutes, sun, extra){
   return task;
 }
 
+/* 2026-09-22 起：标签改名「预习生字→会写字」「生字组词→会识字」。
+   旧数据里已经生成的任务名做一次性前缀替换（只动这两个前缀，其它文本一律不碰）。 */
+let nameMigrated = false;
+function fixTaskName(text){
+  let t = String(text == null ? '' : text);
+  if(t.indexOf('预习生字（') === 0){ t = '会写字（' + t.slice(5); nameMigrated = true; }
+  else if(t.indexOf('生字组词（') === 0){ t = '会识字（' + t.slice(5); nameMigrated = true; }
+  return t;
+}
+
 function makeDay(){ return { chinese: [], math: [] }; }
 
 function normalizeDay(day){
@@ -1300,7 +1344,7 @@ function normalizeDay(day){
       const item = {
         id: t.id || newId(),
         type,
-        text: String(t.text || '作业').slice(0,200),
+        text: fixTaskName(String(t.text || '作业')).slice(0,200),
         done: !!t.done,
         minutes: clamp(Number(t.minutes)||10, 0.5, 120),
         sun: clamp(Math.round(Number(t.sun)||30), 1, 500)
@@ -1341,6 +1385,7 @@ function loadLocalState(){
       date: todayStr(),
       sun: 0,
       checkins: [],
+      sunLog: [],
       settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
       lessonLibrary: JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY))
     };
@@ -1351,6 +1396,7 @@ function loadLocalState(){
   s.days = newDays;
   if(!s.days[s.date]) s.days[s.date] = makeDay();
   if(!Array.isArray(s.checkins)) s.checkins = [];
+  if(!Array.isArray(s.sunLog)) s.sunLog = [];
   if(typeof s.sun !== 'number') s.sun = 0;
   s.settings = normalizeSettings(s.settings);
   s.lessonLibrary = normalizeLessonLibrary(s.lessonLibrary);
@@ -1406,13 +1452,13 @@ let lastPushedUpdatedAt = 0;   // 本机最近一次写入云端的时间戳
 let lastRemoteUpdatedAt = 0;   // 已知的云端最新时间戳
 let uploadFailedNotified = false;
 
-function uploadToCloud(force){
-  if(!dataRef) return Promise.resolve(false);
-  if(isRemoteUpdate && !force) return Promise.resolve(false);
+async function uploadToCloud(force){
+  if(!dataRef) return false;
+  if(isRemoteUpdate && !force) return false;
   // 空设备保护：新设备还没读到云端之前，绝不把内置示例任务推上去
   if(freshBoot && !force && !lastRemoteUpdatedAt){
     console.warn('已跳过上传：本机无历史存档，等待云端数据');
-    return Promise.resolve(false);
+    return false;
   }
   const payload = {
     days: state.days,
@@ -1420,25 +1466,34 @@ function uploadToCloud(force){
     settings: state.settings,
     sun: state.sun,
     checkins: state.checkins,
+    sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
     lessonLibrary: state.lessonLibrary,
     updatedAt: Date.now()
   };
+  const prevPushed = lastPushedUpdatedAt;
   lastPushedUpdatedAt = payload.updatedAt;
   updateSyncInfo();
   try{
-    return set(dataRef, payload).then(() => {
-      uploadFailedNotified = false;
-      return true;
-    }).catch(e => {
-      console.warn('云端上传失败', e);
-      if(!uploadFailedNotified){
-        uploadFailedNotified = true;
-        showSyncStatus('⚠️ 云端上传失败，请检查网络', 'offline');
+    await set(dataRef, payload);
+    try{
+      const snap = await get(dataRef);
+      const vAt = snap.exists() ? Number(snap.val().updatedAt) : 0;
+      if(vAt !== payload.updatedAt){
+        lastPushedUpdatedAt = prevPushed;
+        showSyncStatus('⚠️ 云端写入未生效', 'offline');
+        return false;
       }
-      return false;
-    });
+    }catch(e){ console.warn('上传后验证读取失败（不阻断）', e); }
+    uploadFailedNotified = false;
+    return true;
   }catch(e){
-    return Promise.resolve(false);
+    console.warn('云端上传失败', e);
+    lastPushedUpdatedAt = prevPushed;
+    if(!uploadFailedNotified){
+      uploadFailedNotified = true;
+      showSyncStatus('⚠️ 云端上传失败，请检查网络', 'offline');
+    }
+    return false;
   }
 }
 
@@ -1457,6 +1512,7 @@ function applyRemoteState(remote){
   if(remote.settings) state.settings = normalizeSettings(remote.settings);
   if(typeof remote.sun === 'number') state.sun = remote.sun;
   if(Array.isArray(remote.checkins)) state.checkins = remote.checkins;
+  if(Array.isArray(remote.sunLog)) state.sunLog = remote.sunLog.slice(0, 60);
   if(remote.lessonLibrary) state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary);
   if(rAt) lastRemoteUpdatedAt = rAt;
   saveLocalState();
@@ -1481,17 +1537,17 @@ function startCloudSync(){
   });
 }
 
-/* 读一次云端（Promise 封装，超时返回 null） */
-function readCloudOnce(timeoutMs){
-  return new Promise(resolve => {
-    if(!dataRef){ resolve(null); return; }
-    let done = false;
-    const finish = v => { if(!done){ done = true; resolve(v); } };
-    try{
-      onValue(dataRef, snapshot => finish(snapshot.val()), {onlyOnce: true});
-    }catch(e){ finish(null); }
-    setTimeout(() => finish(null), timeoutMs || 8000);
-  });
+/* 读一次云端：返回 {state:'has-data'|'empty'|'error'|'no-ref', data} */
+async function readCloudOnce(){
+  if(!dataRef) return { state: 'no-ref', data: null };
+  try{
+    const snap = await get(dataRef);
+    if(snap.exists()) return { state: 'has-data', data: snap.val() };
+    return { state: 'empty', data: null };
+  }catch(e){
+    console.warn('读取云端失败', e);
+    return { state: 'error', data: null, error: e };
+  }
 }
 
 let syncInfoTimer = null;
@@ -2391,7 +2447,84 @@ function renderAdminPanel(){
   renderAdminTaskList('math', 'adminMathList', 'adminMathBadge');
   renderLessonLibrary();
   populateLessonSelects();
+  renderSunPanel();
 }
+
+/* ------------------------------------------------------------
+   ☀️ 阳光调整（家长端手动扣除 / 增加，用于兑换奖励）
+   每条调整都写进 state.sunLog 流水，随云端同步，孩子端立刻能看到
+------------------------------------------------------------ */
+function pushSunLog(delta, reason){
+  if(!Array.isArray(state.sunLog)) state.sunLog = [];
+  state.sunLog.unshift({
+    t: Date.now(),
+    delta: Math.round(delta),
+    after: Math.round(Number(state.sun) || 0),
+    reason: reason || (delta < 0 ? '手动扣除' : '手动增加')
+  });
+  if(state.sunLog.length > 60) state.sunLog.length = 60;
+}
+
+function changeSun(delta, reason){
+  const d = Math.round(Number(delta) || 0);
+  if(!d) return false;
+  state.sun = Math.round(Number(state.sun) || 0) + d;
+  pushSunLog(d, reason);
+  saveLocalState();
+  uploadToCloud();
+  renderStats();
+  renderAdminPanel();
+  return true;
+}
+
+function renderSunPanel(){
+  const badge = $('adminSunBadge');
+  if(badge) badge.textContent = state.sun + ' ☀️';
+  const logEl = $('adminSunLog');
+  if(!logEl) return;
+  const log = Array.isArray(state.sunLog) ? state.sunLog : [];
+  if(!log.length){
+    logEl.innerHTML = '<div class="sun-log-empty">还没有阳光调整记录</div>';
+    return;
+  }
+  logEl.innerHTML = log.slice(0, 8).map(e => {
+    const d = Math.round(Number(e.delta) || 0);
+    const cls = d < 0 ? 'minus' : 'plus';
+    let time = '';
+    try{
+      time = new Date(Number(e.t) || Date.now()).toLocaleString('zh-CN', {
+        month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+      });
+    }catch(err){ time = ''; }
+    return '<div class="sun-log-row">'
+      + '<span class="sl-time">' + escapeHtml(time) + '</span>'
+      + '<span class="sl-reason">' + escapeHtml(String(e.reason || '')) + '</span>'
+      + '<span class="sl-delta ' + cls + '">' + (d > 0 ? '+' : '') + d + ' ☀️</span>'
+      + '</div>';
+  }).join('');
+}
+
+function adminSunAdjust(sign){
+  const amtEl = $('adminSunAmount');
+  const reasonEl = $('adminSunReason');
+  const amount = Math.abs(Math.round(Number(amtEl && amtEl.value) || 0));
+  if(!amount){ toast('请输入要调整的阳光数量'); return; }
+  if(amount > 9999){ toast('一次最多调整 9999 ☀️'); return; }
+  const reason = reasonEl ? reasonEl.value : '手动调整';
+  const delta = sign < 0 ? -amount : amount;
+  const now = Math.round(Number(state.sun) || 0);
+  if(delta < 0 && now - amount < 0){
+    if(!confirm('当前阳光只有 ' + now + ' ☀️，扣除 ' + amount + ' 后为 ' + (now - amount) + ' ☀️。\n确定继续吗？')) return;
+  }else{
+    if(!confirm((delta < 0 ? '扣除 ' : '增加 ') + amount + ' ☀️（' + reason + '）？')) return;
+  }
+  if(!changeSun(delta, reason)) return;
+  toast(delta < 0
+    ? '✅ 已扣除 ' + amount + ' ☀️（' + escapeHtml(reason) + '）'
+    : '✅ 已增加 ' + amount + ' ☀️（' + escapeHtml(reason) + '）', 2600);
+}
+$('adminSunMinusBtn').addEventListener('click', () => adminSunAdjust(-1));
+$('adminSunPlusBtn').addEventListener('click', () => adminSunAdjust(1));
 
 function renderAdminTaskList(subject, listId, badgeId){
   const list = document.getElementById(listId);
@@ -2419,6 +2552,8 @@ function renderAdminTaskList(subject, listId, badgeId){
       info.task.done = !info.task.done;
       if(info.task.done) state.sun += info.task.sun;
       else state.sun -= info.task.sun;
+      pushSunLog(info.task.done ? info.task.sun : -info.task.sun,
+                 (info.task.done ? '家长勾选完成：' : '家长取消勾选：') + info.task.text);
       saveLocalState(); uploadToCloud();
       renderStats(); renderBoard(); refreshAllCards();
       renderAdminPanel();
@@ -2488,8 +2623,8 @@ function renderLessonLibrary(){
     return `<div class="lib-row" data-lib-edit="${escapeAttr(name)}" title="双击编辑">
       <div class="lib-lesson">📖 ${escapeHtml(name)}</div>
       <div class="lib-info">
-        <div><b>预习生字：</b>${escapeHtml(preview(item.chars))}</div>
-        <div><b>生字组词：</b>${escapeHtml(preview(item.wordgroups))}</div>
+        <div><b>会写字：</b>${escapeHtml(preview(item.chars))}</div>
+        <div><b>会识字：</b>${escapeHtml(preview(item.wordgroups))}</div>
         <div><b>抄写词语：</b>${escapeHtml(preview(item.words))}</div>
       </div>
       <button class="lib-del" data-lib-del="${escapeAttr(name)}">删除</button>
@@ -2549,7 +2684,7 @@ $('adminLibAddBtn').addEventListener('click', () => {
   const chars = charsEl.value.trim().slice(0,600);
   const wordgroups = wgEl.value.trim().slice(0,600);
   const words = wordsEl.value.trim().slice(0,600);
-  if(!chars && !wordgroups && !words){ toast('生字 / 生字组词 / 抄写词语至少填一项'); return; }
+  if(!chars && !wordgroups && !words){ toast('会写字 / 会识字 / 抄写词语至少填一项'); return; }
   state.lessonLibrary[name] = { chars, wordgroups, words };
   saveLocalState(); uploadToCloud();
   nameEl.value = ''; charsEl.value = ''; wgEl.value = ''; wordsEl.value = '';
@@ -2818,7 +2953,7 @@ $('libEditSave').addEventListener('click', () => {
   const chars = $('libEditChars').value.trim().slice(0,600);
   const wordgroups = $('libEditWordgroups').value.trim().slice(0,600);
   const words = $('libEditWords').value.trim().slice(0,600);
-  if(!chars && !wordgroups && !words){ toast('生字 / 生字组词 / 抄写词语至少填一项'); return; }
+  if(!chars && !wordgroups && !words){ toast('会写字 / 会识字 / 抄写词语至少填一项'); return; }
   if(newName !== editingLibName) delete state.lessonLibrary[editingLibName];
   state.lessonLibrary[newName] = { chars, wordgroups, words };
   saveLocalState(); uploadToCloud();
@@ -2839,11 +2974,11 @@ function openTaskEdit(id){
   const wrap = $('taskEditExtraWrap');
   if(t.type === 'preview'){
     wrap.style.display = '';
-    $('taskEditExtraLabel').textContent = '预习生字（空格分隔）';
+    $('taskEditExtraLabel').textContent = '会写字（空格分隔）';
     $('taskEditExtra').value = (t.chars || []).join(' ');
   } else if(t.type === 'wordgroup'){
     wrap.style.display = '';
-    $('taskEditExtraLabel').textContent = '生字组词（空格分隔）';
+    $('taskEditExtraLabel').textContent = '会识字（空格分隔）';
     $('taskEditExtra').value = (t.words || []).join(' ');
   } else if(t.type === 'copy'){
     wrap.style.display = '';
@@ -2895,8 +3030,8 @@ $('taskEditSave').addEventListener('click', () => {
 });
 
 const LESSON_PICK = {
-  preview:   { sel:'adminPreviewLessonSelect',   hint:'previewLessonHint',   field:'chars',      unit:'字', label:'预习生字' },
-  wordgroup: { sel:'adminWordgroupLessonSelect', hint:'wordgroupLessonHint', field:'wordgroups', unit:'组', label:'生字组词' },
+  preview:   { sel:'adminPreviewLessonSelect',   hint:'previewLessonHint',   field:'chars',      unit:'字', label:'会写字' },
+  wordgroup: { sel:'adminWordgroupLessonSelect', hint:'wordgroupLessonHint', field:'wordgroups', unit:'组', label:'会识字' },
   copy:      { sel:'adminCopyLessonSelect',      hint:'copyLessonHint',      field:'words',      unit:'组', label:'抄写词语' }
 };
 function lessonPickItems(kind){
@@ -2937,35 +3072,35 @@ Object.keys(LESSON_PICK).forEach(kind => {
 $('adminAddPreviewBtn').addEventListener('click', () => {
   const { name, items } = lessonPickItems('preview');
   if(!name){ toast('请先选择课文'); return; }
-  if(!items.length){ toast('「'+escapeHtml(name)+'」还没有预习生字，请到「课文库」补充'); return; }
+  if(!items.length){ toast('「'+escapeHtml(name)+'」还没有会写字，请到「课文库」补充'); return; }
   const chars = items.slice(0, 60);
   const cfg = getUnitCfg('preview');
   const minutes = clamp(Math.round(chars.length * cfg.min), 1, 120);
   const sun = clamp(Math.round(chars.length * cfg.sun), 1, 500);
-  const task = makeTask(`预习生字（${chars.length}字）`, minutes, sun, { type:'preview', chars });
+  const task = makeTask(`会写字（${chars.length}字）`, minutes, sun, { type:'preview', chars });
   state.subjects.chinese.push(task);
   saveLocalState(); uploadToCloud();
   const sel = $('adminPreviewLessonSelect'); if(sel) sel.value = '';
   renderLessonHint('preview');
   renderBoard(); refreshAllCards(); renderAdminPanel();
-  toast('✅ 已添加「'+escapeHtml(name)+'」预习生字（'+chars.length+'字）');
+  toast('✅ 已添加「'+escapeHtml(name)+'」会写字（'+chars.length+'字）');
 });
 
 $('adminAddWordgroupBtn').addEventListener('click', () => {
   const { name, items } = lessonPickItems('wordgroup');
   if(!name){ toast('请先选择课文'); return; }
-  if(!items.length){ toast('「'+escapeHtml(name)+'」还没有生字组词，请到「课文库」补充'); return; }
+  if(!items.length){ toast('「'+escapeHtml(name)+'」还没有会识字，请到「课文库」补充'); return; }
   const words = items.slice(0, 60);
   const cfg = getUnitCfg('wordgroup');
   const minutes = clamp(Math.round(words.length * cfg.min), 1, 120);
   const sun = clamp(Math.round(words.length * cfg.sun), 1, 500);
-  const task = makeTask(`生字组词（${words.length}组）`, minutes, sun, { type:'wordgroup', words });
+  const task = makeTask(`会识字（${words.length}组）`, minutes, sun, { type:'wordgroup', words });
   state.subjects.chinese.push(task);
   saveLocalState(); uploadToCloud();
   const sel = $('adminWordgroupLessonSelect'); if(sel) sel.value = '';
   renderLessonHint('wordgroup');
   renderBoard(); refreshAllCards(); renderAdminPanel();
-  toast('✅ 已添加「'+escapeHtml(name)+'」生字组词（'+words.length+'组）');
+  toast('✅ 已添加「'+escapeHtml(name)+'」会识字（'+words.length+'组）');
 });
 
 $('adminAddCopyBtn').addEventListener('click', () => {
@@ -3081,6 +3216,7 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
     state.date = imported.date || todayStr();
     state.sun = Number(imported.sun) || 0;
     state.checkins = Array.isArray(imported.checkins) ? imported.checkins : [];
+    state.sunLog = Array.isArray(imported.sunLog) ? imported.sunLog : [];
     state.settings = normalizeSettings(imported.settings);
     state.lessonLibrary = normalizeLessonLibrary(imported.lessonLibrary);
 
@@ -3116,16 +3252,21 @@ $('adminForceSyncBtn').addEventListener('click', async () => {
 $('adminForcePullBtn').addEventListener('click', async () => {
   if(!dataRef){ toast('⚠️ 云端未连接'); return; }
   updateSyncInfo('正在读取云端…');
-  const remote = await readCloudOnce(10000);
-  if(remote && remote.days && Object.keys(remote.days).length){
+  const result = await readCloudOnce();
+  if(result.state === 'has-data'
+     && result.data && result.data.days
+     && Object.keys(result.data.days).length){
     // 手动拉取：强制采用云端数据，跳过时间戳保护
     lastPushedUpdatedAt = 0;
     lastRemoteUpdatedAt = 0;
-    applyRemoteState(remote);
+    applyRemoteState(result.data);
     toast('✅ 已从云端拉取最新数据');
-  } else {
+  } else if(result.state === 'empty'){
     toast('⚠️ 云端暂无数据');
     updateSyncInfo('云端暂无数据');
+  } else {
+    toast('⚠️ 读取云端失败，请检查网络');
+    updateSyncInfo('读取云端失败');
   }
 });
 
@@ -3145,14 +3286,33 @@ document.querySelectorAll('.subject-tab').forEach(tab => {
 mainBtn.addEventListener('click', onMainBtnClick);
 
 $('resetBtn').addEventListener('click', () => {
-  if(!confirm('确定要重置当天的打卡吗？')) return;
+  let refund = 0;
+  ['chinese','math'].forEach(k => state.subjects[k].forEach(t => {
+    if(t.done) refund += (Number(t.sun) || 0);
+  }));
+  const ci = state.checkins.indexOf(state.date);
+  if(ci >= 0) refund += 100;
+  const totalRefund = refund;
+  const msg = totalRefund > 0
+    ? '确定要重置当天的打卡吗？\n今天获得的阳光会一并扣回（-' + totalRefund + ' ☀️）'
+    : '确定要重置当天的打卡吗？';
+  if(!confirm(msg)) return;
+  state.sun -= totalRefund;
+  if(totalRefund > 0) pushSunLog(-totalRefund, '重置当天打卡扣回');
+  if(ci >= 0) state.checkins.splice(ci, 1);
   ['chinese','math'].forEach(k => state.subjects[k].forEach(t => { t.done = false; }));
   stopTick(); activeId = null; runtimeMap = {};
-  saveLocalState(); uploadToCloud();
-  renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
+  saveLocalState();
+  uploadToCloud();
+  renderStats();
+  renderBoard();
+  refreshAllCards();
+  updateDogBar();
+  updateMainBtn();
   const first = allTasks().find(t=>!t.done);
   if(first){ activeId = first.id; ensureRuntime(first); refreshAllCards(); updateDogBar(); updateMainBtn(); }
   if(isAdminMode) renderAdminPanel();
+  toast(totalRefund > 0 ? '🔄 已重置当天打卡，扣回 ' + totalRefund + ' ☀️' : '🔄 已重置当天打卡', 2600);
 });
 window.addEventListener('resize', updateDogBar);
 
@@ -3203,18 +3363,28 @@ if(familyIdEl) familyIdEl.textContent = FAMILY_ID;
 
 if(dataRef){
   (async () => {
-    let remote = null;
-    try{ remote = await readCloudOnce(10000); }catch(e){ console.warn('云端读取失败', e); }
-    if(remote && remote.days && Object.keys(remote.days).length){
-      applyRemoteState(remote);
+    const result = await readCloudOnce();
+    if(result.state === 'has-data'
+       && result.data && result.data.days
+       && Object.keys(result.data.days).length){
+      applyRemoteState(result.data);
       console.log('✅ 已从云端加载数据（以云端为准）');
-    } else {
-      console.log('☁️ 云端暂无数据，使用本地数据并上传');
+    }
+    else if(result.state === 'empty'){
+      console.log('☁️ 云端确认为空，用本地数据初始化并上传');
       await uploadToCloud(true);
+    }
+    else {
+      console.warn('⚠️ 读取云端失败（可能是网络问题），暂不上传');
+      showSyncStatus('⚠️ 云端读取失败，稍后重试', 'offline');
     }
     freshBoot = false;
     startCloudSync();
     updateSyncInfo();
+    // 任务名刚做过迁移 → 把改名后的数据回写云端，保证家长端/孩子端一致
+    if(nameMigrated && result.state !== 'error'){
+      try{ await uploadToCloud(true); }catch(e){ console.warn('改名回写云端失败', e); }
+    }
   })();
 } else {
   updateSyncInfo('未连接云端（纯本地模式）');
