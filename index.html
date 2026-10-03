@@ -2050,4 +2050,42 @@ function renderWordGroup(word, showInfo){
       <div class="char-pinyin">${py ? escapeHtml(py) : '&nbsp;'}</div>
       <div class="mizi" data-char="${escapeAttr(c)}" title="单击查看笔顺，双击标记删除线">
         ${miziSvg()}
-       
+        <span class="mizi-char">${escapeHtml(c)}</span>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+/* ============================================================
+   ★ 修复：上传按钮事件绑定（折叠面板内）
+   —— 使用 document 级事件委托 + closest，
+      避免按钮被隐藏/面板重绘/脚本提前报错导致监听失效
+============================================================ */
+document.addEventListener('click', function(e){
+  const btn = e.target.closest('#adminLibSyncBtn');
+  if(!btn) return;
+  e.preventDefault();
+  e.stopPropagation();          // 防止冒泡触发 h3 折叠
+  if(uploadSyncModal){
+    uploadSyncModal.classList.add('show');
+  }
+}, true);   // 捕获阶段，最稳
+
+/* 折叠面板：只绑 h3，且按钮点击不会误触 */
+document.querySelectorAll('.admin-section > h3').forEach(h3 => {
+  h3.addEventListener('click', function(ev){
+    if(ev.target.closest('button, input, select, a')) return;
+    const sec = h3.parentElement;
+    sec.classList.toggle('collapsed');
+    const key = sec.id.replace(/^adminPanel/, '').toLowerCase();
+    if(state && state.settings && state.settings.panelCollapsed &&
+       Object.prototype.hasOwnProperty.call(state.settings.panelCollapsed, key)){
+      state.settings.panelCollapsed[key] = sec.classList.contains('collapsed');
+      saveLocalState();
+    }
+  });
+});
+
+</script>
+</body>
+</html>
