@@ -314,7 +314,6 @@
   .card-progress.chomping{background:linear-gradient(90deg,#FF7043,#BF360C)}
   .task-card.done .card-progress{background:#66BB6A;width:100%!important}
 
-  /* ★ 卡片右上角操作按钮（拍照 / 查看作业） */
   .card-actions{display:flex;flex-direction:row;gap:4px;flex:none;align-items:flex-start}
   .mini-btn{
     font-family:inherit;font-size:15px;line-height:1;padding:0;
@@ -334,7 +333,6 @@
     padding:0 4px;border:1.5px solid #fff;
   }
 
-  /* ★ 照片查看 */
   .photo-card{max-width:600px}
   .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
     gap:8px;margin-top:10px}
@@ -390,11 +388,13 @@
     font-weight:400;color:#000000;
   }
 
+  /* ★ 田字格内的倒计时进度条：高度加倍，位于字体下方，覆盖在田字格之上 */
   .mizi-bar{
-    position:absolute;left:0;bottom:0;height:4px;width:0;
+    position:absolute;left:0;bottom:0;height:8px;width:0;
+    border-radius:0 4px 4px 0;
     background:linear-gradient(90deg,#FFD54F,#FFA000);
     z-index:3;pointer-events:none;
-    box-shadow:0 0 4px rgba(255,167,38,.55);
+    box-shadow:0 1px 4px rgba(255,167,38,.6);
   }
   .mizi-bar.paused{background:linear-gradient(90deg,#FFB74D,#FB8C00)}
   .task-card.done .mizi-bar{display:none}
@@ -787,6 +787,8 @@
     .char-pinyin{font-size:14px;max-width:66px}
     .char-info{font-size:11px}
     .char-grid{gap:6px}
+    /* 小屏田字格进度条高度同步翻倍 */
+    .mizi-bar{height:7px;border-radius:0 3.5px 3.5px 0}
     .eye-card{gap:5px;padding:7px 9px}
     .eye-time{font-size:14px;min-width:46px}
     .eye-card.alert .eye-time{font-size:11px;min-width:62px}
@@ -982,7 +984,6 @@
 
 </div>
 
-<!-- 日历弹窗 -->
 <div class="modal" id="calModal">
   <div class="modal-card cal-card">
     <div class="cal-head">
@@ -1001,7 +1002,6 @@
   </div>
 </div>
 
-<!-- 笔顺弹窗 -->
 <div class="modal" id="strokeModal">
   <div class="modal-card stroke-card">
     <div class="stroke-char-big" id="strokeCharBig">字</div>
@@ -1434,12 +1434,12 @@ const MAX_PHOTOS_PER_TASK = 3;
 const PHOTO_MAX_SIZE = 800;
 const PHOTO_QUALITY = 0.55;
 
-/* ★ 全局计时权威状态（跨设备同步的核心） */
+/* ★ 全局计时权威状态（跨设备 / 刷新持久化 的核心） */
 const DEFAULT_LIVE = {
   activeId: '',
   status: 'idle',        // 'idle' | 'running' | 'paused' | 'chomping'
-  startedAt: 0,          // 当前 running 阶段开始时刻（时间戳）
-  leftAtStart: 0,        // 当前 running 阶段开始时的剩余毫秒
+  startedAt: 0,
+  leftAtStart: 0,
   totalMs: 0,
   rounds: 0,
   chompUntil: 0,
@@ -1603,6 +1603,7 @@ const charTimer = {
   units: [],
   index: 0
 };
+let lastCharPaused = null;
 
 /* ============================================================
    设置规范化
@@ -1675,7 +1676,6 @@ function getEyeCfg(){
     restMin: clamp(Number(ec.restMin) || DEFAULT_SETTINGS.eyeCare.restMin, 1, 60)
   };
 }
-
 function normalizeLessonLibrary(raw){
   const out = {};
   if(!raw || typeof raw !== 'object') return out;
@@ -1692,7 +1692,6 @@ function normalizeLessonLibrary(raw){
   });
   return out;
 }
-
 function makeTask(text, minutes, sun, extra){
   const task = {
     id: newId(),
@@ -1706,7 +1705,6 @@ function makeTask(text, minutes, sun, extra){
   if(extra && extra.words) task.words = extra.words.slice(0, 60);
   return task;
 }
-
 let nameMigrated = false;
 function fixTaskName(text){
   let t = String(text == null ? '' : text);
@@ -1716,9 +1714,7 @@ function fixTaskName(text){
   else if(t.indexOf('生字组词（') === 0){ t = '抄写词语（' + t.slice(5); nameMigrated = true; }
   return t;
 }
-
 function makeDay(){ return { chinese: [], math: [], english: [] }; }
-
 function normalizePhotos(raw){
   if(!Array.isArray(raw)) return [];
   return raw.slice(0, MAX_PHOTOS_PER_TASK).map(p => ({
@@ -1727,7 +1723,6 @@ function normalizePhotos(raw){
     ts: Number((p && p.ts) || 0) || Date.now()
   })).filter(p => p.data);
 }
-
 function normalizeDay(day){
   const out = makeDay();
   ['chinese','math','english'].forEach(k => {
@@ -1751,9 +1746,7 @@ function normalizeDay(day){
   });
   return out;
 }
-
 let freshBoot = false;
-
 function loadLocalState(){
   let s = null;
   try{ s = JSON.parse(localStorage.getItem(STORAGE_KEY)); }catch(e){ s = null; }
@@ -1801,7 +1794,6 @@ function loadLocalState(){
   if(!Object.keys(s.lessonLibrary).length){
     s.lessonLibrary = JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY));
   }
-  /* ★ 规范化 live */
   if(!s.live || typeof s.live !== 'object'){
     s.live = JSON.parse(JSON.stringify(DEFAULT_LIVE));
   } else {
@@ -1809,7 +1801,6 @@ function loadLocalState(){
   }
   return s;
 }
-
 function attachSubjectsProxy(s){
   Object.defineProperty(s, 'subjects', {
     get(){
@@ -1821,7 +1812,6 @@ function attachSubjectsProxy(s){
   });
   return s;
 }
-
 function saveLocalState(){
   pruneDays();
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
@@ -1832,7 +1822,6 @@ function pruneDays(){
     keys.slice(0, keys.length - MAX_DAYS_KEPT).forEach(k => delete state.days[k]);
   }
 }
-
 function allTasks(){ return Object.keys(SUBJECTS).flatMap(k => state.subjects[k] || []); }
 function findTask(id){
   for(const k of Object.keys(SUBJECTS)){
@@ -1860,7 +1849,6 @@ let lastSoundSeq = 0;
 function isLiveOwner(){
   return state && state.live && state.live.ownerTab === TAB_ID;
 }
-
 function liveLeftMs(L){
   L = L || (state && state.live);
   if(!L || !L.activeId) return 0;
@@ -1871,7 +1859,6 @@ function liveLeftMs(L){
   }
   return L.leftAtStart;
 }
-
 function liveEyeLeftMs(L){
   L = L || (state && state.live);
   if(!L || !L.eyeActive) return 0;
@@ -1883,7 +1870,6 @@ function liveEyeLeftMs(L){
   }
   return 0;
 }
-
 function syncRuntimeFromLive(){
   const L = state.live;
   if(!L || !L.activeId) return;
@@ -1895,7 +1881,6 @@ function syncRuntimeFromLive(){
   rt.rounds = L.rounds;
   rt.holdDogAtEnd = (L.status === 'chomping');
 }
-
 function syncLegacyFromLive(){
   const L = state.live;
   if(!L) return;
@@ -1911,7 +1896,6 @@ function syncLegacyFromLive(){
     pauseState.leftMs = 0;
   }
 }
-
 function checkAndPlaySound(){
   const L = state.live;
   if(!L) return;
@@ -1926,8 +1910,6 @@ function checkAndPlaySound(){
   else if(kind === 'eyeAlert') playEyeAlert();
   else if(kind === 'restDone') playRestDone();
 }
-
-let livePushPending = false;
 function pushLive(){
   if(!state || !state.live) return;
   state.live.updatedAt = Date.now();
@@ -1939,7 +1921,6 @@ function pushLive(){
   liveSend({ t:'live', live: state.live });
   ensureTickRunning();
 }
-
 function liveSend(msg){
   const pack = Object.assign({ tab: TAB_ID, ts: Date.now() }, msg || {});
   if(liveChannel){
@@ -1947,7 +1928,6 @@ function liveSend(msg){
   }
   try{ localStorage.setItem(LIVE_KEY, JSON.stringify(pack)); }catch(e){}
 }
-
 if(liveChannel){
   liveChannel.onmessage = e => { try{ liveHandle(e.data); }catch(err){} };
 }else{
@@ -1956,7 +1936,6 @@ if(liveChannel){
     try{ liveHandle(JSON.parse(e.newValue)); }catch(err){}
   });
 }
-
 function liveHandle(pack){
   if(!pack || pack.tab === TAB_ID) return;
   if(pack.t === 'live' && pack.live){
@@ -1968,15 +1947,17 @@ function liveHandle(pack){
       syncRuntimeFromLive();
       checkAndPlaySound();
       renderAllLiveUI();
+      /* ★ 保证本地 tick 处于运行状态（移动端可能之前停过） */
+      if(state.live.activeId || state.live.eyeActive) ensureTickRunning();
     }
   }
 }
-
 function renderAllLiveUI(){
   updateDogBar();
   if(activeId) updateCardVisual(activeId);
   updateEyeUI();
   updateMainBtn();
+  if(charTimer.active) paintCharBarsFromLive();
 }
 
 /* ============================================================
@@ -1989,9 +1970,7 @@ let uploadFailedNotified = false;
 async function uploadToCloud(force){
   if(!dataRef || !fbSet || !fbGet) return false;
   if(isRemoteUpdate && !force) return false;
-  if(freshBoot && !force && !lastRemoteUpdatedAt){
-    return false;
-  }
+  if(freshBoot && !force && !lastRemoteUpdatedAt) return false;
   const payload = {
     days: state.days,
     date: state.date,
@@ -2021,7 +2000,6 @@ async function uploadToCloud(force){
     return false;
   }
 }
-
 function applyRemoteState(remote){
   if(!remote || !remote.days) return;
   const rAt = Number(remote.updatedAt) || 0;
@@ -2056,12 +2034,22 @@ function applyRemoteState(remote){
   syncRuntimeFromLive();
   checkAndPlaySound();
   updateDogBar(); updateMainBtn(); updateDateText(); updateEyeUI();
+  if(charTimer.active) paintCharBarsFromLive();
   if(isAdminMode) renderAdminPanel();
   isRemoteUpdate = false;
   showSyncStatus('☁️ 已从云端更新', 'online');
   updateSyncInfo();
+  /* ★ 关键：云端有活跃任务/护眼时，强制启动 tick（修复移动端停止问题） */
+  if(state.live && (state.live.activeId || state.live.eyeActive)){
+    ensureTickRunning();
+    /* 保证 charTimer 已初始化 */
+    setTimeout(() => {
+      if(state.live.activeId && (!charTimer.active || charTimer.taskId !== state.live.activeId)){
+        initCharTimer(state.live.activeId);
+      }
+    }, 60);
+  }
 }
-
 let cloudListener = null;
 function startCloudSync(){
   if(!dataRef || !fbOnValue || cloudListener) return;
@@ -2074,7 +2062,6 @@ function startCloudSync(){
     showSyncStatus('⚠️ 云端连接失败', 'offline');
   });
 }
-
 async function readCloudOnce(){
   if(!dataRef || !fbGet) return { state: 'no-ref', data: null };
   try{
@@ -2086,7 +2073,6 @@ async function readCloudOnce(){
     return { state: 'error', data: null, error: e };
   }
 }
-
 let syncInfoTimer = null;
 function updateSyncInfo(text){
   const el = document.getElementById('adminSyncInfo');
@@ -2225,7 +2211,6 @@ function toast(msg, ms){
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), ms||2800);
 }
-
 function calcStreak(){
   const set = new Set(state.checkins);
   const d = new Date();
@@ -2314,7 +2299,6 @@ function bindMiziClicks(container){
 const cameraInput = $('cameraInput');
 let pendingPhotoTaskId = null;
 let photoViewTaskId = null;
-
 function getTaskPhotos(task){
   return (task && Array.isArray(task.photos)) ? task.photos : [];
 }
@@ -2499,7 +2483,6 @@ function renderSubjectCards(subject, listEl){
 
     const actions = document.createElement('div');
     actions.className = 'card-actions';
-
     const camBtn = document.createElement('button');
     camBtn.type = 'button';
     camBtn.className = 'mini-btn';
@@ -2544,7 +2527,6 @@ function renderSubjectCards(subject, listEl){
   });
   tasks.forEach(t => updateCardVisual(t.id));
 }
-
 function updateCardVisual(id){
   const ref = cardRefs[id];
   if(!ref) return;
@@ -2597,7 +2579,7 @@ function updateCardVisual(id){
 function refreshAllCards(){ Object.keys(cardRefs).forEach(id => updateCardVisual(id)); }
 
 /* ============================================================
-   田字格倒计时
+   田字格倒计时（★ 完全从 state.live 派生，刷新后自动恢复）
 ============================================================ */
 function charBarEnsure(mizi){
   let bar = mizi.querySelector('.mizi-bar');
@@ -2613,6 +2595,7 @@ function clearCharTimer(){
   charTimer.taskId = null;
   charTimer.units = [];
   charTimer.index = 0;
+  lastCharPaused = null;
 }
 function attachCharBars(units, reset){
   units.forEach(u => {
@@ -2663,7 +2646,7 @@ function initCharTimer(taskId){
   charTimer.mode = built.mode;
   charTimer.units = built.units;
   charTimer.index = 0;
-  paintCharBars();
+  paintCharBarsFromLive();
 }
 function rebindCharTimer(){
   if(!charTimer.active || !charTimer.taskId) return;
@@ -2686,39 +2669,52 @@ function rebindCharTimer(){
   if(groups.length !== charTimer.units.length){ clearCharTimer(); return; }
   charTimer.units.forEach((u, i) => { u.mizis = groups[i]; });
   attachCharBars(charTimer.units, false);
-  paintCharBars();
+  paintCharBarsFromLive();
 }
-function paintCharBars(){
-  if(!charTimer.active) return;
+/* ★ 从 live 派生田字格进度，刷新/多端切换后自动恢复 */
+function paintCharBarsFromLive(){
+  if(!charTimer.active || !charTimer.units.length) return;
+  const L = state.live;
+  if(!L || L.activeId !== charTimer.taskId){
+    /* 任务不匹配：全部归零 */
+    charTimer.units.forEach(u => u.bars.forEach(b => {
+      if(b.__w !== '0%'){ b.__w = '0%'; b.style.width = '0%'; }
+    }));
+    return;
+  }
+  const totalMs = Math.max(1, L.totalMs || 1);
+  let elapsed;
+  if(L.status === 'paused') elapsed = totalMs - (L.leftAtStart || 0);
+  else if(L.status === 'chomping') elapsed = totalMs;
+  else elapsed = totalMs - liveLeftMs(L);
+  elapsed = clamp(elapsed, 0, totalMs);
+
+  /* 计算单位权重总和 */
+  let S = 0;
+  for(let i = 0; i < charTimer.units.length; i++) S += charTimer.units[i].totalMs;
+  if(S <= 0) return;
+  const target = (elapsed / totalMs) * S;
+
+  let acc = 0, index = 0, unitElapsed = 0;
+  for(let i = 0; i < charTimer.units.length; i++){
+    const u = charTimer.units[i];
+    if(target < acc + u.totalMs || i === charTimer.units.length - 1){
+      index = i;
+      unitElapsed = clamp(target - acc, 0, u.totalMs);
+      break;
+    }
+    acc += u.totalMs;
+  }
+  charTimer.index = index;
   charTimer.units.forEach((u, i) => {
     let w;
-    if(i < charTimer.index) w = '100%';
-    else if(i === charTimer.index) w = (clamp(1 - u.leftMs/u.totalMs, 0, 1) * 100) + '%';
+    if(i < index) w = '100%';
+    else if(i === index) w = (clamp(unitElapsed / u.totalMs, 0, 1) * 100) + '%';
     else w = '0%';
     u.bars.forEach(b => {
       if(b.__w !== w){ b.__w = w; b.style.width = w; }
     });
   });
-}
-function tickChar(dt){
-  if(!charTimer.active) return;
-  const u = charTimer.units[charTimer.index];
-  if(!u) return;
-  u.leftMs -= dt;
-  if(u.leftMs <= 0){
-    charTimer.index++;
-    if(charTimer.index >= charTimer.units.length){
-      charTimer.index = 0;
-      charTimer.units.forEach(x => { x.leftMs = x.totalMs; });
-    }
-  }
-  paintCharBars();
-}
-function resetCharProgress(){
-  if(!charTimer.active) return;
-  charTimer.index = 0;
-  charTimer.units.forEach(u => { u.leftMs = u.totalMs; });
-  paintCharBars();
 }
 function setCharPaused(p){
   if(!charTimer.active) return;
@@ -2726,7 +2722,7 @@ function setCharPaused(p){
 }
 
 /* ============================================================
-   ★ 护眼 UI（从 state.live 派生）
+   ★ 护眼 UI
 ============================================================ */
 function moveEyeToken(p){
   if(!eyeTokenEl || !eyeRailEl) return;
@@ -2735,14 +2731,12 @@ function moveEyeToken(p){
   eyeTokenEl.style.transform = 'translate(' + x.toFixed(2) + 'px, -50%)';
   if(eyeFillEl) eyeFillEl.style.width = (clamp(p, 0, 1) * 100) + '%';
 }
-
 function updateEyeUI(){
   const card = $('eyeCard');
   if(!card) return;
   const timeEl  = $('eyeTime');
   const btn = $('eyeRestBtn');
   const L = state.live;
-
   let p = 0;
   if(!L || !L.eyeActive){
     card.className = 'eye-card idle';
@@ -2768,7 +2762,6 @@ function updateEyeUI(){
     if(btn){ btn.disabled = true; btn.textContent = '放松中…'; }
     p = L.eyeTotalMs > 0 ? (left / L.eyeTotalMs) : 0;
   }
-
   moveEyeToken(p);
 }
 
@@ -2785,7 +2778,7 @@ function ensureRuntime(task){
 function cleanupRuntime(){
   const ids = new Set(allTasks().map(t=>t.id));
   for(const id in runtimeMap){ if(!ids.has(id)) delete runtimeMap[id]; }
-  if(activeId && !ids.has(activeId)){ stopTick(); activeId = null; }
+  if(activeId && !ids.has(activeId)){ activeId = null; }
 }
 function setDogProgress(p){
   const trackW = trackEl.clientWidth || 300;
@@ -2924,11 +2917,9 @@ function confetti(){
 }
 
 /* ============================================================
-   ★ 计时主循环（100ms 一次，本地计算）
+   ★ 计时主循环
 ============================================================ */
 let lastTickedActiveId = null;
-let lastRenderedRound = -1;
-let lastRenderedStatus = '';
 
 function tick(){
   if(!state || !state.live) return;
@@ -2941,7 +2932,6 @@ function tick(){
     if(L.status === 'running' && amOwner){
       const left = liveLeftMs(L);
       if(left <= 0){
-        /* 轮次结束 - 仅 owner 处理 */
         L.rounds = (L.rounds || 0) + 1;
         L.status = 'chomping';
         L.chompUntil = now + CHOMP_HOLD_MS;
@@ -2949,10 +2939,8 @@ function tick(){
         L.startedAt = now;
         L.soundSeq = (L.soundSeq || 0) + 1;
         L.soundKind = 'round';
-        /* 扣金币 */
         state.sun -= 1;
         pushSunLog(-1, '未完成扣 1 金币');
-        /* 显示扣金币动画 */
         sunAnchor.classList.add('eaten');
         dogEl.classList.remove('running');
         dogEl.classList.add('chomp');
@@ -2960,7 +2948,6 @@ function tick(){
         flySunAway(1);
         setTimeout(() => { sunAnchor.classList.remove('eaten'); }, 650);
         toast('⏰ 第 <b>' + L.rounds + '</b> 轮结束，任务未完成！<br>扣掉 1 颗金币 💰', 3200);
-        resetCharProgress();
         pushLive();
       }
     }
@@ -3026,13 +3013,14 @@ function tick(){
     }
   }
 
-  /* 本地平滑推进 charTimer */
-  if(L.activeId && L.status === 'running' && charTimer.active){
-    tickChar(100);
-  } else if(L.activeId && L.status === 'paused' && charTimer.active){
-    setCharPaused(true);
-  } else if(L.activeId && L.status === 'running' && charTimer.active){
-    setCharPaused(false);
+  /* ★ 田字格进度：直接从 live 派生（刷新/多端均自动恢复） */
+  if(charTimer.active && charTimer.taskId === L.activeId){
+    paintCharBarsFromLive();
+    const wantPaused = (L.status === 'paused');
+    if(wantPaused !== lastCharPaused){
+      setCharPaused(wantPaused);
+      lastCharPaused = wantPaused;
+    }
   }
 
   /* dog 动画 */
@@ -3072,14 +3060,13 @@ function stopTick(){
 }
 
 /* ============================================================
-   任务操作（写入 state.live）
+   任务操作
 ============================================================ */
 function liveStartTask(taskId){
   const info = findTask(taskId);
   if(!info || info.task.done) return;
   const L = state.live;
   const totalMs = clamp(Number(info.task.minutes)||10, 0.5, 120) * 60000;
-
   L.activeId = taskId;
   L.status = 'running';
   L.startedAt = Date.now();
@@ -3090,7 +3077,6 @@ function liveStartTask(taskId){
   L.ownerTab = TAB_ID;
   L.soundSeq = (L.soundSeq || 0) + 1;
   L.soundKind = 'start';
-
   if(!L.eyeActive){
     const cfg = getEyeCfg();
     L.eyeActive = true;
@@ -3099,17 +3085,19 @@ function liveStartTask(taskId){
     L.eyeTotalMs = cfg.useMin * 60000;
     L.eyeNagCount = 0;
   }
-  /* 立即更新本地显示 */
   ensureRuntime(info.task);
   ensureTickRunning();
   pushLive();
-  initCharTimer(taskId);
+  /* 立即初始化田字格 */
+  if(!charTimer.active || charTimer.taskId !== taskId) initCharTimer(taskId);
+  else rebindCharTimer();
+  lastCharPaused = false;
   setCharPaused(false);
+  paintCharBarsFromLive();
   refreshAllCards();
   updateDogBar(); updateMainBtn();
   scrollToCard(taskId);
 }
-
 function livePause(){
   const L = state.live;
   if(!L.activeId || L.status !== 'running') return;
@@ -3121,11 +3109,11 @@ function livePause(){
   L.soundSeq = (L.soundSeq || 0) + 1;
   L.soundKind = 'pause';
   pushLive();
-  setCharPaused(true);
+  setCharPaused(true); lastCharPaused = true;
+  paintCharBarsFromLive();
   refreshAllCards(); updateDogBar(); updateMainBtn();
   toast('⏸ 已暂停，倒计时停留在当前时间', 1800);
 }
-
 function liveResume(){
   const L = state.live;
   if(!L.activeId || L.status !== 'paused') return;
@@ -3135,11 +3123,11 @@ function liveResume(){
   L.soundSeq = (L.soundSeq || 0) + 1;
   L.soundKind = 'resume';
   pushLive();
-  setCharPaused(false);
+  setCharPaused(false); lastCharPaused = false;
+  paintCharBarsFromLive();
   refreshAllCards(); updateDogBar(); updateMainBtn();
   toast('▶ 已恢复倒计时', 2000);
 }
-
 function liveStopTask(){
   const L = state.live;
   L.activeId = '';
@@ -3152,7 +3140,6 @@ function liveStopTask(){
   clearCharTimer();
   pushLive();
 }
-
 function liveStartEyeRest(){
   const L = state.live;
   if(!L.eyeActive) return;
@@ -3166,7 +3153,6 @@ function liveStartEyeRest(){
   pushLive();
   toast('😌 放松眼睛计时开始（' + cfg.restMin + ' 分钟）', 2200);
 }
-
 function liveStopEyeCare(){
   const L = state.live;
   if(!L.eyeActive) return;
@@ -3205,7 +3191,6 @@ function onMainBtnClick(){
 ============================================================ */
 let pwdPurpose = '';
 let pendingCheckId = null;
-
 function currentParentPassword(){
   return (state && typeof state.parentPassword === 'string' && /^\d{4}$/.test(state.parentPassword))
     ? state.parentPassword
@@ -3254,14 +3239,12 @@ function confirmPassword(){
   else if(purpose === 'pause') livePause();
   else if(purpose === 'check'){ if(checkId) doToggleTaskDone(checkId); }
 }
-
 function requestPause(){
   const L = state.live;
   if(!L.activeId || L.status !== 'running') return;
   pwdPurpose = 'pause';
   openPwdModal('⏸ 暂停确认', '暂停倒计时需要家长密码');
 }
-
 function toggleTaskDone(id){
   const info = findTask(id);
   if(!info) return;
@@ -3273,7 +3256,6 @@ function toggleTaskDone(id){
     info.task.done ? '取消完成需要家长密码' : '确认完成作业需要家长密码'
   );
 }
-
 function doToggleTaskDone(id){
   const info = findTask(id);
   if(!info) return;
@@ -3289,12 +3271,10 @@ function doToggleTaskDone(id){
   }
   completeTask(id);
 }
-
 function completeTask(id){
   const info = findTask(id);
   if(!info || info.task.done) return;
   const task = info.task;
-
   if(state.live.activeId === id){
     liveStopTask();
   }
@@ -3310,11 +3290,9 @@ function completeTask(id){
   toast('✅ 「'+escapeHtml(task.text)+'」完成！<br>结算 +'+reward+' 💰', 2400);
   setTimeout(() => autoStartNext(), 700);
 }
-
 function autoStartNext(){
   const next = allTasks().find(t=>!t.done);
   if(!next){
-    /* 全部完成 */
     liveStopTask();
     liveStopEyeCare();
     if(!state.checkins.includes(state.date)) state.checkins.push(state.date);
@@ -3345,7 +3323,6 @@ function switchSubject(subject){
   appRootEl.classList.toggle('theme-math', subject === 'math');
   appRootEl.classList.toggle('theme-english', subject === 'english');
 }
-
 function switchDate(dateStr){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return;
   liveStopTask();
@@ -3382,7 +3359,6 @@ function renderCalendar(){
   const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
   const prevMonthDays = new Date(calYear, calMonth, 0).getDate();
   const today = todayStr();
-
   for(let i = startWeek - 1; i >= 0; i--){
     const cell = document.createElement('div');
     cell.className = 'cal-day other-month';
@@ -3396,7 +3372,6 @@ function renderCalendar(){
     cell.textContent = d;
     if(dateStr === today) cell.classList.add('today');
     if(dateStr === state.date) cell.classList.add('selected');
-
     const day = state.days[dateStr];
     if(day){
       const all = [...(day.chinese||[]), ...(day.math||[]), ...(day.english||[])];
@@ -3447,7 +3422,6 @@ const strokeCharBig = $('strokeCharBig');
 const strokePinyinEl = $('strokePinyinEl');
 const strokeMetaEl = $('strokeMetaEl');
 let lastStrokeChar = '';
-
 function showStroke(char){
   if(!char || !/[\u4e00-\u9fa5]/.test(char)) return;
   lastStrokeChar = char;
@@ -3522,7 +3496,6 @@ $('adminEntryBtn').addEventListener('click', () => {
   pwdPurpose = 'admin';
   openPwdModal('🔑 家长验证', '请输入家长密码进入管理面板');
 });
-
 function enterAdminMode(){
   isAdminMode = true;
   adminBar.classList.add('show');
@@ -3539,7 +3512,6 @@ function exitAdminMode(){
 }
 $('adminExitBtn').addEventListener('click', exitAdminMode);
 $('adminCloseBtn').addEventListener('click', exitAdminMode);
-
 $('eyeRestBtn').addEventListener('click', () => {
   const L = state.live;
   if(!L.eyeActive) return;
@@ -3562,7 +3534,6 @@ function renderAdminPanel(){
   $('adminSyncStatus').textContent = '☁️ 已连接云端';
   const dateInput = $('adminDateInput');
   if(dateInput) dateInput.value = state.date;
-
   const st = state.settings || DEFAULT_SETTINGS;
   UNIT_FIELDS.forEach(([t, minId, sunId]) => {
     const u = (st.unit && st.unit[t]) || DEFAULT_SETTINGS.unit[t];
@@ -3571,7 +3542,6 @@ function renderAdminPanel(){
     if(minEl) minEl.value = u.min;
     if(sunEl) sunEl.value = u.sun;
   });
-
   renderAdminTaskList('chinese', 'adminChineseList', 'adminChineseBadge');
   renderAdminTaskList('math', 'adminMathList', 'adminMathBadge');
   renderAdminTaskList('english', 'adminEnglishList', 'adminEnglishBadge');
@@ -3583,7 +3553,6 @@ function renderAdminPanel(){
   applyAdminPanelStates();
   syncLastInputFields();
 }
-
 function renderEyePanel(){
   const st = state.settings || DEFAULT_SETTINGS;
   const ec = (st.eyeCare && typeof st.eyeCare === 'object') ? st.eyeCare : DEFAULT_SETTINGS.eyeCare;
@@ -3606,7 +3575,6 @@ $('adminEyeSaveBtn').addEventListener('click', () => {
   renderEyePanel();
   toast('✅ 护眼提醒设置已保存');
 });
-
 function renderPwdPanel(){
   const hint = $('adminPwdHint');
   if(!hint) return;
@@ -3634,7 +3602,6 @@ $('adminResetPwdBtn').addEventListener('click', () => {
   renderPwdPanel();
   toast('✅ 已恢复默认密码 0702');
 });
-
 function pushSunLog(delta, reason){
   if(!Array.isArray(state.sunLog)) state.sunLog = [];
   state.sunLog.unshift({
@@ -3723,7 +3690,6 @@ function renderAdminTaskList(subject, listId, badgeId){
       <button class="at-del" data-del="${escapeAttr(t.id)}" data-subject="${subject}">删除</button>
     </div>
   `).join('');
-
   list.querySelectorAll('[data-toggle]').forEach(el => {
     el.addEventListener('click', e => {
       e.stopPropagation();
@@ -3745,7 +3711,6 @@ function renderAdminTaskList(subject, listId, badgeId){
       renderAdminPanel();
     });
   });
-
   let dragId = null;
   list.querySelectorAll('.admin-task-row').forEach(row => {
     row.addEventListener('dragstart', e => {
@@ -3786,7 +3751,6 @@ function renderAdminTaskList(subject, listId, badgeId){
     });
   });
 }
-
 function syncLastInputFields(){
   const li = state.settings.lastInputs || DEFAULT_SETTINGS.lastInputs;
   const map = {
@@ -3866,7 +3830,6 @@ UNIT_FIELDS.forEach(([t, minId, sunId]) => {
   minEl.addEventListener('change', save);
   sunEl.addEventListener('change', save);
 });
-
 ['adminAddChineseMin','adminAddChineseSun','adminAddMathMin','adminAddMathSun','adminAddEnglishMin','adminAddEnglishSun','adminSunAmount'].forEach(id => {
   const el=$(id);
   if(el) el.addEventListener('change', () => {
@@ -3904,7 +3867,6 @@ function renderLessonLibrary(){
       <button class="lib-del" data-lib-del="${escapeAttr(name)}">删除</button>
     </div>`;
   }).join('');
-
   list.querySelectorAll('[data-lib-del]').forEach(el => {
     el.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -3916,12 +3878,10 @@ function renderLessonLibrary(){
       toast('已删除课文库条目');
     });
   });
-
   list.querySelectorAll('[data-lib-edit]').forEach(el => {
     el.addEventListener('dblclick', () => openLibEdit(el.dataset.libEdit));
   });
 }
-
 function populateLessonSelects(){
   const lib = state.lessonLibrary || {};
   const keys = Object.keys(lib).sort();
@@ -3946,7 +3906,6 @@ function populateLessonSelects(){
     renderLessonHint('preview'); renderLessonHint('wordgroup'); renderLessonHint('copy');
   }catch(e){}
 }
-
 $('adminLibAddBtn').addEventListener('click', () => {
   const nameEl = $('adminLibLesson');
   const charsEl = $('adminLibChars');
@@ -4318,7 +4277,6 @@ Object.keys(LESSON_PICK).forEach(kind => {
   const sel = $(cfg.sel);
   if(sel) sel.addEventListener('change', () => renderLessonHint(kind));
 });
-
 $('adminAddPreviewBtn').addEventListener('click', () => {
   const { name, items } = lessonPickItems('preview');
   if(!name){ toast('请先选择课文'); return; }
@@ -4367,7 +4325,6 @@ $('adminAddCopyBtn').addEventListener('click', () => {
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加「'+escapeHtml(name)+'」抄写词语（'+words.length+'组）');
 });
-
 $('adminAddChineseBtn').addEventListener('click', () => {
   const textEl = $('adminAddChineseText');
   const minEl = $('adminAddChineseMin');
@@ -4417,7 +4374,6 @@ $('adminAddEnglishBtn').addEventListener('click', () => {
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加英语作业：「'+escapeHtml(text)+'」');
 });
-
 $('adminDateInput').addEventListener('change', e => {
   const v = e.target.value;
   if(v) switchDate(v);
@@ -4500,7 +4456,6 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
     toast('⚠️ 本地上传失败：' + err.message);
   }
 });
-
 $('adminForceSyncBtn').addEventListener('click', async () => {
   if(!dataRef){ toast('⚠️ 云端未连接'); return; }
   updateSyncInfo('正在上传…');
@@ -4542,15 +4497,29 @@ window.addEventListener('resize', () => {
   measureEyeRail();
   updateEyeUI();
 });
-
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState === 'visible'){
     lastTs = performance.now();
+    /* ★ 回到前台：确保 tick 在跑，并重新派生 UI */
     if(state.live && (state.live.activeId || state.live.eyeActive)) ensureTickRunning();
     syncLegacyFromLive();
     syncRuntimeFromLive();
+    if(charTimer.active) paintCharBarsFromLive();
     renderAllLiveUI();
   }
+});
+/* 页面获得焦点时也检查一次（移动端从后台切回时更可靠） */
+window.addEventListener('focus', () => {
+  lastTs = performance.now();
+  if(state.live && (state.live.activeId || state.live.eyeActive)) ensureTickRunning();
+  if(charTimer.active) paintCharBarsFromLive();
+  renderAllLiveUI();
+});
+window.addEventListener('pageshow', () => {
+  lastTs = performance.now();
+  if(state.live && (state.live.activeId || state.live.eyeActive)) ensureTickRunning();
+  if(charTimer.active) paintCharBarsFromLive();
+  renderAllLiveUI();
 });
 
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
@@ -4560,9 +4529,7 @@ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
       .catch(err => console.log('SW 注册失败:', err));
   });
 }
-
 window.addEventListener('beforeunload', () => {
-  /* 主动放弃 owner，让其他端可以接管 */
   if(isLiveOwner() && state && state.live && (state.live.status === 'running' || state.live.status === 'chomping')){
     try{
       state.live.ownerTab = '';
@@ -4600,7 +4567,6 @@ requestAnimationFrame(() => {
   if(!L || !L.activeId) return;
   const info = findTask(L.activeId);
   if(!info || info.task.done){
-    /* 任务已被删除或已完成，清空 live */
     L.activeId = '';
     L.status = 'idle';
     L.startedAt = 0;
@@ -4609,7 +4575,6 @@ requestAnimationFrame(() => {
     return;
   }
   ensureRuntime(info.task);
-  /* 如果是 running/chomping，本端接管 owner */
   if(L.status === 'running' || L.status === 'chomping'){
     L.ownerTab = TAB_ID;
     L.updatedAt = Date.now();
@@ -4619,11 +4584,11 @@ requestAnimationFrame(() => {
   renderAllLiveUI();
   refreshAllCards();
   ensureTickRunning();
-  /* 延迟初始化 charTimer，等 DOM 就绪 */
   setTimeout(() => {
-    if(state.live.activeId && (state.live.status === 'running' || state.live.status === 'chomping')){
+    if(state.live.activeId && (state.live.status === 'running' || state.live.status === 'chomping' || state.live.status === 'paused')){
       initCharTimer(state.live.activeId);
-      if(state.live.status === 'paused') setCharPaused(true);
+      if(state.live.status === 'paused'){ setCharPaused(true); lastCharPaused = true; }
+      paintCharBarsFromLive();
     }
   }, 220);
 })();
