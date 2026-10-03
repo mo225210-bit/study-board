@@ -39,7 +39,6 @@
     --c-main:#6FC3E8;--c-dark:#4FA8D8;--c-deep:#3D8FC0;--c-border:#2E7FA8;
     --c-btn:#29A3D6;--c-btn-shade:#1B7FA8;--c-light:#E1F5FE;--c-soft:#E8F5FE;--c-text:#0277BD;
   }
-  /* ★ 新增：英语主题色（与英语栏蓝色系一致） */
   .app.theme-english{
     --c-main:#64B5F6;--c-dark:#42A5F5;--c-deep:#1976D2;--c-border:#1565C0;
     --c-btn:#1E88E5;--c-btn-shade:#0D47A1;--c-light:#E3F2FD;--c-soft:#EAF4FE;--c-text:#0D47A1;
@@ -149,9 +148,6 @@
   .timer-btn:disabled{opacity:.55;cursor:not-allowed;transform:none!important;
     background:linear-gradient(180deg,#BDBDBD,#9E9E9E);border-color:#9E9E9E;box-shadow:0 4px 0 #757575;color:#fff}
 
-  /* ============================================================
-     ★ 护眼提醒卡片（同一行：计时 · 用眼 · 进度条 · 放松 · 按钮）
-  ============================================================ */
   .eye-card{
     display:flex;align-items:center;gap:8px;flex-wrap:nowrap;
     background:rgba(255,255,255,.92);border:2px solid #fff;border-radius:16px;
@@ -394,7 +390,6 @@
     font-weight:400;color:#000000;
   }
 
-  /* ★ 田字格内的倒计时进度条 */
   .mizi-bar{
     position:absolute;left:0;bottom:0;height:4px;width:0;
     background:linear-gradient(90deg,#FFD54F,#FFA000);
@@ -450,7 +445,6 @@
     transition:all .15s;white-space:nowrap}
   .btn-main:active{transform:translateY(2px)}
 
-  /* ✅ 弹窗内表单 */
   .form-field{margin-bottom:10px}
   .form-field>label{display:block;font-size:12px;font-weight:800;color:#5b7a5b;margin-bottom:5px;padding-left:2px}
   .form-field input{
@@ -683,13 +677,11 @@
   .admin-add-row.inline-row .aa-unit{font-size:10.5px;flex:none;white-space:nowrap}
   .admin-add-row.inline-row .aa-btn{padding:10px 12px;flex:none;font-size:12.5px}
 
-  /* ★ 家长端自定义作业：多行文本框 */
   .admin-add-row textarea.aa-text{
     flex:1 1 100%;width:100%;min-height:76px;
     resize:vertical;line-height:1.6;font-size:13.5px;
     font-family:inherit;
   }
-  /* ★ 金币调整：下拉框收窄，金币输入框加大 */
   #adminSunReason{
     flex:0 0 auto;
     width:126px;
@@ -752,7 +744,6 @@
   }
   .admin-sub-label:first-of-type{margin-top:6px}
 
-  /* ✅ 课文库行 */
   .lib-row{
     display:flex;align-items:flex-start;gap:10px;padding:10px 12px;
     background:rgba(255,255,255,.05);border-radius:12px;margin-bottom:6px;
@@ -796,7 +787,6 @@
     .char-pinyin{font-size:14px;max-width:66px}
     .char-info{font-size:11px}
     .char-grid{gap:6px}
-    /* ★ 护眼同一行：小屏缩紧间距与尺寸 */
     .eye-card{gap:5px;padding:7px 9px}
     .eye-time{font-size:14px;min-width:46px}
     .eye-card.alert .eye-time{font-size:11px;min-width:62px}
@@ -813,14 +803,11 @@
     .admin-add-row.inline-row .aa-num{width:44px;font-size:11px;padding:8px 2px}
     .admin-add-row.inline-row .aa-unit{font-size:9px;letter-spacing:-.3px}
     .admin-add-row.inline-row .aa-btn{padding:8px 8px;font-size:11px}
-    /* ★ 卡片操作按钮小屏缩紧 */
     .mini-btn{width:26px;height:26px;font-size:13px;border-radius:8px}
-    /* ★ 金币调整小屏适配 */
     #adminSunReason{width:104px;font-size:11.5px;padding:8px 5px}
     #adminSunAmount{width:76px;font-size:15px;padding:8px 4px}
   }
 
-  /* 首页紧凑布局 */
   .home-compact .col-head{padding:2px 4px;margin-bottom:4px;background:transparent;border:0;box-shadow:none}
   .home-compact .col-title{font-size:12px}
   .home-compact .col-count{font-size:9px;padding:1px 6px}
@@ -835,7 +822,6 @@
   .home-compact .toolbar{gap:6px}
   .home-compact .btn-ghost{padding:6px 12px;font-size:11.5px}
 
-  /* ===== 学生页作业折叠 / 双击删除线 / 自定义作业字体 / 英语 ===== */
   .task-card.done .char-grid{display:none}
   .mizi.struck .mizi-char{text-decoration:line-through;text-decoration-thickness:3px;text-decoration-color:#D32F2F}
   .mizi.struck{background:#E8F5E9;box-shadow:inset 0 0 0 2px rgba(211,47,47,.12)}
@@ -857,7 +843,6 @@
     background:linear-gradient(180deg,#64B5F6,#1976D2);box-shadow:0 3px 0 #0D47A1
   }
 
-  /* 家长端折叠面板 */
   .admin-section.collapsed{padding-bottom:8px}
   .admin-section>h3{cursor:pointer;user-select:none}
   .admin-section>h3::after{content:'⌃';margin-left:auto;color:#7a9aaa;font-size:14px}
@@ -870,7 +855,6 @@
   .admin-task-row:active{cursor:grabbing}
   .drag-handle{font-size:15px;color:#7a9aaa;flex:none}
 
-  /* ★ 抄写并组词的田字格不显示偏旁和结构 */
   .word-group.no-char-info .char-info{display:none}
 
 </style>
@@ -915,7 +899,6 @@
     <div class="timer-hint" id="timerHint">点击右侧按钮开始倒计时</div>
   </div>
 
-  <!-- ★ 护眼提醒：同一行「计时 · 用眼 · 进度条 · 放松 · 放松眼睛」 -->
   <div class="eye-card idle" id="eyeCard">
     <div class="eye-time" id="eyeTime">--:--</div>
     <span class="eye-end eye-end-l">用眼</span>
@@ -924,21 +907,17 @@
       <div class="eye-token" id="eyeToken">
         <svg class="ce-svg" viewBox="0 0 48 48" aria-hidden="true">
           <g class="ce-eye">
-            <!-- 睫毛 -->
             <path d="M12 12.2 L9 6.6" stroke="#4FA8D8" stroke-width="2.6" stroke-linecap="round"/>
             <path d="M24 9.2 L24 3.4" stroke="#4FA8D8" stroke-width="2.6" stroke-linecap="round"/>
             <path d="M36 12.2 L39 6.6" stroke="#4FA8D8" stroke-width="2.6" stroke-linecap="round"/>
-            <!-- 眼白 -->
             <ellipse cx="24" cy="26" rx="18" ry="13.5" fill="#ffffff"
                      stroke="#3D8FC0" stroke-width="2.6"/>
-            <!-- 眼珠 -->
             <g class="ce-iris">
               <circle cx="24" cy="26" r="8.4" fill="#6FC3E8"/>
               <circle cx="24" cy="26" r="4.6" fill="#12304A"/>
               <circle cx="20.6" cy="22.6" r="2.5" fill="#ffffff"/>
               <circle cx="27" cy="29.2" r="1.2" fill="#ffffff" opacity=".85"/>
             </g>
-            <!-- 放松时的闭眼弧线 -->
             <path class="ce-lid" d="M8.6 25 Q24 32.6 39.4 25" fill="none"
                   stroke="#3D8FC0" stroke-width="2.6" stroke-linecap="round"/>
           </g>
@@ -1036,7 +1015,6 @@
   </div>
 </div>
 
-<!-- 家长密码弹窗 -->
 <div class="modal" id="pwdModal">
   <div class="modal-card">
     <div class="pwd-lock">🔒</div>
@@ -1053,7 +1031,6 @@
   </div>
 </div>
 
-<!-- ✅ 课文库编辑弹窗 -->
 <div class="modal" id="libEditModal">
   <div class="modal-card">
     <h3>✏️ 编辑课文库</h3>
@@ -1081,7 +1058,6 @@
   </div>
 </div>
 
-<!-- ✅ 任务编辑弹窗 -->
 <div class="modal" id="taskEditModal">
   <div class="modal-card">
     <h3>✏️ 编辑作业</h3>
@@ -1111,7 +1087,6 @@
   </div>
 </div>
 
-<!-- ✅ 上传写字表 / 识字表弹窗 -->
 <div class="modal" id="uploadSyncModal">
   <div class="modal-card">
     <h3>📤 上传写字表 / 识字表</h3>
@@ -1140,7 +1115,6 @@
   </div>
 </div>
 
-<!-- ★ 作业照片弹窗 -->
 <div class="modal" id="photoModal">
   <div class="modal-card photo-card">
     <h3 id="photoModalTitle">📷 作业照片</h3>
@@ -1153,16 +1127,13 @@
   </div>
 </div>
 
-<!-- ★ 照片全屏查看 -->
 <div class="photo-viewer" id="photoViewer">
   <button class="pv-close" id="photoViewerClose">✕</button>
   <img id="photoViewerImg" alt="作业照片">
 </div>
 
-<!-- ★ 隐藏的相机输入 -->
 <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
 
-<!-- 管理视图 -->
 <div class="admin-bar" id="adminBar">
   <div class="admin-label">🔓 家长管理模式</div>
   <div class="admin-status" id="adminSyncStatus">☁️ 已连接云端</div>
@@ -1176,7 +1147,7 @@
       <button class="admin-close" id="adminCloseBtn">✕ 关闭</button>
     </div>
 
-    <div class="admin-section " id="adminPanelChinese">
+    <div class="admin-section" id="adminPanelChinese">
       <h3>📖 语文作业 <span class="badge" id="adminChineseBadge">0</span></h3>
       <p style="font-size:11.5px;color:#5a7a8a;font-weight:700;margin-bottom:8px">💡 双击作业条目可重新编辑</p>
       <div id="adminChineseList"></div>
@@ -1192,7 +1163,6 @@
         <span class="aa-unit">金币/字</span>
         <button class="aa-btn" id="adminAddPreviewBtn">添加</button>
       </div>
-      <!-- ★ 新增：预习生字预览提示 -->
       <div class="aa-hint" id="previewLessonHint">选好课文直接点「添加」即可，不用手动输入</div>
 
       <div class="admin-sub-label">➕ 添加抄写并组词</div>
@@ -1206,7 +1176,6 @@
         <span class="aa-unit">金币/字</span>
         <button class="aa-btn" id="adminAddWordgroupBtn">添加</button>
       </div>
-      <!-- ★ 新增：抄写并组词预览提示 -->
       <div class="aa-hint" id="wordgroupLessonHint">选好课文直接点「添加」即可，不用手动输入</div>
 
       <div class="admin-sub-label">➕ 添加抄写词语</div>
@@ -1220,7 +1189,6 @@
         <span class="aa-unit">金币/组</span>
         <button class="aa-btn" id="adminAddCopyBtn">添加</button>
       </div>
-      <!-- ★ 新增：抄写词语预览提示 -->
       <div class="aa-hint" id="copyLessonHint">选好课文直接点「添加」即可，不用手动输入</div>
 
       <div class="admin-sub-label">➕ 添加自定义作业</div>
@@ -1234,9 +1202,7 @@
       </div>
     </div>
 
-    <!-- ✅ 数学任务 -->
-
-    <div class="admin-section " id="adminPanelMath">
+    <div class="admin-section" id="adminPanelMath">
       <h3>🔢 数学作业 <span class="badge" id="adminMathBadge">0</span></h3>
       <p style="font-size:11.5px;color:#5a7a8a;font-weight:700;margin-bottom:8px">💡 双击作业条目可重新编辑</p>
       <div id="adminMathList"></div>
@@ -1252,9 +1218,7 @@
       </div>
     </div>
 
-    <!-- ✅ 英语任务 -->
-
-    <div class="admin-section " id="adminPanelEnglish">
+    <div class="admin-section" id="adminPanelEnglish">
       <h3>🔤 英语作业 <span class="badge" id="adminEnglishBadge">0</span></h3>
       <p style="font-size:11.5px;color:#5a7a8a;font-weight:700;margin-bottom:8px">💡 双击作业条目可重新编辑</p>
       <div id="adminEnglishList"></div>
@@ -1270,7 +1234,6 @@
       </div>
     </div>
 
-    <!-- ✅ 护眼提醒设置 -->
     <div class="admin-section collapsed" id="adminPanelEye">
       <h3>👁️ 护眼提醒</h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
@@ -1287,8 +1250,6 @@
       </div>
       <div class="aa-hint" id="adminEyeHint">当前设置：每用眼 20 分钟提醒放松，放松 5 分钟</div>
     </div>
-
-    <!-- ✅ 日期选择 -->
 
     <div class="admin-section collapsed" id="adminPanelDate">
       <h3>📅 日期选择</h3>
@@ -1346,7 +1307,6 @@
       <div class="sun-log" id="adminSunLog"></div>
     </div>
 
-    <!-- ✅ 家长密码（默认折叠） -->
     <div class="admin-section collapsed" id="adminPanelPassword">
       <h3>🔒 家长密码</h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
@@ -1379,7 +1339,6 @@
         <b style="color:#FFD54F">双击条目可重新编辑。</b>
       </p>
 
-      <!-- ★ 上传按钮：位于折叠面板内容区，展开「课文生字库」后才显示 -->
       <div class="admin-add-row">
         <button class="aa-btn" id="adminLibSyncBtn">📤 上传写字表 / 识字表</button>
       </div>
@@ -1431,7 +1390,7 @@
 
 <script type="module">
 /* ============================================================
-   🔥 Firebase 配置 — 请替换为你自己的配置
+   🔥 Firebase 配置
 ============================================================ */
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyAGtDcOvTmHPsltv8HaHAaWyt174kCqIsQ",
@@ -1444,15 +1403,8 @@ const FIREBASE_CONFIG = {
 };
 
 const FAMILY_ID = 'x7k2m9q4';
-
-/* 🔑 万能密码：始终有效，不随家长自定义密码改变 */
 const MASTER_PASSWORD = '0702';
 
-const FIREBASE_READY = !!(FIREBASE_CONFIG.apiKey && !/^YOUR_/.test(FIREBASE_CONFIG.apiKey));
-
-/* ============================================================
-   Firebase SDK（★ 改为动态导入：CDN 加载失败也不会导致整页脚本不执行）
-============================================================ */
 let firebaseApp = null, db = null, dataRef = null;
 let fbSet = null, fbGet = null, fbOnValue = null;
 
@@ -1467,8 +1419,6 @@ try{
   fbOnValue   = dbMod.onValue;
 }catch(e){
   console.warn('Firebase 加载/初始化失败，将使用纯本地模式', e);
-  firebaseApp = null; db = null; dataRef = null;
-  fbSet = null; fbGet = null; fbOnValue = null;
 }
 
 /* ============================================================
@@ -1477,13 +1427,32 @@ try{
 const STORAGE_KEY = 'study_board_v9';
 const MAX_DAYS_KEPT = 180;
 const CHOMP_HOLD_MS = 700;
-const EYE_NAG_MS = 60000;    // 护眼提醒未响应，每 1 分钟响一次
+const EYE_NAG_MS = 60000;
 const SUBJECTS = { chinese:{key:'chinese',name:'语文'}, math:{key:'math',name:'数学'}, english:{key:'english',name:'英语'} };
 
-/* ★ 照片相关常量 */
 const MAX_PHOTOS_PER_TASK = 3;
 const PHOTO_MAX_SIZE = 800;
 const PHOTO_QUALITY = 0.55;
+
+/* ★ 全局计时权威状态（跨设备同步的核心） */
+const DEFAULT_LIVE = {
+  activeId: '',
+  status: 'idle',        // 'idle' | 'running' | 'paused' | 'chomping'
+  startedAt: 0,          // 当前 running 阶段开始时刻（时间戳）
+  leftAtStart: 0,        // 当前 running 阶段开始时的剩余毫秒
+  totalMs: 0,
+  rounds: 0,
+  chompUntil: 0,
+  eyeActive: false,
+  eyeMode: 'idle',       // 'idle' | 'use' | 'need-rest' | 'rest'
+  eyeStageStart: 0,
+  eyeTotalMs: 0,
+  eyeNagCount: 0,
+  soundSeq: 0,
+  soundKind: '',
+  ownerTab: '',
+  updatedAt: 0
+};
 
 const DEFAULT_DATA = {
   chinese:[
@@ -1536,7 +1505,6 @@ const DEFAULT_LESSON_LIBRARY = {
   }
 };
 
-/* ✅ 汉字偏旁 / 结构 数据（HZ_RAW 已拆到 hanzi-data.js，通过 <script src> 引入） */
 const HZ_STRUCT_NAME = {'1':'左右','2':'上下','3':'独体','4':'半包围','5':'全包围','6':'上中下','7':'左中右'};
 const HZ_INFO = (function(){
   const map = {};
@@ -1552,7 +1520,7 @@ const HZ_INFO = (function(){
 })();
 
 /* ============================================================
-   工具函数
+   工具
 ============================================================ */
 const pad2 = n => String(n).padStart(2,'0');
 const fmtDate = d => d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
@@ -1588,7 +1556,6 @@ function escapeHtml(s){
 function escapeAttr(s){
   return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
-
 function getPinyin(char){
   try{
     if(window.pinyinPro && window.pinyinPro.pinyin){
@@ -1623,13 +1590,12 @@ let running = false;
 let tickTimer = null;
 let lastTs = 0;
 let cardRefs = {};
-const pauseState = {active:false,totalMs:0,leftMs:0,wasRunning:false};
+const pauseState = {active:false,leftMs:0};
 let currentSubject = 'chinese';
 let isAdminMode = false;
 let isRemoteUpdate = false;
 let currentWriter = null;
 
-/* ★ 田字格倒计时状态 */
 const charTimer = {
   active: false,
   taskId: null,
@@ -1638,16 +1604,9 @@ const charTimer = {
   index: 0
 };
 
-/* ★ 护眼提醒状态 */
-const eyeTimer = {
-  active: false,       // 是否处于护眼监控中（作业进行中）
-  mode: 'idle',        // 'idle' | 'use' | 'need-rest' | 'rest'
-  totalMs: 0,          // 当前阶段总时长
-  leftMs: 0,           // 当前阶段剩余毫秒
-  overdueMs: 0,        // need-rest 模式已超时毫秒
-  nagAccumMs: 0        // 距离下次响铃累计毫秒
-};
-
+/* ============================================================
+   设置规范化
+============================================================ */
 function normalizeSettings(raw){
   const d = DEFAULT_SETTINGS;
   const r = (raw && typeof raw === 'object') ? raw : {};
@@ -1760,7 +1719,6 @@ function fixTaskName(text){
 
 function makeDay(){ return { chinese: [], math: [], english: [] }; }
 
-/* ★ 把照片数组规范化 */
 function normalizePhotos(raw){
   if(!Array.isArray(raw)) return [];
   return raw.slice(0, MAX_PHOTOS_PER_TASK).map(p => ({
@@ -1823,7 +1781,8 @@ function loadLocalState(){
       sunLog: [],
       settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
       lessonLibrary: JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY)),
-      parentPassword: MASTER_PASSWORD
+      parentPassword: MASTER_PASSWORD,
+      live: JSON.parse(JSON.stringify(DEFAULT_LIVE))
     };
     s.days[todayStr()] = normalizeDay(DEFAULT_DATA);
   }
@@ -1841,6 +1800,12 @@ function loadLocalState(){
   s.lessonLibrary = normalizeLessonLibrary(s.lessonLibrary);
   if(!Object.keys(s.lessonLibrary).length){
     s.lessonLibrary = JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY));
+  }
+  /* ★ 规范化 live */
+  if(!s.live || typeof s.live !== 'object'){
+    s.live = JSON.parse(JSON.stringify(DEFAULT_LIVE));
+  } else {
+    s.live = Object.assign({}, DEFAULT_LIVE, s.live);
   }
   return s;
 }
@@ -1878,6 +1843,143 @@ function findTask(id){
 }
 
 /* ============================================================
+   ★ Live 状态工具
+============================================================ */
+const TAB_ID = 'tb' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const LIVE_KEY = 'study_board_live_ping_' + FAMILY_ID;
+
+let liveChannel = null;
+try{
+  if(typeof BroadcastChannel !== 'undefined'){
+    liveChannel = new BroadcastChannel('study_board_live_' + FAMILY_ID);
+  }
+}catch(e){ liveChannel = null; }
+
+let lastSoundSeq = 0;
+
+function isLiveOwner(){
+  return state && state.live && state.live.ownerTab === TAB_ID;
+}
+
+function liveLeftMs(L){
+  L = L || (state && state.live);
+  if(!L || !L.activeId) return 0;
+  if(L.status === 'paused') return L.leftAtStart;
+  if(L.status === 'chomping') return 0;
+  if(L.status === 'running'){
+    return Math.max(0, L.leftAtStart - (Date.now() - L.startedAt));
+  }
+  return L.leftAtStart;
+}
+
+function liveEyeLeftMs(L){
+  L = L || (state && state.live);
+  if(!L || !L.eyeActive) return 0;
+  if(L.eyeMode === 'use' || L.eyeMode === 'rest'){
+    return Math.max(0, L.eyeTotalMs - (Date.now() - L.eyeStageStart));
+  }
+  if(L.eyeMode === 'need-rest'){
+    return Date.now() - L.eyeStageStart;
+  }
+  return 0;
+}
+
+function syncRuntimeFromLive(){
+  const L = state.live;
+  if(!L || !L.activeId) return;
+  const rt = runtimeMap[L.activeId] || (runtimeMap[L.activeId] = {
+    totalMs: L.totalMs, leftMs: L.totalMs, rounds: 0, holdDogAtEnd: false
+  });
+  rt.totalMs = L.totalMs;
+  rt.leftMs = liveLeftMs(L);
+  rt.rounds = L.rounds;
+  rt.holdDogAtEnd = (L.status === 'chomping');
+}
+
+function syncLegacyFromLive(){
+  const L = state.live;
+  if(!L) return;
+  if(L.activeId){
+    activeId = L.activeId;
+    running = (L.status === 'running');
+    pauseState.active = (L.status === 'paused');
+    pauseState.leftMs = L.status === 'paused' ? L.leftAtStart : 0;
+  } else {
+    activeId = null;
+    running = false;
+    pauseState.active = false;
+    pauseState.leftMs = 0;
+  }
+}
+
+function checkAndPlaySound(){
+  const L = state.live;
+  if(!L) return;
+  const seq = Number(L.soundSeq) || 0;
+  if(seq <= lastSoundSeq) return;
+  lastSoundSeq = seq;
+  const kind = L.soundKind || '';
+  if(kind === 'start' || kind === 'resume') playSound('start');
+  else if(kind === 'pause') playSound('pause');
+  else if(kind === 'round') playSound('chomp');
+  else if(kind === 'win') playSound('win');
+  else if(kind === 'eyeAlert') playEyeAlert();
+  else if(kind === 'restDone') playRestDone();
+}
+
+let livePushPending = false;
+function pushLive(){
+  if(!state || !state.live) return;
+  state.live.updatedAt = Date.now();
+  syncLegacyFromLive();
+  syncRuntimeFromLive();
+  checkAndPlaySound();
+  saveLocalState();
+  uploadToCloud();
+  liveSend({ t:'live', live: state.live });
+  ensureTickRunning();
+}
+
+function liveSend(msg){
+  const pack = Object.assign({ tab: TAB_ID, ts: Date.now() }, msg || {});
+  if(liveChannel){
+    try{ liveChannel.postMessage(pack); return; }catch(e){}
+  }
+  try{ localStorage.setItem(LIVE_KEY, JSON.stringify(pack)); }catch(e){}
+}
+
+if(liveChannel){
+  liveChannel.onmessage = e => { try{ liveHandle(e.data); }catch(err){} };
+}else{
+  window.addEventListener('storage', e => {
+    if(e.key !== LIVE_KEY || !e.newValue) return;
+    try{ liveHandle(JSON.parse(e.newValue)); }catch(err){}
+  });
+}
+
+function liveHandle(pack){
+  if(!pack || pack.tab === TAB_ID) return;
+  if(pack.t === 'live' && pack.live){
+    const remoteAt = Number(pack.live.updatedAt) || 0;
+    const localAt = Number(state.live && state.live.updatedAt) || 0;
+    if(remoteAt > localAt){
+      state.live = Object.assign({}, DEFAULT_LIVE, pack.live);
+      syncLegacyFromLive();
+      syncRuntimeFromLive();
+      checkAndPlaySound();
+      renderAllLiveUI();
+    }
+  }
+}
+
+function renderAllLiveUI(){
+  updateDogBar();
+  if(activeId) updateCardVisual(activeId);
+  updateEyeUI();
+  updateMainBtn();
+}
+
+/* ============================================================
    ☁️ 云端同步
 ============================================================ */
 let lastPushedUpdatedAt = 0;
@@ -1888,7 +1990,6 @@ async function uploadToCloud(force){
   if(!dataRef || !fbSet || !fbGet) return false;
   if(isRemoteUpdate && !force) return false;
   if(freshBoot && !force && !lastRemoteUpdatedAt){
-    console.warn('已跳过上传：本机无历史存档，等待云端数据');
     return false;
   }
   const payload = {
@@ -1900,6 +2001,7 @@ async function uploadToCloud(force){
     sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
     lessonLibrary: state.lessonLibrary,
     parentPassword: state.parentPassword,
+    live: state.live,
     updatedAt: Date.now()
   };
   const prevPushed = lastPushedUpdatedAt;
@@ -1907,15 +2009,6 @@ async function uploadToCloud(force){
   updateSyncInfo();
   try{
     await fbSet(dataRef, payload);
-    try{
-      const snap = await fbGet(dataRef);
-      const vAt = snap.exists() ? Number(snap.val().updatedAt) : 0;
-      if(vAt !== payload.updatedAt){
-        lastPushedUpdatedAt = prevPushed;
-        showSyncStatus('⚠️ 云端写入未生效', 'offline');
-        return false;
-      }
-    }catch(e){ console.warn('上传后验证读取失败（不阻断）', e); }
     uploadFailedNotified = false;
     return true;
   }catch(e){
@@ -1948,10 +2041,21 @@ function applyRemoteState(remote){
   if(typeof remote.parentPassword === 'string' && /^\d{4}$/.test(remote.parentPassword)){
     state.parentPassword = remote.parentPassword;
   }
+  /* ★ 应用云端 live（仅当远端更新） */
+  if(remote.live && typeof remote.live === 'object'){
+    const remoteLiveAt = Number(remote.live.updatedAt) || 0;
+    const localLiveAt = Number(state.live && state.live.updatedAt) || 0;
+    if(remoteLiveAt > localLiveAt){
+      state.live = Object.assign({}, DEFAULT_LIVE, remote.live);
+    }
+  }
   if(rAt) lastRemoteUpdatedAt = rAt;
   saveLocalState();
   renderStats(); renderBoard(); refreshAllCards();
-  updateDogBar(); updateMainBtn(); updateDateText();
+  syncLegacyFromLive();
+  syncRuntimeFromLive();
+  checkAndPlaySound();
+  updateDogBar(); updateMainBtn(); updateDateText(); updateEyeUI();
   if(isAdminMode) renderAdminPanel();
   isRemoteUpdate = false;
   showSyncStatus('☁️ 已从云端更新', 'online');
@@ -2004,186 +2108,6 @@ function showSyncStatus(text, cls){
 }
 
 /* ============================================================
-   📡 多标签页 / 多窗口实时同步（倒计时 + 提示音）
-   —— 同一时刻只有一个标签页作为「计时器主控」；
-      其余标签页镜像显示、跟随提示音，保证完全同步。
-============================================================ */
-const TAB_ID = 'tb' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
-const LIVE_KEY = 'study_board_live_' + FAMILY_ID;
-const BEAT_MS = 500;
-
-let liveChannel = null;
-try{
-  if(typeof BroadcastChannel !== 'undefined'){
-    liveChannel = new BroadcastChannel('study_board_live_' + FAMILY_ID);
-  }
-}catch(e){ liveChannel = null; }
-
-let isTimerOwner = false;
-let mirrorMode = false;
-let beatTimer = null;
-
-function liveSend(msg){
-  const pack = Object.assign({ tab: TAB_ID, ts: Date.now() }, msg || {});
-  if(liveChannel){
-    try{ liveChannel.postMessage(pack); return; }catch(e){}
-  }
-  try{ localStorage.setItem(LIVE_KEY, JSON.stringify(pack)); }catch(e){}
-}
-
-if(liveChannel){
-  liveChannel.onmessage = e => { try{ liveHandle(e.data); }catch(err){} };
-}else{
-  window.addEventListener('storage', e => {
-    if(e.key !== LIVE_KEY || !e.newValue) return;
-    try{ liveHandle(JSON.parse(e.newValue)); }catch(err){}
-  });
-}
-
-function takeTimerOwnership(){
-  isTimerOwner = true;
-  mirrorMode = false;
-  liveSend({ t:'claim' });
-  if(!beatTimer) beatTimer = setInterval(broadcastBeat, BEAT_MS);
-}
-function releaseTimerOwnership(){
-  if(!isTimerOwner) return;
-  isTimerOwner = false;
-  if(beatTimer){ clearInterval(beatTimer); beatTimer = null; }
-  liveSend({ t:'release' });
-}
-function broadcastBeat(){
-  if(!isTimerOwner) return;
-  if(activeId && !findTask(activeId)) activeId = null;
-  const rt = activeId ? runtimeMap[activeId] : null;
-  liveSend({
-    t:'beat',
-    id: activeId || '',
-    running: !!running,
-    paused: !!pauseState.active,
-    pauseLeftMs: pauseState.leftMs || 0,
-    leftMs: rt ? rt.leftMs : 0,
-    totalMs: rt ? rt.totalMs : 0,
-    rounds: rt ? (rt.rounds || 0) : 0,
-    hold: rt ? !!rt.holdDogAtEnd : false,
-    eye: {
-      active: !!eyeTimer.active,
-      mode: eyeTimer.mode,
-      leftMs: eyeTimer.leftMs,
-      totalMs: eyeTimer.totalMs,
-      overdueMs: eyeTimer.overdueMs
-    }
-  });
-}
-
-function liveHandle(pack){
-  if(!pack || pack.tab === TAB_ID) return;
-  if(pack.t === 'claim'){
-    if(isTimerOwner){
-      isTimerOwner = false;
-      if(beatTimer){ clearInterval(beatTimer); beatTimer = null; }
-    }
-    mirrorMode = true;
-    return;
-  }
-  if(pack.t === 'release'){
-    if(!isTimerOwner) mirrorMode = false;
-    return;
-  }
-  if(isTimerOwner) return;         // 自己是主控，忽略镜像消息
-  mirrorMode = true;
-  if(pack.t === 'beat') applyMirrorBeat(pack);
-  else if(pack.t === 'event') handleMirrorEvent(pack);
-}
-
-function applyMirrorBeat(pack){
-  /* --- 护眼状态跟随主控 --- */
-  if(pack.eye){
-    const wasActive = eyeTimer.active;
-    const wasMode = eyeTimer.mode;
-    eyeTimer.active = !!pack.eye.active;
-    eyeTimer.mode = pack.eye.mode || 'idle';
-    eyeTimer.leftMs = Number(pack.eye.leftMs) || 0;
-    eyeTimer.totalMs = Number(pack.eye.totalMs) || 0;
-    eyeTimer.overdueMs = Number(pack.eye.overdueMs) || 0;
-    eyeTimer.nagAccumMs = 0;
-    updateEyeUI();
-    if(wasActive && eyeTimer.active){
-      if(wasMode !== 'need-rest' && eyeTimer.mode === 'need-rest'){
-        playEyeAlert();
-        toast('⏰ 该放松眼睛啦！点「放松眼睛」休息一下', 3400);
-      } else if(wasMode === 'rest' && eyeTimer.mode === 'use'){
-        playRestDone();
-        toast('✅ 放松结束，继续加油！', 2200);
-      }
-    }
-    if(eyeTimer.active) ensureTickRunning();
-  }
-
-  /* --- 倒计时状态跟随主控 --- */
-  if(!pack.id){
-    if(activeId || running){
-      activeId = null;
-      running = false;
-      pauseState.active = false;
-      pauseState.leftMs = 0;
-      dogEl.classList.remove('running','paused','chomp');
-      updateDogBar(); updateMainBtn(); refreshAllCards();
-    }
-    return;
-  }
-  if(activeId !== pack.id){
-    activeId = pack.id;
-    const info = findTask(activeId);
-    if(info) ensureRuntime(info.task);
-    initCharTimer(activeId);
-  }
-  const rt = runtimeMap[pack.id];
-  if(rt){
-    rt.totalMs = Number(pack.totalMs) || rt.totalMs;
-    rt.leftMs = Number(pack.leftMs) || 0;
-    rt.rounds = Number(pack.rounds) || 0;
-    rt.holdDogAtEnd = !!pack.hold;
-  }
-  running = !!pack.running && !pack.paused;
-  pauseState.active = !!pack.paused;
-  pauseState.leftMs = Number(pack.pauseLeftMs) || 0;
-  if(running){
-    dogEl.classList.remove('paused','chomp');
-    dogEl.classList.add('running');
-  }else{
-    dogEl.classList.remove('running');
-  }
-  ensureTickRunning();
-  updateDogBar(); updateMainBtn();
-}
-
-function handleMirrorEvent(pack){
-  switch(pack.name){
-    case 'start':
-    case 'resume':
-      playSound('start');
-      break;
-    case 'pause':
-      playSound('pause');
-      break;
-    case 'round':
-      playSound('chomp');
-      toast('⏰ 第 <b>' + (pack.rounds || 1) + '</b> 轮结束，任务未完成！<br>扣掉 1 颗金币 💰', 3200);
-      break;
-    case 'win':
-      playSound('win');
-      confetti();
-      toast('🎉 全部完成啦！', 4200);
-      break;
-  }
-}
-
-window.addEventListener('beforeunload', () => {
-  if(isTimerOwner) liveSend({ t:'release' });
-});
-
-/* ============================================================
    音效
 ============================================================ */
 let audioCtx = null;
@@ -2225,7 +2149,6 @@ function playSound(kind){
   else if(kind==='fail'){tone(300,now,0.16,'sine',0.08);tone(200,now+0.16,0.26,'sine',0.08);}
   else if(kind==='win'){[523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>tone(f,now+i*0.11,0.4,'triangle',0.12));tone(1568,now+0.6,0.8,'sine',0.08);}
 }
-/* ★ 护眼：该休息了（急促三声铃） */
 function playEyeAlert(){
   if(!ensureAudio()) return;
   const now = audioCtx.currentTime;
@@ -2234,7 +2157,6 @@ function playEyeAlert(){
     tone(1174.7, now + i*0.22 + 0.02, 0.14, 'triangle', 0.08);
   }
 }
-/* ★ 护眼：放松结束（上行三音） */
 function playRestDone(){
   if(!ensureAudio()) return;
   const now = audioCtx.currentTime;
@@ -2283,11 +2205,10 @@ const taskEditModal = $('taskEditModal');
 const uploadSyncModal = $('uploadSyncModal');
 const photoModal = $('photoModal');
 
-/* ★ 护眼轨道 DOM 缓存 */
 const eyeRailEl   = $('eyeRail');
 const eyeTokenEl  = $('eyeToken');
 const eyeFillEl   = $('eyeRailFill');
-let eyeRailW = -1;   // 眼睛可滑动的最大位移（px），-1 表示尚未测量
+let eyeRailW = -1;
 
 function measureEyeRail(){
   if(!eyeRailEl || !eyeTokenEl) return;
@@ -2325,7 +2246,7 @@ function updateDateText(){
 }
 
 /* ============================================================
-   米字格渲染
+   米字格
 ============================================================ */
 function miziSvg(){
   return `<svg class="mizi-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -2348,7 +2269,6 @@ function renderCharCard(char){
     <div class="char-info">结构：${escapeHtml(info[1])}</div>
   </div>`;
 }
-
 function renderWordGroup(word, showInfo){
   if(showInfo === undefined) showInfo = true;
   const chars = [...word].filter(c => /[\u4e00-\u9fa5]/.test(c));
@@ -2371,9 +2291,7 @@ function bindMiziClicks(container){
     el.addEventListener('click', e => {
       e.stopPropagation();
       clearTimeout(clickTimer);
-      clickTimer = setTimeout(() => {
-        showStroke(el.dataset.char);
-      }, 260);
+      clickTimer = setTimeout(() => { showStroke(el.dataset.char); }, 260);
     });
     el.addEventListener('dblclick', e => {
       e.preventDefault();
@@ -2391,7 +2309,7 @@ function bindMiziClicks(container){
 }
 
 /* ============================================================
-   📷 作业拍照 / 查看照片
+   📷 拍照
 ============================================================ */
 const cameraInput = $('cameraInput');
 let pendingPhotoTaskId = null;
@@ -2400,7 +2318,6 @@ let photoViewTaskId = null;
 function getTaskPhotos(task){
   return (task && Array.isArray(task.photos)) ? task.photos : [];
 }
-
 function compressImage(file, maxSize, quality){
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -2412,7 +2329,6 @@ function compressImage(file, maxSize, quality){
         try{
           let w = img.naturalWidth || img.width;
           let h = img.naturalHeight || img.height;
-          if(!w || !h) throw new Error('图片尺寸异常');
           const scale = Math.min(1, maxSize / Math.max(w, h));
           w = Math.max(1, Math.round(w * scale));
           h = Math.max(1, Math.round(h * scale));
@@ -2430,7 +2346,6 @@ function compressImage(file, maxSize, quality){
     reader.readAsDataURL(file);
   });
 }
-
 function openCameraForTask(taskId){
   const info = findTask(taskId);
   if(!info) return;
@@ -2442,7 +2357,6 @@ function openCameraForTask(taskId){
   try{ cameraInput.value = ''; }catch(e){}
   cameraInput.click();
 }
-
 cameraInput.addEventListener('change', async (e) => {
   const file = e.target.files && e.target.files[0];
   const taskId = pendingPhotoTaskId;
@@ -2465,7 +2379,6 @@ cameraInput.addEventListener('change', async (e) => {
     toast('⚠️ 照片保存失败：' + escapeHtml(err && err.message ? err.message : '未知错误'));
   }
 });
-
 function openPhotoViewer(taskId){
   const info = findTask(taskId);
   if(!info) return;
@@ -2478,7 +2391,6 @@ function openPhotoViewer(taskId){
   renderPhotoGrid(taskId);
   photoModal.classList.add('show');
 }
-
 function renderPhotoGrid(taskId){
   const info = findTask(taskId);
   const grid = $('photoGrid');
@@ -2514,7 +2426,6 @@ function renderPhotoGrid(taskId){
     });
   });
 }
-
 $('photoModalClose').addEventListener('click', () => photoModal.classList.remove('show'));
 photoModal.addEventListener('click', e => { if(e.target === photoModal) photoModal.classList.remove('show'); });
 $('photoModalCam').addEventListener('click', () => { if(photoViewTaskId) openCameraForTask(photoViewTaskId); });
@@ -2586,7 +2497,6 @@ function renderSubjectCards(subject, listEl){
     body.appendChild(textEl); body.appendChild(info);
     top.appendChild(cb); top.appendChild(body);
 
-    /* ★ 卡片右上角：拍照 / 查看作业 */
     const actions = document.createElement('div');
     actions.className = 'card-actions';
 
@@ -2595,10 +2505,7 @@ function renderSubjectCards(subject, listEl){
     camBtn.className = 'mini-btn';
     camBtn.textContent = '📷';
     camBtn.title = '拍照';
-    camBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      openCameraForTask(task.id);
-    });
+    camBtn.addEventListener('click', e => { e.stopPropagation(); openCameraForTask(task.id); });
     actions.appendChild(camBtn);
 
     const photoCount = getTaskPhotos(task).length;
@@ -2607,10 +2514,7 @@ function renderSubjectCards(subject, listEl){
     viewBtn.className = 'mini-btn view';
     viewBtn.title = '查看作业照片';
     viewBtn.innerHTML = '🖼️' + (photoCount ? '<span class="pcount">'+photoCount+'</span>' : '');
-    viewBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      openPhotoViewer(task.id);
-    });
+    viewBtn.addEventListener('click', e => { e.stopPropagation(); openPhotoViewer(task.id); });
     actions.appendChild(viewBtn);
 
     top.appendChild(actions);
@@ -2693,7 +2597,7 @@ function updateCardVisual(id){
 function refreshAllCards(){ Object.keys(cardRefs).forEach(id => updateCardVisual(id)); }
 
 /* ============================================================
-   ★ 田字格倒计时进度条
+   田字格倒计时
 ============================================================ */
 function charBarEnsure(mizi){
   let bar = mizi.querySelector('.mizi-bar');
@@ -2822,82 +2726,8 @@ function setCharPaused(p){
 }
 
 /* ============================================================
-   ★ 护眼提醒
+   ★ 护眼 UI（从 state.live 派生）
 ============================================================ */
-function startEyeCare(){
-  if(eyeTimer.active) return;
-  const cfg = getEyeCfg();
-  eyeTimer.active = true;
-  eyeTimer.mode = 'use';
-  eyeTimer.totalMs = cfg.useMin * 60000;
-  eyeTimer.leftMs = eyeTimer.totalMs;
-  eyeTimer.overdueMs = 0;
-  eyeTimer.nagAccumMs = 0;
-  measureEyeRail();
-  updateEyeUI();
-  ensureTickRunning();
-}
-function stopEyeCare(){
-  eyeTimer.active = false;
-  eyeTimer.mode = 'idle';
-  eyeTimer.totalMs = 0;
-  eyeTimer.leftMs = 0;
-  eyeTimer.overdueMs = 0;
-  eyeTimer.nagAccumMs = 0;
-  updateEyeUI();
-}
-function startEyeRest(){
-  if(!eyeTimer.active) return;
-  if(eyeTimer.mode !== 'use' && eyeTimer.mode !== 'need-rest') return;
-  const cfg = getEyeCfg();
-  eyeTimer.mode = 'rest';
-  eyeTimer.totalMs = cfg.restMin * 60000;
-  eyeTimer.leftMs = eyeTimer.totalMs;
-  eyeTimer.overdueMs = 0;
-  eyeTimer.nagAccumMs = 0;
-  measureEyeRail();
-  updateEyeUI();
-  toast('😌 放松眼睛计时开始（' + cfg.restMin + ' 分钟）', 2200);
-}
-function tickEye(dt){
-  if(!eyeTimer.active) return;
-  if(eyeTimer.mode === 'use'){
-    eyeTimer.leftMs -= dt;
-    if(eyeTimer.leftMs <= 0){
-      eyeTimer.leftMs = 0;
-      eyeTimer.mode = 'need-rest';
-      eyeTimer.overdueMs = 0;
-      eyeTimer.nagAccumMs = 0;
-      playEyeAlert();
-      toast('⏰ 该放松眼睛啦！点「放松眼睛」休息一下', 3400);
-    }
-    updateEyeUI();
-  } else if(eyeTimer.mode === 'need-rest'){
-    eyeTimer.overdueMs += dt;
-    eyeTimer.nagAccumMs += dt;
-    if(eyeTimer.nagAccumMs >= EYE_NAG_MS){
-      eyeTimer.nagAccumMs -= EYE_NAG_MS;
-      playEyeAlert();
-      toast('⚠️ 还没放松眼睛哦，快点「放松眼睛」吧', 2600);
-    }
-    updateEyeUI();
-  } else if(eyeTimer.mode === 'rest'){
-    eyeTimer.leftMs -= dt;
-    if(eyeTimer.leftMs <= 0){
-      const cfg = getEyeCfg();
-      eyeTimer.mode = 'use';
-      eyeTimer.totalMs = cfg.useMin * 60000;
-      eyeTimer.leftMs = eyeTimer.totalMs;
-      eyeTimer.overdueMs = 0;
-      eyeTimer.nagAccumMs = 0;
-      playRestDone();
-      toast('✅ 放松结束，继续加油！', 2200);
-    }
-    updateEyeUI();
-  }
-}
-
-/* ★ 把 0~1 的进度换算成眼睛在轨道上的位置：0=用眼端，1=放松端 */
 function moveEyeToken(p){
   if(!eyeTokenEl || !eyeRailEl) return;
   if(eyeRailW < 0) measureEyeRail();
@@ -2911,29 +2741,32 @@ function updateEyeUI(){
   if(!card) return;
   const timeEl  = $('eyeTime');
   const btn = $('eyeRestBtn');
+  const L = state.live;
 
-  let p = 0;   // 0 = 用眼端，1 = 放松端
-
-  if(!eyeTimer.active){
+  let p = 0;
+  if(!L || !L.eyeActive){
     card.className = 'eye-card idle';
     if(timeEl) timeEl.textContent = '--:--';
     if(btn){ btn.disabled = true; btn.textContent = '😌 放松眼睛'; }
     p = 0;
-  } else if(eyeTimer.mode === 'use'){
+  } else if(L.eyeMode === 'use'){
     card.className = 'eye-card using';
-    if(timeEl) timeEl.textContent = fmtMs(eyeTimer.leftMs);
+    const left = liveEyeLeftMs(L);
+    if(timeEl) timeEl.textContent = fmtMs(left);
     if(btn){ btn.disabled = false; btn.textContent = '😌 放松眼睛'; }
-    p = eyeTimer.totalMs > 0 ? 1 - (eyeTimer.leftMs / eyeTimer.totalMs) : 0;
-  } else if(eyeTimer.mode === 'need-rest'){
+    p = L.eyeTotalMs > 0 ? 1 - (left / L.eyeTotalMs) : 0;
+  } else if(L.eyeMode === 'need-rest'){
     card.className = 'eye-card alert';
-    if(timeEl) timeEl.textContent = '已等待' + fmtMs(eyeTimer.overdueMs);
+    const overdue = liveEyeLeftMs(L);
+    if(timeEl) timeEl.textContent = '已等待' + fmtMs(overdue);
     if(btn){ btn.disabled = false; btn.textContent = '😌 开始放松'; }
     p = 1;
-  } else if(eyeTimer.mode === 'rest'){
+  } else if(L.eyeMode === 'rest'){
     card.className = 'eye-card resting';
-    if(timeEl) timeEl.textContent = fmtMs(eyeTimer.leftMs);
+    const left = liveEyeLeftMs(L);
+    if(timeEl) timeEl.textContent = fmtMs(left);
     if(btn){ btn.disabled = true; btn.textContent = '放松中…'; }
-    p = eyeTimer.totalMs > 0 ? (eyeTimer.leftMs / eyeTimer.totalMs) : 0;
+    p = L.eyeTotalMs > 0 ? (left / L.eyeTotalMs) : 0;
   }
 
   moveEyeToken(p);
@@ -2984,8 +2817,8 @@ function updateDogBar(){
     trackFill.className = 'track-fill';
     trackFill.style.width = (p*100)+'%';
     trackTime.className = 'track-time paused';
-    trackTime.textContent = fmtMs(pauseState.leftMs);
-    timerHint.innerHTML = '⏸ <span class="paused-t">暂停中</span>：'+escapeHtml(name)+' · 剩余 '+fmtMs(pauseState.leftMs)+' 后自动继续';
+    trackTime.textContent = fmtMs(rt.leftMs);
+    timerHint.innerHTML = '⏸ <span class="paused-t">已暂停</span>：'+escapeHtml(name)+' · 点「▶ 继续」恢复';
     return;
   }
   if(rt.holdDogAtEnd){
@@ -3037,19 +2870,9 @@ function updateMainBtn(){
   else { mainBtn.classList.add('start'); mainBtn.textContent='▶ 开始'; }
   mainBtn.disabled = false;
 }
-function eatSun(count, msg){
-  if(count <= 0) return;
-  state.sun -= count;
-  saveLocalState(); uploadToCloud();
-  renderStats();
-  sunAnchor.classList.add('eaten');
-  dogEl.classList.remove('running');
-  dogEl.classList.add('chomp');
-  playSound('chomp');
-  bumpPill(sunPillEl);
-  flySunAway(count);
-  setTimeout(() => { sunAnchor.classList.remove('eaten'); dogEl.classList.remove('chomp'); }, 650);
-  if(msg) toast(msg, 3200);
+function bumpPill(el){
+  el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+  setTimeout(() => el.classList.remove('bump'), 260);
 }
 function flySunAway(n){
   const rect = sunPillEl.getBoundingClientRect();
@@ -3062,121 +2885,319 @@ function flySunAway(n){
   requestAnimationFrame(() => { el.style.transform='translateY(-56px) scale(1.15)'; el.style.opacity='0'; });
   setTimeout(() => el.remove(), 850);
 }
+function flySun(fromEl){
+  const from = fromEl.getBoundingClientRect();
+  const to = sunPillEl.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'fly-sun';
+  el.textContent = '💰';
+  el.style.left = (from.left+from.width/2-14)+'px';
+  el.style.top  = (from.top+from.height/2-14)+'px';
+  document.body.appendChild(el);
+  const dx = (to.left+to.width/2)-(from.left+from.width/2);
+  const dy = (to.top+to.height/2)-(from.top+from.height/2);
+  requestAnimationFrame(() => {
+    el.style.transform=`translate(${dx}px, ${dy}px) scale(.45)`;
+    el.style.opacity='0.15';
+  });
+  setTimeout(() => el.remove(), 950);
+}
+function scrollToCard(id){
+  const ref = cardRefs[id];
+  if(ref && ref.el && ref.el.scrollIntoView){
+    try{ ref.el.scrollIntoView({behavior:'smooth', block:'center'}); }catch(e){}
+  }
+}
+function confetti(){
+  const emojis = ['⭐','💰','✨','🎉','🌈','💚','🌟','🍀'];
+  for(let i=0;i<28;i++){
+    const el = document.createElement('div');
+    el.className='confetti';
+    el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    el.style.left = (Math.random()*96)+'vw';
+    el.style.fontSize = (16+Math.random()*20)+'px';
+    el.style.animationDelay = (Math.random()*0.7)+'s';
+    el.style.animationDuration = (2.2+Math.random()*1.2)+'s';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 4200);
+  }
+}
 
 /* ============================================================
-   ★ 计时主循环（改用 setInterval，标签页在后台也能继续走时）
+   ★ 计时主循环（100ms 一次，本地计算）
 ============================================================ */
-function tick(now){
-  const dt = now - lastTs;
-  lastTs = now;
-  if(dt < 0) return;
+let lastTickedActiveId = null;
+let lastRenderedRound = -1;
+let lastRenderedStatus = '';
 
-  if(mirrorMode){
-    /* 镜像端：只做本地平滑递减，不扣金币、不响铃 */
-    if(running && activeId){
-      const rt = runtimeMap[activeId];
-      if(rt && !rt.holdDogAtEnd){
-        rt.leftMs = Math.max(0, rt.leftMs - dt);
-        tickChar(dt);
+function tick(){
+  if(!state || !state.live) return;
+  const L = state.live;
+  const now = Date.now();
+  const amOwner = isLiveOwner();
+
+  /* 处理 task 状态 */
+  if(L.activeId){
+    if(L.status === 'running' && amOwner){
+      const left = liveLeftMs(L);
+      if(left <= 0){
+        /* 轮次结束 - 仅 owner 处理 */
+        L.rounds = (L.rounds || 0) + 1;
+        L.status = 'chomping';
+        L.chompUntil = now + CHOMP_HOLD_MS;
+        L.leftAtStart = L.totalMs;
+        L.startedAt = now;
+        L.soundSeq = (L.soundSeq || 0) + 1;
+        L.soundKind = 'round';
+        /* 扣金币 */
+        state.sun -= 1;
+        pushSunLog(-1, '未完成扣 1 金币');
+        /* 显示扣金币动画 */
+        sunAnchor.classList.add('eaten');
+        dogEl.classList.remove('running');
+        dogEl.classList.add('chomp');
+        bumpPill(sunPillEl);
+        flySunAway(1);
+        setTimeout(() => { sunAnchor.classList.remove('eaten'); }, 650);
+        toast('⏰ 第 <b>' + L.rounds + '</b> 轮结束，任务未完成！<br>扣掉 1 颗金币 💰', 3200);
+        resetCharProgress();
+        pushLive();
       }
     }
-  } else {
-    if(pauseState.active){
-      pauseState.leftMs -= dt;
-      if(pauseState.leftMs <= 0){
-        pauseState.leftMs = 0;
-        const shouldResume = pauseState.wasRunning;
-        pauseState.active = false;
-        if(shouldResume && activeId){
-          const info = findTask(activeId);
-          if(info && !info.task.done){
-            running = true;
-            dogEl.classList.remove('paused');
-            dogEl.classList.add('running');
-            playSound('start');
-            toast('⏰ 暂停结束，倒计时自动继续！', 2400);
-          }
-        }
-      }
+    if(L.status === 'chomping' && amOwner && now >= L.chompUntil){
+      L.status = 'running';
+      L.startedAt = now;
+      L.leftAtStart = L.totalMs;
+      pushLive();
     }
-    else if(running && activeId){
-      const rt = runtimeMap[activeId];
-      if(rt && !rt.holdDogAtEnd){
-        rt.leftMs -= dt;
-        tickChar(dt);
-        if(rt.leftMs <= 0){
-          rt.rounds = (rt.rounds||0)+1;
-          rt.leftMs = rt.totalMs;
-          rt.holdDogAtEnd = true;
-          resetCharProgress();
-          eatSun(1, '⏰ 第 <b>'+rt.rounds+'</b> 轮结束，任务未完成！<br>扣掉 1 颗金币 💰');
-          liveSend({ t:'event', name:'round', rounds: rt.rounds });
-          const myRound = rt.rounds;
-          setTimeout(() => {
-            if(!activeId || !runtimeMap[activeId]) return;
-            if(runtimeMap[activeId].rounds !== myRound) return;
-            runtimeMap[activeId].holdDogAtEnd = false;
-            if(running){ dogEl.classList.remove('chomp'); dogEl.classList.add('running'); }
-            updateDogBar();
-            if(activeId) updateCardVisual(activeId);
-          }, CHOMP_HOLD_MS);
-        }
-      }
-    }
-    /* ★ 护眼倒计时独立运行 */
-    tickEye(dt);
   }
 
+  /* 处理护眼 */
+  if(L.eyeActive && amOwner){
+    if(L.eyeMode === 'use'){
+      const left = liveEyeLeftMs(L);
+      if(left <= 0){
+        L.eyeMode = 'need-rest';
+        L.eyeStageStart = now;
+        L.eyeTotalMs = 0;
+        L.eyeNagCount = 0;
+        L.soundSeq = (L.soundSeq || 0) + 1;
+        L.soundKind = 'eyeAlert';
+        pushLive();
+        toast('⏰ 该放松眼睛啦！点「放松眼睛」休息一下', 3400);
+      }
+    } else if(L.eyeMode === 'need-rest'){
+      const overdue = now - L.eyeStageStart;
+      const expectNags = Math.floor(overdue / EYE_NAG_MS);
+      if(expectNags > (L.eyeNagCount || 0)){
+        L.eyeNagCount = expectNags;
+        L.soundSeq = (L.soundSeq || 0) + 1;
+        L.soundKind = 'eyeAlert';
+        pushLive();
+        toast('⚠️ 还没放松眼睛哦，快点「放松眼睛」吧', 2600);
+      }
+    } else if(L.eyeMode === 'rest'){
+      const left = liveEyeLeftMs(L);
+      if(left <= 0){
+        const cfg = getEyeCfg();
+        L.eyeMode = 'use';
+        L.eyeStageStart = now;
+        L.eyeTotalMs = cfg.useMin * 60000;
+        L.eyeNagCount = 0;
+        L.soundSeq = (L.soundSeq || 0) + 1;
+        L.soundKind = 'restDone';
+        pushLive();
+        toast('✅ 放松结束，继续加油！', 2200);
+      }
+    }
+  }
+
+  /* 同步 legacy 状态 + runtimeMap */
+  syncLegacyFromLive();
+  syncRuntimeFromLive();
+
+  /* activeId 变化时切换 charTimer */
+  if(lastTickedActiveId !== (L.activeId || null)){
+    lastTickedActiveId = L.activeId || null;
+    if(lastTickedActiveId && cardRefs[lastTickedActiveId]){
+      initCharTimer(lastTickedActiveId);
+    } else {
+      clearCharTimer();
+    }
+  }
+
+  /* 本地平滑推进 charTimer */
+  if(L.activeId && L.status === 'running' && charTimer.active){
+    tickChar(100);
+  } else if(L.activeId && L.status === 'paused' && charTimer.active){
+    setCharPaused(true);
+  } else if(L.activeId && L.status === 'running' && charTimer.active){
+    setCharPaused(false);
+  }
+
+  /* dog 动画 */
+  if(L.activeId && L.status === 'running'){
+    dogEl.classList.remove('paused','chomp');
+    dogEl.classList.add('running');
+  } else if(L.activeId && L.status === 'paused'){
+    dogEl.classList.remove('running','chomp');
+    dogEl.classList.add('paused');
+  } else if(L.activeId && L.status === 'chomping'){
+    dogEl.classList.remove('running','paused');
+    dogEl.classList.add('chomp');
+  } else {
+    dogEl.classList.remove('running','paused','chomp');
+  }
+
+  /* 更新 UI */
   updateDogBar();
   if(activeId) updateCardVisual(activeId);
+  updateEyeUI();
   updateMainBtn();
 
-  /* 没有需要持续刷新的东西就停掉 interval */
-  const needsTick = pauseState.active || (running && activeId) || eyeTimer.active || !!activeId;
-  if(!needsTick && tickTimer){
-    clearInterval(tickTimer);
-    tickTimer = null;
+  /* 判定是否需要继续 tick */
+  const needTick = !!L.activeId || L.eyeActive;
+  if(!needTick && tickTimer){
+    clearInterval(tickTimer); tickTimer = null;
   }
 }
 function ensureTickRunning(){
   if(tickTimer) return;
   lastTs = performance.now();
-  tickTimer = setInterval(() => tick(performance.now()), 100);
+  tickTimer = setInterval(() => tick(), 100);
 }
 function stopTick(){
-  running = false;
-  pauseState.active = false;
-  pauseState.leftMs = 0;
   if(tickTimer){ clearInterval(tickTimer); tickTimer = null; }
   dogEl.classList.remove('running','paused','chomp');
-  if(eyeTimer.active) ensureTickRunning();
 }
-function startTask(id){
-  const info = findTask(id);
+
+/* ============================================================
+   任务操作（写入 state.live）
+============================================================ */
+function liveStartTask(taskId){
+  const info = findTask(taskId);
   if(!info || info.task.done) return;
-  if(activeId && activeId !== id && running){ running=false; dogEl.classList.remove('running'); }
-  takeTimerOwnership();
-  activeId = id;
-  ensureRuntime(info.task);
-  const rt = runtimeMap[id];
-  if(rt.leftMs <= 0){ rt.leftMs = rt.totalMs; rt.rounds=0; rt.holdDogAtEnd=false; }
-  pauseState.active = false; pauseState.leftMs = 0;
-  running = true;
-  dogEl.classList.remove('paused','chomp');
-  dogEl.classList.add('running');
-  if(charTimer.active && charTimer.taskId === id){
-    rebindCharTimer();
-  } else {
-    initCharTimer(id);
+  const L = state.live;
+  const totalMs = clamp(Number(info.task.minutes)||10, 0.5, 120) * 60000;
+
+  L.activeId = taskId;
+  L.status = 'running';
+  L.startedAt = Date.now();
+  L.leftAtStart = totalMs;
+  L.totalMs = totalMs;
+  L.rounds = 0;
+  L.chompUntil = 0;
+  L.ownerTab = TAB_ID;
+  L.soundSeq = (L.soundSeq || 0) + 1;
+  L.soundKind = 'start';
+
+  if(!L.eyeActive){
+    const cfg = getEyeCfg();
+    L.eyeActive = true;
+    L.eyeMode = 'use';
+    L.eyeStageStart = Date.now();
+    L.eyeTotalMs = cfg.useMin * 60000;
+    L.eyeNagCount = 0;
   }
-  setCharPaused(false);
-  /* ★ 首次开始作业 → 开启护眼提醒 */
-  if(!eyeTimer.active) startEyeCare();
-  playSound('start');
-  liveSend({ t:'event', name:'start' });
+  /* 立即更新本地显示 */
+  ensureRuntime(info.task);
   ensureTickRunning();
+  pushLive();
+  initCharTimer(taskId);
+  setCharPaused(false);
+  refreshAllCards();
+  updateDogBar(); updateMainBtn();
+  scrollToCard(taskId);
+}
+
+function livePause(){
+  const L = state.live;
+  if(!L.activeId || L.status !== 'running') return;
+  const left = liveLeftMs(L);
+  L.status = 'paused';
+  L.leftAtStart = Math.max(0, left);
+  L.startedAt = Date.now();
+  L.ownerTab = TAB_ID;
+  L.soundSeq = (L.soundSeq || 0) + 1;
+  L.soundKind = 'pause';
+  pushLive();
+  setCharPaused(true);
   refreshAllCards(); updateDogBar(); updateMainBtn();
-  scrollToCard(id);
+  toast('⏸ 已暂停，倒计时停留在当前时间', 1800);
+}
+
+function liveResume(){
+  const L = state.live;
+  if(!L.activeId || L.status !== 'paused') return;
+  L.status = 'running';
+  L.startedAt = Date.now();
+  L.ownerTab = TAB_ID;
+  L.soundSeq = (L.soundSeq || 0) + 1;
+  L.soundKind = 'resume';
+  pushLive();
+  setCharPaused(false);
+  refreshAllCards(); updateDogBar(); updateMainBtn();
+  toast('▶ 已恢复倒计时', 2000);
+}
+
+function liveStopTask(){
+  const L = state.live;
+  L.activeId = '';
+  L.status = 'idle';
+  L.startedAt = 0;
+  L.leftAtStart = 0;
+  L.totalMs = 0;
+  L.rounds = 0;
+  L.chompUntil = 0;
+  clearCharTimer();
+  pushLive();
+}
+
+function liveStartEyeRest(){
+  const L = state.live;
+  if(!L.eyeActive) return;
+  if(L.eyeMode !== 'use' && L.eyeMode !== 'need-rest') return;
+  const cfg = getEyeCfg();
+  L.eyeMode = 'rest';
+  L.eyeStageStart = Date.now();
+  L.eyeTotalMs = cfg.restMin * 60000;
+  L.eyeNagCount = 0;
+  L.ownerTab = TAB_ID;
+  pushLive();
+  toast('😌 放松眼睛计时开始（' + cfg.restMin + ' 分钟）', 2200);
+}
+
+function liveStopEyeCare(){
+  const L = state.live;
+  if(!L.eyeActive) return;
+  L.eyeActive = false;
+  L.eyeMode = 'idle';
+  L.eyeStageStart = 0;
+  L.eyeTotalMs = 0;
+  L.eyeNagCount = 0;
+  pushLive();
+}
+
+/* ============================================================
+   用户交互
+============================================================ */
+function onMainBtnClick(){
+  const L = state.live;
+  if(L.activeId && L.status === 'paused'){ liveResume(); return; }
+  if(L.activeId && L.status === 'running'){ requestPause(); return; }
+  if(L.activeId && L.status === 'chomping') return;
+  if(!L.activeId){
+    const first = allTasks().find(t=>!t.done);
+    if(first){ liveStartTask(first.id); }
+    return;
+  }
+  const info = findTask(L.activeId);
+  if(!info || info.task.done){
+    const next = allTasks().find(t=>!t.done);
+    if(next) liveStartTask(next.id);
+    return;
+  }
+  liveStartTask(L.activeId);
 }
 
 /* ============================================================
@@ -3230,65 +3251,17 @@ function confirmPassword(){
   pwdPurpose = '';
   pendingCheckId = null;
   if(purpose === 'admin') enterAdminMode();
-  else if(purpose === 'pause') doPause();
+  else if(purpose === 'pause') livePause();
   else if(purpose === 'check'){ if(checkId) doToggleTaskDone(checkId); }
 }
 
 function requestPause(){
-  if(!activeId || !running) return;
+  const L = state.live;
+  if(!L.activeId || L.status !== 'running') return;
   pwdPurpose = 'pause';
   openPwdModal('⏸ 暂停确认', '暂停倒计时需要家长密码');
 }
-function doPause(){
-  if(!activeId || !running) return;
-  takeTimerOwnership();
-  running = false;
-  pauseState.active = false;
-  pauseState.leftMs = 0;
-  dogEl.classList.remove('running','paused','chomp');
-  setCharPaused(true);
-  playSound('pause');
-  liveSend({ t:'event', name:'pause' });
-  refreshAllCards(); updateDogBar(); updateMainBtn();
-  toast('⏸ 已暂停，倒计时停留在当前时间', 1800);
-}
-function resumeFromPause(){
-  if(!pauseState.active) return;
-  takeTimerOwnership();
-  const wasRunning = pauseState.wasRunning;
-  pauseState.active = false; pauseState.leftMs = 0;
-  dogEl.classList.remove('paused');
-  if(wasRunning && activeId){
-    const info = findTask(activeId);
-    if(info && !info.task.done){
-      running = true;
-      dogEl.classList.add('running');
-      playSound('start');
-      liveSend({ t:'event', name:'resume' });
-      toast('▶ 已恢复倒计时', 2000);
-    }
-  }
-  ensureTickRunning();
-  refreshAllCards(); updateDogBar(); updateMainBtn();
-}
-function onMainBtnClick(){
-  if(pauseState.active){ resumeFromPause(); return; }
-  if(!activeId){
-    const first = allTasks().find(t=>!t.done);
-    if(first){ activeId=first.id; ensureRuntime(first); startTask(first.id); }
-    return;
-  }
-  const info = findTask(activeId);
-  if(!info || info.task.done){
-    const next = allTasks().find(t=>!t.done);
-    if(next){ activeId=next.id; ensureRuntime(next); startTask(next.id); }
-    return;
-  }
-  if(running){ requestPause(); return; }
-  startTask(activeId);
-}
 
-/* ★ 打勾需要家长密码（家长管理模式下免密码） */
 function toggleTaskDone(id){
   const info = findTask(id);
   if(!info) return;
@@ -3321,12 +3294,9 @@ function completeTask(id){
   const info = findTask(id);
   if(!info || info.task.done) return;
   const task = info.task;
-  if(activeId === id){
-    running=false; pauseState.active=false; pauseState.leftMs=0;
-    dogEl.classList.remove('running','paused','chomp');
-    if(tickTimer){ clearInterval(tickTimer); tickTimer = null; }
-    clearCharTimer();
-    if(eyeTimer.active) ensureTickRunning();
+
+  if(state.live.activeId === id){
+    liveStopTask();
   }
   const reward = task.sun;
   task.done = true;
@@ -3340,87 +3310,30 @@ function completeTask(id){
   toast('✅ 「'+escapeHtml(task.text)+'」完成！<br>结算 +'+reward+' 💰', 2400);
   setTimeout(() => autoStartNext(), 700);
 }
+
 function autoStartNext(){
   const next = allTasks().find(t=>!t.done);
   if(!next){
-    activeId=null; running=false; pauseState.active=false; pauseState.leftMs=0;
-    dogEl.classList.remove('running','paused','chomp');
-    if(tickTimer){ clearInterval(tickTimer); tickTimer = null; }
-    clearCharTimer();
-    stopEyeCare();          /* ★ 作业全部完成 → 关闭护眼提醒 */
-    updateDogBar(); updateMainBtn(); refreshAllCards();
-    setTimeout(celebrate, 900);
+    /* 全部完成 */
+    liveStopTask();
+    liveStopEyeCare();
+    if(!state.checkins.includes(state.date)) state.checkins.push(state.date);
+    saveLocalState(); uploadToCloud();
+    renderStats();
+    state.live.soundSeq = (state.live.soundSeq||0) + 1;
+    state.live.soundKind = 'win';
+    pushLive();
+    confetti();
+    toast('🎉 全部完成啦！', 4200);
     return false;
   }
-  takeTimerOwnership();
-  activeId = next.id;
-  const rt = ensureRuntime(next);
-  rt.leftMs = rt.totalMs; rt.rounds=0; rt.holdDogAtEnd=false;
-  pauseState.active=false; pauseState.leftMs=0;
-  running = true;
-  dogEl.classList.remove('paused','chomp');
-  dogEl.classList.add('running');
-  initCharTimer(next.id);
-  playSound('start');
-  liveSend({ t:'event', name:'start' });
-  ensureTickRunning();
-  refreshAllCards(); updateDogBar(); updateMainBtn();
-  scrollToCard(next.id);
-  toast('▶ 自动开始下一条：<b>'+escapeHtml(next.text)+'</b>', 2600);
+  liveStartTask(next.id);
   return true;
 }
-function scrollToCard(id){
-  const ref = cardRefs[id];
-  if(ref && ref.el && ref.el.scrollIntoView){
-    try{ ref.el.scrollIntoView({behavior:'smooth', block:'center'}); }catch(e){}
-  }
-}
-function bumpPill(el){
-  el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
-  setTimeout(() => el.classList.remove('bump'), 260);
-}
-function flySun(fromEl){
-  const from = fromEl.getBoundingClientRect();
-  const to = sunPillEl.getBoundingClientRect();
-  const el = document.createElement('div');
-  el.className = 'fly-sun';
-  el.textContent = '💰';
-  el.style.left = (from.left+from.width/2-14)+'px';
-  el.style.top  = (from.top+from.height/2-14)+'px';
-  document.body.appendChild(el);
-  const dx = (to.left+to.width/2)-(from.left+from.width/2);
-  const dy = (to.top+to.height/2)-(from.top+from.height/2);
-  requestAnimationFrame(() => {
-    el.style.transform=`translate(${dx}px, ${dy}px) scale(.45)`;
-    el.style.opacity='0.15';
-  });
-  setTimeout(() => el.remove(), 950);
-}
-function celebrate(){
-  stopEyeCare();   /* ★ 稳妥起见，庆祝时也关掉护眼提醒 */
-  if(!state.checkins.includes(state.date)) state.checkins.push(state.date);
-  saveLocalState(); uploadToCloud();
-  renderStats();
-  playSound('win');
-  liveSend({ t:'event', name:'win' });
-  confetti();
-  toast('🎉 全部完成啦！', 4200);
-}
-function confetti(){
-  const emojis = ['⭐','💰','✨','🎉','🌈','💚','🌟','🍀'];
-  for(let i=0;i<28;i++){
-    const el = document.createElement('div');
-    el.className='confetti';
-    el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
-    el.style.left = (Math.random()*96)+'vw';
-    el.style.fontSize = (16+Math.random()*20)+'px';
-    el.style.animationDelay = (Math.random()*0.7)+'s';
-    el.style.animationDuration = (2.2+Math.random()*1.2)+'s';
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 4200);
-  }
-}
 
+/* ============================================================
+   切换科目 / 日期
+============================================================ */
 function switchSubject(subject){
   currentSubject = subject;
   document.querySelectorAll('.subject-tab').forEach(t => {
@@ -3435,9 +3348,8 @@ function switchSubject(subject){
 
 function switchDate(dateStr){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return;
-  stopEyeCare();     /* ★ 换日期 → 关掉护眼提醒 */
-  stopTick();
-  activeId = null;
+  liveStopTask();
+  liveStopEyeCare();
   runtimeMap = {};
   clearCharTimer();
   state.date = dateStr;
@@ -3451,6 +3363,9 @@ function switchDate(dateStr){
   toast(isToday ? '📅 已切换到今天' : '📅 已切换到 ' + dateLabel(dateStr).replace('今天 · ','').replace('昨天 · ',''), 2200);
 }
 
+/* ============================================================
+   日历
+============================================================ */
 let calYear = 0, calMonth = 0;
 function openCalendar(){
   const d = new Date(state.date + 'T00:00:00');
@@ -3523,6 +3438,9 @@ $('calTodayBtn').addEventListener('click', () => {
 $('calCloseBtn').addEventListener('click', () => calModal.classList.remove('show'));
 calModal.addEventListener('click', e => { if(e.target === calModal) calModal.classList.remove('show'); });
 
+/* ============================================================
+   笔顺
+============================================================ */
 const strokeModal = $('strokeModal');
 const strokeStage = $('strokeStage');
 const strokeCharBig = $('strokeCharBig');
@@ -3584,6 +3502,9 @@ strokeModal.addEventListener('click', e => {
   }
 });
 
+/* ============================================================
+   密码弹窗
+============================================================ */
 $('pwdConfirm').addEventListener('click', confirmPassword);
 $('pwdCancel').addEventListener('click', closePwdModal);
 pwdInput.addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); confirmPassword(); } });
@@ -3594,7 +3515,9 @@ pwdInput.addEventListener('input', () => {
 });
 pwdModalEl.addEventListener('click', e => { if(e.target===pwdModalEl) closePwdModal(); });
 
-/* ★ 家长入口：点左上角向日葵 */
+/* ============================================================
+   家长入口
+============================================================ */
 $('adminEntryBtn').addEventListener('click', () => {
   pwdPurpose = 'admin';
   openPwdModal('🔑 家长验证', '请输入家长密码进入管理面板');
@@ -3617,11 +3540,17 @@ function exitAdminMode(){
 $('adminExitBtn').addEventListener('click', exitAdminMode);
 $('adminCloseBtn').addEventListener('click', exitAdminMode);
 
-/* ★ 护眼按钮：手动开始放松 */
 $('eyeRestBtn').addEventListener('click', () => {
-  startEyeRest();
+  const L = state.live;
+  if(!L.eyeActive) return;
+  if(L.eyeMode !== 'use' && L.eyeMode !== 'need-rest') return;
+  L.ownerTab = TAB_ID;
+  liveStartEyeRest();
 });
 
+/* ============================================================
+   管理面板
+============================================================ */
 function renderAdminPanel(){
   if(!isAdminMode) return;
   const all = allTasks();
@@ -3655,9 +3584,6 @@ function renderAdminPanel(){
   syncLastInputFields();
 }
 
-/* ------------------------------------------------------------
-   👁️ 护眼提醒设置
------------------------------------------------------------- */
 function renderEyePanel(){
   const st = state.settings || DEFAULT_SETTINGS;
   const ec = (st.eyeCare && typeof st.eyeCare === 'object') ? st.eyeCare : DEFAULT_SETTINGS.eyeCare;
@@ -3681,9 +3607,6 @@ $('adminEyeSaveBtn').addEventListener('click', () => {
   toast('✅ 护眼提醒设置已保存');
 });
 
-/* ------------------------------------------------------------
-   🔒 家长密码面板
------------------------------------------------------------- */
 function renderPwdPanel(){
   const hint = $('adminPwdHint');
   if(!hint) return;
@@ -3712,9 +3635,6 @@ $('adminResetPwdBtn').addEventListener('click', () => {
   toast('✅ 已恢复默认密码 0702');
 });
 
-/* ------------------------------------------------------------
-   💰 金币调整
------------------------------------------------------------- */
 function pushSunLog(delta, reason){
   if(!Array.isArray(state.sunLog)) state.sunLog = [];
   state.sunLog.unshift({
@@ -3725,7 +3645,6 @@ function pushSunLog(delta, reason){
   });
   if(state.sunLog.length > 60) state.sunLog.length = 60;
 }
-
 function changeSun(delta, reason){
   const d = Math.round(Number(delta) || 0);
   if(!d) return false;
@@ -3737,7 +3656,6 @@ function changeSun(delta, reason){
   renderAdminPanel();
   return true;
 }
-
 function renderSunPanel(){
   const badge = $('adminSunBadge');
   if(badge) badge.textContent = state.sun + ' 💰';
@@ -3764,7 +3682,6 @@ function renderSunPanel(){
       + '</div>';
   }).join('');
 }
-
 function adminSunAdjust(sign){
   const amtEl = $('adminSunAmount');
   const reasonEl = $('adminSunReason');
@@ -3821,7 +3738,7 @@ function renderAdminTaskList(subject, listId, badgeId){
       const info = findTask(id);
       if(info && info.task.done) state.sun -= Number(info.task.sun)||0;
       state.subjects[subj] = state.subjects[subj].filter(t => t.id !== id);
-      if(activeId === id){ stopTick(); activeId = null; clearCharTimer(); }
+      if(state.live.activeId === id){ liveStopTask(); }
       cleanupRuntime();
       saveLocalState(); uploadToCloud();
       renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
@@ -4049,7 +3966,7 @@ $('adminLibAddBtn').addEventListener('click', () => {
 });
 
 /* ============================================================
-   上传写字表 / 识字表
+   上传 PDF
 ============================================================ */
 let pdfJsLoading = null;
 function loadPdfJs(){
@@ -4074,7 +3991,6 @@ function loadPdfJs(){
   });
   return pdfJsLoading;
 }
-
 async function extractPdfText(file){
   const lib = await loadPdfJs();
   const buf = await file.arrayBuffer();
@@ -4106,7 +4022,6 @@ async function extractPdfText(file){
   }
   return all;
 }
-
 function collectHanzi(src, start){
   let s = '';
   for(let i = start; i < src.length; i++){
@@ -4126,7 +4041,6 @@ function collectAllHanzi(src){
   }
   return s;
 }
-
 function parseHanziSheet(text){
   const src = String(text || '').replace(/\r/g, '');
   if(!src.trim()) return [];
@@ -4134,27 +4048,22 @@ function parseHanziSheet(text){
   const out = [];
   let section = '';
   let cur = null;
-
   const finish = () => {
     if(cur && cur.hanzi) out.push({ label: cur.label.slice(0, 60), hanzi: cur.hanzi });
     cur = null;
   };
-
   const SEC_ONLY_RE = /^[#＃\s]*[（(【\[]?\s*(阅读|识字)\s*[)）】\]]?\s*$/;
   const SEC_NUM_RE  = /^[#＃\s]*[（(【\[]?\s*(阅读|识字)\s*(\d{1,2})/;
   const LESSON_RE   = /^[#＃\s]*[（(【\[]?\s*(\d{1,2}|语文园地[一二三四五六七八九十]+)/;
   const TRIM_HEAD   = /^[\s、．.。,:：;；)）】\]\-—_]+/;
-
   for(let i = 0; i < lines.length; i++){
     const line = lines[i].replace(/\u3000/g, ' ').trim();
     if(!line) continue;
-
     if(SEC_ONLY_RE.test(line)){
       finish();
       section = line.match(SEC_ONLY_RE)[1];
       continue;
     }
-
     let label = null, rest = '';
     const snm = line.match(SEC_NUM_RE);
     const lm  = line.match(LESSON_RE);
@@ -4166,20 +4075,17 @@ function parseHanziSheet(text){
       label = section + lm[1];
       rest = line.slice(lm[0].length);
     }
-
     if(label !== null){
       finish();
       rest = rest.replace(TRIM_HEAD, '');
       cur = { label, hanzi: collectHanzi(rest, 0) };
       continue;
     }
-
     if(cur) cur.hanzi += collectAllHanzi(line);
   }
   finish();
   return out;
 }
-
 function mergeSheet(entries, field){
   const grouped = new Map();
   entries.forEach(({ label, hanzi }) => {
@@ -4206,7 +4112,6 @@ function mergeSheet(entries, field){
   });
   return { added, updated };
 }
-
 $('adminLibSyncBtn').addEventListener('click', () => {
   $('uploadWriteFile').value = '';
   $('uploadReadFile').value = '';
@@ -4230,7 +4135,6 @@ $('uploadCancel').addEventListener('click', () => uploadSyncModal.classList.remo
 uploadSyncModal.addEventListener('click', e => {
   if(e.target === uploadSyncModal) uploadSyncModal.classList.remove('show');
 });
-
 $('uploadSyncBtn').addEventListener('click', async () => {
   const writeFile = $('uploadWriteFile').files[0];
   const readFile  = $('uploadReadFile').files[0];
@@ -4265,12 +4169,10 @@ $('uploadSyncBtn').addEventListener('click', async () => {
     const r2 = mergeSheet(readEntries, 'wordgroups');
     saveLocalState(); uploadToCloud();
     renderLessonLibrary(); populateLessonSelects();
-
     prog.className = 'upload-progress ok';
     prog.textContent =
       `✅ 写字表 ${writeEntries.length} 条 · 识字表 ${readEntries.length} 条` +
       ` · 新增 ${r1.added + r2.added} 篇 · 更新 ${r1.updated + r2.updated} 篇`;
-
     toast(
       `✅ 同步完成<br>` +
       `写字表：${writeEntries.length} 条 · 识字表：${readEntries.length} 条<br>` +
@@ -4361,21 +4263,12 @@ $('taskEditSave').addEventListener('click', () => {
   const s = parseInt($('taskEditSun').value, 10);
   t.minutes = clamp(isFinite(m) && m > 0 ? m : 10, 0.5, 120);
   t.sun = clamp(isFinite(s) && s > 0 ? s : 30, 1, 500);
-
   if(t.type === 'preview'){
     const chars = [...new Set(parseChars($('taskEditExtra').value))].slice(0,60);
     if(chars.length) t.chars = chars;
   } else if(t.type === 'wordgroup' || t.type === 'copy'){
     const words = parseWords($('taskEditExtra').value).slice(0,60);
     if(words.length) t.words = words;
-  }
-
-  if(runtimeMap[t.id]){
-    const ms = t.minutes*60000;
-    const rt = runtimeMap[t.id];
-    if(rt.totalMs !== ms){
-      rt.totalMs = ms; rt.leftMs = ms; rt.rounds = 0; rt.holdDogAtEnd = false;
-    }
   }
   saveLocalState(); uploadToCloud();
   taskEditModal.classList.remove('show');
@@ -4442,7 +4335,6 @@ $('adminAddPreviewBtn').addEventListener('click', () => {
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加「'+escapeHtml(name)+'」会写字（'+chars.length+'字）');
 });
-
 $('adminAddWordgroupBtn').addEventListener('click', () => {
   const { name, items } = lessonPickItems('wordgroup');
   if(!name){ toast('请先选择课文'); return; }
@@ -4459,7 +4351,6 @@ $('adminAddWordgroupBtn').addEventListener('click', () => {
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加「'+escapeHtml(name)+'」抄写并组词（'+chars.length+'字）');
 });
-
 $('adminAddCopyBtn').addEventListener('click', () => {
   const { name, items } = lessonPickItems('copy');
   if(!name){ toast('请先选择课文'); return; }
@@ -4493,7 +4384,6 @@ $('adminAddChineseBtn').addEventListener('click', () => {
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加任务：「'+escapeHtml(text)+'」');
 });
-
 $('adminAddMathBtn').addEventListener('click', () => {
   const textEl = $('adminAddMathText');
   const minEl = $('adminAddMathMin');
@@ -4510,7 +4400,6 @@ $('adminAddMathBtn').addEventListener('click', () => {
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加任务：「'+escapeHtml(text)+'」');
 });
-
 $('adminAddEnglishBtn').addEventListener('click', () => {
   const textEl = $('adminAddEnglishText');
   const minEl = $('adminAddEnglishMin');
@@ -4542,7 +4431,6 @@ $('adminLocalDownloadBtn').addEventListener('click', () => {
     backup.__backupType = 'study_board_local_backup';
     backup.__backupVersion = 1;
     backup.__backupTime = new Date().toISOString();
-
     const blob = new Blob([JSON.stringify(backup, null, 2)], {
       type: 'application/json;charset=utf-8'
     });
@@ -4561,31 +4449,24 @@ $('adminLocalDownloadBtn').addEventListener('click', () => {
     toast('⚠️ 本地下载失败');
   }
 });
-
 $('adminLocalUploadBtn').addEventListener('click', () => {
   $('adminLocalUploadFile').value = '';
   $('adminLocalUploadFile').click();
 });
-
 $('adminLocalUploadFile').addEventListener('change', async (e) => {
   const file = e.target.files && e.target.files[0];
   if(!file) return;
-
   try{
     const text = await file.text();
     const imported = JSON.parse(text);
-
     if(!imported || !imported.days){
       throw new Error('不是有效的学习打卡台本地备份文件');
     }
-
     if(!confirm('确定要导入这份本地数据吗？\\n导入后会覆盖当前本地学习数据。')) return;
-
     const newDays = {};
     Object.keys(imported.days).forEach(k => {
       newDays[k] = normalizeDay(imported.days[k]);
     });
-
     state.days = newDays;
     state.date = imported.date || todayStr();
     state.sun = Number(imported.sun) || 0;
@@ -4596,21 +4477,23 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
     state.parentPassword = (typeof imported.parentPassword === 'string'
       && /^\d{4}$/.test(imported.parentPassword))
       ? imported.parentPassword : MASTER_PASSWORD;
-
+    if(imported.live && typeof imported.live === 'object'){
+      state.live = Object.assign({}, DEFAULT_LIVE, imported.live);
+    }
     if(!state.days[state.date]) state.days[state.date] = makeDay();
-
     saveLocalState();
     renderStats();
     renderBoard();
     refreshAllCards();
+    syncLegacyFromLive();
+    syncRuntimeFromLive();
     updateDogBar();
     updateMainBtn();
+    updateEyeUI();
     if(isAdminMode) renderAdminPanel();
     populateLessonSelects();
-
     let synced = false;
     try{ synced = await uploadToCloud(true); }catch(err){ console.warn('导入后云端同步失败', err); }
-
     toast(synced ? '✅ 本地数据导入成功，已同步到云端' : '✅ 本地数据导入成功（云端同步失败，请点「强制上传本地数据」）');
   }catch(err){
     console.error(err);
@@ -4645,15 +4528,16 @@ $('adminForcePullBtn').addEventListener('click', async () => {
   }
 });
 
+/* ============================================================
+   事件绑定
+============================================================ */
 document.querySelectorAll('.subject-tab').forEach(tab => {
   tab.addEventListener('click', () => switchSubject(tab.dataset.tab));
 });
-
 mainBtn.addEventListener('click', onMainBtnClick);
 
 window.addEventListener('resize', () => {
   updateDogBar();
-  /* ★ 轨道宽度可能变化，重新测量并刷新眼睛位置 */
   eyeRailW = -1;
   measureEyeRail();
   updateEyeUI();
@@ -4661,14 +4545,14 @@ window.addEventListener('resize', () => {
 
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState === 'visible'){
-    /* 从后台回来时，校正时间基准并确保 tick 在跑 */
     lastTs = performance.now();
-    if(activeId || eyeTimer.active) ensureTickRunning();
-    refreshAllCards(); updateDogBar(); updateMainBtn(); updateEyeUI();
+    if(state.live && (state.live.activeId || state.live.eyeActive)) ensureTickRunning();
+    syncLegacyFromLive();
+    syncRuntimeFromLive();
+    renderAllLiveUI();
   }
 });
 
-/* ★ 只在 http/https 下注册 SW，避免 file:// 直接打开时报错 */
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js')
@@ -4677,9 +4561,24 @@ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
   });
 }
 
+window.addEventListener('beforeunload', () => {
+  /* 主动放弃 owner，让其他端可以接管 */
+  if(isLiveOwner() && state && state.live && (state.live.status === 'running' || state.live.status === 'chomping')){
+    try{
+      state.live.ownerTab = '';
+      liveSend({ t:'live', live: state.live });
+    }catch(e){}
+  }
+});
+
+/* ============================================================
+   初始化
+============================================================ */
 state = attachSubjectsProxy(loadLocalState());
 state.date = todayStr();
 if(!state.days[state.date]) state.days[state.date] = makeDay();
+
+lastSoundSeq = Number(state.live.soundSeq) || 0;
 
 dateTextEl.textContent = dateLabel(state.date);
 updateDateText();
@@ -4687,12 +4586,47 @@ saveLocalState();
 renderStats(); renderBoard();
 switchSubject('chinese');
 refreshAllCards();
+
 requestAnimationFrame(() => {
   measureEyeRail();
-  updateEyeUI();   /* ★ 初始化护眼卡片 UI */
+  updateEyeUI();
   updateDogBar();
   updateMainBtn();
 });
+
+/* ★ 从持久化状态恢复倒计时（刷新后不会复位） */
+(function restoreLiveFromState(){
+  const L = state.live;
+  if(!L || !L.activeId) return;
+  const info = findTask(L.activeId);
+  if(!info || info.task.done){
+    /* 任务已被删除或已完成，清空 live */
+    L.activeId = '';
+    L.status = 'idle';
+    L.startedAt = 0;
+    L.leftAtStart = 0;
+    L.totalMs = 0;
+    return;
+  }
+  ensureRuntime(info.task);
+  /* 如果是 running/chomping，本端接管 owner */
+  if(L.status === 'running' || L.status === 'chomping'){
+    L.ownerTab = TAB_ID;
+    L.updatedAt = Date.now();
+  }
+  syncLegacyFromLive();
+  syncRuntimeFromLive();
+  renderAllLiveUI();
+  refreshAllCards();
+  ensureTickRunning();
+  /* 延迟初始化 charTimer，等 DOM 就绪 */
+  setTimeout(() => {
+    if(state.live.activeId && (state.live.status === 'running' || state.live.status === 'chomping')){
+      initCharTimer(state.live.activeId);
+      if(state.live.status === 'paused') setCharPaused(true);
+    }
+  }, 220);
+})();
 
 /* ============================================================
    ☁️ 启动同步
