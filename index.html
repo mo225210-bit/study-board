@@ -623,14 +623,10 @@
 
   .task-card.done .char-grid{display:none}
 
-  /* ★ 双击 → 绿色对勾（放在字的后面/右侧，字半透明） */
+  /* ★ 双击 → 绿色对勾（字保持不变淡，仅加勾） */
   .mizi.checked{
     background:#E8F5E9;
     border-color:#66BB6A;
-  }
-  .mizi.checked .mizi-char{
-    opacity:.18;
-    transform:translateX(-6px) scale(.85);
   }
   .mizi.checked .mizi-bar{
     display:none;
@@ -653,7 +649,6 @@
   @keyframes checkPop{from{transform:translateY(-50%) scale(.3);opacity:0}to{transform:translateY(-50%) scale(1);opacity:1}}
   @media (max-width: 500px){
     .mizi.checked::after{font-size:22px;right:1px}
-    .mizi.checked .mizi-char{transform:translateX(-5px) scale(.82)}
   }
 
   .word-group{background:transparent}
@@ -906,6 +901,7 @@
       <button class="admin-close" id="adminCloseBtn">✕ 关闭</button>
     </div>
 
+    <!-- ① 语文 -->
     <div class="admin-section" id="adminPanelChinese">
       <h3>📖 语文作业 <span class="badge" id="adminChineseBadge">0</span></h3>
       <p style="font-size:11.5px;color:#5a7a8a;font-weight:700;margin-bottom:8px">💡 双击作业条目可重新编辑</p>
@@ -951,6 +947,7 @@
       </div>
     </div>
 
+    <!-- ② 数学 -->
     <div class="admin-section" id="adminPanelMath">
       <h3>🔢 数学作业 <span class="badge" id="adminMathBadge">0</span></h3>
       <div id="adminMathList"></div>
@@ -965,6 +962,7 @@
       </div>
     </div>
 
+    <!-- ③ 英语 -->
     <div class="admin-section" id="adminPanelEnglish">
       <h3>🔤 英语作业 <span class="badge" id="adminEnglishBadge">0</span></h3>
       <div id="adminEnglishList"></div>
@@ -979,23 +977,7 @@
       </div>
     </div>
 
-    <div class="admin-section collapsed" id="adminPanelEye">
-      <h3>👁️ 护眼提醒</h3>
-      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
-        孩子点「开始」后自动开始用眼倒计时。用眼到时间会响铃提醒休息；<br>
-        不点「放松眼睛」的话，之后每 <b style="color:#FFD54F">30 秒</b> 再响铃一次，直到点为止。<br>
-        按下「放松眼睛」后任务倒计时自动暂停，放松结束自动继续。
-      </p>
-      <div class="admin-add-row inline-row">
-        <input class="aa-num" id="adminEyeUseMin" type="number" min="1" max="120" step="1">
-        <span class="aa-unit">分钟/用眼</span>
-        <input class="aa-num" id="adminEyeRestMin" type="number" min="1" max="60" step="1">
-        <span class="aa-unit">分钟/放松</span>
-        <button class="aa-btn" id="adminEyeSaveBtn">保存</button>
-      </div>
-      <div class="aa-hint" id="adminEyeHint"></div>
-    </div>
-
+    <!-- ④ 日期 -->
     <div class="admin-section collapsed" id="adminPanelDate">
       <h3>📅 日期选择</h3>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
@@ -1004,15 +986,7 @@
       </div>
     </div>
 
-    <div class="admin-section collapsed" id="adminPanelProgress">
-      <h3>📊 进度总览 <span class="badge" id="adminTodayBadge"></span></h3>
-      <div class="admin-stats">
-        <div class="admin-stat-card"><div class="asc-num" id="adminStatSun">0</div><div class="asc-label">💰 当前金币（个）</div></div>
-        <div class="admin-stat-card"><div class="asc-num" id="adminStatDone">0/0</div><div class="asc-label">✅ 已完成作业</div></div>
-        <div class="admin-stat-card"><div class="asc-num" id="adminStatStreak">0</div><div class="asc-label">🔥 连续打卡天数</div></div>
-      </div>
-    </div>
-
+    <!-- ⑤ 金币 -->
     <div class="admin-section collapsed" id="adminPanelSun">
       <h3>💰 金币调整 <span class="badge" id="adminSunBadge">0 个 💰</span></h3>
       <div class="admin-add-row inline-row">
@@ -1030,6 +1004,51 @@
       <div class="sun-log" id="adminSunLog"></div>
     </div>
 
+    <!-- ⑥ 进度 -->
+    <div class="admin-section collapsed" id="adminPanelProgress">
+      <h3>📊 进度总览 <span class="badge" id="adminTodayBadge"></span></h3>
+      <div class="admin-stats">
+        <div class="admin-stat-card"><div class="asc-num" id="adminStatSun">0</div><div class="asc-label">💰 当前金币（个）</div></div>
+        <div class="admin-stat-card"><div class="asc-num" id="adminStatDone">0/0</div><div class="asc-label">✅ 已完成作业</div></div>
+        <div class="admin-stat-card"><div class="asc-num" id="adminStatStreak">0</div><div class="asc-label">🔥 连续打卡天数</div></div>
+      </div>
+    </div>
+
+    <!-- ⑦ 护眼 -->
+    <div class="admin-section collapsed" id="adminPanelEye">
+      <h3>👁️ 护眼提醒</h3>
+      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+        孩子点「开始」后自动开始用眼倒计时。用眼到时间会响铃提醒休息；<br>
+        不点「放松眼睛」的话，之后每 <b style="color:#FFD54F">30 秒</b> 再响铃一次，直到点为止。<br>
+        按下「放松眼睛」后任务倒计时自动暂停，放松结束自动继续。
+      </p>
+      <div class="admin-add-row inline-row">
+        <input class="aa-num" id="adminEyeUseMin" type="number" min="1" max="120" step="1">
+        <span class="aa-unit">分钟/用眼</span>
+        <input class="aa-num" id="adminEyeRestMin" type="number" min="1" max="60" step="1">
+        <span class="aa-unit">分钟/放松</span>
+        <button class="aa-btn" id="adminEyeSaveBtn">保存</button>
+      </div>
+      <div class="aa-hint" id="adminEyeHint"></div>
+    </div>
+
+    <!-- ⑧ 课文库 -->
+    <div class="admin-section collapsed" id="adminPanelLibrary">
+      <h3>📚 课文生字 / 组词 / 词语库 <span class="badge" id="adminLibBadge">0 条</span></h3>
+      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+        <b style="color:#FFD54F">双击条目可重新编辑。</b>
+      </p>
+      <div class="admin-add-row"><button class="aa-btn" id="adminLibSyncBtn">📤 上传写字表 / 识字表</button></div>
+      <div id="adminLibList"></div>
+      <div class="admin-sub-label">➕ 添加课文库条目</div>
+      <div class="admin-add-row"><input class="aa-text" id="adminLibLesson" placeholder="课文名"></div>
+      <div class="admin-add-row"><input class="aa-text" id="adminLibChars" placeholder="会写字，空格分隔"></div>
+      <div class="admin-add-row"><input class="aa-text" id="adminLibWordgroups" placeholder="会识字，空格分隔"></div>
+      <div class="admin-add-row"><input class="aa-text" id="adminLibWords" placeholder="抄写词语，空格分隔"></div>
+      <div class="admin-add-row"><button class="aa-btn" id="adminLibAddBtn" style="flex:1">💾 保存到课文库</button></div>
+    </div>
+
+    <!-- ⑨ 密码 -->
     <div class="admin-section collapsed" id="adminPanelPassword">
       <h3>🔒 家长密码</h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
@@ -1047,21 +1066,7 @@
       </div>
     </div>
 
-    <div class="admin-section collapsed" id="adminPanelLibrary">
-      <h3>📚 课文生字 / 组词 / 词语库 <span class="badge" id="adminLibBadge">0 条</span></h3>
-      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
-        <b style="color:#FFD54F">双击条目可重新编辑。</b>
-      </p>
-      <div class="admin-add-row"><button class="aa-btn" id="adminLibSyncBtn">📤 上传写字表 / 识字表</button></div>
-      <div id="adminLibList"></div>
-      <div class="admin-sub-label">➕ 添加课文库条目</div>
-      <div class="admin-add-row"><input class="aa-text" id="adminLibLesson" placeholder="课文名"></div>
-      <div class="admin-add-row"><input class="aa-text" id="adminLibChars" placeholder="会写字，空格分隔"></div>
-      <div class="admin-add-row"><input class="aa-text" id="adminLibWordgroups" placeholder="会识字，空格分隔"></div>
-      <div class="admin-add-row"><input class="aa-text" id="adminLibWords" placeholder="抄写词语，空格分隔"></div>
-      <div class="admin-add-row"><button class="aa-btn" id="adminLibAddBtn" style="flex:1">💾 保存到课文库</button></div>
-    </div>
-
+    <!-- ⑩ 云端 -->
     <div class="admin-section collapsed" id="adminPanelSync">
       <h3>☁️ 云端同步</h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
@@ -1172,6 +1177,8 @@ const DEFAULT_SETTINGS = {
     copy:      { min: 2,   sun: 6 }
   },
   eyeCare: { useMin: 20, restMin: 5 },
+  /* ★ 记住上一次选择的课文 */
+  lessonPick: { preview: '', wordgroup: '', copy: '' },
   lastInputs: {
     chineseMin: 10, chineseSun: 30,
     mathMin: 10, mathSun: 30,
@@ -1301,6 +1308,8 @@ function normalizeSettings(raw){
   const li = (r.lastInputs && typeof r.lastInputs === 'object') ? r.lastInputs : {};
   const pc = (r.panelCollapsed && typeof r.panelCollapsed === 'object') ? r.panelCollapsed : {};
   const ec = (r.eyeCare && typeof r.eyeCare === 'object') ? r.eyeCare : {};
+  /* ★ 上次选择的课文 */
+  const lp = (r.lessonPick && typeof r.lessonPick === 'object') ? r.lessonPick : {};
   const num = (v, dv, min, max) => {
     const n = Number(v);
     return clamp(isFinite(n) ? n : dv, min, max);
@@ -1308,6 +1317,11 @@ function normalizeSettings(raw){
   return {
     unit: { preview: pick('preview'), wordgroup: pick('wordgroup'), copy: pick('copy') },
     eyeCare: { useMin: num(ec.useMin, d.eyeCare.useMin, 1, 120), restMin: num(ec.restMin, d.eyeCare.restMin, 1, 60) },
+    lessonPick: {
+      preview:   String(lp.preview   || '').slice(0,60),
+      wordgroup: String(lp.wordgroup || '').slice(0,60),
+      copy:      String(lp.copy      || '').slice(0,60)
+    },
     lastInputs: {
       chineseMin: num(li.chineseMin, d.lastInputs.chineseMin, 1, 120),
       chineseSun: num(li.chineseSun, d.lastInputs.chineseSun, 1, 500),
@@ -2076,7 +2090,7 @@ function renderSubjectCards(subject, listEl){
     const minEl = document.createElement('span'); minEl.className = 't-min';
     minEl.textContent = '⏱'+task.minutes+'分钟';
     const sunEl = document.createElement('span'); sunEl.className = 't-sun';
-    sunEl.textContent = '💰'+task.sun+'个';   /* ★ 加"个" */
+    sunEl.textContent = '💰'+task.sun+'个';
     const timeEl = document.createElement('span'); timeEl.className = 't-time';
     timeEl.textContent = task.done ? '✓ 已完成' : (task.minutes+'分钟');
     info.appendChild(stars); info.appendChild(minEl); info.appendChild(sunEl); info.appendChild(timeEl);
@@ -2149,7 +2163,6 @@ function updateCardVisual(id){
       ref.progressEl.className = 'card-progress paused';
       ref.progressEl.style.width = (clamp(p,0,1)*100)+'%';
     } else if(rt.overdue){
-      /* ★ 超时后：进度条 100%，时间显示已超时轮数 */
       ref.timeEl.className = 't-time chomping';
       ref.timeEl.textContent = '超时 ' + rt.rounds + ' 个';
       ref.progressEl.className = 'card-progress chomping';
@@ -2173,7 +2186,7 @@ function refreshAllCards(){ Object.keys(cardRefs).forEach(id => updateCardVisual
 /* ============================================================
    田字格倒计时
    ★ 每个字/词一份时间：按顺序每个字走 unitMs，然后下一个字
-   ★ 超时后：所有字同步显示单份时间的循环进度
+   ★ 所有字计时结束后进度条停在满格（暂停）
 ============================================================ */
 function charBarEnsure(mizi){
   let bar = mizi.querySelector('.mizi-bar');
@@ -2263,19 +2276,17 @@ function paintCharBarsFromLive(){
     return;
   }
 
-  /* 超时后：所有字进度条同步，按单份时间循环 */
+  /* ★ 超时后：所有字/词计时结束，进度条停在满格（暂停不动） */
   if(L.overdue){
-    const elapsed = Date.now() - L.cycleStart;
-    const p = clamp(elapsed / Math.max(1, L.unitMs), 0, 1);
     charTimer.units.forEach(u => {
       u.bars.forEach(b => {
-        if(b.__s !== p){ b.__s = p; b.style.transform = 'scaleX(' + p.toFixed(4) + ')'; }
+        if(b.__s !== 1){ b.__s = 1; b.style.transform = 'scaleX(1)'; }
       });
     });
     return;
   }
 
-  /* 正常阶段：按顺序，每个字/词一份时间 */
+  /* 正常阶段：按顺序，每个字/词一份时间，走完一个进入下一个 */
   const totalMs = Math.max(1, L.totalMs);
   let elapsed;
   if(L.status === 'paused') elapsed = totalMs - (L.leftAtStart || 0);
@@ -2302,7 +2313,6 @@ function setCharPaused(p){
 /* ============================================================
    ★ 护眼 UI
 ============================================================ */
-/* ★ 用百分比定位（更精准，不会因测量误差走不到右边） */
 function moveEyeToken(p){
   if(!eyeTokenEl) return;
   const pp = clamp(p, 0, 1);
@@ -2393,15 +2403,18 @@ function updateDogBar(){
     return;
   }
   if(rt.overdue){
-    /* ★ 超时后：进度条保持 100%，显示已超时轮数 */
+    /* ★ 超时后：主进度条按单份时间循环倒计时 */
+    const L = state.live || {};
+    const unitMs = Math.max(1, Number(L.unitMs) || 1);
+    const left = liveLeftMs(L);
+    const frac = clamp(left / unitMs, 0, 1);   /* 1 → 0 */
     trackEl.className = 'track chomping';
-    setDogProgress(1);
+    setDogProgress(1 - frac);
     trackFill.className = 'track-fill';
-    trackFill.style.width = '100%';
+    trackFill.style.width = (frac * 100) + '%';
     trackTime.className = 'track-time chomping';
-    trackTime.textContent = '00:00';
-    const nextLeft = liveLeftMs(state.live);
-    timerHint.innerHTML = '⏰ <span class="chomp-t">已超时</span> · 已扣 '+rt.rounds+' 个金币 · '+fmtMs(nextLeft)+' 后再扣 1 个';
+    trackTime.textContent = fmtMs(left);
+    timerHint.innerHTML = '⏰ <span class="chomp-t">已超时</span> · 已扣 '+rt.rounds+' 个金币 · 倒计时结束再扣 1 个';
     return;
   }
   trackEl.className = 'track';
@@ -2411,8 +2424,7 @@ function updateDogBar(){
   trackFill.style.width = (p*100)+'%';
   trackTime.className = 'track-time';
   trackTime.textContent = fmtMs(rt.leftMs);
-  const roundText = '';
-  if(running){ timerHint.innerHTML = '⏳ 正在进行：<span class="highlight">'+escapeHtml(name)+'</span>'+roundText; }
+  if(running){ timerHint.innerHTML = '⏳ 正在进行：<span class="highlight">'+escapeHtml(name)+'</span>'; }
   else {
     if(rt.leftMs < rt.totalMs && rt.leftMs > 0){
       timerHint.innerHTML = '⏸ 已暂停：<span class="highlight">'+escapeHtml(name)+'</span>（点「▶ 继续」恢复）';
@@ -3391,12 +3403,21 @@ function renderLessonLibrary(){
     el.addEventListener('dblclick', () => openLibEdit(el.dataset.libEdit));
   });
 }
+
+/* ★ 记住上一次选择的课文 */
+function saveLessonPick(kind, value){
+  if(!state.settings) state.settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+  if(!state.settings.lessonPick) state.settings.lessonPick = { preview:'', wordgroup:'', copy:'' };
+  state.settings.lessonPick[kind] = String(value || '').slice(0,60);
+  saveLocalState(); uploadToCloud();
+}
 function populateLessonSelects(){
   const lib = state.lessonLibrary || {};
   const keys = Object.keys(lib).sort();
-  const fill = (sel, placeholder) => {
-    if(!sel) return;
-    const cur = sel.value;
+  if(!state.settings.lessonPick) state.settings.lessonPick = { preview:'', wordgroup:'', copy:'' };
+  const lp = state.settings.lessonPick;
+  const fill = (sel, placeholder, wanted) => {
+    if(!sel) return '';
     sel.innerHTML = '';
     const opt0 = document.createElement('option');
     opt0.value = ''; opt0.textContent = placeholder;
@@ -3406,11 +3427,16 @@ function populateLessonSelects(){
       o.value = name; o.textContent = name;
       sel.appendChild(o);
     });
-    if(cur && keys.includes(cur)) sel.value = cur;
+    sel.value = (wanted && keys.includes(wanted)) ? wanted : '';
+    return sel.value;
   };
-  fill($('adminPreviewLessonSelect'),    '— 选择课文 —');
-  fill($('adminWordgroupLessonSelect'),  '— 选择课文 —');
-  fill($('adminCopyLessonSelect'),       '— 选择课文 —');
+  const a = fill($('adminPreviewLessonSelect'),   '— 选择课文 —', lp.preview);
+  const b = fill($('adminWordgroupLessonSelect'), '— 选择课文 —', lp.wordgroup);
+  const c = fill($('adminCopyLessonSelect'),      '— 选择课文 —', lp.copy);
+  if(a !== lp.preview || b !== lp.wordgroup || c !== lp.copy){
+    state.settings.lessonPick = { preview:a, wordgroup:b, copy:c };
+    saveLocalState(); uploadToCloud();
+  }
   try{ renderLessonHint('preview'); renderLessonHint('wordgroup'); renderLessonHint('copy'); }catch(e){}
 }
 $('adminLibAddBtn').addEventListener('click', () => {
@@ -3687,10 +3713,14 @@ function renderLessonHint(kind){
   hint.className = 'aa-hint ok';
   hint.textContent = '将添加 ' + items.length + ' ' + cfg.unit + '：' + shown + (items.length > 24 ? ' …' : '');
 }
+/* ★ 选择课文时记住选择 */
 Object.keys(LESSON_PICK).forEach(kind => {
   const cfg = LESSON_PICK[kind];
   const sel = $(cfg.sel);
-  if(sel) sel.addEventListener('change', () => renderLessonHint(kind));
+  if(sel) sel.addEventListener('change', () => {
+    saveLessonPick(kind, sel.value);
+    renderLessonHint(kind);
+  });
 });
 $('adminAddPreviewBtn').addEventListener('click', () => {
   const { name, items } = lessonPickItems('preview');
@@ -3703,8 +3733,6 @@ $('adminAddPreviewBtn').addEventListener('click', () => {
   const task = makeTask(`预习生字（${chars.length}字）`, minutes, sun, { type:'preview', chars });
   state.subjects.chinese.push(task);
   saveLocalState(); uploadToCloud();
-  const sel = $('adminPreviewLessonSelect'); if(sel) sel.value = '';
-  renderLessonHint('preview');
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加「'+escapeHtml(name)+'」会写字');
 });
@@ -3719,8 +3747,6 @@ $('adminAddWordgroupBtn').addEventListener('click', () => {
   const task = makeTask(`抄写并组词（${chars.length}字）`, minutes, sun, { type:'wordgroup', words: chars });
   state.subjects.chinese.push(task);
   saveLocalState(); uploadToCloud();
-  const sel = $('adminWordgroupLessonSelect'); if(sel) sel.value = '';
-  renderLessonHint('wordgroup');
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加「'+escapeHtml(name)+'」抄写并组词');
 });
@@ -3735,8 +3761,6 @@ $('adminAddCopyBtn').addEventListener('click', () => {
   const task = makeTask(`抄写词语（${words.length}组）`, minutes, sun, { type:'copy', words });
   state.subjects.chinese.push(task);
   saveLocalState(); uploadToCloud();
-  const sel = $('adminCopyLessonSelect'); if(sel) sel.value = '';
-  renderLessonHint('copy');
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加「'+escapeHtml(name)+'」抄写词语');
 });
