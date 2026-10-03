@@ -1265,18 +1265,17 @@
       <h3>
         📚 课文生字 / 组词 / 词语库
         <span class="badge" id="adminLibBadge">0 条</span>
-        <button id="adminLibSyncBtn"
-          style="font-family:inherit;font-size:12px;font-weight:900;color:#0d1a26;
-                 background:linear-gradient(180deg,#FFE082,#FFC107);
-                 border:2px solid #FFC107;padding:6px 14px;border-radius:10px;
-                 cursor:pointer;box-shadow:0 3px 0 #E0A800;margin-left:auto;white-space:nowrap">
-          📤 上传写字表/识字表
-        </button>
       </h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
         保存「课文名 → 会写字 / 会识字 / 抄写词语」。添加任务时只需在上方选择课文名，点「添加」即可生成，无需手动输入。
         <b style="color:#FFD54F">双击条目可重新编辑。</b>
       </p>
+
+      <!-- ★ 上传按钮：移入折叠内容区，展开本折叠面板后才显示 -->
+      <div class="admin-add-row">
+        <button class="aa-btn" id="adminLibSyncBtn">📤 上传写字表 / 识字表</button>
+      </div>
+
       <div id="adminLibList"></div>
 
       <div class="admin-sub-label">➕ 添加课文库条目</div>
