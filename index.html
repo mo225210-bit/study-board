@@ -1,1340 +1,6 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#7EC8F0">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="学习打卡台">
-<title>学习打卡台</title>
-<link rel="manifest" href="manifest.json">
-<script src="hanzi-data.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5.0/dist/hanzi-writer.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.26.0/dist/index.js"></script>
-<style>
-  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  html,body{height:100%}
-  body{
-    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
-    background:linear-gradient(180deg,#78C7F2 0%,#9BD9F7 24%,#BDE8FA 48%,#D8F2FF 70%,#EEF9FF 100%);
-    min-height:100vh;overflow-x:hidden;user-select:none;color:#2b3a2b;
-  }
-  .cloud{position:fixed;background:#fff;border-radius:100px;opacity:.7;z-index:0;pointer-events:none}
-  .cloud::before,.cloud::after{content:'';position:absolute;background:#fff;border-radius:50%}
-  .cloud::before{width:60%;height:150%;top:-70%;left:15%}
-  .cloud::after{width:45%;height:120%;top:-50%;left:55%}
-  .c1{width:130px;height:38px;top:8%;left:-160px;animation:drift 48s linear infinite}
-  .c2{width:90px;height:26px;top:26%;left:-160px;animation:drift 66s linear infinite 8s;opacity:.5}
-  .c3{width:160px;height:44px;top:3%;left:-200px;animation:drift 80s linear infinite 20s;opacity:.55}
-  @keyframes drift{to{transform:translateX(calc(100vw + 260px))}}
-
-  .app{
-    --c-main:#8FD14F;--c-dark:#74B93A;--c-deep:#5EA22C;--c-border:#4E8A22;
-    --c-btn:#68B32E;--c-btn-shade:#4E8A22;--c-light:#EAF6E6;--c-soft:#F1F8EE;--c-text:#2E7D32;
-    position:relative;z-index:1;width:100%;max-width:820px;margin:0 auto;
-    padding:6px 8px;display:flex;flex-direction:column;gap:7px;min-height:100vh;
-  }
-  .app.theme-math{
-    --c-main:#6FC3E8;--c-dark:#4FA8D8;--c-deep:#3D8FC0;--c-border:#2E7FA8;
-    --c-btn:#29A3D6;--c-btn-shade:#1B7FA8;--c-light:#E1F5FE;--c-soft:#E8F5FE;--c-text:#0277BD;
-  }
-  /* ★ 新增：英语主题色（与英语栏蓝色系一致） */
-  .app.theme-english{
-    --c-main:#64B5F6;--c-dark:#42A5F5;--c-deep:#1976D2;--c-border:#1565C0;
-    --c-btn:#1E88E5;--c-btn-shade:#0D47A1;--c-light:#E3F2FD;--c-soft:#EAF4FE;--c-text:#0D47A1;
-  }
-
-  .topbar{
-    display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
-    background:rgba(255,255,255,.86);backdrop-filter:blur(12px);
-    border:2px solid rgba(255,255,255,.95);border-radius:15px;padding:6px 10px;
-    box-shadow:0 6px 20px rgba(60,110,60,.18);
-  }
-  .brand{display:flex;align-items:center;gap:10px}
-  .brand-icon{
-    font-size:28px;animation:sway 3s ease-in-out infinite;
-    background:transparent;border:0;padding:0;cursor:pointer;
-    line-height:1;font-family:inherit;
-  }
-  .brand-icon:active{transform:scale(.92)}
-  @keyframes sway{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
-  .brand-title{font-size:16px;font-weight:900;color:#2E7D32;letter-spacing:.5px}
-  .brand-sub{font-size:11px;color:#7a8f7a;font-weight:600;margin-top:1px}
-  .stats{display:flex;gap:8px;align-items:center}
-  .pill{display:flex;align-items:center;gap:5px;font-weight:900;font-size:14px;
-        padding:6px 12px;border-radius:999px;white-space:nowrap;
-        transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .3s,box-shadow .3s}
-  .sun-pill{background:linear-gradient(180deg,#FFE082,#FFC107);color:#7a5300;box-shadow:0 3px 0 #E0A800}
-  .sun-pill.negative{background:linear-gradient(180deg,#EF9A9A,#E53935);color:#fff;box-shadow:0 3px 0 #B71C1C}
-  .streak-pill{background:linear-gradient(180deg,#FFAB91,#FF7043);color:#fff;box-shadow:0 3px 0 #D84315}
-  .pill.bump{transform:scale(1.22)}
-
-  .cal-btn{
-    font-family:inherit;font-size:16px;line-height:1;
-    width:40px;height:40px;border-radius:14px;cursor:pointer;
-    background:linear-gradient(180deg,#fff,#EAF6E6);
-    border:2px solid #fff;color:#2E7D32;
-    display:inline-flex;align-items:center;justify-content:center;
-    box-shadow:0 4px 12px rgba(60,110,60,.18);
-    transition:all .18s;position:relative;
-  }
-  .cal-btn:active{transform:translateY(2px)}
-  .cal-btn.has-other{
-    background:linear-gradient(180deg,#FFE082,#FFC107);
-    border-color:#FFC107;
-  }
-  .cal-btn .cal-dot{
-    position:absolute;top:4px;right:4px;width:9px;height:9px;border-radius:50%;
-    background:#FF5252;border:2px solid #fff;display:none;
-  }
-  .cal-btn.has-other .cal-dot{display:block}
-
-  .section-label{display:flex;align-items:center;gap:8px;
-    font-size:13px;font-weight:900;color:#2E7D32;letter-spacing:.5px;padding-left:4px}
-  .section-label::after{content:'';flex:1;height:2px;border-radius:2px;
-    background:linear-gradient(90deg,rgba(46,125,50,.35),transparent)}
-
-  .timer-card{
-    background:repeating-linear-gradient(90deg,rgba(255,255,255,.08) 0 24px,transparent 24px 48px),
-      linear-gradient(180deg,rgba(255,255,255,.96) 0%,var(--c-soft) 100%);
-    backdrop-filter:blur(12px);border:3px solid var(--c-border);border-radius:22px;
-    padding:8px 10px 8px;
-    box-shadow:inset 0 -6px 14px rgba(0,0,0,.06),0 6px 20px rgba(60,110,60,.18);
-    display:flex;flex-direction:column;gap:6px;transition:all .3s;
-  }
-  .timer-row{display:flex;gap:10px;align-items:stretch}
-  .track{position:relative;flex:1;min-width:0;height:58px;border-radius:29px;overflow:hidden;
-    background:linear-gradient(180deg,var(--c-light),var(--c-soft));
-    border:3px solid var(--c-border);box-shadow:inset 0 4px 10px rgba(40,90,30,.12);transition:all .3s}
-  .track.paused{border-color:#FFB74D;background:linear-gradient(180deg,#FFF8E1,#FFE0B2)}
-  .track.chomping{border-color:#FF7043;background:linear-gradient(180deg,#FFF3E0,#FFCCBC)}
-  .track-fill{position:absolute;top:0;right:0;bottom:0;width:0;
-    background:linear-gradient(90deg,rgba(255,183,77,.18),rgba(255,152,0,.40));pointer-events:none;transition:all .3s}
-  .sun-anchor{position:absolute;left:8px;top:50%;transform:translateY(-50%);
-    font-size:28px;line-height:1;z-index:2;filter:drop-shadow(0 0 9px rgba(255,200,0,.9))}
-  .sun-anchor.eaten{animation:sunEaten .65s ease forwards}
-  @keyframes sunEaten{0%{transform:translateY(-50%) scale(1);opacity:1}40%{transform:translateY(-50%) scale(1.5);opacity:1}100%{transform:translateY(-50%) scale(0);opacity:0}}
-  .track-time{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    font-size:19px;font-weight:900;color:var(--c-text);z-index:4;font-variant-numeric:tabular-nums;
-    pointer-events:none;text-shadow:0 1px 0 #fff,0 0 10px rgba(255,255,255,.98);transition:color .3s}
-  .track-time.paused{color:#E65100}
-  .track-time.chomping{color:#BF360C}
-  .dog-wrap{position:absolute;top:0;left:0;height:100%;width:42px;
-    display:flex;align-items:center;justify-content:center;will-change:transform;z-index:3}
-  .dog{font-size:32px;line-height:1;transform-origin:50% 100%}
-  .dog.running{animation:dogRun .34s ease-in-out infinite}
-  .dog.paused{animation:dogPause 2.2s ease-in-out infinite}
-  @keyframes dogRun{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-7px) rotate(4deg)}}
-  @keyframes dogPause{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-  .dog.chomp{animation:chomp .55s ease}
-  @keyframes chomp{0%{transform:scale(1)}30%{transform:scale(1.45) rotate(-12deg)}60%{transform:scale(.86) rotate(9deg)}100%{transform:scale(1)}}
-  .timer-hint{font-size:12px;font-weight:800;color:#7a8f7a;text-align:center;min-height:16px}
-  .timer-hint .highlight{color:var(--c-text);font-weight:900}
-  .timer-hint .paused-t{color:#E65100;font-weight:900}
-  .timer-hint .chomp-t{color:#BF360C;font-weight:900}
-
-  .timer-btn{
-    flex:none;display:inline-flex;align-items:center;justify-content:center;
-    font-family:inherit;font-size:14px;font-weight:900;
-    padding:0 18px;border-radius:24px;cursor:pointer;
-    border:3px solid transparent;letter-spacing:1px;min-width:112px;
-    white-space:nowrap;transition:all .15s;
-  }
-  .timer-btn:active{transform:translateY(2px)}
-  .timer-btn.start{background:linear-gradient(180deg,var(--c-main),var(--c-btn));color:#fff;
-    border-color:var(--c-btn);box-shadow:0 4px 0 var(--c-btn-shade);transition:all .3s}
-  .timer-btn.pause{background:linear-gradient(180deg,#FFCC80,#FB8C00);color:#fff;border-color:#FB8C00;box-shadow:0 4px 0 #E65100}
-  .timer-btn.resume{background:linear-gradient(180deg,#4FC3F7,#0288D1);color:#fff;border-color:#0288D1;box-shadow:0 4px 0 #01579B}
-  .timer-btn:disabled{opacity:.55;cursor:not-allowed;transform:none!important;
-    background:linear-gradient(180deg,#BDBDBD,#9E9E9E);border-color:#9E9E9E;box-shadow:0 4px 0 #757575;color:#fff}
-
-  /* ============================================================
-     ★ 护眼提醒卡片（同一行：计时 · 用眼 · 进度条 · 放松 · 按钮）
-  ============================================================ */
-  .eye-card{
-    display:flex;align-items:center;gap:8px;flex-wrap:nowrap;
-    background:rgba(255,255,255,.92);border:2px solid #fff;border-radius:16px;
-    padding:8px 12px;box-shadow:0 4px 14px rgba(60,110,60,.14);
-    transition:background .3s,border-color .3s,opacity .3s;
-  }
-  .eye-card.idle{opacity:.68}
-  .eye-card.using{
-    background:linear-gradient(180deg,#E8F5E9,#C8E6C9);
-    border-color:#A5D6A7;
-  }
-  .eye-card.alert{
-    background:linear-gradient(180deg,#FFEBEE,#FFCDD2);
-    border-color:#EF9A9A;
-    animation:eyePulse 1s ease-in-out infinite;
-  }
-  @keyframes eyePulse{
-    0%,100%{box-shadow:0 4px 14px rgba(229,57,53,.22)}
-    50%{box-shadow:0 4px 22px rgba(229,57,53,.6)}
-  }
-  .eye-card.resting{
-    background:linear-gradient(180deg,#E3F2FD,#BBDEFB);
-    border-color:#90CAF9;
-  }
-
-  .eye-time{
-    flex:none;min-width:56px;text-align:center;
-    font-size:17px;font-weight:900;color:#2E7D32;
-    font-variant-numeric:tabular-nums;line-height:1.2;letter-spacing:.3px;
-    transition:color .3s;
-  }
-  .eye-card.alert .eye-time{color:#C62828;font-size:13px;min-width:76px}
-  .eye-card.resting .eye-time{color:#1565C0}
-
-  .eye-end{
-    font-size:11px;font-weight:900;color:#93a893;white-space:nowrap;flex:none;
-    transition:color .3s;
-  }
-  .eye-card.using   .eye-end-l{color:#2E7D32}
-  .eye-card.alert   .eye-end-l{color:#C62828}
-  .eye-card.resting .eye-end-r{color:#1565C0}
-
-  .eye-rail{
-    position:relative;flex:1;min-width:56px;height:30px;border-radius:15px;
-    background:linear-gradient(180deg,#EEF7EE,#DFEEDF);
-    border:2px solid #CBE4CB;
-    box-shadow:inset 0 2px 6px rgba(40,90,30,.10);
-    transition:background .3s,border-color .3s;
-  }
-  .eye-card.resting .eye-rail{background:linear-gradient(180deg,#EAF4FE,#D6E9FA);border-color:#B3D9F5}
-  .eye-card.alert   .eye-rail{background:linear-gradient(180deg,#FFF1F1,#FFD9D9);border-color:#F3B7B7}
-
-  .eye-rail-fill{
-    position:absolute;left:0;top:0;bottom:0;width:0;border-radius:15px;
-    background:linear-gradient(90deg,rgba(143,209,79,.30),rgba(104,179,46,.44));
-    pointer-events:none;
-  }
-  .eye-card.resting .eye-rail-fill{background:linear-gradient(90deg,rgba(79,195,247,.26),rgba(41,163,214,.42))}
-  .eye-card.alert   .eye-rail-fill{background:linear-gradient(90deg,rgba(239,83,80,.24),rgba(229,57,53,.42))}
-
-  .eye-token{
-    position:absolute;top:50%;left:0;width:34px;height:34px;
-    transform:translate(0,-50%);
-    display:grid;place-items:center;z-index:2;pointer-events:none;
-    filter:drop-shadow(0 2px 4px rgba(40,90,120,.28));
-  }
-  .ce-svg{width:34px;height:34px;display:block}
-  .ce-eye{
-    transform-box:view-box;transform-origin:24px 26px;
-    animation:ceBlink 4.8s ease-in-out infinite;
-  }
-  @keyframes ceBlink{
-    0%,89%,100%{transform:scaleY(1)}
-    93%{transform:scaleY(.14)}
-  }
-  .ce-iris{transition:opacity .35s}
-  .eye-card.resting .ce-iris{opacity:.15}
-  .ce-lid{opacity:0;transition:opacity .35s}
-  .eye-card.resting .ce-lid{opacity:1}
-
-  .eye-btn{
-    font-family:inherit;font-size:12.5px;font-weight:900;color:#fff;
-    background:linear-gradient(180deg,#4FC3F7,#0288D1);
-    border:2px solid #0288D1;padding:8px 14px;border-radius:999px;
-    box-shadow:0 3px 0 #01579B;cursor:pointer;white-space:nowrap;
-    transition:all .15s;flex:none;
-  }
-  .eye-btn:active{transform:translateY(2px)}
-  .eye-btn:disabled{
-    opacity:.55;cursor:not-allowed;transform:none!important;
-    background:linear-gradient(180deg,#BDBDBD,#9E9E9E);
-    border-color:#9E9E9E;box-shadow:0 3px 0 #757575;
-  }
-
-  .subject-tabs{display:flex;gap:0;background:rgba(255,255,255,.9);border:2px solid #fff;
-    border-radius:14px;padding:3px;box-shadow:0 4px 14px rgba(60,110,60,.14)}
-  .subject-tab{flex:1;font-family:inherit;font-size:13px;font-weight:900;padding:7px 6px;
-    border-radius:14px;cursor:pointer;border:none;background:transparent;color:#7a8f7a;
-    transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
-  .subject-tab.active{background:linear-gradient(180deg,#8FD14F,#68B32E);color:#fff;box-shadow:0 3px 0 #4E8A22}
-  .subject-tab.active[data-tab="math"]{background:linear-gradient(180deg,#6FC3E8,#29A3D6);box-shadow:0 3px 0 #1B7FA8}
-  .subject-tab .tab-count{font-size:11px;background:rgba(255,255,255,.35);padding:1px 7px;border-radius:999px}
-  .subject-tab.active .tab-count{background:rgba(255,255,255,.3)}
-  .tab-panel{display:none}
-  .tab-panel.active{display:block}
-
-  .subject-col{border:2px solid #4E8A22;border-radius:16px;padding:6px;
-    background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 24px,transparent 24px 48px),
-      linear-gradient(180deg,#8FD14F 0%,#74B93A 55%,#5EA22C 100%);
-    box-shadow:inset 0 -8px 18px rgba(0,0,0,.10),0 8px 22px rgba(40,90,30,.20);position:relative;overflow:hidden}
-  .subject-col::after{content:'';position:absolute;inset:0;border-radius:19px;pointer-events:none;
-    background:radial-gradient(circle at 18% 8%,rgba(255,255,255,.24),transparent 46%)}
-  .subject-col[data-subject="math"]{
-    background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 24px,transparent 24px 48px),
-      linear-gradient(180deg,#6FC3E8 0%,#4FA8D8 55%,#3D8FC0 100%);
-    border-color:#2E7FA8;box-shadow:inset 0 -8px 18px rgba(0,0,0,.10),0 8px 22px rgba(30,70,100,.22)}
-  .col-head{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;
-    gap:6px;background:rgba(255,255,255,.92);border:2px solid #fff;border-radius:15px;
-    padding:5px 8px;margin-bottom:5px;box-shadow:0 3px 10px rgba(0,0,0,.12)}
-  .col-title{font-size:13px;font-weight:900;color:#2E7D32;white-space:nowrap}
-  .subject-col[data-subject="math"] .col-title{color:#0277BD}
-  .col-count{font-size:10.5px;font-weight:900;color:#fff;background:#68B32E;padding:2px 8px;
-    border-radius:999px;margin-left:4px}
-  .subject-col[data-subject="math"] .col-count{background:#29A3D6}
-
-  .card-list{position:relative;z-index:2;display:flex;flex-direction:column;gap:5px;min-height:70px}
-  .empty-tip{text-align:center;font-size:11.5px;font-weight:700;color:rgba(255,255,255,.92);
-    background:rgba(0,0,0,.16);border:2px dashed rgba(255,255,255,.5);
-    border-radius:14px;padding:18px 8px;line-height:1.7}
-
-  .task-card{position:relative;overflow:hidden;background:rgba(255,255,255,.97);
-    border:2px solid #fff;border-radius:12px;padding:7px 9px 6px;
-    transition:all .16s;box-shadow:0 3px 9px rgba(0,0,0,.13)}
-  .task-card.active{border-color:#FFC107;box-shadow:0 0 0 3px rgba(255,193,7,.4),0 6px 16px rgba(0,0,0,.16)}
-  .task-card.active.paused-card{border-color:#FFB74D;box-shadow:0 0 0 3px rgba(255,183,77,.4)}
-  .task-card.active.chomping-card{border-color:#FF7043;box-shadow:0 0 0 3px rgba(255,112,67,.4)}
-  .task-card.done{background:rgba(238,248,236,.97);border-color:#B7E0A8;animation:cardDone .6s ease}
-  @keyframes cardDone{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,193,7,.75)}
-    50%{transform:scale(1.03);box-shadow:0 0 0 9px rgba(255,193,7,0)}100%{transform:scale(1)}}
-  .card-top{display:flex;gap:10px;align-items:flex-start}
-  .checkbox{flex:none;width:23px;height:23px;border-radius:7px;border:2.5px solid #A5D6A7;
-    background:#fff;display:grid;place-items:center;margin-top:1px;cursor:pointer;transition:all .2s}
-  .subject-col[data-subject="math"] .checkbox{border-color:#90CAF9}
-  .checkbox .tick{color:#fff;font-size:16px;font-weight:900;line-height:1;opacity:0;
-    transform:scale(.4);transition:all .25s cubic-bezier(.34,1.56,.64,1)}
-  .task-card.done .checkbox{background:#43A047;border-color:#43A047}
-  .subject-col[data-subject="math"] .task-card.done .checkbox{background:#039BE5;border-color:#039BE5}
-  .task-card.done .checkbox .tick{opacity:1;transform:scale(1)}
-  .card-body{flex:1;min-width:0}
-  .task-text{font-size:13px;font-weight:800;color:#2b3a2b;line-height:1.5;word-break:break-word}
-  .task-card.done .task-text{text-decoration:line-through;color:#9aad9a}
-  .task-info{display:flex;align-items:center;gap:8px;margin-top:5px;font-size:10.5px;
-    font-weight:900;flex-wrap:wrap}
-  .task-info .t-min{color:#5b7a5b}
-  .task-info .t-sun{color:#B8860B}
-  .task-info .t-time{color:#2E7D32;font-variant-numeric:tabular-nums;font-size:13px}
-  .task-info .t-time.paused{color:#EF6C00}
-  .task-info .t-time.chomping{color:#BF360C}
-  .task-info .t-time.done-t{color:#43A047}
-  .stars-mini{color:#FFA000;letter-spacing:-.6px;font-size:10px}
-  .card-progress{position:absolute;left:0;bottom:0;height:3.5px;width:0;
-    background:linear-gradient(90deg,#FFD54F,#FFA000);transition:width .3s linear}
-  .card-progress.paused{background:linear-gradient(90deg,#FFB74D,#FB8C00)}
-  .card-progress.chomping{background:linear-gradient(90deg,#FF7043,#BF360C)}
-  .task-card.done .card-progress{background:#66BB6A;width:100%!important}
-
-  .char-grid{
-    display:flex;flex-wrap:wrap;gap:8px;margin-top:9px;padding-top:9px;
-    border-top:1px dashed #DCEED4;position:relative;z-index:2;
-  }
-  .char-card{
-    display:flex;flex-direction:column;align-items:center;gap:1px;
-    width:78px;
-  }
-  .mizi{
-    position:relative;width:54px;height:54px;flex:none;
-    display:grid;place-items:center;
-    background:#E8F5E9;
-    border:1.5px solid #EF9A9A;
-    border-radius:3px;
-    cursor:pointer;transition:transform .15s,box-shadow .15s;
-    overflow:hidden;
-  }
-  .mizi:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.14)}
-  .mizi:active{transform:scale(.95)}
-  .mizi-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-  .mizi-svg line{
-    stroke:rgba(229,115,115,.55);
-    stroke-width:1;stroke-dasharray:4 3;
-    vector-effect:non-scaling-stroke;
-  }
-  .mizi-char{
-    position:relative;z-index:2;font-size:38px;line-height:1;
-    font-family:"Kaiti SC","KaiTi","STKaiti","楷体","PingFang SC","Microsoft YaHei",serif;
-    font-weight:400;color:#000000;
-  }
-
-  /* ★ 田字格内的倒计时进度条 */
-  .mizi-bar{
-    position:absolute;left:0;bottom:0;height:4px;width:0;
-    background:linear-gradient(90deg,#FFD54F,#FFA000);
-    z-index:3;pointer-events:none;
-    box-shadow:0 0 4px rgba(255,167,38,.55);
-  }
-  .mizi-bar.paused{background:linear-gradient(90deg,#FFB74D,#FB8C00)}
-  .task-card.done .mizi-bar{display:none}
-
-  .task-card.done .mizi{background:#F1F8E9;border-color:#C5E1A5}
-  .task-card.done .mizi-char{color:#9aad9a}
-  .task-card.done .char-pinyin,
-  .task-card.done .char-info{color:#9aad9a}
-  .char-pinyin{
-    font-size:16px;font-weight:700;color:#000000;letter-spacing:.3px;
-    max-width:78px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    text-align:center;line-height:1.2;
-  }
-  .char-info{
-    font-size:12.5px;font-weight:700;color:#000000;white-space:nowrap;
-    text-align:center;line-height:1.35;letter-spacing:-.2px;
-  }
-  .word-group{
-    display:flex;gap:5px;align-items:flex-start;
-    padding:4px;border-radius:6px;background:rgba(143,209,79,.08);
-  }
-  .wg-item{
-    display:flex;flex-direction:column;align-items:center;gap:1px;
-    flex:none;
-  }
-
-  .toolbar{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-  .btn-ghost{font-family:inherit;font-size:12.5px;font-weight:800;color:#3d5a3d;
-    background:rgba(255,255,255,.88);border:2px solid #fff;padding:8px 16px;border-radius:999px;
-    cursor:pointer;box-shadow:0 4px 12px rgba(60,110,60,.16);transition:all .15s}
-  .btn-ghost:hover{background:#fff;transform:translateY(-2px)}
-
-  .modal{position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;
-    padding:20px;background:rgba(20,40,20,.5);backdrop-filter:blur(4px)}
-  .modal.show{display:flex;animation:fadeIn .2s ease}
-  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-  .modal-card{width:100%;max-width:560px;background:#fff;border-radius:22px;padding:22px;
-    box-shadow:0 20px 50px rgba(0,0,0,.3);animation:cardIn .3s cubic-bezier(.34,1.56,.64,1);
-    max-height:88vh;overflow-y:auto}
-  @keyframes cardIn{from{transform:scale(.85) translateY(20px);opacity:0}to{transform:scale(1) translateY(0)}}
-  .modal-card h3{font-size:17px;color:#2E7D32;margin-bottom:6px}
-  .modal-card p{font-size:12px;color:#8a9a8a;margin-bottom:12px;line-height:1.65}
-  .modal-actions{display:flex;gap:10px;margin-top:14px}
-  .modal-actions button{flex:1;text-align:center}
-  .btn-main{font-family:inherit;font-size:13.5px;font-weight:900;color:#fff;
-    background:linear-gradient(180deg,#8FD14F,#68B32E);border:2px solid #68B32E;
-    padding:9px 20px;border-radius:999px;cursor:pointer;box-shadow:0 3px 0 #4E8A22;
-    transition:all .15s;white-space:nowrap}
-  .btn-main:active{transform:translateY(2px)}
-
-  /* ✅ 弹窗内表单 */
-  .form-field{margin-bottom:10px}
-  .form-field>label{display:block;font-size:12px;font-weight:800;color:#5b7a5b;margin-bottom:5px;padding-left:2px}
-  .form-field input{
-    width:100%;font-family:inherit;font-size:13.5px;font-weight:700;color:#2b3a2b;
-    background:#F6FBF6;border:2px solid #D7E8D7;padding:10px 12px;border-radius:12px;
-    outline:none;transition:all .15s;
-  }
-  .form-field input:focus{border-color:#7CC47C;background:#fff}
-  .form-field input[type="file"]{padding:8px 10px;font-size:12.5px;cursor:pointer}
-  .form-row{display:flex;gap:10px}
-  .form-row .form-field{flex:1}
-
-  .upload-progress{
-    margin-top:10px;font-size:12px;font-weight:800;color:#5b7a5b;
-    text-align:center;min-height:18px;line-height:1.6;
-  }
-  .upload-progress.busy{color:#0288D1}
-  .upload-progress.ok{color:#2E7D32}
-  .upload-progress.err{color:#E53935}
-  .upload-files{
-    font-size:11.5px;font-weight:800;color:#2E7D32;
-    margin-top:4px;padding-left:2px;word-break:break-all;
-  }
-
-  .cal-card{max-width:380px;padding:18px}
-  .cal-head{display:flex;align-items:center;justify-content:space-between;
-    gap:10px;margin-bottom:12px}
-  .cal-head button{
-    font-family:inherit;font-size:15px;font-weight:900;width:36px;height:36px;
-    border-radius:10px;cursor:pointer;border:2px solid #E8F5E9;background:#fff;
-    color:#2E7D32;transition:all .15s;
-  }
-  .cal-head button:active{transform:scale(.94)}
-  .cal-title{font-size:15px;font-weight:900;color:#2E7D32;letter-spacing:.5px}
-  .cal-week{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:6px}
-  .cal-week div{
-    text-align:center;font-size:11px;font-weight:900;color:#8aa88a;padding:4px 0;
-  }
-  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
-  .cal-day{
-    position:relative;aspect-ratio:1;border-radius:10px;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;
-    font-size:13.5px;font-weight:800;color:#2b3a2b;
-    background:#F6FBF6;border:2px solid transparent;transition:all .15s;
-  }
-  .cal-day:hover{background:#EAF6E6}
-  .cal-day.empty{background:transparent;cursor:default;pointer-events:none}
-  .cal-day.other-month{color:#c8d8c8;background:transparent}
-  .cal-day.today{
-    border-color:#FFC107;
-    box-shadow:inset 0 0 0 1px rgba(255,193,7,.3);
-  }
-  .cal-day.selected{
-    background:linear-gradient(180deg,#8FD14F,#68B32E);color:#fff;
-    box-shadow:0 3px 0 #4E8A22;
-  }
-  .cal-day.selected .cal-mark{background:#fff}
-  .cal-mark{
-    position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
-    width:5px;height:5px;border-radius:50%;background:#FF9800;
-  }
-  .cal-mark.done{background:#4CAF50}
-  .cal-actions{display:flex;gap:10px;margin-top:14px}
-  .cal-actions button{flex:1}
-
-  .stroke-card{max-width:340px;text-align:center;padding:20px}
-  .stroke-char-big{
-    font-size:26px;font-weight:900;color:#2E7D32;
-    font-family:"Kaiti SC","KaiTi","STKaiti","楷体",serif;
-  }
-  .stroke-pinyin{font-size:14px;font-weight:800;color:#5b7a5b;margin-top:2px}
-  .stroke-meta{font-size:12px;font-weight:800;color:#8aa88a;margin-top:4px}
-  .stroke-stage{
-    width:220px;height:220px;margin:14px auto 0;
-    background:#E8F5E9;border:2px solid #EF9A9A;border-radius:8px;
-    display:flex;align-items:center;justify-content:center;position:relative;
-  }
-  .stroke-stage svg{display:block}
-
-  .pwd-lock{font-size:42px;text-align:center;line-height:1;margin-bottom:8px}
-  .pwd-input-wrap{position:relative;margin:6px 0 4px}
-  .pwd-input{width:100%;font-family:inherit;font-size:26px;font-weight:900;letter-spacing:14px;
-    text-align:center;color:#2E7D32;padding:12px 14px 12px 26px;border:2px solid #D7E8D7;
-    border-radius:14px;outline:none;background:#F6FBF6;font-variant-numeric:tabular-nums}
-  .pwd-input:focus{border-color:#7CC47C;background:#fff}
-  .pwd-input.error{border-color:#EF5350;background:#FFEBEE;animation:shake .4s}
-  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}
-    40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
-  .pwd-tip{font-size:11.5px;font-weight:800;text-align:center;color:#8a9a8a;margin-top:6px;height:16px}
-  .pwd-tip.err{color:#EF5350}
-
-  .toast{
-    position:fixed;left:50%;bottom:36px;transform:translateX(-50%) translateY(18px);
-    background:rgba(30,52,30,.95);color:#fff;font-size:13.5px;font-weight:800;
-    padding:12px 22px;border-radius:999px;z-index:9998;opacity:0;
-    transition:opacity .3s,transform .3s;pointer-events:none;
-    max-width:88vw;text-align:center;box-shadow:0 10px 28px rgba(0,0,0,.3);line-height:1.55;
-  }
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-  .fly-sun{position:fixed;width:28px;height:28px;display:grid;place-items:center;font-size:24px;
-    line-height:1;pointer-events:none;z-index:9999;
-    transition:transform .85s cubic-bezier(.45,-0.25,.6,1),opacity .85s ease-in}
-  .fly-sun-away{position:fixed;width:28px;height:28px;display:grid;place-items:center;font-size:22px;
-    line-height:1;pointer-events:none;z-index:9999;font-weight:900;color:#C62828;
-    text-shadow:0 1px 3px rgba(255,255,255,.9);
-    transition:transform .8s ease-out,opacity .8s ease-out}
-  .confetti{position:fixed;top:-44px;z-index:10000;pointer-events:none;animation:fall 2.6s linear forwards}
-  @keyframes fall{to{transform:translateY(108vh) rotate(720deg);opacity:0}}
-
-  .admin-bar{
-    position:fixed;bottom:0;left:0;right:0;z-index:200;
-    background:linear-gradient(180deg,#1a2a3a,#0d1a26);
-    display:none;align-items:center;justify-content:center;gap:20px;
-    padding:12px 20px;box-shadow:0 -4px 20px rgba(0,0,0,.3);
-  }
-  .admin-bar.show{display:flex}
-  .admin-bar .admin-label{
-    font-size:13px;font-weight:900;color:#FFD54F;letter-spacing:1px;
-    display:flex;align-items:center;gap:6px;
-  }
-  .admin-bar .admin-status{
-    font-size:11px;font-weight:700;color:#7a9aaa;
-  }
-  .admin-bar .admin-btn{
-    font-family:inherit;font-size:12.5px;font-weight:900;color:#fff;
-    background:linear-gradient(180deg,#EF9A9A,#E53935);
-    border:2px solid #E53935;padding:8px 18px;border-radius:999px;cursor:pointer;
-    box-shadow:0 3px 0 #B71C1C;transition:all .15s;white-space:nowrap;
-  }
-  .admin-bar .admin-btn:active{transform:translateY(2px)}
-
-  .admin-panel{
-    position:fixed;inset:0;z-index:300;display:none;
-    background:linear-gradient(180deg,#0d1a26,#1a2a3a);
-    overflow-y:auto;padding:20px;
-  }
-  .admin-panel.show{display:block}
-  .admin-panel-inner{
-    max-width:1100px;margin:0 auto;
-  }
-  .admin-header{
-    display:flex;align-items:center;justify-content:space-between;
-    gap:16px;margin-bottom:20px;flex-wrap:wrap;
-  }
-  .admin-header h2{
-    font-size:19px;font-weight:900;color:#FFD54F;letter-spacing:1px;
-    display:flex;align-items:center;gap:10px;
-  }
-  .admin-header .admin-close{
-    font-family:inherit;font-size:13.5px;font-weight:900;color:#fff;
-    background:linear-gradient(180deg,#EF9A9A,#E53935);
-    border:2px solid #E53935;padding:10px 24px;border-radius:999px;cursor:pointer;
-    box-shadow:0 3px 0 #B71C1C;transition:all .15s;
-  }
-  .admin-section{
-    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
-    border-radius:18px;padding:18px;margin-bottom:16px;
-  }
-  .admin-section h3{
-    font-size:15px;font-weight:900;color:#E0E8F0;margin-bottom:12px;
-    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
-  }
-  .admin-section h3 .badge{
-    font-size:10.5px;background:rgba(255,213,79,.2);color:#FFD54F;
-    padding:2px 10px;border-radius:999px;font-weight:900;
-  }
-
-  .admin-task-row{
-    display:flex;align-items:center;gap:10px;padding:10px 12px;
-    background:rgba(255,255,255,.05);border-radius:12px;margin-bottom:6px;
-    transition:all .15s;cursor:pointer;
-  }
-  .admin-task-row:hover{background:rgba(255,255,255,.1)}
-  .admin-task-row .at-check{
-    width:22px;height:22px;border-radius:6px;border:2px solid rgba(255,255,255,.3);
-    background:transparent;display:grid;place-items:center;flex:none;
-    font-size:13px;color:transparent;cursor:pointer;transition:all .2s;
-  }
-  .admin-task-row .at-check.done{
-    background:#43A047;border-color:#43A047;color:#fff;
-  }
-  .admin-task-row .at-text{
-    flex:1;font-size:13px;font-weight:800;color:#E0E8F0;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  }
-  .admin-task-row .at-text.done{text-decoration:line-through;color:#6a8a6a}
-  .admin-task-row .at-meta{
-    font-size:11px;font-weight:700;color:#7a9aaa;white-space:nowrap;
-  }
-  .admin-task-row .at-del{
-    font-family:inherit;font-size:11px;font-weight:900;color:#EF5350;
-    background:rgba(239,83,80,.15);border:1px solid rgba(239,83,80,.3);
-    padding:4px 10px;border-radius:8px;cursor:pointer;transition:all .15s;
-    white-space:nowrap;
-  }
-  .admin-task-row .at-del:hover{background:rgba(239,83,80,.3)}
-  .admin-add-row{
-    display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;
-  }
-  .admin-add-row input, .admin-add-row select{
-    font-family:inherit;font-size:13px;font-weight:700;color:#E0E8F0;
-    background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);
-    padding:10px 12px;border-radius:10px;outline:none;transition:all .15s;
-  }
-  .admin-add-row input:focus, .admin-add-row select:focus{border-color:#FFD54F;background:rgba(255,255,255,.12)}
-  .admin-add-row input::placeholder{color:#5a7a8a;font-weight:600}
-  .admin-add-row .aa-text{flex:1;min-width:130px}
-  .admin-add-row .aa-num{width:64px;text-align:center;padding-left:6px;padding-right:6px}
-  .admin-add-row .aa-unit{
-    font-size:11px;font-weight:800;color:#8aa8c8;white-space:nowrap;
-  }
-  .admin-add-row .aa-select{
-    flex:1;min-width:180px;cursor:pointer;
-    background-color:rgba(255,255,255,.08);
-  }
-  .admin-add-row .aa-select option{
-    background:#1a2a3a;color:#E0E8F0;font-weight:700;
-  }
-  .admin-add-row .aa-btn{
-    font-family:inherit;font-size:13px;font-weight:900;color:#0d1a26;
-    background:linear-gradient(180deg,#FFE082,#FFC107);
-    border:2px solid #FFC107;padding:10px 16px;border-radius:10px;cursor:pointer;
-    box-shadow:0 3px 0 #E0A800;transition:all .15s;white-space:nowrap;
-  }
-  .admin-add-row .aa-btn:active{transform:translateY(2px)}
-  .admin-add-row.inline-row{flex-wrap:nowrap;gap:5px}
-  .admin-add-row.inline-row .aa-select{flex:1 1 90px;min-width:0}
-  .admin-add-row.inline-row .aa-num{width:54px;flex:none;padding-left:4px;padding-right:4px}
-  .admin-add-row.inline-row .aa-unit{font-size:10.5px;flex:none;white-space:nowrap}
-  .admin-add-row.inline-row .aa-btn{padding:10px 12px;flex:none;font-size:12.5px}
-  .aa-hint{
-    font-size:11.5px;font-weight:700;color:#7a9aaa;line-height:1.7;
-    margin:6px 2px 12px;word-break:break-all;
-  }
-  .aa-hint.ok{color:#9CCC65}
-  .aa-hint.warn{color:#FFB74D}
-  .sun-log{margin-top:10px;display:flex;flex-direction:column;gap:6px}
-  .sun-log-empty{font-size:11.5px;font-weight:700;color:#5a7a8a;text-align:center;padding:8px 0}
-  .sun-log-row{
-    display:flex;align-items:center;gap:8px;
-    background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08);
-    border-radius:10px;padding:7px 10px;
-  }
-  .sun-log-row .sl-time{font-size:11px;font-weight:800;color:#7a9aaa;flex:none}
-  .sun-log-row .sl-reason{
-    font-size:11.5px;font-weight:800;color:#cfd8e3;flex:1;min-width:0;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  }
-  .sun-log-row .sl-delta{font-size:12px;font-weight:900;flex:none}
-  .sun-log-row .sl-delta.minus{color:#FF8A80}
-  .sun-log-row .sl-delta.plus{color:#9CCC65}
-
-  .admin-stats{
-    display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;
-  }
-  .admin-stat-card{
-    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
-    border-radius:14px;padding:16px;text-align:center;
-  }
-  .admin-stat-card .asc-num{
-    font-size:28px;font-weight:900;color:#FFD54F;font-variant-numeric:tabular-nums;
-  }
-  .admin-stat-card .asc-label{
-    font-size:11.5px;font-weight:800;color:#7a9aaa;margin-top:4px;
-  }
-
-  .admin-empty{
-    text-align:center;font-size:12.5px;font-weight:700;color:#5a7a8a;
-    padding:20px;border:2px dashed rgba(255,255,255,.1);border-radius:14px;
-  }
-
-  .admin-sub-label{
-    font-size:12px;font-weight:800;color:#8aa8c8;
-    margin:14px 0 6px;padding-left:4px;
-  }
-  .admin-sub-label:first-of-type{margin-top:6px}
-
-  /* ✅ 课文库行 */
-  .lib-row{
-    display:flex;align-items:flex-start;gap:10px;padding:10px 12px;
-    background:rgba(255,255,255,.05);border-radius:12px;margin-bottom:6px;
-    flex-wrap:wrap;cursor:pointer;transition:all .15s;
-  }
-  .lib-row:hover{background:rgba(255,255,255,.11);box-shadow:inset 0 0 0 1px rgba(255,213,79,.25)}
-  .lib-row .lib-lesson{
-    font-size:13px;font-weight:900;color:#FFD54F;
-    min-width:120px;flex:none;padding-top:1px;
-  }
-  .lib-row .lib-info{
-    font-size:11.5px;font-weight:700;color:#8aa8c8;flex:1;line-height:1.7;
-    min-width:180px;word-break:break-word;
-  }
-  .lib-row .lib-info b{color:#B0D888;font-weight:900}
-  .lib-row .lib-del{
-    font-family:inherit;font-size:11px;font-weight:900;color:#EF5350;
-    background:rgba(239,83,80,.15);border:1px solid rgba(239,83,80,.3);
-    padding:4px 10px;border-radius:8px;cursor:pointer;transition:all .15s;
-    white-space:nowrap;flex:none;
-  }
-  .lib-row .lib-del:hover{background:rgba(239,83,80,.3)}
-
-  .sync-status{
-    position:fixed;top:10px;right:10px;z-index:250;
-    font-size:11px;font-weight:800;padding:4px 12px;border-radius:999px;
-    transition:all .3s;pointer-events:none;opacity:0;
-  }
-  .sync-status.show{opacity:1}
-  .sync-status.online{background:rgba(76,175,80,.9);color:#fff}
-  .sync-status.offline{background:rgba(239,83,80,.9);color:#fff}
-
-  @media (max-width: 500px){
-    .app{padding:10px}
-    .timer-btn{min-width:86px;font-size:13px;padding:0 12px;border-radius:20px}
-    .track{height:60px;border-radius:30px}
-    .track-time{font-size:19px}
-    .mizi{width:46px;height:46px}
-    .mizi-char{font-size:32px}
-    .char-card{width:66px}
-    .char-pinyin{font-size:14px;max-width:66px}
-    .char-info{font-size:11px}
-    .char-grid{gap:6px}
-    /* ★ 护眼同一行：小屏缩紧间距与尺寸 */
-    .eye-card{gap:5px;padding:7px 9px}
-    .eye-time{font-size:14px;min-width:46px}
-    .eye-card.alert .eye-time{font-size:11px;min-width:62px}
-    .eye-end{font-size:9.5px}
-    .eye-rail{height:26px;border-radius:13px;min-width:44px}
-    .eye-token{width:28px;height:28px}
-    .ce-svg{width:28px;height:28px}
-    .eye-btn{padding:6px 9px;font-size:10.5px}
-    .admin-add-row:not(.inline-row) .aa-text{min-width:100%}
-    .admin-add-row:not(.inline-row) .aa-num{width:58px}
-    .admin-add-row:not(.inline-row) .aa-select{min-width:100%}
-    .admin-add-row.inline-row{gap:4px}
-    .admin-add-row.inline-row .aa-select{flex:1 1 70px;font-size:12px;padding:8px 5px}
-    .admin-add-row.inline-row .aa-num{width:44px;font-size:11px;padding:8px 2px}
-    .admin-add-row.inline-row .aa-unit{font-size:9px;letter-spacing:-.3px}
-    .admin-add-row.inline-row .aa-btn{padding:8px 8px;font-size:11px}
-  }
-
-  /* 首页紧凑布局 */
-  .home-compact .col-head{padding:2px 4px;margin-bottom:4px;background:transparent;border:0;box-shadow:none}
-  .home-compact .col-title{font-size:12px}
-  .home-compact .col-count{font-size:9px;padding:1px 6px}
-  .home-compact .subject-col{padding:5px;border-radius:14px}
-  .home-compact .card-list{gap:4px;min-height:55px}
-  .home-compact .task-card{padding:6px 8px 5px;border-radius:10px}
-  .home-compact .task-text{font-size:12px;line-height:1.35}
-  .home-compact .task-info{margin-top:3px;font-size:9.5px;gap:6px}
-  .home-compact .checkbox{width:21px;height:21px;border-radius:6px}
-  .home-compact .checkbox .tick{font-size:13px}
-  .home-compact .timer-hint{font-size:10.5px;min-height:13px}
-  .home-compact .toolbar{gap:6px}
-  .home-compact .btn-ghost{padding:6px 12px;font-size:11.5px}
-
-  /* ===== 学生页作业折叠 / 双击删除线 / 自定义作业字体 / 英语 ===== */
-  .task-card.done .char-grid{display:none}
-  .mizi.struck .mizi-char{text-decoration:line-through;text-decoration-thickness:3px;text-decoration-color:#D32F2F}
-  .mizi.struck{background:#E8F5E9;box-shadow:inset 0 0 0 2px rgba(211,47,47,.12)}
-  .word-group{background:transparent}
-  .custom-task-text{
-    font-family:"Kaiti SC","KaiTi","STKaiti","楷体","PingFang SC","Microsoft YaHei",serif;
-    font-size:24px!important;line-height:1.28!important;font-weight:400!important;color:#000;
-  }
-  .task-card.done .custom-task-text{color:#9aad9a}
-  .subject-col[data-subject="english"]{
-    background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 24px,transparent 24px 48px),
-      linear-gradient(180deg,#9CCBFF 0%,#6EA8E5 55%,#4C87C7 100%);
-    border-color:#3B6FA8;
-    box-shadow:inset 0 -8px 18px rgba(0,0,0,.10),0 8px 22px rgba(30,70,100,.22)
-  }
-  .subject-col[data-subject="english"] .col-title{color:#1565C0}
-  .subject-col[data-subject="english"] .col-count{background:#1976D2}
-  .subject-tab.active[data-tab="english"]{
-    background:linear-gradient(180deg,#64B5F6,#1976D2);box-shadow:0 3px 0 #0D47A1
-  }
-
-  /* 家长端折叠面板 */
-  .admin-section.collapsed{padding-bottom:8px}
-  .admin-section>h3{cursor:pointer;user-select:none}
-  .admin-section>h3::after{content:'⌃';margin-left:auto;color:#7a9aaa;font-size:14px}
-  .admin-section.collapsed>h3::after{content:'⌄'}
-  .admin-section.collapsed>h3{margin-bottom:0}
-  .admin-section.collapsed> :not(h3){display:none!important}
-  .admin-task-row.dragging{opacity:.45;transform:scale(.99)}
-  .admin-task-row.drag-over{outline:2px dashed #FFD54F;background:rgba(255,213,79,.12)}
-  .admin-task-row{cursor:grab}
-  .admin-task-row:active{cursor:grabbing}
-  .drag-handle{font-size:15px;color:#7a9aaa;flex:none}
-
-  /* ★ 抄写并组词的田字格不显示偏旁和结构 */
-  .word-group.no-char-info .char-info{display:none}
-
-</style>
-</head>
-<body>
-
-<div class="cloud c1"></div>
-<div class="cloud c2"></div>
-<div class="cloud c3"></div>
-
-<div class="sync-status" id="syncStatus"></div>
-
-<div class="app home-compact" id="appRoot">
-
-  <header class="topbar">
-    <div class="brand">
-      <button class="brand-icon" id="adminEntryBtn" title="家长入口">🌻</button>
-      <div>
-        <div class="brand-title">学习打卡台</div>
-        <div class="brand-sub" id="dateText">今天也要加油哦！</div>
-      </div>
-    </div>
-    <div class="stats">
-      <button class="cal-btn" id="calBtn" title="切换日期">
-        📅<span class="cal-dot"></span>
-      </button>
-      <div class="pill sun-pill" id="sunPill">💰 <span id="sunCount">0</span></div>
-      <div class="pill streak-pill">🔥 <span id="streakCount">0</span>天</div>
-    </div>
-  </header>
-
-  <div class="timer-card">
-    <div class="timer-row">
-      <div class="track" id="track">
-        <div class="track-fill" id="trackFill"></div>
-        <div class="sun-anchor" id="sunAnchor">💰</div>
-        <div class="track-time" id="trackTime">--:--</div>
-        <div class="dog-wrap" id="dogWrap"><div class="dog" id="dog">🐕</div></div>
-      </div>
-      <button class="timer-btn start" id="mainBtn">▶ 开始</button>
-    </div>
-    <div class="timer-hint" id="timerHint">点击右侧按钮开始倒计时</div>
-  </div>
-
-  <!-- ★ 护眼提醒：同一行「计时 · 用眼 · 进度条 · 放松 · 放松眼睛」 -->
-  <div class="eye-card idle" id="eyeCard">
-    <div class="eye-time" id="eyeTime">--:--</div>
-    <span class="eye-end eye-end-l">用眼</span>
-    <div class="eye-rail" id="eyeRail">
-      <div class="eye-rail-fill" id="eyeRailFill"></div>
-      <div class="eye-token" id="eyeToken">
-        <svg class="ce-svg" viewBox="0 0 48 48" aria-hidden="true">
-          <g class="ce-eye">
-            <!-- 睫毛 -->
-            <path d="M12 12.2 L9 6.6" stroke="#4FA8D8" stroke-width="2.6" stroke-linecap="round"/>
-            <path d="M24 9.2 L24 3.4" stroke="#4FA8D8" stroke-width="2.6" stroke-linecap="round"/>
-            <path d="M36 12.2 L39 6.6" stroke="#4FA8D8" stroke-width="2.6" stroke-linecap="round"/>
-            <!-- 眼白 -->
-            <ellipse cx="24" cy="26" rx="18" ry="13.5" fill="#ffffff"
-                     stroke="#3D8FC0" stroke-width="2.6"/>
-            <!-- 眼珠 -->
-            <g class="ce-iris">
-              <circle cx="24" cy="26" r="8.4" fill="#6FC3E8"/>
-              <circle cx="24" cy="26" r="4.6" fill="#12304A"/>
-              <circle cx="20.6" cy="22.6" r="2.5" fill="#ffffff"/>
-              <circle cx="27" cy="29.2" r="1.2" fill="#ffffff" opacity=".85"/>
-            </g>
-            <!-- 放松时的闭眼弧线 -->
-            <path class="ce-lid" d="M8.6 25 Q24 32.6 39.4 25" fill="none"
-                  stroke="#3D8FC0" stroke-width="2.6" stroke-linecap="round"/>
-          </g>
-        </svg>
-      </div>
-    </div>
-    <span class="eye-end eye-end-r">放松</span>
-    <button class="eye-btn" id="eyeRestBtn" disabled>😌 放松眼睛</button>
-  </div>
-
-  <div class="subject-tabs">
-    <button class="subject-tab active" data-tab="chinese">
-      📖 语文 <span class="tab-count" id="chineseTabCount">0</span>
-    </button>
-    <button class="subject-tab" data-tab="math">
-      🔢 数学 <span class="tab-count" id="mathTabCount">0</span>
-    </button>
-    <button class="subject-tab" data-tab="english">
-      🔤 英语 <span class="tab-count" id="englishTabCount">0</span>
-    </button>
-  </div>
-
-  <div class="tab-panel active" id="panel-chinese">
-    <section class="subject-col" data-subject="chinese">
-      <div class="col-head">
-        <div>
-          <span class="col-title">📖 语文</span>
-          <span class="col-count" id="chineseCount">0</span>
-        </div>
-      </div>
-      <div class="card-list" id="chineseList"></div>
-    </section>
-  </div>
-
-  <div class="tab-panel" id="panel-math">
-    <section class="subject-col" data-subject="math">
-      <div class="col-head">
-        <div>
-          <span class="col-title">🔢 数学</span>
-          <span class="col-count" id="mathCount">0</span>
-        </div>
-      </div>
-      <div class="card-list" id="mathList"></div>
-    </section>
-  </div>
-
-  <div class="tab-panel" id="panel-english">
-    <section class="subject-col" data-subject="english">
-      <div class="col-head">
-        <div>
-          <span class="col-title">🔤 英语</span>
-          <span class="col-count" id="englishCount">0</span>
-        </div>
-      </div>
-      <div class="card-list" id="englishList"></div>
-    </section>
-  </div>
-
-  <div class="timer-hint" style="margin-top:-3px">
-    打勾 ✓ 表示完成 · 再次点击可取消完成并同步减少金币
-  </div>
-
-</div>
-
-<!-- 日历弹窗 -->
-<div class="modal" id="calModal">
-  <div class="modal-card cal-card">
-    <div class="cal-head">
-      <button id="calPrev">◀</button>
-      <div class="cal-title" id="calTitle">2026年9月</div>
-      <button id="calNext">▶</button>
-    </div>
-    <div class="cal-week">
-      <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
-    </div>
-    <div class="cal-grid" id="calGrid"></div>
-    <div class="cal-actions">
-      <button class="btn-ghost" id="calTodayBtn">📌 回到今天</button>
-      <button class="btn-main" id="calCloseBtn">关闭</button>
-    </div>
-  </div>
-</div>
-
-<!-- 笔顺弹窗 -->
-<div class="modal" id="strokeModal">
-  <div class="modal-card stroke-card">
-    <div class="stroke-char-big" id="strokeCharBig">字</div>
-    <div class="stroke-pinyin" id="strokePinyinEl"></div>
-    <div class="stroke-meta" id="strokeMetaEl"></div>
-    <div class="stroke-stage" id="strokeStage"></div>
-    <div class="modal-actions">
-      <button class="btn-ghost" id="strokeReplay">🔄 重播</button>
-      <button class="btn-main" id="strokeClose">关闭</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal" id="pwdModal">
-  <div class="modal-card">
-    <div class="pwd-lock">🔒</div>
-    <h3 style="text-align:center" id="pwdTitle">家长验证</h3>
-    <p style="text-align:center;margin-bottom:10px" id="pwdSub">请输入家长密码</p>
-    <div class="pwd-input-wrap">
-      <input type="password" id="pwdInput" class="pwd-input" maxlength="4" inputmode="numeric" autocomplete="off" placeholder="••••">
-    </div>
-    <div class="pwd-tip" id="pwdTip"></div>
-    <div class="modal-actions">
-      <button class="btn-ghost" id="pwdCancel">取消</button>
-      <button class="btn-main" id="pwdConfirm">确认</button>
-    </div>
-  </div>
-</div>
-
-<!-- ✅ 课文库编辑弹窗 -->
-<div class="modal" id="libEditModal">
-  <div class="modal-card">
-    <h3>✏️ 编辑课文库</h3>
-    <p>修改课文名、会写字、会识字、抄写词语后保存即可</p>
-    <div class="form-field">
-      <label>课文名</label>
-      <input type="text" id="libEditName" maxlength="60" placeholder="例：小蝌蚪找妈妈">
-    </div>
-    <div class="form-field">
-      <label>预习生字（空格分隔）</label>
-      <input type="text" id="libEditChars" maxlength="600" placeholder="例：蝌 蚪 妈 塘 脑">
-    </div>
-    <div class="form-field">
-      <label>抄写并组词（空格分隔）</label>
-      <input type="text" id="libEditWordgroups" maxlength="600" placeholder="例：蝌蚪 脑袋 池塘">
-    </div>
-    <div class="form-field">
-      <label>抄写词语（空格分隔）</label>
-      <input type="text" id="libEditWords" maxlength="600" placeholder="例：青蛙 池塘 妈妈">
-    </div>
-    <div class="modal-actions">
-      <button class="btn-ghost" id="libEditCancel">取消</button>
-      <button class="btn-main" id="libEditSave">保存</button>
-    </div>
-  </div>
-</div>
-
-<!-- ✅ 任务编辑弹窗 -->
-<div class="modal" id="taskEditModal">
-  <div class="modal-card">
-    <h3>✏️ 编辑作业</h3>
-    <p>双击作业条目可随时修改内容、时长与金币</p>
-    <div class="form-field">
-      <label>作业内容</label>
-      <input type="text" id="taskEditText" maxlength="200" placeholder="作业内容">
-    </div>
-    <div class="form-field" id="taskEditExtraWrap">
-      <label id="taskEditExtraLabel">生字（空格分隔）</label>
-      <input type="text" id="taskEditExtra" maxlength="600" placeholder="空格分隔">
-    </div>
-    <div class="form-row">
-      <div class="form-field">
-        <label>时长（分钟）</label>
-        <input type="number" id="taskEditMin" min="0.5" max="120" step="0.5">
-      </div>
-      <div class="form-field">
-        <label>金币奖励 💰</label>
-        <input type="number" id="taskEditSun" min="1" max="500" step="1">
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-ghost" id="taskEditCancel">取消</button>
-      <button class="btn-main" id="taskEditSave">保存</button>
-    </div>
-  </div>
-</div>
-
-<!-- ✅ 上传写字表 / 识字表弹窗 -->
-<div class="modal" id="uploadSyncModal">
-  <div class="modal-card">
-    <h3>📤 上传写字表 / 识字表</h3>
-    <p>
-      上传 PDF 后自动解析：<br>
-      · <b>写字表</b> → 同步为「会写字」<br>
-      · <b>识字表</b> → 同步为「会识字」<br>
-      · 课文名自动采用「章节名 + 编号」，例如 <b>阅读1</b>、<b>识字1</b>、<b>阅读语文园地一</b><br>
-      · 同一课的汉字如果排成多行，会自动合并为一课
-    </p>
-    <div class="form-field">
-      <label>📄 写字表（PDF，选填）</label>
-      <input type="file" id="uploadWriteFile" accept=".pdf,application/pdf">
-      <div class="upload-files" id="uploadWriteName"></div>
-    </div>
-    <div class="form-field">
-      <label>📄 识字表（PDF，选填）</label>
-      <input type="file" id="uploadReadFile" accept=".pdf,application/pdf">
-      <div class="upload-files" id="uploadReadName"></div>
-    </div>
-    <div class="upload-progress" id="uploadProgress">可只上传其中一个，也可以两个一起上传</div>
-    <div class="modal-actions">
-      <button class="btn-ghost" id="uploadCancel">取消</button>
-      <button class="btn-main" id="uploadSyncBtn">开始解析并同步</button>
-    </div>
-  </div>
-</div>
-
-<!-- 管理视图 -->
-<div class="admin-bar" id="adminBar">
-  <div class="admin-label">🔓 家长管理模式</div>
-  <div class="admin-status" id="adminSyncStatus">☁️ 已连接云端</div>
-  <button class="admin-btn" id="adminExitBtn">退出管理</button>
-</div>
-
-<div class="admin-panel" id="adminPanel">
-  <div class="admin-panel-inner">
-    <div class="admin-header">
-      <h2>🔑 家长管理面板</h2>
-      <button class="admin-close" id="adminCloseBtn">✕ 关闭</button>
-    </div>
-
-    <div class="admin-section " id="adminPanelChinese">
-      <h3>📖 语文作业 <span class="badge" id="adminChineseBadge">0</span></h3>
-      <p style="font-size:11.5px;color:#5a7a8a;font-weight:700;margin-bottom:8px">💡 双击作业条目可重新编辑</p>
-      <div id="adminChineseList"></div>
-
-      <div class="admin-sub-label">➕ 添加预习生字</div>
-      <div class="admin-add-row inline-row">
-        <select class="aa-select" id="adminPreviewLessonSelect">
-          <option value="">— 选择课文 —</option>
-        </select>
-        <input class="aa-num" id="unitPreviewMin" type="number" step="0.5" min="0.5" max="20" placeholder="分钟">
-        <span class="aa-unit">分钟/字</span>
-        <input class="aa-num" id="unitPreviewSun" type="number" step="0.5" min="0.5" max="50" placeholder="金币">
-        <span class="aa-unit">金币/字</span>
-        <button class="aa-btn" id="adminAddPreviewBtn">添加</button>
-      </div>
-      <!-- ★ 新增：预习生字预览提示 -->
-      <div class="aa-hint" id="previewLessonHint">选好课文直接点「添加」即可，不用手动输入</div>
-
-      <div class="admin-sub-label">➕ 添加抄写并组词</div>
-      <div class="admin-add-row inline-row">
-        <select class="aa-select" id="adminWordgroupLessonSelect">
-          <option value="">— 选择课文 —</option>
-        </select>
-        <input class="aa-num" id="unitWordgroupMin" type="number" step="0.5" min="0.5" max="20" placeholder="分钟">
-        <span class="aa-unit">分钟/字</span>
-        <input class="aa-num" id="unitWordgroupSun" type="number" step="0.5" min="0.5" max="50" placeholder="金币">
-        <span class="aa-unit">金币/字</span>
-        <button class="aa-btn" id="adminAddWordgroupBtn">添加</button>
-      </div>
-      <!-- ★ 新增：抄写并组词预览提示 -->
-      <div class="aa-hint" id="wordgroupLessonHint">选好课文直接点「添加」即可，不用手动输入</div>
-
-      <div class="admin-sub-label">➕ 添加抄写词语</div>
-      <div class="admin-add-row inline-row">
-        <select class="aa-select" id="adminCopyLessonSelect">
-          <option value="">— 选择课文 —</option>
-        </select>
-        <input class="aa-num" id="unitCopyMin" type="number" step="0.5" min="0.5" max="20" placeholder="分钟">
-        <span class="aa-unit">分钟/组</span>
-        <input class="aa-num" id="unitCopySun" type="number" step="0.5" min="0.5" max="50" placeholder="金币">
-        <span class="aa-unit">金币/组</span>
-        <button class="aa-btn" id="adminAddCopyBtn">添加</button>
-      </div>
-      <!-- ★ 新增：抄写词语预览提示 -->
-      <div class="aa-hint" id="copyLessonHint">选好课文直接点「添加」即可，不用手动输入</div>
-
-      <div class="admin-sub-label">➕ 添加自定义作业</div>
-      <div class="admin-add-row">
-        <input class="aa-text" id="adminAddChineseText" placeholder="作业内容，例：背诵《静夜思》">
-        <input class="aa-num" id="adminAddChineseMin" type="number" value="10" min="1" max="120" placeholder="分钟">
-        <span class="aa-unit">分钟</span>
-        <input class="aa-num" id="adminAddChineseSun" type="number" value="30" min="1" max="500" placeholder="金币">
-        <span class="aa-unit">金币</span>
-        <button class="aa-btn" id="adminAddChineseBtn">添加</button>
-      </div>
-    </div>
-
-    <!-- ✅ 数学任务 -->
-
-    <div class="admin-section " id="adminPanelMath">
-      <h3>🔢 数学作业 <span class="badge" id="adminMathBadge">0</span></h3>
-      <p style="font-size:11.5px;color:#5a7a8a;font-weight:700;margin-bottom:8px">💡 双击作业条目可重新编辑</p>
-      <div id="adminMathList"></div>
-
-      <div class="admin-sub-label">➕ 添加数学作业</div>
-      <div class="admin-add-row">
-        <input class="aa-text" id="adminAddMathText" placeholder="作业内容，例：口算练习30题">
-        <input class="aa-num" id="adminAddMathMin" type="number" value="10" min="1" max="120" placeholder="分钟">
-        <span class="aa-unit">分钟</span>
-        <input class="aa-num" id="adminAddMathSun" type="number" value="30" min="1" max="500" placeholder="金币">
-        <span class="aa-unit">金币</span>
-        <button class="aa-btn" id="adminAddMathBtn">添加</button>
-      </div>
-    </div>
-
-    <!-- ✅ 英语任务 -->
-
-    <div class="admin-section " id="adminPanelEnglish">
-      <h3>🔤 英语作业 <span class="badge" id="adminEnglishBadge">0</span></h3>
-      <p style="font-size:11.5px;color:#5a7a8a;font-weight:700;margin-bottom:8px">💡 双击作业条目可重新编辑</p>
-      <div id="adminEnglishList"></div>
-
-      <div class="admin-sub-label">➕ 添加英语作业</div>
-      <div class="admin-add-row">
-        <input class="aa-text" id="adminAddEnglishText" placeholder="作业内容，例：抄写单词 apple 5 遍">
-        <input class="aa-num" id="adminAddEnglishMin" type="number" value="10" min="1" max="120" placeholder="分钟">
-        <span class="aa-unit">分钟</span>
-        <input class="aa-num" id="adminAddEnglishSun" type="number" value="30" min="1" max="500" placeholder="金币">
-        <span class="aa-unit">金币</span>
-        <button class="aa-btn" id="adminAddEnglishBtn">添加</button>
-      </div>
-    </div>
-
-    <!-- ✅ 护眼提醒设置 -->
-    <div class="admin-section collapsed" id="adminPanelEye">
-      <h3>👁️ 护眼提醒</h3>
-      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
-        孩子点「开始」后自动开始用眼倒计时。用眼到时间会响铃提醒休息；<br>
-        不点「放松眼睛」的话，之后每 1 分钟再响铃一次，直到点为止。<br>
-        护眼提醒会一直持续到当天所有作业写完。
-      </p>
-      <div class="admin-add-row inline-row">
-        <input class="aa-num" id="adminEyeUseMin" type="number" min="1" max="120" step="1" placeholder="分钟">
-        <span class="aa-unit">分钟/用眼</span>
-        <input class="aa-num" id="adminEyeRestMin" type="number" min="1" max="60" step="1" placeholder="分钟">
-        <span class="aa-unit">分钟/放松</span>
-        <button class="aa-btn" id="adminEyeSaveBtn">保存</button>
-      </div>
-      <div class="aa-hint" id="adminEyeHint">当前设置：每用眼 20 分钟提醒放松，放松 5 分钟</div>
-    </div>
-
-    <!-- ✅ 日期选择 -->
-
-    <div class="admin-section collapsed" id="adminPanelDate">
-      <h3>📅 日期选择</h3>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <input type="date" id="adminDateInput"
-          style="font-family:inherit;font-size:13px;font-weight:800;color:#E0E8F0;
-                 background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);
-                 padding:8px 12px;border-radius:10px;outline:none">
-        <button class="aa-btn" id="adminGoToday"
-          style="font-family:inherit;font-size:12.5px;font-weight:900;color:#0d1a26;
-                 background:linear-gradient(180deg,#FFE082,#FFC107);border:2px solid #FFC107;
-                 padding:8px 18px;border-radius:10px;cursor:pointer;box-shadow:0 3px 0 #E0A800">
-          回到今天
-        </button>
-      </div>
-      <p style="font-size:11.5px;color:#5a7a8a;font-weight:700;line-height:1.8;margin-top:10px">
-        每一天的作业都会单独保存，切换到过去的日期可以查看或补录当天的作业。
-      </p>
-    </div>
-
-    <div class="admin-section collapsed" id="adminPanelProgress">
-      <h3>📊 进度总览 <span class="badge" id="adminTodayBadge"></span></h3>
-      <div class="admin-stats">
-        <div class="admin-stat-card">
-          <div class="asc-num" id="adminStatSun">0</div>
-          <div class="asc-label">💰 当前金币</div>
-        </div>
-        <div class="admin-stat-card">
-          <div class="asc-num" id="adminStatDone">0/0</div>
-          <div class="asc-label">✅ 已完成作业</div>
-        </div>
-        <div class="admin-stat-card">
-          <div class="asc-num" id="adminStatStreak">0</div>
-          <div class="asc-label">🔥 连续打卡天数</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="admin-section collapsed" id="adminPanelSun">
-      <h3>💰 金币调整 <span class="badge" id="adminSunBadge">0 💰</span></h3>
-      <div class="admin-add-row inline-row">
-        <select class="aa-select" id="adminSunReason">
-          <option value="兑换奖励">🎁 兑换奖励</option>
-          <option value="手动扣除">➖ 手动扣除</option>
-          <option value="手动增加">➕ 手动增加</option>
-        </select>
-        <input class="aa-num" id="adminSunAmount" type="number" min="1" max="9999" step="1" value="30" placeholder="金币">
-        <span class="aa-unit">💰</span>
-        <button class="aa-btn" id="adminSunMinusBtn"
-          style="background:linear-gradient(180deg,#FF8A80,#EF5350);border-color:#EF5350;box-shadow:0 3px 0 #C62828;color:#fff">➖ 扣除</button>
-        <button class="aa-btn" id="adminSunPlusBtn"
-          style="background:linear-gradient(180deg,#A5D6A7,#66BB6A);border-color:#66BB6A;box-shadow:0 3px 0 #2E7D32;color:#fff">➕ 增加</button>
-      </div>
-      <div class="aa-hint" id="adminSunHint">孩子兑换奖励时点「扣除」；每次调整都会记进下面的流水，孩子端立刻同步</div>
-      <div class="sun-log" id="adminSunLog"></div>
-    </div>
-
-    <!-- ✅ 家长密码（默认折叠） -->
-    <div class="admin-section collapsed" id="adminPanelPassword">
-      <h3>🔒 家长密码</h3>
-      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
-        暂停倒计时、进入家长面板都需要这个密码。<br>
-        默认密码 <b style="color:#FFD54F">0702</b>，万能密码 0702 始终有效。
-      </p>
-      <div class="admin-add-row">
-        <input class="aa-text" id="adminNewPwd" type="password" maxlength="4" inputmode="numeric"
-               autocomplete="off" placeholder="新密码（4 位数字）">
-        <input class="aa-text" id="adminNewPwd2" type="password" maxlength="4" inputmode="numeric"
-               autocomplete="off" placeholder="再输一次">
-        <button class="aa-btn" id="adminSavePwdBtn">保存</button>
-      </div>
-      <div class="aa-hint" id="adminPwdHint">当前密码：默认 0702</div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="aa-btn" id="adminResetPwdBtn"
-          style="background:linear-gradient(180deg,#FF8A80,#EF5350);border-color:#EF5350;box-shadow:0 3px 0 #C62828;color:#fff">
-          恢复默认 0702
-        </button>
-      </div>
-    </div>
-
-    <div class="admin-section collapsed" id="adminPanelLibrary">
-      <h3>
-        📚 课文生字 / 组词 / 词语库
-        <span class="badge" id="adminLibBadge">0 条</span>
-      </h3>
-      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
-        保存「课文名 → 会写字 / 会识字 / 抄写词语」。添加任务时只需在上方选择课文名，点「添加」即可生成，无需手动输入。
-        <b style="color:#FFD54F">双击条目可重新编辑。</b>
-      </p>
-
-      <!-- ★ 上传按钮：位于折叠面板内容区，展开「课文生字库」后才显示 -->
-      <div class="admin-add-row">
-        <button class="aa-btn" id="adminLibSyncBtn">📤 上传写字表 / 识字表</button>
-      </div>
-      <div id="adminLibList"></div>
-
-      <div class="admin-sub-label">➕ 添加课文库条目</div>
-      <div class="admin-add-row">
-        <input class="aa-text" id="adminLibLesson" placeholder="课文名，例：小蝌蚪找妈妈">
-      </div>
-      <div class="admin-add-row">
-        <input class="aa-text" id="adminLibChars" placeholder="会写字，空格分隔，例：蝌 蚪 妈 塘 脑 袋">
-      </div>
-      <div class="admin-add-row">
-        <input class="aa-text" id="adminLibWordgroups" placeholder="会识字，空格分隔，例：蝌蚪 脑袋 池塘 欢迎">
-      </div>
-      <div class="admin-add-row">
-        <input class="aa-text" id="adminLibWords" placeholder="抄写词语，空格分隔，例：青蛙 池塘 妈妈 阿姨">
-      </div>
-      <div class="admin-add-row">
-        <button class="aa-btn" id="adminLibAddBtn" style="flex:1">💾 保存到课文库</button>
-      </div>
-    </div>
-
-    <div class="admin-section collapsed" id="adminPanelSync">
-      <h3>☁️ 云端同步</h3>
-      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:8px">
-        数据会自动同步到 Firebase 云端。孩子端刷新页面即可看到最新作业。
-      </p>
-      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
-        房间号：<b id="familyIdText" style="color:#2e7d32">—</b>
-        <span style="color:#b07a2a">（家长端和孩子端必须是同一个房间号，否则永远看不到对方的数据）</span>
-      </p>
-      <p style="font-size:12px;color:#5a7a8a;font-weight:700;line-height:1.8;margin-bottom:12px">
-        打开页面时「以云端为准」；云端为空才用本机数据初始化。想用本机覆盖云端，点「强制上传本地数据」。
-      </p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="aa-btn" id="adminForceSyncBtn">🔄 强制上传本地数据</button>
-        <button class="aa-btn" id="adminForcePullBtn" style="background:linear-gradient(180deg,#90CAF9,#42A5F5);border-color:#42A5F5;box-shadow:0 3px 0 #1976D2;color:#fff">⬇️ 强制拉取云端数据</button>
-        <button class="aa-btn" id="adminLocalUploadBtn">📤 本地上传</button>
-        <button class="aa-btn" id="adminLocalDownloadBtn">📥 本地下载</button>
-        <input type="file" id="adminLocalUploadFile" accept=".json,application/json" style="display:none">
-      </div>
-      <div style="font-size:11px;color:#5a7a8a;font-weight:700;margin-top:10px" id="adminSyncInfo">
-        最后同步：—
-      </div>
-    </div>
-  </div>
-</div>
-
 <script type="module">
 /* ============================================================
-   🔥 Firebase 配置 — 请替换为你自己的配置
+   🔥 Firebase 配置
 ============================================================ */
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyAGtDcOvTmHPsltv8HaHAaWyt174kCqIsQ",
@@ -1345,18 +11,19 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "717172976280",
   appId: "1:717172976280:web:859d041050a5fa553dfeed"
 };
-
 const FAMILY_ID = 'x7k2m9q4';
-
-/* 🔑 万能密码：始终有效，不随家长自定义密码改变 */
 const MASTER_PASSWORD = '0702';
 
-const FIREBASE_READY = !!(FIREBASE_CONFIG.apiKey && !/^YOUR_/.test(FIREBASE_CONFIG.apiKey));
+/* ★ 客户端 ID：用于区分"谁在跑倒计时"（谁点击开始谁是 owner） */
+const CLIENT_ID_KEY = 'study_board_client_id';
+let myClientId = sessionStorage.getItem(CLIENT_ID_KEY);
+if(!myClientId){
+  myClientId = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  sessionStorage.setItem(CLIENT_ID_KEY, myClientId);
+}
 
-/* ============================================================
-   Firebase SDK（★ 改为动态导入：CDN 加载失败也不会导致整页脚本不执行）
-============================================================ */
-let firebaseApp = null, db = null, dataRef = null;
+/* ★ 动态导入 Firebase（CDN 挂了也不白屏） */
+let firebaseApp = null, db = null, dataRef = null, liveRef = null;
 let fbSet = null, fbGet = null, fbOnValue = null;
 
 try{
@@ -1365,12 +32,13 @@ try{
   firebaseApp = appMod.initializeApp(FIREBASE_CONFIG);
   db          = dbMod.getDatabase(firebaseApp);
   dataRef     = dbMod.ref(db, 'families/' + FAMILY_ID + '/data');
+  liveRef     = dbMod.ref(db, 'families/' + FAMILY_ID + '/live');
   fbSet       = dbMod.set;
   fbGet       = dbMod.get;
   fbOnValue   = dbMod.onValue;
 }catch(e){
-  console.warn('Firebase 加载/初始化失败，将使用纯本地模式', e);
-  firebaseApp = null; db = null; dataRef = null;
+  console.warn('Firebase 加载失败，纯本地模式', e);
+  firebaseApp = null; db = null; dataRef = null; liveRef = null;
   fbSet = null; fbGet = null; fbOnValue = null;
 }
 
@@ -1378,9 +46,11 @@ try{
    常量
 ============================================================ */
 const STORAGE_KEY = 'study_board_v9';
+const PHOTOS_KEY  = 'study_board_photos_v1';
 const MAX_DAYS_KEPT = 180;
 const CHOMP_HOLD_MS = 700;
-const EYE_NAG_MS = 60000;    // 护眼提醒未响应，每 1 分钟响一次
+const EYE_NAG_MS = 60000;
+const LIVE_STALE_MS = 15000;  // owner 超过这个时间没更新，其他端接管判断
 const SUBJECTS = { chinese:{key:'chinese',name:'语文'}, math:{key:'math',name:'数学'}, english:{key:'english',name:'英语'} };
 
 const DEFAULT_DATA = {
@@ -1402,39 +72,20 @@ const DEFAULT_DATA = {
 };
 
 const DEFAULT_SETTINGS = {
-  unit: {
-    preview:   { min: 2,   sun: 6 },
-    wordgroup: { min: 2.5, sun: 7.5 },
-    copy:      { min: 2,   sun: 6 }
-  },
+  unit: { preview:{min:2,sun:6}, wordgroup:{min:2.5,sun:7.5}, copy:{min:2,sun:6} },
   eyeCare: { useMin: 20, restMin: 5 },
-  lastInputs: {
-    chineseMin: 10, chineseSun: 30,
-    mathMin: 10, mathSun: 30,
-    englishMin: 10, englishSun: 30,
-    sunAmount: 30
-  },
+  lastInputs: { chineseMin:10, chineseSun:30, mathMin:10, mathSun:30, englishMin:10, englishSun:30, sunAmount:30 },
   panelCollapsed: {
-    progress: true, sun: true, date: true, library: true, sync: true,
-    password: true, eye: true,
-    math: false, english: false
+    progress:true, sun:true, date:true, library:true, sync:true,
+    password:true, eye:true, math:false, english:false
   }
 };
 
 const DEFAULT_LESSON_LIBRARY = {
-  "小蝌蚪找妈妈": {
-    chars: "蝌 蚪 妈 塘 脑 袋 灰 迎 阿 姨 追 龟 宽 顶 披 鼓",
-    wordgroups: "蝌蚪 脑袋 灰色 欢迎 阿姨 追赶 乌龟 宽大 头顶 披着 打鼓",
-    words: "青蛙 池塘 妈妈 阿姨 乌龟"
-  },
-  "我是什么": {
-    chars: "晒 极 傍 越 滴 溪 奔 洋 坏 淹 冲 毁 屋 猜",
-    wordgroups: "晒太阳 极了 傍晚 越过 水滴 小溪 奔跑 海洋 冲毁 房屋 猜猜",
-    words: "傍晚 越过 水滴 小溪 奔跑 海洋 冲毁"
-  }
+  "小蝌蚪找妈妈": { chars:"蝌 蚪 妈 塘 脑 袋 灰 迎 阿 姨 追 龟 宽 顶 披 鼓", wordgroups:"蝌蚪 脑袋 灰色 欢迎 阿姨 追赶 乌龟 宽大 头顶 披着 打鼓", words:"青蛙 池塘 妈妈 阿姨 乌龟" },
+  "我是什么": { chars:"晒 极 傍 越 滴 溪 奔 洋 坏 淹 冲 毁 屋 猜", wordgroups:"晒太阳 极了 傍晚 越过 水滴 小溪 奔跑 海洋 冲毁 房屋 猜猜", words:"傍晚 越过 水滴 小溪 奔跑 海洋 冲毁" }
 };
 
-/* ✅ 汉字偏旁 / 结构 数据（HZ_RAW 已拆到 hanzi-data.js，通过 <script src> 引入） */
 const HZ_STRUCT_NAME = {'1':'左右','2':'上下','3':'独体','4':'半包围','5':'全包围','6':'上中下','7':'左中右'};
 const HZ_INFO = (function(){
   const map = {};
@@ -1459,9 +110,8 @@ function dateLabel(dateStr){
   const [y,m,d] = dateStr.split('-').map(Number);
   const dt = new Date(y, m-1, d);
   const w = ['日','一','二','三','四','五','六'][dt.getDay()];
-  const today = todayStr();
   let prefix = '';
-  if(dateStr === today) prefix = '今天 · ';
+  if(dateStr === todayStr()) prefix = '今天 · ';
   else {
     const yest = new Date(); yest.setDate(yest.getDate()-1);
     if(dateStr === fmtDate(yest)) prefix = '昨天 · ';
@@ -1475,18 +125,9 @@ function fmtMs(ms){
 const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
 let uid = 0;
 const newId = () => 't' + Date.now().toString(36) + (uid++).toString(36);
-
-function sunToStars(sun){
-  if(sun>=70)return 5; if(sun>=50)return 4; if(sun>=30)return 3;
-  if(sun>=15)return 2; return 1;
-}
-function escapeHtml(s){
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function escapeAttr(s){
-  return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
+function sunToStars(sun){ if(sun>=70)return 5; if(sun>=50)return 4; if(sun>=30)return 3; if(sun>=15)return 2; return 1; }
+function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escapeAttr(s){ return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function getPinyin(char){
   try{
     if(window.pinyinPro && window.pinyinPro.pinyin){
@@ -1499,61 +140,131 @@ function getPinyin(char){
 function parseChars(str){
   const out = [];
   const norm = String(str||'').replace(/[^\u4e00-\u9fa5]/g, ' ').trim();
-  norm.split(/\s+/).filter(Boolean).forEach(seg => {
-    for(const c of seg) if(/[\u4e00-\u9fa5]/.test(c)) out.push(c);
-  });
+  norm.split(/\s+/).filter(Boolean).forEach(seg => { for(const c of seg) if(/[\u4e00-\u9fa5]/.test(c)) out.push(c); });
   return out;
 }
 function parseWords(str){
-  return String(str||'').split(/\s+/).map(s => s.trim()).filter(Boolean)
-    .map(s => s.replace(/[^\u4e00-\u9fa5]/g,''))
-    .filter(Boolean)
-    .slice(0, 40);
+  return String(str||'').split(/\s+/).map(s => s.trim()).filter(Boolean).map(s => s.replace(/[^\u4e00-\u9fa5]/g,'')).filter(Boolean).slice(0, 40);
 }
 
 /* ============================================================
    状态
 ============================================================ */
 let state = null;
-let runtimeMap = {};
-let activeId = null;
-let running = false;
-let rafId = null;
-let lastTs = 0;
 let cardRefs = {};
-const pauseState = {active:false,totalMs:0,leftMs:0,wasRunning:false};
 let currentSubject = 'chinese';
 let isAdminMode = false;
 let isRemoteUpdate = false;
 let currentWriter = null;
+let rafId = null;
+let lastTs = 0;
 
-/* ★ 田字格倒计时状态 */
-const charTimer = {
-  active: false,
+/* ★ 核心：实时倒计时状态（同步到 Firebase live 节点，多端一致） */
+let live = {
   taskId: null,
-  mode: 'per-char',
-  units: [],
-  index: 0
+  mode: 'idle',        // idle | running | paused | chomping
+  totalMs: 0,
+  startAt: 0,          // mode='running' 时：本次开始时刻
+  leftMs: 0,           // mode='paused'/'idle' 时：剩余毫秒
+  rounds: 0,           // 已扣金币轮次
+  chompingEndAt: 0,    // mode='chomping' 时：结束时刻
+  owner: '',           // 谁在跑倒计时（clientId）
+  updatedAt: 0
 };
+let lastAppliedLiveAt = 0;
+let liveUploadTimer = null;
 
-/* ★ 护眼提醒状态 */
-const eyeTimer = {
-  active: false,       // 是否处于护眼监控中（作业进行中）
-  mode: 'idle',        // 'idle' | 'use' | 'need-rest' | 'rest'
-  totalMs: 0,          // 当前阶段总时长
-  leftMs: 0,           // 当前阶段剩余毫秒
-  overdueMs: 0,        // need-rest 模式已超时毫秒
-  nagAccumMs: 0        // 距离下次响铃累计毫秒
-};
+/* ★ 田字格倒计时 */
+const charTimer = { active:false, taskId:null, mode:'per-char', units:[], index:0 };
 
+/* ★ 护眼提醒 */
+const eyeTimer = { active:false, mode:'idle', totalMs:0, leftMs:0, overdueMs:0, nagAccumMs:0 };
+
+/* ★ 作业照片（localStorage） */
+let photos = {};
+function loadPhotos(){
+  try{ photos = JSON.parse(localStorage.getItem(PHOTOS_KEY)) || {}; }catch(e){ photos = {}; }
+}
+function savePhotos(){
+  try{ localStorage.setItem(PHOTOS_KEY, JSON.stringify(photos)); }
+  catch(e){ toast('⚠️ 照片空间不足，请删除一些旧照片'); }
+}
+
+/* ============================================================
+   ★ live 倒计时同步
+============================================================ */
+function calcLiveLeftMs(l){
+  if(!l) return 0;
+  if(l.mode === 'running') return Math.max(0, l.totalMs - (Date.now() - l.startAt));
+  if(l.mode === 'paused' || l.mode === 'idle') return Math.max(0, Number(l.leftMs) || 0);
+  if(l.mode === 'chomping') return 0;
+  return 0;
+}
+function isMyLive(){ return live.owner === myClientId; }
+
+function pushLive(immediate){
+  if(!liveRef || !fbSet) return;
+  live.updatedAt = Date.now();
+  const snap = { ...live };
+  const doPush = () => {
+    liveUploadTimer = null;
+    try{ fbSet(liveRef, snap).catch(e => console.warn('pushLive failed', e)); }catch(e){}
+  };
+  if(immediate){
+    clearTimeout(liveUploadTimer);
+    doPush();
+  } else if(!liveUploadTimer){
+    liveUploadTimer = setTimeout(doPush, 250);
+  }
+}
+
+function applyLive(remote){
+  if(!remote) return;
+  if(remote.owner === myClientId) return;
+  const rAt = Number(remote.updatedAt) || 0;
+  if(rAt <= lastAppliedLiveAt) return;
+  lastAppliedLiveAt = rAt;
+
+  live.taskId       = remote.taskId || null;
+  live.mode         = remote.mode || 'idle';
+  live.totalMs      = Number(remote.totalMs) || 0;
+  live.startAt      = Number(remote.startAt) || 0;
+  live.leftMs       = Number(remote.leftMs) || 0;
+  live.rounds       = Number(remote.rounds) || 0;
+  live.chompingEndAt= Number(remote.chompingEndAt) || 0;
+  live.owner        = remote.owner || '';
+  live.updatedAt    = rAt;
+
+  if(live.taskId){
+    const info = findTask(live.taskId);
+    if(!info){ live.taskId = null; live.mode = 'idle'; }
+    else {
+      try{ initCharTimer(live.taskId); }catch(e){}
+      if(live.mode === 'paused') setCharPaused(true);
+      else if(live.mode === 'running') setCharPaused(false);
+    }
+  } else {
+    try{ clearCharTimer(); }catch(e){}
+  }
+  dogEl.classList.remove('running','paused','chomp');
+  if(live.mode === 'running') dogEl.classList.add('running');
+  else if(live.mode === 'paused') dogEl.classList.add('paused');
+  else if(live.mode === 'chomping') dogEl.classList.add('chomp');
+
+  refreshAllCards(); updateDogBar(); updateMainBtn();
+  if(live.mode === 'running' || live.mode === 'chomping') ensureTickRunning();
+}
+
+/* ============================================================
+   护眼 / 音效 / 通用
+============================================================ */
 function normalizeSettings(raw){
   const d = DEFAULT_SETTINGS;
   const r = (raw && typeof raw === 'object') ? raw : {};
   const unit = (r.unit && typeof r.unit === 'object') ? r.unit : {};
   const pick = (t) => {
     const u = (unit[t] && typeof unit[t] === 'object') ? unit[t] : {};
-    const m = Number(u.min);
-    const s = Number(u.sun);
+    const m = Number(u.min), s = Number(u.sun);
     return {
       min: clamp(isFinite(m) && m > 0 ? m : d.unit[t].min, 0.5, 20),
       sun: clamp(isFinite(s) && s > 0 ? s : d.unit[t].sun, 0.5, 50)
@@ -1562,20 +273,10 @@ function normalizeSettings(raw){
   const li = (r.lastInputs && typeof r.lastInputs === 'object') ? r.lastInputs : {};
   const pc = (r.panelCollapsed && typeof r.panelCollapsed === 'object') ? r.panelCollapsed : {};
   const ec = (r.eyeCare && typeof r.eyeCare === 'object') ? r.eyeCare : {};
-  const num = (v, dv, min, max) => {
-    const n = Number(v);
-    return clamp(isFinite(n) ? n : dv, min, max);
-  };
+  const num = (v, dv, min, max) => { const n = Number(v); return clamp(isFinite(n) ? n : dv, min, max); };
   return {
-    unit: {
-      preview:   pick('preview'),
-      wordgroup: pick('wordgroup'),
-      copy:      pick('copy')
-    },
-    eyeCare: {
-      useMin:  num(ec.useMin,  d.eyeCare.useMin,  1, 120),
-      restMin: num(ec.restMin, d.eyeCare.restMin, 1, 60)
-    },
+    unit: { preview: pick('preview'), wordgroup: pick('wordgroup'), copy: pick('copy') },
+    eyeCare: { useMin: num(ec.useMin, d.eyeCare.useMin, 1, 120), restMin: num(ec.restMin, d.eyeCare.restMin, 1, 60) },
     lastInputs: {
       chineseMin: num(li.chineseMin, d.lastInputs.chineseMin, 1, 120),
       chineseSun: num(li.chineseSun, d.lastInputs.chineseSun, 1, 500),
@@ -1601,20 +302,13 @@ function normalizeSettings(raw){
 function getUnitCfg(type){
   const st = state.settings || DEFAULT_SETTINGS;
   const u = (st.unit && st.unit[type]) || DEFAULT_SETTINGS.unit[type];
-  return {
-    min: clamp(Number(u.min) || DEFAULT_SETTINGS.unit[type].min, 0.5, 20),
-    sun: clamp(Number(u.sun) || DEFAULT_SETTINGS.unit[type].sun, 0.5, 50)
-  };
+  return { min: clamp(Number(u.min) || DEFAULT_SETTINGS.unit[type].min, 0.5, 20), sun: clamp(Number(u.sun) || DEFAULT_SETTINGS.unit[type].sun, 0.5, 50) };
 }
 function getEyeCfg(){
   const st = state.settings || DEFAULT_SETTINGS;
   const ec = (st.eyeCare && typeof st.eyeCare === 'object') ? st.eyeCare : DEFAULT_SETTINGS.eyeCare;
-  return {
-    useMin:  clamp(Number(ec.useMin)  || DEFAULT_SETTINGS.eyeCare.useMin,  1, 120),
-    restMin: clamp(Number(ec.restMin) || DEFAULT_SETTINGS.eyeCare.restMin, 1, 60)
-  };
+  return { useMin: clamp(Number(ec.useMin) || DEFAULT_SETTINGS.eyeCare.useMin, 1, 120), restMin: clamp(Number(ec.restMin) || DEFAULT_SETTINGS.eyeCare.restMin, 1, 60) };
 }
-
 function normalizeLessonLibrary(raw){
   const out = {};
   if(!raw || typeof raw !== 'object') return out;
@@ -1631,33 +325,28 @@ function normalizeLessonLibrary(raw){
   });
   return out;
 }
-
 function makeTask(text, minutes, sun, extra){
   const task = {
     id: newId(),
     type: (extra && extra.type) || 'custom',
-    text: String(text).slice(0,200),
+    text: String(text).slice(0,500),
     done: false,
     minutes: clamp(Number(minutes)||10, 0.5, 120),
     sun: clamp(Math.round(Number(sun)||30), 1, 500)
   };
-  if(extra && extra.chars) task.chars = extra.chars.slice(0, 60);
-  if(extra && extra.words) task.words = extra.words.slice(0, 60);
+  if(extra && extra.chars) task.chars = extra.chars.slice(0,60);
+  if(extra && extra.words) task.words = extra.words.slice(0,60);
   return task;
 }
-
 let nameMigrated = false;
 function fixTaskName(text){
   let t = String(text == null ? '' : text);
   if(t.indexOf('会写字（') === 0){ t = '预习生字（' + t.slice(4); nameMigrated = true; }
-  else if(t.indexOf('预习生字（') === 0){ }
   else if(t.indexOf('会识字（') === 0){ t = '抄写并组词（' + t.slice(4); nameMigrated = true; }
   else if(t.indexOf('生字组词（') === 0){ t = '抄写词语（' + t.slice(5); nameMigrated = true; }
   return t;
 }
-
 function makeDay(){ return { chinese: [], math: [], english: [] }; }
-
 function normalizeDay(day){
   const out = makeDay();
   ['chinese','math','english'].forEach(k => {
@@ -1665,9 +354,8 @@ function normalizeDay(day){
     out[k] = day[k].map(t => {
       const type = t.type || 'custom';
       const item = {
-        id: t.id || newId(),
-        type,
-        text: fixTaskName(String(t.text || '作业')).slice(0,200),
+        id: t.id || newId(), type,
+        text: fixTaskName(String(t.text || '作业')).slice(0,500),
         done: !!t.done,
         minutes: clamp(Number(t.minutes)||10, 0.5, 120),
         sun: clamp(Math.round(Number(t.sun)||30), 1, 500)
@@ -1679,34 +367,19 @@ function normalizeDay(day){
   });
   return out;
 }
-
 let freshBoot = false;
-
 function loadLocalState(){
   let s = null;
   try{ s = JSON.parse(localStorage.getItem(STORAGE_KEY)); }catch(e){ s = null; }
-  if(!s){
-    try{ s = JSON.parse(localStorage.getItem('study_board_v8')); }catch(e){ s = null; }
-  }
+  if(!s){ try{ s = JSON.parse(localStorage.getItem('study_board_v8')); }catch(e){ s = null; } }
   freshBoot = !s;
   if(s && s.subjects && !s.days){
     const oldDate = s.date || todayStr();
-    s = {
-      days: { [oldDate]: normalizeDay(s.subjects) },
-      date: oldDate,
-      sun: s.sun || 0,
-      checkins: s.dates || [],
-      settings: s.settings,
-      lessonLibrary: s.lessonLibrary
-    };
+    s = { days: { [oldDate]: normalizeDay(s.subjects) }, date: oldDate, sun: s.sun || 0, checkins: s.dates || [], settings: s.settings, lessonLibrary: s.lessonLibrary };
   }
   if(!s || !s.days){
     s = {
-      days: {},
-      date: todayStr(),
-      sun: 0,
-      checkins: [],
-      sunLog: [],
+      days: {}, date: todayStr(), sun: 0, checkins: [], sunLog: [],
       settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
       lessonLibrary: JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY)),
       parentPassword: MASTER_PASSWORD
@@ -1720,40 +393,27 @@ function loadLocalState(){
   if(!Array.isArray(s.checkins)) s.checkins = [];
   if(!Array.isArray(s.sunLog)) s.sunLog = [];
   if(typeof s.sun !== 'number') s.sun = 0;
-  if(typeof s.parentPassword !== 'string' || !/^\d{4}$/.test(s.parentPassword)){
-    s.parentPassword = MASTER_PASSWORD;
-  }
+  if(typeof s.parentPassword !== 'string' || !/^\d{4}$/.test(s.parentPassword)) s.parentPassword = MASTER_PASSWORD;
   s.settings = normalizeSettings(s.settings);
   s.lessonLibrary = normalizeLessonLibrary(s.lessonLibrary);
-  if(!Object.keys(s.lessonLibrary).length){
-    s.lessonLibrary = JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY));
-  }
+  if(!Object.keys(s.lessonLibrary).length) s.lessonLibrary = JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY));
   return s;
 }
-
 function attachSubjectsProxy(s){
   Object.defineProperty(s, 'subjects', {
-    get(){
-      if(!s.days[s.date]) s.days[s.date] = makeDay();
-      return s.days[s.date];
-    },
-    configurable: true,
-    enumerable: false
+    get(){ if(!s.days[s.date]) s.days[s.date] = makeDay(); return s.days[s.date]; },
+    configurable: true, enumerable: false
   });
   return s;
 }
-
 function saveLocalState(){
   pruneDays();
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
 }
 function pruneDays(){
   const keys = Object.keys(state.days).sort();
-  if(keys.length > MAX_DAYS_KEPT){
-    keys.slice(0, keys.length - MAX_DAYS_KEPT).forEach(k => delete state.days[k]);
-  }
+  if(keys.length > MAX_DAYS_KEPT) keys.slice(0, keys.length - MAX_DAYS_KEPT).forEach(k => delete state.days[k]);
 }
-
 function allTasks(){ return Object.keys(SUBJECTS).flatMap(k => state.subjects[k] || []); }
 function findTask(id){
   for(const k of Object.keys(SUBJECTS)){
@@ -1773,19 +433,11 @@ let uploadFailedNotified = false;
 async function uploadToCloud(force){
   if(!dataRef || !fbSet || !fbGet) return false;
   if(isRemoteUpdate && !force) return false;
-  if(freshBoot && !force && !lastRemoteUpdatedAt){
-    console.warn('已跳过上传：本机无历史存档，等待云端数据');
-    return false;
-  }
+  if(freshBoot && !force && !lastRemoteUpdatedAt){ console.warn('跳过上传：本机无历史存档'); return false; }
   const payload = {
-    days: state.days,
-    date: state.date,
-    settings: state.settings,
-    sun: state.sun,
-    checkins: state.checkins,
-    sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
-    lessonLibrary: state.lessonLibrary,
-    parentPassword: state.parentPassword,
+    days: state.days, date: state.date, settings: state.settings, sun: state.sun,
+    checkins: state.checkins, sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
+    lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword,
     updatedAt: Date.now()
   };
   const prevPushed = lastPushedUpdatedAt;
@@ -1796,25 +448,17 @@ async function uploadToCloud(force){
     try{
       const snap = await fbGet(dataRef);
       const vAt = snap.exists() ? Number(snap.val().updatedAt) : 0;
-      if(vAt !== payload.updatedAt){
-        lastPushedUpdatedAt = prevPushed;
-        showSyncStatus('⚠️ 云端写入未生效', 'offline');
-        return false;
-      }
-    }catch(e){ console.warn('上传后验证读取失败（不阻断）', e); }
+      if(vAt !== payload.updatedAt){ lastPushedUpdatedAt = prevPushed; showSyncStatus('⚠️ 云端写入未生效', 'offline'); return false; }
+    }catch(e){}
     uploadFailedNotified = false;
     return true;
   }catch(e){
     console.warn('云端上传失败', e);
     lastPushedUpdatedAt = prevPushed;
-    if(!uploadFailedNotified){
-      uploadFailedNotified = true;
-      showSyncStatus('⚠️ 云端上传失败，请检查网络', 'offline');
-    }
+    if(!uploadFailedNotified){ uploadFailedNotified = true; showSyncStatus('⚠️ 云端上传失败', 'offline'); }
     return false;
   }
 }
-
 function applyRemoteState(remote){
   if(!remote || !remote.days) return;
   const rAt = Number(remote.updatedAt) || 0;
@@ -1831,9 +475,7 @@ function applyRemoteState(remote){
   if(Array.isArray(remote.checkins)) state.checkins = remote.checkins;
   if(Array.isArray(remote.sunLog)) state.sunLog = remote.sunLog.slice(0, 60);
   if(remote.lessonLibrary) state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary);
-  if(typeof remote.parentPassword === 'string' && /^\d{4}$/.test(remote.parentPassword)){
-    state.parentPassword = remote.parentPassword;
-  }
+  if(typeof remote.parentPassword === 'string' && /^\d{4}$/.test(remote.parentPassword)) state.parentPassword = remote.parentPassword;
   if(rAt) lastRemoteUpdatedAt = rAt;
   saveLocalState();
   renderStats(); renderBoard(); refreshAllCards();
@@ -1843,32 +485,32 @@ function applyRemoteState(remote){
   showSyncStatus('☁️ 已从云端更新', 'online');
   updateSyncInfo();
 }
-
 let cloudListener = null;
+let liveListener = null;
 function startCloudSync(){
-  if(!dataRef || !fbOnValue || cloudListener) return;
-  cloudListener = fbOnValue(dataRef, snapshot => {
-    const remote = snapshot.val();
-    if(!remote) return;
-    applyRemoteState(remote);
-  }, err => {
-    console.warn('云端监听失败', err);
-    showSyncStatus('⚠️ 云端连接失败', 'offline');
-  });
+  if(dataRef && fbOnValue && !cloudListener){
+    cloudListener = fbOnValue(dataRef, snapshot => {
+      const remote = snapshot.val();
+      if(!remote) return;
+      applyRemoteState(remote);
+    }, err => { console.warn('云端监听失败', err); showSyncStatus('⚠️ 云端连接失败', 'offline'); });
+  }
+  if(liveRef && fbOnValue && !liveListener){
+    liveListener = fbOnValue(liveRef, snapshot => {
+      const remote = snapshot.val();
+      if(!remote) return;
+      applyLive(remote);
+    }, err => { console.warn('live 监听失败', err); });
+  }
 }
-
 async function readCloudOnce(){
   if(!dataRef || !fbGet) return { state: 'no-ref', data: null };
   try{
     const snap = await fbGet(dataRef);
     if(snap.exists()) return { state: 'has-data', data: snap.val() };
     return { state: 'empty', data: null };
-  }catch(e){
-    console.warn('读取云端失败', e);
-    return { state: 'error', data: null, error: e };
-  }
+  }catch(e){ return { state: 'error', data: null, error: e }; }
 }
-
 let syncInfoTimer = null;
 function updateSyncInfo(text){
   const el = document.getElementById('adminSyncInfo');
@@ -1876,15 +518,12 @@ function updateSyncInfo(text){
   if(text){ el.textContent = text; return; }
   const fmt = t => t ? new Date(t).toLocaleTimeString() : '—';
   const mine = lastPushedUpdatedAt >= lastRemoteUpdatedAt;
-  el.textContent = '最后同步：' + fmt(mine ? lastPushedUpdatedAt : lastRemoteUpdatedAt) +
-    (mine ? '（已上传）' : '（已接收）') +
-    '　云端时间：' + fmt(lastRemoteUpdatedAt);
+  el.textContent = '最后同步：' + fmt(mine ? lastPushedUpdatedAt : lastRemoteUpdatedAt) + (mine ? '（已上传）' : '（已接收）') + '　云端时间：' + fmt(lastRemoteUpdatedAt);
 }
 function showSyncStatus(text, cls){
   const el = document.getElementById('syncStatus');
   if(!el) return;
-  el.textContent = text;
-  el.className = 'sync-status show ' + cls;
+  el.textContent = text; el.className = 'sync-status show ' + cls;
   clearTimeout(syncInfoTimer);
   syncInfoTimer = setTimeout(() => el.classList.remove('show'), 2500);
 }
@@ -1894,15 +533,14 @@ function showSyncStatus(text, cls){
 ============================================================ */
 let audioCtx = null;
 function ensureAudio(){
-  if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){audioCtx=null;} }
+  if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ audioCtx=null; } }
   if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
 }
 function tone(freq,start,dur,type,vol){
   if(!audioCtx) return;
   const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-  o.type = type||'sine';
-  o.frequency.setValueAtTime(freq,start);
+  o.type = type||'sine'; o.frequency.setValueAtTime(freq,start);
   g.gain.setValueAtTime(0.0001,start);
   g.gain.linearRampToValueAtTime(vol||0.12,start+0.012);
   g.gain.exponentialRampToValueAtTime(0.0001,start+dur);
@@ -1916,31 +554,21 @@ function playSound(kind){
     const o=audioCtx.createOscillator(),g=audioCtx.createGain();
     o.type='square'; o.frequency.setValueAtTime(340,now);
     o.frequency.exponentialRampToValueAtTime(70,now+0.18);
-    g.gain.setValueAtTime(0.10,now);
-    g.gain.exponentialRampToValueAtTime(0.0001,now+0.2);
-    o.connect(g);g.connect(audioCtx.destination);
-    o.start(now);o.stop(now+0.22);
+    g.gain.setValueAtTime(0.10,now); g.gain.exponentialRampToValueAtTime(0.0001,now+0.2);
+    o.connect(g);g.connect(audioCtx.destination); o.start(now);o.stop(now+0.22);
   }
-  else if(kind==='plant'){[523.25,659.25,783.99].forEach((f,i)=>tone(f,now+i*0.075,0.22,'triangle',0.10));}
-  else if(kind==='start'){[660,880].forEach((f,i)=>tone(f,now+i*0.08,0.18,'triangle',0.09));}
-  else if(kind==='pause'){[520,400].forEach((f,i)=>tone(f,now+i*0.10,0.20,'sine',0.09));}
-  else if(kind==='chomp'){
-    tone(320,now,0.07,'square',0.16); tone(180,now+0.06,0.09,'square',0.18);
-    tone(90,now+0.13,0.16,'sawtooth',0.16); tone(60,now+0.15,0.20,'sine',0.10);
-  }
-  else if(kind==='fail'){tone(300,now,0.16,'sine',0.08);tone(200,now+0.16,0.26,'sine',0.08);}
-  else if(kind==='win'){[523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>tone(f,now+i*0.11,0.4,'triangle',0.12));tone(1568,now+0.6,0.8,'sine',0.08);}
+  else if(kind==='plant'){ [523.25,659.25,783.99].forEach((f,i)=>tone(f,now+i*0.075,0.22,'triangle',0.10)); }
+  else if(kind==='start'){ [660,880].forEach((f,i)=>tone(f,now+i*0.08,0.18,'triangle',0.09)); }
+  else if(kind==='pause'){ [520,400].forEach((f,i)=>tone(f,now+i*0.10,0.20,'sine',0.09)); }
+  else if(kind==='chomp'){ tone(320,now,0.07,'square',0.16); tone(180,now+0.06,0.09,'square',0.18); tone(90,now+0.13,0.16,'sawtooth',0.16); tone(60,now+0.15,0.20,'sine',0.10); }
+  else if(kind==='fail'){ tone(300,now,0.16,'sine',0.08);tone(200,now+0.16,0.26,'sine',0.08); }
+  else if(kind==='win'){ [523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>tone(f,now+i*0.11,0.4,'triangle',0.12));tone(1568,now+0.6,0.8,'sine',0.08); }
 }
-/* ★ 护眼：该休息了（急促三声铃） */
 function playEyeAlert(){
   if(!ensureAudio()) return;
   const now = audioCtx.currentTime;
-  for(let i = 0; i < 3; i++){
-    tone(880, now + i*0.22, 0.16, 'sine', 0.16);
-    tone(1174.7, now + i*0.22 + 0.02, 0.14, 'triangle', 0.08);
-  }
+  for(let i = 0; i < 3; i++){ tone(880, now + i*0.22, 0.16, 'sine', 0.16); tone(1174.7, now + i*0.22 + 0.02, 0.14, 'triangle', 0.08); }
 }
-/* ★ 护眼：放松结束（上行三音） */
 function playRestDone(){
   if(!ensureAudio()) return;
   const now = audioCtx.currentTime;
@@ -1987,19 +615,16 @@ const adminPanel = $('adminPanel');
 const libEditModal = $('libEditModal');
 const taskEditModal = $('taskEditModal');
 const uploadSyncModal = $('uploadSyncModal');
-
-/* ★ 护眼轨道 DOM 缓存 */
+const photoViewModal = $('photoViewModal');
 const eyeRailEl   = $('eyeRail');
 const eyeTokenEl  = $('eyeToken');
 const eyeFillEl   = $('eyeRailFill');
-let eyeRailW = -1;   // 眼睛可滑动的最大位移（px），-1 表示尚未测量
+let eyeRailW = -1;
 
 function measureEyeRail(){
   if(!eyeRailEl || !eyeTokenEl) return;
-  const w = eyeRailEl.clientWidth - eyeTokenEl.offsetWidth;
-  eyeRailW = Math.max(0, w);
+  eyeRailW = Math.max(0, eyeRailEl.clientWidth - eyeTokenEl.offsetWidth);
 }
-
 let toastTimer = null;
 function toast(msg, ms){
   let el = document.querySelector('.toast');
@@ -2009,7 +634,6 @@ function toast(msg, ms){
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), ms||2800);
 }
-
 function calcStreak(){
   const set = new Set(state.checkins);
   const d = new Date();
@@ -2030,30 +654,23 @@ function updateDateText(){
 }
 
 /* ============================================================
-   米字格渲染
+   米字格
 ============================================================ */
 function miziSvg(){
   return `<svg class="mizi-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-    <line x1="0" y1="50" x2="100" y2="50"/>
-    <line x1="50" y1="0" x2="50" y2="100"/>
-    <line x1="0" y1="0" x2="100" y2="100"/>
-    <line x1="100" y1="0" x2="0" y2="100"/>
-  </svg>`;
+    <line x1="0" y1="50" x2="100" y2="50"/><line x1="50" y1="0" x2="50" y2="100"/>
+    <line x1="0" y1="0" x2="100" y2="100"/><line x1="100" y1="0" x2="0" y2="100"/></svg>`;
 }
 function renderCharCard(char){
   const info = HZ_INFO[char] || ['—','—'];
   const py = getPinyin(char);
   return `<div class="char-card">
     <div class="char-pinyin">${py ? escapeHtml(py) : '&nbsp;'}</div>
-    <div class="mizi" data-char="${escapeAttr(char)}" title="单击查看笔顺，双击标记删除线">
-      ${miziSvg()}
-      <span class="mizi-char">${escapeHtml(char)}</span>
-    </div>
+    <div class="mizi" data-char="${escapeAttr(char)}" title="单击查看笔顺，双击标记删除线">${miziSvg()}<span class="mizi-char">${escapeHtml(char)}</span></div>
     <div class="char-info">偏旁：${escapeHtml(info[0])}</div>
     <div class="char-info">结构：${escapeHtml(info[1])}</div>
   </div>`;
 }
-
 function renderWordGroup(word, showInfo){
   if(showInfo === undefined) showInfo = true;
   const chars = [...word].filter(c => /[\u4e00-\u9fa5]/.test(c));
@@ -2063,10 +680,7 @@ function renderWordGroup(word, showInfo){
     const py = getPinyin(c);
     return `<div class="wg-item">
       <div class="char-pinyin">${py ? escapeHtml(py) : '&nbsp;'}</div>
-      <div class="mizi" data-char="${escapeAttr(c)}" title="单击查看笔顺，双击标记删除线">
-        ${miziSvg()}
-        <span class="mizi-char">${escapeHtml(c)}</span>
-      </div>
+      <div class="mizi" data-char="${escapeAttr(c)}" title="单击查看笔顺，双击标记删除线">${miziSvg()}<span class="mizi-char">${escapeHtml(c)}</span></div>
     </div>`;
   }).join('')}</div>`;
 }
@@ -2076,27 +690,21 @@ function bindMiziClicks(container){
     el.addEventListener('click', e => {
       e.stopPropagation();
       clearTimeout(clickTimer);
-      clickTimer = setTimeout(() => {
-        showStroke(el.dataset.char);
-      }, 260);
+      clickTimer = setTimeout(() => { showStroke(el.dataset.char); }, 260);
     });
     el.addEventListener('dblclick', e => {
-      e.preventDefault();
-      e.stopPropagation();
-      clearTimeout(clickTimer);
+      e.preventDefault(); e.stopPropagation(); clearTimeout(clickTimer);
       const group = el.closest('.word-group');
       if(group){
         const struck = !el.classList.contains('struck');
         group.querySelectorAll('.mizi[data-char]').forEach(x => x.classList.toggle('struck', struck));
-      }else{
-        el.classList.toggle('struck');
-      }
+      } else el.classList.toggle('struck');
     });
   });
 }
 
 /* ============================================================
-   作业板
+   作业板（★ 已去掉打勾；添加拍照 / 查看按钮）
 ============================================================ */
 function renderBoard(){
   cardRefs = {};
@@ -2128,17 +736,13 @@ function renderSubjectCards(subject, listEl){
     const top = document.createElement('div');
     top.className = 'card-top';
 
-    const cb = document.createElement('div');
-    cb.className = 'checkbox';
-    cb.innerHTML = '<span class="tick">✓</span>';
-    cb.addEventListener('click', e => { e.stopPropagation(); toggleTaskDone(task.id); });
-
     const body = document.createElement('div');
     body.className = 'card-body';
 
     const textEl = document.createElement('div');
     textEl.className = 'task-text' + (task.type === 'custom' ? ' custom-task-text' : '');
     textEl.textContent = task.text;
+    textEl.style.whiteSpace = 'pre-wrap';
 
     const info = document.createElement('div');
     info.className = 'task-info';
@@ -2156,9 +760,36 @@ function renderSubjectCards(subject, listEl){
     timeEl.className = 't-time';
     timeEl.textContent = task.done ? '✓ 已完成' : (task.minutes+'分钟');
     info.appendChild(stars); info.appendChild(minEl); info.appendChild(sunEl); info.appendChild(timeEl);
-
     body.appendChild(textEl); body.appendChild(info);
-    top.appendChild(cb); top.appendChild(body);
+
+    /* ★ 右侧操作按钮：拍照 + 查看 */
+    const actions = document.createElement('div');
+    actions.className = 'task-actions';
+
+    const photoBtn = document.createElement('button');
+    photoBtn.className = 'task-act-btn photo';
+    photoBtn.title = '拍照提交作业';
+    photoBtn.textContent = '📷';
+    photoBtn.addEventListener('click', e => { e.stopPropagation(); takePhoto(task.id); });
+    actions.appendChild(photoBtn);
+
+    const photoList = photos[task.id] || [];
+    const viewBtn = document.createElement('button');
+    viewBtn.className = 'task-act-btn view';
+    viewBtn.title = '查看作业照片';
+    viewBtn.textContent = '🖼';
+    if(photoList.length){
+      const cnt = document.createElement('span');
+      cnt.className = 'photo-count';
+      cnt.textContent = photoList.length;
+      viewBtn.appendChild(cnt);
+    }
+    viewBtn.disabled = !photoList.length;
+    viewBtn.style.opacity = photoList.length ? '1' : '.45';
+    viewBtn.addEventListener('click', e => { e.stopPropagation(); if(photoList.length) viewPhotos(task.id); });
+    actions.appendChild(viewBtn);
+
+    top.appendChild(body); top.appendChild(actions);
     card.appendChild(top);
 
     if(task.type === 'preview' && Array.isArray(task.chars) && task.chars.length){
@@ -2167,8 +798,7 @@ function renderSubjectCards(subject, listEl){
       grid.innerHTML = task.chars.map(c => renderCharCard(c)).join('');
       card.appendChild(grid);
       bindMiziClicks(grid);
-    } else if((task.type === 'wordgroup' || task.type === 'copy')
-          && Array.isArray(task.words) && task.words.length){
+    } else if((task.type === 'wordgroup' || task.type === 'copy') && Array.isArray(task.words) && task.words.length){
       const grid = document.createElement('div');
       grid.className = 'char-grid';
       grid.innerHTML = task.words.map(w => renderWordGroup(w, false)).join('');
@@ -2185,14 +815,12 @@ function renderSubjectCards(subject, listEl){
   });
   tasks.forEach(t => updateCardVisual(t.id));
 }
-
 function updateCardVisual(id){
   const ref = cardRefs[id];
   if(!ref) return;
   const info = findTask(id);
   if(!info) return;
   const task = info.task;
-  const rt = runtimeMap[id];
   if(task.done){
     ref.el.className = 'task-card done';
     ref.timeEl.className = 't-time done-t';
@@ -2201,30 +829,31 @@ function updateCardVisual(id){
     ref.progressEl.style.width = '100%';
     return;
   }
-  const isActive = activeId === id;
+  const isActive = live.taskId === id;
   let cls = 'task-card';
   if(isActive){
     cls += ' active';
-    if(pauseState.active) cls += ' paused-card';
-    if(rt && rt.holdDogAtEnd) cls += ' chomping-card';
+    if(live.mode === 'paused') cls += ' paused-card';
+    if(live.mode === 'chomping') cls += ' chomping-card';
   }
   ref.el.className = cls;
-  if(rt && isActive){
-    if(pauseState.active){
+  if(isActive && (live.mode === 'running' || live.mode === 'paused' || live.mode === 'chomping')){
+    const leftMs = calcLiveLeftMs(live);
+    const totalMs = live.totalMs || task.minutes*60000;
+    const p = totalMs > 0 ? 1 - leftMs/totalMs : 0;
+    if(live.mode === 'paused'){
       ref.timeEl.className = 't-time paused';
-      ref.timeEl.textContent = fmtMs(rt.leftMs);
-      const p = rt.totalMs>0 ? 1-rt.leftMs/rt.totalMs : 0;
+      ref.timeEl.textContent = fmtMs(leftMs);
       ref.progressEl.className = 'card-progress paused';
       ref.progressEl.style.width = (clamp(p,0,1)*100)+'%';
-    } else if(rt.holdDogAtEnd){
+    } else if(live.mode === 'chomping'){
       ref.timeEl.className = 't-time chomping';
       ref.timeEl.textContent = '00:00';
       ref.progressEl.className = 'card-progress chomping';
       ref.progressEl.style.width = '100%';
     } else {
       ref.timeEl.className = 't-time';
-      ref.timeEl.textContent = fmtMs(rt.leftMs);
-      const p = rt.totalMs>0 ? 1-rt.leftMs/rt.totalMs : 0;
+      ref.timeEl.textContent = fmtMs(leftMs);
       ref.progressEl.className = 'card-progress';
       ref.progressEl.style.width = (clamp(p,0,1)*100)+'%';
     }
@@ -2242,19 +871,10 @@ function refreshAllCards(){ Object.keys(cardRefs).forEach(id => updateCardVisual
 ============================================================ */
 function charBarEnsure(mizi){
   let bar = mizi.querySelector('.mizi-bar');
-  if(!bar){
-    bar = document.createElement('div');
-    bar.className = 'mizi-bar';
-    mizi.appendChild(bar);
-  }
+  if(!bar){ bar = document.createElement('div'); bar.className = 'mizi-bar'; mizi.appendChild(bar); }
   return bar;
 }
-function clearCharTimer(){
-  charTimer.active = false;
-  charTimer.taskId = null;
-  charTimer.units = [];
-  charTimer.index = 0;
-}
+function clearCharTimer(){ charTimer.active=false; charTimer.taskId=null; charTimer.units=[]; charTimer.index=0; }
 function attachCharBars(units, reset){
   units.forEach(u => {
     u.bars = u.mizis.map(m => {
@@ -2314,15 +934,9 @@ function rebindCharTimer(){
   if(!grid){ clearCharTimer(); return; }
   const groups = [];
   if(charTimer.mode === 'per-char'){
-    grid.querySelectorAll('.char-card').forEach(c => {
-      const m = c.querySelector('.mizi');
-      if(m) groups.push([m]);
-    });
+    grid.querySelectorAll('.char-card').forEach(c => { const m = c.querySelector('.mizi'); if(m) groups.push([m]); });
   } else {
-    grid.querySelectorAll('.word-group').forEach(g => {
-      const ms = Array.from(g.querySelectorAll('.mizi'));
-      if(ms.length) groups.push(ms);
-    });
+    grid.querySelectorAll('.word-group').forEach(g => { const ms = Array.from(g.querySelectorAll('.mizi')); if(ms.length) groups.push(ms); });
   }
   if(groups.length !== charTimer.units.length){ clearCharTimer(); return; }
   charTimer.units.forEach((u, i) => { u.mizis = groups[i]; });
@@ -2336,9 +950,7 @@ function paintCharBars(){
     if(i < charTimer.index) w = '100%';
     else if(i === charTimer.index) w = (clamp(1 - u.leftMs/u.totalMs, 0, 1) * 100) + '%';
     else w = '0%';
-    u.bars.forEach(b => {
-      if(b.__w !== w){ b.__w = w; b.style.width = w; }
-    });
+    u.bars.forEach(b => { if(b.__w !== w){ b.__w = w; b.style.width = w; } });
   });
 }
 function tickChar(dt){
@@ -2383,12 +995,8 @@ function startEyeCare(){
   ensureTickRunning();
 }
 function stopEyeCare(){
-  eyeTimer.active = false;
-  eyeTimer.mode = 'idle';
-  eyeTimer.totalMs = 0;
-  eyeTimer.leftMs = 0;
-  eyeTimer.overdueMs = 0;
-  eyeTimer.nagAccumMs = 0;
+  eyeTimer.active = false; eyeTimer.mode = 'idle';
+  eyeTimer.totalMs = 0; eyeTimer.leftMs = 0; eyeTimer.overdueMs = 0; eyeTimer.nagAccumMs = 0;
   updateEyeUI();
 }
 function startEyeRest(){
@@ -2400,8 +1008,7 @@ function startEyeRest(){
   eyeTimer.leftMs = eyeTimer.totalMs;
   eyeTimer.overdueMs = 0;
   eyeTimer.nagAccumMs = 0;
-  measureEyeRail();
-  updateEyeUI();
+  measureEyeRail(); updateEyeUI();
   toast('😌 放松眼睛计时开始（' + cfg.restMin + ' 分钟）', 2200);
 }
 function tickEye(dt){
@@ -2441,8 +1048,6 @@ function tickEye(dt){
     updateEyeUI();
   }
 }
-
-/* ★ 把 0~1 的进度换算成眼睛在轨道上的位置：0=用眼端，1=放松端 */
 function moveEyeToken(p){
   if(!eyeTokenEl || !eyeRailEl) return;
   if(eyeRailW < 0) measureEyeRail();
@@ -2450,15 +1055,12 @@ function moveEyeToken(p){
   eyeTokenEl.style.transform = 'translate(' + x.toFixed(2) + 'px, -50%)';
   if(eyeFillEl) eyeFillEl.style.width = (clamp(p, 0, 1) * 100) + '%';
 }
-
 function updateEyeUI(){
   const card = $('eyeCard');
   if(!card) return;
   const timeEl  = $('eyeTime');
   const btn = $('eyeRestBtn');
-
-  let p = 0;   // 0 = 用眼端，1 = 放松端
-
+  let p = 0;
   if(!eyeTimer.active){
     card.className = 'eye-card idle';
     if(timeEl) timeEl.textContent = '--:--';
@@ -2480,25 +1082,12 @@ function updateEyeUI(){
     if(btn){ btn.disabled = true; btn.textContent = '放松中…'; }
     p = eyeTimer.totalMs > 0 ? (eyeTimer.leftMs / eyeTimer.totalMs) : 0;
   }
-
   moveEyeToken(p);
 }
 
 /* ============================================================
-   运行时
+   ★ 核心 tick（owner 才扣金币；非 owner 只跟随显示）
 ============================================================ */
-function ensureRuntime(task){
-  if(!runtimeMap[task.id]){
-    const ms = clamp(Number(task.minutes)||10,0.5,120)*60000;
-    runtimeMap[task.id] = {totalMs:ms,leftMs:ms,rounds:0,holdDogAtEnd:false};
-  }
-  return runtimeMap[task.id];
-}
-function cleanupRuntime(){
-  const ids = new Set(allTasks().map(t=>t.id));
-  for(const id in runtimeMap){ if(!ids.has(id)) delete runtimeMap[id]; }
-  if(activeId && !ids.has(activeId)){ stopTick(); activeId = null; }
-}
 function setDogProgress(p){
   const trackW = trackEl.clientWidth || 300;
   const dogW = dogWrap.offsetWidth || 42;
@@ -2508,79 +1097,59 @@ function setDogProgress(p){
   dogWrap.style.transform = `translateX(${startX+(endX-startX)*t}px)`;
 }
 function updateDogBar(){
-  if(!activeId){
+  if(!live.taskId || live.mode === 'idle'){
     trackEl.className='track';
     setDogProgress(0);
-    trackFill.className='track-fill';
-    trackFill.style.width='0%';
-    trackTime.className='track-time';
-    trackTime.textContent='--:--';
+    trackFill.className='track-fill'; trackFill.style.width='0%';
+    trackTime.className='track-time'; trackTime.textContent='--:--';
     timerHint.innerHTML = '点击右侧「<span class="highlight">▶ 开始</span>」启动倒计时';
     return;
   }
-  const info = findTask(activeId);
-  const rt = runtimeMap[activeId];
-  if(!info || !rt){ activeId=null; updateDogBar(); return; }
+  const info = findTask(live.taskId);
+  if(!info){ live.taskId = null; updateDogBar(); return; }
   const name = info.task.text;
-  if(pauseState.active){
+  const leftMs = calcLiveLeftMs(live);
+  const totalMs = live.totalMs || info.task.minutes*60000;
+  const p = totalMs > 0 ? 1 - leftMs/totalMs : 0;
+  if(live.mode === 'paused'){
     trackEl.className = 'track paused';
-    const p = rt.totalMs>0 ? 1-rt.leftMs/rt.totalMs : 0;
     setDogProgress(p);
-    trackFill.className = 'track-fill';
-    trackFill.style.width = (p*100)+'%';
+    trackFill.className = 'track-fill'; trackFill.style.width = (p*100)+'%';
     trackTime.className = 'track-time paused';
-    trackTime.textContent = fmtMs(pauseState.leftMs);
-    timerHint.innerHTML = '⏸ <span class="paused-t">暂停中</span>：'+escapeHtml(name)+' · 剩余 '+fmtMs(pauseState.leftMs)+' 后自动继续';
+    trackTime.textContent = fmtMs(leftMs);
+    timerHint.innerHTML = '⏸ <span class="paused-t">已暂停</span>：' + escapeHtml(name);
     return;
   }
-  if(rt.holdDogAtEnd){
+  if(live.mode === 'chomping'){
     trackEl.className = 'track chomping';
     setDogProgress(1);
-    trackFill.className = 'track-fill';
-    trackFill.style.width = '100%';
-    trackTime.className = 'track-time chomping';
-    trackTime.textContent = '00:00';
+    trackFill.className = 'track-fill'; trackFill.style.width = '100%';
+    trackTime.className = 'track-time chomping'; trackTime.textContent = '00:00';
     timerHint.innerHTML = '😋 <span class="chomp-t">正在扣金币…</span>';
     return;
   }
   trackEl.className = 'track';
-  const p = rt.totalMs>0 ? 1-rt.leftMs/rt.totalMs : 0;
   setDogProgress(p);
-  trackFill.className = 'track-fill';
-  trackFill.style.width = (p*100)+'%';
+  trackFill.className = 'track-fill'; trackFill.style.width = (p*100)+'%';
   trackTime.className = 'track-time';
-  trackTime.textContent = fmtMs(rt.leftMs);
-  const roundText = rt.rounds>0 ? ' · 已扣 '+rt.rounds+' 颗' : '';
-  if(running){ timerHint.innerHTML = '⏳ 正在进行：<span class="highlight">'+escapeHtml(name)+'</span>'+roundText; }
-  else {
-    if(rt.leftMs < rt.totalMs && rt.leftMs > 0){
-      timerHint.innerHTML = '⏸ 已暂停：<span class="highlight">'+escapeHtml(name)+'</span>（点「▶ 继续」恢复）';
-    } else {
-      timerHint.innerHTML = '待开始：<span class="highlight">'+escapeHtml(name)+'</span>（点「▶ 开始」）';
-    }
-  }
+  trackTime.textContent = fmtMs(leftMs);
+  const roundText = live.rounds>0 ? ' · 已扣 '+live.rounds+' 颗' : '';
+  const ownerText = isMyLive() ? '' : ' <span style="color:#0288D1">（跟播）</span>';
+  timerHint.innerHTML = '⏳ 正在进行：<span class="highlight">'+escapeHtml(name)+'</span>'+roundText+ownerText;
 }
 function updateMainBtn(){
   mainBtn.classList.remove('start','pause','resume');
-  if(!activeId){
+  if(!live.taskId || live.mode === 'idle'){
     const first = allTasks().find(t=>!t.done);
     if(first){ mainBtn.classList.add('start'); mainBtn.textContent='▶ 开始'; mainBtn.disabled=false; }
     else { mainBtn.classList.add('start'); mainBtn.textContent='🎉 完成'; mainBtn.disabled=true; }
     return;
   }
-  const info = findTask(activeId);
+  const info = findTask(live.taskId);
   if(!info || info.task.done){ mainBtn.classList.add('start'); mainBtn.textContent='▶ 开始'; mainBtn.disabled=false; return; }
-  if(pauseState.active){
-    mainBtn.classList.add('resume');
-    mainBtn.textContent = '▶ 继续';
-    mainBtn.disabled = false;
-    return;
-  }
-  if(running){ mainBtn.classList.add('pause'); mainBtn.textContent='⏸ 暂停'; mainBtn.disabled=false; return; }
-  const rt = runtimeMap[activeId];
-  if(rt && rt.leftMs < rt.totalMs && rt.leftMs > 0){ mainBtn.classList.add('resume'); mainBtn.textContent='▶ 继续'; }
-  else { mainBtn.classList.add('start'); mainBtn.textContent='▶ 开始'; }
-  mainBtn.disabled = false;
+  if(live.mode === 'running'){ mainBtn.classList.add('pause'); mainBtn.textContent='⏸ 暂停'; mainBtn.disabled=false; return; }
+  if(live.mode === 'paused'){ mainBtn.classList.add('resume'); mainBtn.textContent='▶ 继续'; mainBtn.disabled=false; return; }
+  mainBtn.classList.add('start'); mainBtn.textContent='▶ 开始'; mainBtn.disabled=false;
 }
 function eatSun(count, msg){
   if(count <= 0) return;
@@ -2607,104 +1176,132 @@ function flySunAway(n){
   requestAnimationFrame(() => { el.style.transform='translateY(-56px) scale(1.15)'; el.style.opacity='0'; });
   setTimeout(() => el.remove(), 850);
 }
-function tick(now){
-  const dt = now - lastTs;
-  lastTs = now;
-  if(pauseState.active){
-    pauseState.leftMs -= dt;
-    if(pauseState.leftMs <= 0){
-      pauseState.leftMs = 0;
-      const shouldResume = pauseState.wasRunning;
-      pauseState.active = false;
-      if(shouldResume && activeId){
-        const info = findTask(activeId);
-        if(info && !info.task.done){
-          running = true;
-          dogEl.classList.remove('paused');
-          dogEl.classList.add('running');
-          playSound('start');
-          toast('⏰ 暂停结束，倒计时自动继续！', 2400);
-        }
-      }
-    }
-  }
-  else if(running && activeId){
-    const rt = runtimeMap[activeId];
-    if(rt && !rt.holdDogAtEnd){
-      rt.leftMs -= dt;
-      tickChar(dt);
-      if(rt.leftMs <= 0){
-        rt.rounds = (rt.rounds||0)+1;
-        rt.leftMs = rt.totalMs;
-        rt.holdDogAtEnd = true;
-        resetCharProgress();
-        eatSun(1, '⏰ 第 <b>'+rt.rounds+'</b> 轮结束，任务未完成！<br>扣掉 1 颗金币 💰');
-        const myRound = rt.rounds;
-        setTimeout(() => {
-          if(!activeId || !runtimeMap[activeId]) return;
-          if(runtimeMap[activeId].rounds !== myRound) return;
-          runtimeMap[activeId].holdDogAtEnd = false;
-          if(running){ dogEl.classList.remove('chomp'); dogEl.classList.add('running'); }
-          updateDogBar();
-          if(activeId) updateCardVisual(activeId);
-        }, CHOMP_HOLD_MS);
-      }
-    }
-  }
-  /* ★ 护眼倒计时独立运行（与主倒计时无关） */
-  tickEye(dt);
 
+function tick(now){
+  const dt = Math.min(500, now - lastTs);
+  lastTs = now;
+
+  if(isMyLive()){
+    if(live.mode === 'running'){
+      tickChar(dt);
+      if(calcLiveLeftMs(live) <= 0){
+        live.rounds = (live.rounds || 0) + 1;
+        live.mode = 'chomping';
+        live.chompingEndAt = Date.now() + CHOMP_HOLD_MS;
+        live.leftMs = live.totalMs;
+        resetCharProgress();
+        eatSun(1, '⏰ 第 <b>'+live.rounds+'</b> 轮结束，任务未完成！<br>扣掉 1 颗金币 💰');
+        pushLive(true);
+      }
+    } else if(live.mode === 'chomping'){
+      if(Date.now() >= live.chompingEndAt){
+        live.mode = 'running';
+        live.startAt = Date.now();
+        live.leftMs = live.totalMs;
+        dogEl.classList.remove('chomp');
+        dogEl.classList.add('running');
+        pushLive(true);
+      }
+    }
+  }
+
+  tickEye(dt);
   updateDogBar();
-  if(activeId) updateCardVisual(activeId);
+  if(live.taskId) updateCardVisual(live.taskId);
   updateMainBtn();
 
-  const needsTick = pauseState.active || (running && activeId) || eyeTimer.active;
+  const needsTick = (live.mode === 'running' || live.mode === 'chomping') || eyeTimer.active;
   if(needsTick) rafId = requestAnimationFrame(tick);
   else rafId = null;
 }
 function ensureTickRunning(){ if(!rafId){ lastTs = performance.now(); rafId = requestAnimationFrame(tick); } }
 function stopTick(){
-  running=false; pauseState.active=false; pauseState.leftMs=0;
   cancelAnimationFrame(rafId); rafId=null;
   dogEl.classList.remove('running','paused','chomp');
-  /* ★ 护眼提醒还在跑，就继续让它 tick */
   if(eyeTimer.active) ensureTickRunning();
 }
+
 function startTask(id){
   const info = findTask(id);
   if(!info || info.task.done) return;
-  if(activeId && activeId !== id && running){ running=false; dogEl.classList.remove('running'); }
-  activeId = id;
-  ensureRuntime(info.task);
-  const rt = runtimeMap[id];
-  if(rt.leftMs <= 0){ rt.leftMs = rt.totalMs; rt.rounds=0; rt.holdDogAtEnd=false; }
-  pauseState.active = false; pauseState.leftMs = 0;
-  running = true;
+  const taskMs = clamp(Number(info.task.minutes)||10, 0.5, 120) * 60000;
+  const isSameTask = (live.taskId === id);
+  const hasProgress = isSameTask && live.leftMs > 0 && live.leftMs < taskMs && live.mode !== 'chomping';
+
+  live.taskId = id;
+  live.mode = 'running';
+  live.totalMs = taskMs;
+  if(hasProgress){
+    live.startAt = Date.now() - (live.totalMs - live.leftMs);
+  } else {
+    live.startAt = Date.now();
+    live.leftMs = live.totalMs;
+    live.rounds = 0;
+  }
+  live.chompingEndAt = 0;
+  live.owner = myClientId;
+  pushLive(true);
+
   dogEl.classList.remove('paused','chomp');
   dogEl.classList.add('running');
-  if(charTimer.active && charTimer.taskId === id){
-    rebindCharTimer();
-  } else {
-    initCharTimer(id);
-  }
+  initCharTimer(id);
   setCharPaused(false);
-  /* ★ 首次开始作业 → 开启护眼提醒 */
   if(!eyeTimer.active) startEyeCare();
   playSound('start');
   ensureTickRunning();
   refreshAllCards(); updateDogBar(); updateMainBtn();
   scrollToCard(id);
 }
+function doPause(){
+  if(live.mode !== 'running') return;
+  live.leftMs = calcLiveLeftMs(live);
+  live.mode = 'paused';
+  live.owner = myClientId;
+  pushLive(true);
+  dogEl.classList.remove('running');
+  dogEl.classList.add('paused');
+  setCharPaused(true);
+  playSound('pause');
+  refreshAllCards(); updateDogBar(); updateMainBtn();
+  toast('⏸ 已暂停，倒计时停留在当前时间', 1800);
+}
+function resumeLive(){
+  if(live.mode !== 'paused') return;
+  live.startAt = Date.now() - (live.totalMs - live.leftMs);
+  live.mode = 'running';
+  live.owner = myClientId;
+  pushLive(true);
+  dogEl.classList.remove('paused');
+  dogEl.classList.add('running');
+  setCharPaused(false);
+  playSound('start');
+  ensureTickRunning();
+  refreshAllCards(); updateDogBar(); updateMainBtn();
+  toast('▶ 已恢复倒计时', 2000);
+}
+function onMainBtnClick(){
+  if(live.mode === 'paused'){ resumeLive(); return; }
+  if(!live.taskId || live.mode === 'idle'){
+    const first = allTasks().find(t=>!t.done);
+    if(first){ startTask(first.id); }
+    return;
+  }
+  const info = findTask(live.taskId);
+  if(!info || info.task.done){
+    const next = allTasks().find(t=>!t.done);
+    if(next){ startTask(next.id); }
+    return;
+  }
+  if(live.mode === 'running'){ requestPause(); return; }
+  startTask(live.taskId);
+}
 
 /* ============================================================
-   🔒 密码验证
+   🔒 密码
 ============================================================ */
 let pwdPurpose = '';
-
 function currentParentPassword(){
-  return (state && typeof state.parentPassword === 'string' && /^\d{4}$/.test(state.parentPassword))
-    ? state.parentPassword
-    : MASTER_PASSWORD;
+  return (state && typeof state.parentPassword === 'string' && /^\d{4}$/.test(state.parentPassword)) ? state.parentPassword : MASTER_PASSWORD;
 }
 function checkPassword(val){
   const v = String(val == null ? '' : val).trim();
@@ -2713,84 +1310,35 @@ function checkPassword(val){
   return v === currentParentPassword();
 }
 function openPwdModal(title, sub){
-  pwdTitle.textContent = title;
-  pwdSub.textContent = sub;
-  pwdInput.value = '';
-  pwdInput.classList.remove('error');
-  pwdTip.textContent = '';
-  pwdTip.classList.remove('err');
+  pwdTitle.textContent = title; pwdSub.textContent = sub;
+  pwdInput.value = ''; pwdInput.classList.remove('error');
+  pwdTip.textContent = ''; pwdTip.classList.remove('err');
   pwdModalEl.classList.add('show');
   setTimeout(() => pwdInput.focus(), 120);
 }
 function confirmPassword(){
   const val = (pwdInput.value||'').trim();
   if(!checkPassword(val)){
-    pwdInput.classList.remove('error');
-    void pwdInput.offsetWidth;
+    pwdInput.classList.remove('error'); void pwdInput.offsetWidth;
     pwdInput.classList.add('error');
-    pwdTip.textContent = '密码不正确，请再试一次';
-    pwdTip.classList.add('err');
-    pwdInput.value='';
-    pwdInput.focus();
-    playSound('fail');
+    pwdTip.textContent = '密码不正确，请再试一次'; pwdTip.classList.add('err');
+    pwdInput.value=''; pwdInput.focus(); playSound('fail');
     return;
   }
   pwdModalEl.classList.remove('show');
-  const purpose = pwdPurpose;
-  pwdPurpose = '';
+  const purpose = pwdPurpose; pwdPurpose = '';
   if(purpose === 'admin') enterAdminMode();
   else if(purpose === 'pause') doPause();
 }
-
 function requestPause(){
-  if(!activeId || !running) return;
+  if(live.mode !== 'running') return;
   pwdPurpose = 'pause';
   openPwdModal('⏸ 暂停确认', '暂停倒计时需要家长密码');
 }
-function doPause(){
-  if(!activeId || !running) return;
-  running = false;
-  pauseState.active = false;
-  pauseState.leftMs = 0;
-  dogEl.classList.remove('running','paused','chomp');
-  setCharPaused(true);
-  playSound('pause');
-  refreshAllCards(); updateDogBar(); updateMainBtn();
-  toast('⏸ 已暂停，倒计时停留在当前时间', 1800);
-}
-function resumeFromPause(){
-  if(!pauseState.active) return;
-  const wasRunning = pauseState.wasRunning;
-  pauseState.active = false; pauseState.leftMs = 0;
-  dogEl.classList.remove('paused');
-  if(wasRunning && activeId){
-    const info = findTask(activeId);
-    if(info && !info.task.done){
-      running = true;
-      dogEl.classList.add('running');
-      playSound('start');
-      toast('▶ 已恢复倒计时', 2000);
-    }
-  }
-  ensureTickRunning();
-  refreshAllCards(); updateDogBar(); updateMainBtn();
-}
-function onMainBtnClick(){
-  if(pauseState.active){ resumeFromPause(); return; }
-  if(!activeId){
-    const first = allTasks().find(t=>!t.done);
-    if(first){ activeId=first.id; ensureRuntime(first); startTask(first.id); }
-    return;
-  }
-  const info = findTask(activeId);
-  if(!info || info.task.done){
-    const next = allTasks().find(t=>!t.done);
-    if(next){ activeId=next.id; ensureRuntime(next); startTask(next.id); }
-    return;
-  }
-  if(running){ requestPause(); return; }
-  startTask(activeId);
-}
+
+/* ============================================================
+   完成 / 自动开始下一条
+============================================================ */
 function toggleTaskDone(id){
   const info = findTask(id);
   if(!info) return;
@@ -2801,19 +1349,20 @@ function toggleTaskDone(id){
     saveLocalState(); uploadToCloud();
     renderStats(); renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
     if(isAdminMode) renderAdminPanel();
-    toast('↩️ 已取消完成，返还作业的勾选状态，金币同步减少');
+    toast('↩️ 已取消完成，金币同步减少');
     return;
   }
   completeTask(id);
 }
-
 function completeTask(id){
   const info = findTask(id);
   if(!info || info.task.done) return;
   const task = info.task;
-  if(activeId === id){
-    running=false; pauseState.active=false; pauseState.leftMs=0;
-    dogEl.classList.remove('running','paused','chomp');
+  if(live.taskId === id && isMyLive()){
+    live.taskId = null;
+    live.mode = 'idle';
+    live.owner = myClientId;
+    pushLive(true);
     cancelAnimationFrame(rafId); rafId=null;
     clearCharTimer();
     if(eyeTimer.active) ensureTickRunning();
@@ -2833,35 +1382,22 @@ function completeTask(id){
 function autoStartNext(){
   const next = allTasks().find(t=>!t.done);
   if(!next){
-    activeId=null; running=false; pauseState.active=false; pauseState.leftMs=0;
-    dogEl.classList.remove('running','paused','chomp');
+    live.taskId = null; live.mode = 'idle';
+    live.owner = myClientId; pushLive(true);
     cancelAnimationFrame(rafId); rafId=null;
     clearCharTimer();
-    stopEyeCare();          /* ★ 作业全部完成 → 关闭护眼提醒 */
+    stopEyeCare();
     updateDogBar(); updateMainBtn(); refreshAllCards();
     setTimeout(celebrate, 900);
     return false;
   }
-  activeId = next.id;
-  const rt = ensureRuntime(next);
-  rt.leftMs = rt.totalMs; rt.rounds=0; rt.holdDogAtEnd=false;
-  pauseState.active=false; pauseState.leftMs=0;
-  running = true;
-  dogEl.classList.remove('paused','chomp');
-  dogEl.classList.add('running');
-  initCharTimer(next.id);
-  playSound('start');
-  ensureTickRunning();
-  refreshAllCards(); updateDogBar(); updateMainBtn();
-  scrollToCard(next.id);
+  startTask(next.id);
   toast('▶ 自动开始下一条：<b>'+escapeHtml(next.text)+'</b>', 2600);
   return true;
 }
 function scrollToCard(id){
   const ref = cardRefs[id];
-  if(ref && ref.el && ref.el.scrollIntoView){
-    try{ ref.el.scrollIntoView({behavior:'smooth', block:'center'}); }catch(e){}
-  }
+  if(ref && ref.el && ref.el.scrollIntoView){ try{ ref.el.scrollIntoView({behavior:'smooth', block:'center'}); }catch(e){} }
 }
 function bumpPill(el){
   el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
@@ -2878,14 +1414,11 @@ function flySun(fromEl){
   document.body.appendChild(el);
   const dx = (to.left+to.width/2)-(from.left+from.width/2);
   const dy = (to.top+to.height/2)-(from.top+from.height/2);
-  requestAnimationFrame(() => {
-    el.style.transform=`translate(${dx}px, ${dy}px) scale(.45)`;
-    el.style.opacity='0.15';
-  });
+  requestAnimationFrame(() => { el.style.transform=`translate(${dx}px, ${dy}px) scale(.45)`; el.style.opacity='0.15'; });
   setTimeout(() => el.remove(), 950);
 }
 function celebrate(){
-  stopEyeCare();   /* ★ 稳妥起见，庆祝时也关掉护眼提醒 */
+  stopEyeCare();
   if(!state.checkins.includes(state.date)) state.checkins.push(state.date);
   saveLocalState(); uploadToCloud();
   renderStats();
@@ -2908,24 +1441,116 @@ function confetti(){
   }
 }
 
+/* ============================================================
+   ★ 拍照 & 查看作业
+============================================================ */
+function compressImage(file, maxSize, quality){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if(width > maxSize || height > maxSize){
+          if(width > height){ height = Math.round(height * maxSize / width); width = maxSize; }
+          else { width = Math.round(width * maxSize / height); height = maxSize; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality || 0.72));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+let currentPhotoTaskId = null;
+function takePhoto(taskId){
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.capture = 'environment';
+  input.onchange = async () => {
+    const file = input.files && input.files[0];
+    if(!file) return;
+    try{
+      const data = await compressImage(file, 900, 0.75);
+      if(!photos[taskId]) photos[taskId] = [];
+      photos[taskId].push({ id: 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,5), data, ts: Date.now() });
+      if(photos[taskId].length > 6) photos[taskId] = photos[taskId].slice(-6);
+      savePhotos();
+      const info = findTask(taskId);
+      if(info && !info.task.done){
+        completeTask(taskId);
+        toast('📷 照片已保存，任务已标记完成', 2400);
+      } else {
+        renderBoard(); refreshAllCards();
+        toast('📷 照片已保存');
+      }
+    }catch(e){
+      console.error(e);
+      toast('⚠️ 拍照失败，请重试');
+    }
+  };
+  input.click();
+}
+function viewPhotos(taskId){
+  currentPhotoTaskId = taskId;
+  const info = findTask(taskId);
+  $('photoViewTitle').textContent = '📷 ' + (info ? info.task.text.slice(0, 40) : '作业照片');
+  renderPhotoList(taskId);
+  photoViewModal.classList.add('show');
+}
+function renderPhotoList(taskId){
+  const listEl = $('photoViewList');
+  const list = photos[taskId] || [];
+  if(!list.length){
+    listEl.innerHTML = '<div class="photo-empty">还没有照片</div>';
+    return;
+  }
+  listEl.innerHTML = list.map(p => `
+    <div class="photo-item">
+      <img src="${p.data}" alt="">
+      <button class="photo-del" data-photo-del="${escapeAttr(p.id)}">✕</button>
+      <div class="photo-time">${new Date(p.ts).toLocaleString('zh-CN', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'})}</div>
+    </div>`).join('');
+  listEl.querySelectorAll('[data-photo-del]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const pid = btn.dataset.photoDel;
+      photos[taskId] = (photos[taskId] || []).filter(x => x.id !== pid);
+      if(!photos[taskId].length) delete photos[taskId];
+      savePhotos();
+      renderPhotoList(taskId);
+      renderBoard(); refreshAllCards();
+    });
+  });
+}
+$('photoViewAdd').addEventListener('click', () => {
+  if(currentPhotoTaskId) takePhoto(currentPhotoTaskId);
+});
+$('photoViewClose').addEventListener('click', () => photoViewModal.classList.remove('show'));
+photoViewModal.addEventListener('click', e => { if(e.target === photoViewModal) photoViewModal.classList.remove('show'); });
+
+/* ============================================================
+   科目 / 日期
+============================================================ */
 function switchSubject(subject){
   currentSubject = subject;
-  document.querySelectorAll('.subject-tab').forEach(t => {
-    t.classList.toggle('active', t.dataset.tab === subject);
-  });
-  document.querySelectorAll('.tab-panel').forEach(p => {
-    p.classList.toggle('active', p.id === 'panel-' + subject);
-  });
+  document.querySelectorAll('.subject-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === subject));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + subject));
   appRootEl.classList.toggle('theme-math', subject === 'math');
   appRootEl.classList.toggle('theme-english', subject === 'english');
 }
-
 function switchDate(dateStr){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return;
-  stopEyeCare();     /* ★ 换日期 → 关掉护眼提醒 */
-  stopTick();
-  activeId = null;
-  runtimeMap = {};
+  stopEyeCare();
+  live.taskId = null; live.mode = 'idle';
+  live.owner = myClientId; pushLive(true);
+  cancelAnimationFrame(rafId); rafId=null;
   clearCharTimer();
   state.date = dateStr;
   if(!state.days[state.date]) state.days[state.date] = makeDay();
@@ -2934,15 +1559,12 @@ function switchDate(dateStr){
   renderBoard(); renderStats();
   refreshAllCards(); updateDogBar(); updateMainBtn();
   if(isAdminMode) renderAdminPanel();
-  const isToday = dateStr === todayStr();
-  toast(isToday ? '📅 已切换到今天' : '📅 已切换到 ' + dateLabel(dateStr).replace('今天 · ','').replace('昨天 · ',''), 2200);
+  toast(dateStr === todayStr() ? '📅 已切换到今天' : '📅 已切换日期', 2200);
 }
-
 let calYear = 0, calMonth = 0;
 function openCalendar(){
   const d = new Date(state.date + 'T00:00:00');
-  calYear = d.getFullYear();
-  calMonth = d.getMonth();
+  calYear = d.getFullYear(); calMonth = d.getMonth();
   renderCalendar();
   calModal.classList.add('show');
 }
@@ -2954,21 +1576,17 @@ function renderCalendar(){
   const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
   const prevMonthDays = new Date(calYear, calMonth, 0).getDate();
   const today = todayStr();
-
   for(let i = startWeek - 1; i >= 0; i--){
     const cell = document.createElement('div');
-    cell.className = 'cal-day other-month';
-    cell.textContent = prevMonthDays - i;
+    cell.className = 'cal-day other-month'; cell.textContent = prevMonthDays - i;
     calGrid.appendChild(cell);
   }
   for(let d = 1; d <= daysInMonth; d++){
     const dateStr = `${calYear}-${pad2(calMonth+1)}-${pad2(d)}`;
     const cell = document.createElement('div');
-    cell.className = 'cal-day';
-    cell.textContent = d;
+    cell.className = 'cal-day'; cell.textContent = d;
     if(dateStr === today) cell.classList.add('today');
     if(dateStr === state.date) cell.classList.add('selected');
-
     const day = state.days[dateStr];
     if(day){
       const all = [...(day.chinese||[]), ...(day.math||[]), ...(day.english||[])];
@@ -2979,50 +1597,38 @@ function renderCalendar(){
         cell.appendChild(mark);
       }
     }
-    cell.addEventListener('click', () => {
-      switchDate(dateStr);
-      calModal.classList.remove('show');
-    });
+    cell.addEventListener('click', () => { switchDate(dateStr); calModal.classList.remove('show'); });
     calGrid.appendChild(cell);
   }
   const totalCells = startWeek + daysInMonth;
   const remain = (7 - totalCells % 7) % 7;
   for(let i = 1; i <= remain; i++){
     const cell = document.createElement('div');
-    cell.className = 'cal-day other-month';
-    cell.textContent = i;
+    cell.className = 'cal-day other-month'; cell.textContent = i;
     calGrid.appendChild(cell);
   }
 }
 calBtn.addEventListener('click', openCalendar);
-$('calPrev').addEventListener('click', () => {
-  calMonth--; if(calMonth < 0){ calMonth = 11; calYear--; }
-  renderCalendar();
-});
-$('calNext').addEventListener('click', () => {
-  calMonth++; if(calMonth > 11){ calMonth = 0; calYear++; }
-  renderCalendar();
-});
-$('calTodayBtn').addEventListener('click', () => {
-  switchDate(todayStr());
-  calModal.classList.remove('show');
-});
+$('calPrev').addEventListener('click', () => { calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); });
+$('calNext').addEventListener('click', () => { calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); });
+$('calTodayBtn').addEventListener('click', () => { switchDate(todayStr()); calModal.classList.remove('show'); });
 $('calCloseBtn').addEventListener('click', () => calModal.classList.remove('show'));
 calModal.addEventListener('click', e => { if(e.target === calModal) calModal.classList.remove('show'); });
 
+/* ============================================================
+   笔顺弹窗
+============================================================ */
 const strokeModal = $('strokeModal');
 const strokeStage = $('strokeStage');
 const strokeCharBig = $('strokeCharBig');
 const strokePinyinEl = $('strokePinyinEl');
 const strokeMetaEl = $('strokeMetaEl');
 let lastStrokeChar = '';
-
 function showStroke(char){
   if(!char || !/[\u4e00-\u9fa5]/.test(char)) return;
   lastStrokeChar = char;
   strokeCharBig.textContent = char;
-  const py = getPinyin(char);
-  strokePinyinEl.textContent = py || '';
+  strokePinyinEl.textContent = getPinyin(char) || '';
   const info = HZ_INFO[char] || ['—','—'];
   strokeMetaEl.textContent = `偏旁：${info[0]} · 结构：${info[1]}`;
   strokeStage.innerHTML = '';
@@ -3032,8 +1638,7 @@ function showStroke(char){
 function playStroke(char){
   strokeStage.innerHTML = '';
   if(!window.HanziWriter){
-    strokeStage.innerHTML = `<div style="font-size:130px;line-height:1;color:#2E7D32;
-      font-family:'Kaiti SC','KaiTi','STKaiti','楷体',serif">${escapeHtml(char)}</div>`;
+    strokeStage.innerHTML = `<div style="font-size:130px;line-height:1;color:#2E7D32;font-family:'Kaiti SC','KaiTi','STKaiti','楷体',serif">${escapeHtml(char)}</div>`;
     return;
   }
   try{
@@ -3048,29 +1653,23 @@ function playStroke(char){
           .then(r => { if(!r.ok) throw new Error('no data'); return r.json(); })
           .then(onComplete)
           .catch(err => {
-            strokeStage.innerHTML = `<div style="font-size:130px;line-height:1;color:#2E7D32;
-              font-family:'Kaiti SC','KaiTi','STKaiti','楷体',serif">${escapeHtml(c)}</div>`;
+            strokeStage.innerHTML = `<div style="font-size:130px;line-height:1;color:#2E7D32;font-family:'Kaiti SC','KaiTi','STKaiti','楷体',serif">${escapeHtml(c)}</div>`;
             if(onError) onError(err);
           });
       }
     });
     currentWriter.animateCharacter();
   }catch(e){
-    console.warn('笔顺渲染失败', e);
-    strokeStage.innerHTML = `<div style="font-size:130px;line-height:1.2;color:#2E7D32;
-      font-family:'Kaiti SC','KaiTi','STKaiti','楷体',serif">${escapeHtml(char)}</div>`;
+    strokeStage.innerHTML = `<div style="font-size:130px;line-height:1.2;color:#2E7D32;font-family:'Kaiti SC','KaiTi','STKaiti','楷体',serif">${escapeHtml(char)}</div>`;
   }
 }
 $('strokeReplay').addEventListener('click', () => { if(lastStrokeChar) playStroke(lastStrokeChar); });
-$('strokeClose').addEventListener('click', () => {
-  strokeModal.classList.remove('show'); strokeStage.innerHTML = ''; currentWriter = null;
-});
-strokeModal.addEventListener('click', e => {
-  if(e.target === strokeModal){
-    strokeModal.classList.remove('show'); strokeStage.innerHTML = ''; currentWriter = null;
-  }
-});
+$('strokeClose').addEventListener('click', () => { strokeModal.classList.remove('show'); strokeStage.innerHTML = ''; currentWriter = null; });
+strokeModal.addEventListener('click', e => { if(e.target === strokeModal){ strokeModal.classList.remove('show'); strokeStage.innerHTML = ''; currentWriter = null; } });
 
+/* ============================================================
+   密码弹窗事件
+============================================================ */
 $('pwdConfirm').addEventListener('click', confirmPassword);
 $('pwdCancel').addEventListener('click', () => pwdModalEl.classList.remove('show'));
 pwdInput.addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); confirmPassword(); } });
@@ -3080,13 +1679,12 @@ pwdInput.addEventListener('input', () => {
   if(v.length >= 4) confirmPassword();
 });
 pwdModalEl.addEventListener('click', e => { if(e.target===pwdModalEl) pwdModalEl.classList.remove('show'); });
+$('adminEntryBtn').addEventListener('click', () => { pwdPurpose = 'admin'; openPwdModal('🔑 家长验证', '请输入家长密码进入管理面板'); });
+$('eyeRestBtn').addEventListener('click', () => startEyeRest());
 
-/* ★ 家长入口：点左上角向日葵 */
-$('adminEntryBtn').addEventListener('click', () => {
-  pwdPurpose = 'admin';
-  openPwdModal('🔑 家长验证', '请输入家长密码进入管理面板');
-});
-
+/* ============================================================
+   家长面板
+============================================================ */
 function enterAdminMode(){
   isAdminMode = true;
   adminBar.classList.add('show');
@@ -3104,11 +1702,6 @@ function exitAdminMode(){
 $('adminExitBtn').addEventListener('click', exitAdminMode);
 $('adminCloseBtn').addEventListener('click', exitAdminMode);
 
-/* ★ 护眼按钮：手动开始放松 */
-$('eyeRestBtn').addEventListener('click', () => {
-  startEyeRest();
-});
-
 function renderAdminPanel(){
   if(!isAdminMode) return;
   const all = allTasks();
@@ -3117,10 +1710,9 @@ function renderAdminPanel(){
   $('adminStatDone').textContent = doneCount + '/' + all.length;
   $('adminStatStreak').textContent = calcStreak();
   $('adminTodayBadge').textContent = state.date;
-  $('adminSyncStatus').textContent = '☁️ 已连接云端';
+  $('adminSyncStatus').textContent = dataRef ? '☁️ 已连接云端' : '📴 纯本地模式';
   const dateInput = $('adminDateInput');
   if(dateInput) dateInput.value = state.date;
-
   const st = state.settings || DEFAULT_SETTINGS;
   UNIT_FIELDS.forEach(([t, minId, sunId]) => {
     const u = (st.unit && st.unit[t]) || DEFAULT_SETTINGS.unit[t];
@@ -3129,7 +1721,6 @@ function renderAdminPanel(){
     if(minEl) minEl.value = u.min;
     if(sunEl) sunEl.value = u.sun;
   });
-
   renderAdminTaskList('chinese', 'adminChineseList', 'adminChineseBadge');
   renderAdminTaskList('math', 'adminMathList', 'adminMathBadge');
   renderAdminTaskList('english', 'adminEnglishList', 'adminEnglishBadge');
@@ -3141,44 +1732,28 @@ function renderAdminPanel(){
   applyAdminPanelStates();
   syncLastInputFields();
 }
-
-/* ------------------------------------------------------------
-   👁️ 护眼提醒设置
------------------------------------------------------------- */
 function renderEyePanel(){
   const st = state.settings || DEFAULT_SETTINGS;
   const ec = (st.eyeCare && typeof st.eyeCare === 'object') ? st.eyeCare : DEFAULT_SETTINGS.eyeCare;
-  const useEl = $('adminEyeUseMin');
-  const restEl = $('adminEyeRestMin');
+  const useEl = $('adminEyeUseMin'); const restEl = $('adminEyeRestMin');
   if(useEl) useEl.value = ec.useMin;
   if(restEl) restEl.value = ec.restMin;
   const hint = $('adminEyeHint');
-  if(hint){
-    hint.className = 'aa-hint ok';
-    hint.textContent = '当前设置：每用眼 ' + ec.useMin + ' 分钟提醒放松，放松 ' + ec.restMin + ' 分钟';
-  }
+  if(hint){ hint.className = 'aa-hint ok'; hint.textContent = '当前设置：每用眼 ' + ec.useMin + ' 分钟提醒放松，放松 ' + ec.restMin + ' 分钟'; }
 }
 $('adminEyeSaveBtn').addEventListener('click', () => {
   const useV  = clamp(Math.round(parseFloat($('adminEyeUseMin').value)  || 20), 1, 120);
   const restV = clamp(Math.round(parseFloat($('adminEyeRestMin').value) || 5),  1, 60);
   if(!state.settings) state.settings = {};
   state.settings.eyeCare = { useMin: useV, restMin: restV };
-  saveLocalState(); uploadToCloud();
-  renderEyePanel();
+  saveLocalState(); uploadToCloud(); renderEyePanel();
   toast('✅ 护眼提醒设置已保存');
 });
-
-/* ------------------------------------------------------------
-   🔒 家长密码面板
------------------------------------------------------------- */
 function renderPwdPanel(){
   const hint = $('adminPwdHint');
   if(!hint) return;
-  const cur = currentParentPassword();
   hint.className = 'aa-hint';
-  hint.textContent = (cur === MASTER_PASSWORD)
-    ? '当前密码：默认 0702（万能密码同样有效）'
-    : '当前已设置自定义密码（万能密码 0702 仍然有效）';
+  hint.textContent = (currentParentPassword() === MASTER_PASSWORD) ? '当前密码：默认 0702（万能密码同样有效）' : '当前已设置自定义密码（万能密码 0702 仍然有效）';
 }
 $('adminSavePwdBtn').addEventListener('click', () => {
   const a = ($('adminNewPwd').value || '').trim();
@@ -3188,73 +1763,45 @@ $('adminSavePwdBtn').addEventListener('click', () => {
   state.parentPassword = a;
   saveLocalState(); uploadToCloud();
   $('adminNewPwd').value = ''; $('adminNewPwd2').value = '';
-  renderPwdPanel();
-  toast('✅ 家长密码已更新');
+  renderPwdPanel(); toast('✅ 家长密码已更新');
 });
 $('adminResetPwdBtn').addEventListener('click', () => {
   if(!confirm('确定恢复默认密码 0702 吗？')) return;
   state.parentPassword = MASTER_PASSWORD;
   saveLocalState(); uploadToCloud();
-  renderPwdPanel();
-  toast('✅ 已恢复默认密码 0702');
+  renderPwdPanel(); toast('✅ 已恢复默认密码 0702');
 });
-
-/* ------------------------------------------------------------
-   💰 金币调整
------------------------------------------------------------- */
 function pushSunLog(delta, reason){
   if(!Array.isArray(state.sunLog)) state.sunLog = [];
-  state.sunLog.unshift({
-    t: Date.now(),
-    delta: Math.round(delta),
-    after: Math.round(Number(state.sun) || 0),
-    reason: reason || (delta < 0 ? '手动扣除' : '手动增加')
-  });
+  state.sunLog.unshift({ t: Date.now(), delta: Math.round(delta), after: Math.round(Number(state.sun) || 0), reason: reason || (delta < 0 ? '手动扣除' : '手动增加') });
   if(state.sunLog.length > 60) state.sunLog.length = 60;
 }
-
 function changeSun(delta, reason){
   const d = Math.round(Number(delta) || 0);
   if(!d) return false;
   state.sun = Math.round(Number(state.sun) || 0) + d;
   pushSunLog(d, reason);
-  saveLocalState();
-  uploadToCloud();
-  renderStats();
-  renderAdminPanel();
+  saveLocalState(); uploadToCloud();
+  renderStats(); renderAdminPanel();
   return true;
 }
-
 function renderSunPanel(){
   const badge = $('adminSunBadge');
   if(badge) badge.textContent = state.sun + ' 💰';
   const logEl = $('adminSunLog');
   if(!logEl) return;
   const log = Array.isArray(state.sunLog) ? state.sunLog : [];
-  if(!log.length){
-    logEl.innerHTML = '<div class="sun-log-empty">还没有金币调整记录</div>';
-    return;
-  }
+  if(!log.length){ logEl.innerHTML = '<div class="sun-log-empty">还没有金币调整记录</div>'; return; }
   logEl.innerHTML = log.slice(0, 8).map(e => {
     const d = Math.round(Number(e.delta) || 0);
     const cls = d < 0 ? 'minus' : 'plus';
     let time = '';
-    try{
-      time = new Date(Number(e.t) || Date.now()).toLocaleString('zh-CN', {
-        month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
-      });
-    }catch(err){ time = ''; }
-    return '<div class="sun-log-row">'
-      + '<span class="sl-time">' + escapeHtml(time) + '</span>'
-      + '<span class="sl-reason">' + escapeHtml(String(e.reason || '')) + '</span>'
-      + '<span class="sl-delta ' + cls + '">' + (d > 0 ? '+' : '') + d + ' 💰</span>'
-      + '</div>';
+    try{ time = new Date(Number(e.t) || Date.now()).toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }); }catch(err){}
+    return '<div class="sun-log-row"><span class="sl-time">' + escapeHtml(time) + '</span><span class="sl-reason">' + escapeHtml(String(e.reason || '')) + '</span><span class="sl-delta ' + cls + '">' + (d > 0 ? '+' : '') + d + ' 💰</span></div>';
   }).join('');
 }
-
 function adminSunAdjust(sign){
-  const amtEl = $('adminSunAmount');
-  const reasonEl = $('adminSunReason');
+  const amtEl = $('adminSunAmount'); const reasonEl = $('adminSunReason');
   const amount = Math.abs(Math.round(Number(amtEl && amtEl.value) || 0));
   if(!amount){ toast('请输入要调整的金币数量'); return; }
   if(amount > 9999){ toast('一次最多调整 9999 💰'); return; }
@@ -3267,9 +1814,7 @@ function adminSunAdjust(sign){
     if(!confirm((delta < 0 ? '扣除 ' : '增加 ') + amount + ' 💰（' + reason + '）？')) return;
   }
   if(!changeSun(delta, reason)) return;
-  toast(delta < 0
-    ? '✅ 已扣除 ' + amount + ' 💰（' + escapeHtml(reason) + '）'
-    : '✅ 已增加 ' + amount + ' 💰（' + escapeHtml(reason) + '）', 2600);
+  toast(delta < 0 ? '✅ 已扣除 ' + amount + ' 💰' : '✅ 已增加 ' + amount + ' 💰', 2600);
 }
 $('adminSunMinusBtn').addEventListener('click', () => adminSunAdjust(-1));
 $('adminSunPlusBtn').addEventListener('click', () => adminSunAdjust(1));
@@ -3280,10 +1825,7 @@ function renderAdminTaskList(subject, listId, badgeId){
   const tasks = state.subjects[subject];
   if(!list || !badge) return;
   badge.textContent = tasks.filter(t => !t.done).length + ' 待完成';
-  if(!tasks.length){
-    list.innerHTML = '<div class="admin-empty">暂无作业，在下方添加</div>';
-    return;
-  }
+  if(!tasks.length){ list.innerHTML = '<div class="admin-empty">暂无作业，在下方添加</div>'; return; }
   list.innerHTML = tasks.map(t => `
     <div class="admin-task-row" data-id="${escapeAttr(t.id)}" data-subject="${subject}" draggable="true" title="拖动调整顺序，双击编辑">
       <span class="drag-handle">☷</span>
@@ -3291,53 +1833,31 @@ function renderAdminTaskList(subject, listId, badgeId){
       <div class="at-text ${t.done?'done':''}">${escapeHtml(t.text)}</div>
       <div class="at-meta">⏱${t.minutes}分钟 · 💰${t.sun}</div>
       <button class="at-del" data-del="${escapeAttr(t.id)}" data-subject="${subject}">删除</button>
-    </div>
-  `).join('');
-
+    </div>`).join('');
   list.querySelectorAll('[data-toggle]').forEach(el => {
-    el.addEventListener('click', e => {
-      e.stopPropagation();
-      toggleTaskDone(el.dataset.toggle);
-    });
+    el.addEventListener('click', e => { e.stopPropagation(); toggleTaskDone(el.dataset.toggle); });
   });
   list.querySelectorAll('[data-del]').forEach(el => {
     el.addEventListener('click', e => {
       e.stopPropagation();
-      const id = el.dataset.del;
-      const subj = el.dataset.subject;
+      const id = el.dataset.del; const subj = el.dataset.subject;
       const info = findTask(id);
       if(info && info.task.done) state.sun -= Number(info.task.sun)||0;
       state.subjects[subj] = state.subjects[subj].filter(t => t.id !== id);
-      if(activeId === id){ stopTick(); activeId = null; clearCharTimer(); }
-      cleanupRuntime();
+      if(live.taskId === id && isMyLive()){ live.taskId = null; live.mode = 'idle'; pushLive(true); cancelAnimationFrame(rafId); rafId=null; clearCharTimer(); }
       saveLocalState(); uploadToCloud();
       renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
       renderAdminPanel();
     });
   });
-
   let dragId = null;
   list.querySelectorAll('.admin-task-row').forEach(row => {
-    row.addEventListener('dragstart', e => {
-      dragId = row.dataset.id;
-      row.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', dragId);
-    });
-    row.addEventListener('dragend', () => {
-      row.classList.remove('dragging');
-      list.querySelectorAll('.drag-over').forEach(x => x.classList.remove('drag-over'));
-      dragId = null;
-    });
-    row.addEventListener('dragover', e => {
-      e.preventDefault();
-      if(dragId && dragId !== row.dataset.id) row.classList.add('drag-over');
-      e.dataTransfer.dropEffect = 'move';
-    });
+    row.addEventListener('dragstart', e => { dragId = row.dataset.id; row.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', dragId); });
+    row.addEventListener('dragend', () => { row.classList.remove('dragging'); list.querySelectorAll('.drag-over').forEach(x => x.classList.remove('drag-over')); dragId = null; });
+    row.addEventListener('dragover', e => { e.preventDefault(); if(dragId && dragId !== row.dataset.id) row.classList.add('drag-over'); e.dataTransfer.dropEffect = 'move'; });
     row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
     row.addEventListener('drop', e => {
-      e.preventDefault();
-      row.classList.remove('drag-over');
+      e.preventDefault(); row.classList.remove('drag-over');
       const fromId = dragId || e.dataTransfer.getData('text/plain');
       const toId = row.dataset.id;
       if(!fromId || fromId === toId) return;
@@ -3374,34 +1894,14 @@ function rememberInput(key, value){
 }
 function applyAdminPanelStates(){
   const pc = state.settings.panelCollapsed || DEFAULT_SETTINGS.panelCollapsed;
-  const map = {
-    adminPanelProgress: pc.progress,
-    adminPanelSun: pc.sun,
-    adminPanelDate: pc.date,
-    adminPanelLibrary: pc.library,
-    adminPanelSync: pc.sync,
-    adminPanelPassword: pc.password,
-    adminPanelEye: pc.eye,
-    adminPanelMath: pc.math,
-    adminPanelEnglish: pc.english
-  };
-  Object.entries(map).forEach(([id,collapsed]) => {
-    const el=$(id);
-    if(el) el.classList.toggle('collapsed', !!collapsed);
-  });
+  const map = { adminPanelProgress: pc.progress, adminPanelSun: pc.sun, adminPanelDate: pc.date, adminPanelLibrary: pc.library, adminPanelSync: pc.sync, adminPanelPassword: pc.password, adminPanelEye: pc.eye, adminPanelMath: pc.math, adminPanelEnglish: pc.english };
+  Object.entries(map).forEach(([id,collapsed]) => { const el=$(id); if(el) el.classList.toggle('collapsed', !!collapsed); });
 }
 function setupAdminPanelToggles(){
-  const map = {
-    adminPanelProgress:'progress', adminPanelSun:'sun', adminPanelDate:'date',
-    adminPanelMath:'math', adminPanelEnglish:'english',
-    adminPanelLibrary:'library', adminPanelSync:'sync',
-    adminPanelPassword:'password', adminPanelEye:'eye'
-  };
+  const map = { adminPanelProgress:'progress', adminPanelSun:'sun', adminPanelDate:'date', adminPanelMath:'math', adminPanelEnglish:'english', adminPanelLibrary:'library', adminPanelSync:'sync', adminPanelPassword:'password', adminPanelEye:'eye' };
   Object.entries(map).forEach(([id,key]) => {
-    const panel=$(id);
-    if(!panel) return;
-    const h=panel.querySelector('h3');
-    if(!h) return;
+    const panel=$(id); if(!panel) return;
+    const h=panel.querySelector('h3'); if(!h) return;
     h.addEventListener('click', () => {
       panel.classList.toggle('collapsed');
       if(!state.settings.panelCollapsed) state.settings.panelCollapsed={};
@@ -3412,55 +1912,34 @@ function setupAdminPanelToggles(){
 }
 setupAdminPanelToggles();
 
-const UNIT_FIELDS = [
-  ['preview','unitPreviewMin','unitPreviewSun'],
-  ['wordgroup','unitWordgroupMin','unitWordgroupSun'],
-  ['copy','unitCopyMin','unitCopySun']
-];
+const UNIT_FIELDS = [['preview','unitPreviewMin','unitPreviewSun'],['wordgroup','unitWordgroupMin','unitWordgroupSun'],['copy','unitCopyMin','unitCopySun']];
 UNIT_FIELDS.forEach(([t, minId, sunId]) => {
-  const minEl = document.getElementById(minId);
-  const sunEl = document.getElementById(sunId);
+  const minEl = document.getElementById(minId); const sunEl = document.getElementById(sunId);
   if(!minEl || !sunEl) return;
   const save = () => {
     const d = DEFAULT_SETTINGS.unit[t];
-    const m = parseFloat(minEl.value);
-    const s = parseFloat(sunEl.value);
-    state.settings.unit[t] = {
-      min: clamp(isFinite(m) && m > 0 ? m : d.min, 0.5, 20),
-      sun: clamp(isFinite(s) && s > 0 ? s : d.sun, 0.5, 50)
-    };
-    minEl.value = state.settings.unit[t].min;
-    sunEl.value = state.settings.unit[t].sun;
+    const m = parseFloat(minEl.value); const s = parseFloat(sunEl.value);
+    state.settings.unit[t] = { min: clamp(isFinite(m) && m > 0 ? m : d.min, 0.5, 20), sun: clamp(isFinite(s) && s > 0 ? s : d.sun, 0.5, 50) };
+    minEl.value = state.settings.unit[t].min; sunEl.value = state.settings.unit[t].sun;
     saveLocalState(); uploadToCloud();
   };
-  minEl.addEventListener('change', save);
-  sunEl.addEventListener('change', save);
+  minEl.addEventListener('change', save); sunEl.addEventListener('change', save);
 });
-
 ['adminAddChineseMin','adminAddChineseSun','adminAddMathMin','adminAddMathSun','adminAddEnglishMin','adminAddEnglishSun','adminSunAmount'].forEach(id => {
   const el=$(id);
   if(el) el.addEventListener('change', () => {
-    const keyMap={
-      adminAddChineseMin:'chineseMin',adminAddChineseSun:'chineseSun',
-      adminAddMathMin:'mathMin',adminAddMathSun:'mathSun',
-      adminAddEnglishMin:'englishMin',adminAddEnglishSun:'englishSun',
-      adminSunAmount:'sunAmount'
-    };
+    const keyMap={ adminAddChineseMin:'chineseMin',adminAddChineseSun:'chineseSun',adminAddMathMin:'mathMin',adminAddMathSun:'mathSun',adminAddEnglishMin:'englishMin',adminAddEnglishSun:'englishSun',adminSunAmount:'sunAmount' };
     rememberInput(keyMap[id], el.value);
   });
 });
 
 function renderLessonLibrary(){
-  const list = $('adminLibList');
-  const badge = $('adminLibBadge');
+  const list = $('adminLibList'); const badge = $('adminLibBadge');
   const lib = state.lessonLibrary || {};
   const keys = Object.keys(lib);
   if(badge) badge.textContent = keys.length + ' 条';
   if(!list) return;
-  if(!keys.length){
-    list.innerHTML = '<div class="admin-empty">还没有课文库，在下方添加</div>';
-    return;
-  }
+  if(!keys.length){ list.innerHTML = '<div class="admin-empty">还没有课文库，在下方添加</div>'; return; }
   const preview = s => (s && String(s).trim()) ? String(s).slice(0,80) : '（无）';
   list.innerHTML = keys.map(name => {
     const item = lib[name] || {};
@@ -3474,9 +1953,8 @@ function renderLessonLibrary(){
       <button class="lib-del" data-lib-del="${escapeAttr(name)}">删除</button>
     </div>`;
   }).join('');
-
   list.querySelectorAll('[data-lib-del]').forEach(el => {
-    el.addEventListener('click', (e) => {
+    el.addEventListener('click', e => {
       e.stopPropagation();
       const name = el.dataset.libDel;
       if(!confirm('确定要删除课文「'+name+'」吗？')) return;
@@ -3486,12 +1964,10 @@ function renderLessonLibrary(){
       toast('已删除课文库条目');
     });
   });
-
   list.querySelectorAll('[data-lib-edit]').forEach(el => {
     el.addEventListener('dblclick', () => openLibEdit(el.dataset.libEdit));
   });
 }
-
 function populateLessonSelects(){
   const lib = state.lessonLibrary || {};
   const keys = Object.keys(lib).sort();
@@ -3499,35 +1975,25 @@ function populateLessonSelects(){
     if(!sel) return;
     const cur = sel.value;
     sel.innerHTML = '';
-    const opt0 = document.createElement('option');
-    opt0.value = ''; opt0.textContent = placeholder;
+    const opt0 = document.createElement('option'); opt0.value = ''; opt0.textContent = placeholder;
     sel.appendChild(opt0);
-    keys.forEach(name => {
-      const o = document.createElement('option');
-      o.value = name; o.textContent = name;
-      sel.appendChild(o);
-    });
+    keys.forEach(name => { const o = document.createElement('option'); o.value = name; o.textContent = name; sel.appendChild(o); });
     if(cur && keys.includes(cur)) sel.value = cur;
   };
   fill($('adminPreviewLessonSelect'),    '— 选择课文 —');
   fill($('adminWordgroupLessonSelect'),  '— 选择课文 —');
   fill($('adminCopyLessonSelect'),       '— 选择课文 —');
-  try{
-    renderLessonHint('preview'); renderLessonHint('wordgroup'); renderLessonHint('copy');
-  }catch(e){}
+  try{ renderLessonHint('preview'); renderLessonHint('wordgroup'); renderLessonHint('copy'); }catch(e){}
 }
-
 $('adminLibAddBtn').addEventListener('click', () => {
-  const nameEl = $('adminLibLesson');
-  const charsEl = $('adminLibChars');
-  const wgEl = $('adminLibWordgroups');
-  const wordsEl = $('adminLibWords');
+  const nameEl = $('adminLibLesson'); const charsEl = $('adminLibChars');
+  const wgEl = $('adminLibWordgroups'); const wordsEl = $('adminLibWords');
   const name = nameEl.value.trim().slice(0,60);
   if(!name){ toast('请输入课文名'); return; }
   const chars = charsEl.value.trim().slice(0,600);
   const wordgroups = wgEl.value.trim().slice(0,600);
   const words = wordsEl.value.trim().slice(0,600);
-  if(!chars && !wordgroups && !words){ toast('会写字 / 会识字 / 抄写词语至少填一项'); return; }
+  if(!chars && !wordgroups && !words){ toast('至少填一项'); return; }
   state.lessonLibrary[name] = { chars, wordgroups, words };
   saveLocalState(); uploadToCloud();
   nameEl.value = ''; charsEl.value = ''; wgEl.value = ''; wordsEl.value = '';
@@ -3547,21 +2013,15 @@ function loadPdfJs(){
     s.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
     s.onload = () => {
       if(window.pdfjsLib){
-        try{
-          window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-            'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
-        }catch(e){}
+        try{ window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js'; }catch(e){}
         resolve(window.pdfjsLib);
-      } else {
-        reject(new Error('PDF 解析组件未就绪'));
-      }
+      } else reject(new Error('PDF 组件未就绪'));
     };
-    s.onerror = () => reject(new Error('PDF 组件加载失败，请检查网络'));
+    s.onerror = () => reject(new Error('PDF 组件加载失败'));
     document.head.appendChild(s);
   });
   return pdfJsLoading;
 }
-
 async function extractPdfText(file){
   const lib = await loadPdfJs();
   const buf = await file.arrayBuffer();
@@ -3571,29 +2031,18 @@ async function extractPdfText(file){
     const page = await pdf.getPage(p);
     const content = await page.getTextContent();
     const items = (content.items || []).filter(it => typeof it.str === 'string' && it.str.length);
-    items.sort((a, b) => {
-      const ya = a.transform[5], yb = b.transform[5];
-      if(Math.abs(ya - yb) > 3) return yb - ya;
-      return a.transform[4] - b.transform[4];
-    });
+    items.sort((a, b) => { const ya=a.transform[5],yb=b.transform[5]; if(Math.abs(ya-yb)>3) return yb-ya; return a.transform[4]-b.transform[4]; });
     let lastY = null, lastRight = null;
     for(const it of items){
-      const y = it.transform[5];
-      const x = it.transform[4];
-      if(lastY !== null && Math.abs(y - lastY) > 3){
-        all += '\n'; lastRight = null;
-      } else if(lastRight !== null && (x - lastRight) > 1.5 && !/\s$/.test(all)){
-        all += ' ';
-      }
-      all += it.str;
-      lastY = y;
-      lastRight = x + (Number(it.width) || 0);
+      const y = it.transform[5], x = it.transform[4];
+      if(lastY !== null && Math.abs(y - lastY) > 3){ all += '\n'; lastRight = null; }
+      else if(lastRight !== null && (x - lastRight) > 1.5 && !/\s$/.test(all)) all += ' ';
+      all += it.str; lastY = y; lastRight = x + (Number(it.width) || 0);
     }
     all += '\n';
   }
   return all;
 }
-
 function collectHanzi(src, start){
   let s = '';
   for(let i = start; i < src.length; i++){
@@ -3607,66 +2056,34 @@ function collectHanzi(src, start){
 function collectAllHanzi(src){
   let s = '';
   const str = String(src || '');
-  for(let i = 0; i < str.length; i++){
-    const c = str.charAt(i);
-    if(/[\u4e00-\u9fa5]/.test(c)) s += c;
-  }
+  for(let i = 0; i < str.length; i++){ const c = str.charAt(i); if(/[\u4e00-\u9fa5]/.test(c)) s += c; }
   return s;
 }
-
 function parseHanziSheet(text){
   const src = String(text || '').replace(/\r/g, '');
   if(!src.trim()) return [];
   const lines = src.split('\n');
   const out = [];
-  let section = '';
-  let cur = null;
-
-  const finish = () => {
-    if(cur && cur.hanzi) out.push({ label: cur.label.slice(0, 60), hanzi: cur.hanzi });
-    cur = null;
-  };
-
+  let section = ''; let cur = null;
+  const finish = () => { if(cur && cur.hanzi) out.push({ label: cur.label.slice(0,60), hanzi: cur.hanzi }); cur = null; };
   const SEC_ONLY_RE = /^[#＃\s]*[（(【\[]?\s*(阅读|识字)\s*[)）】\]]?\s*$/;
   const SEC_NUM_RE  = /^[#＃\s]*[（(【\[]?\s*(阅读|识字)\s*(\d{1,2})/;
   const LESSON_RE   = /^[#＃\s]*[（(【\[]?\s*(\d{1,2}|语文园地[一二三四五六七八九十]+)/;
   const TRIM_HEAD   = /^[\s、．.。,:：;；)）】\]\-—_]+/;
-
   for(let i = 0; i < lines.length; i++){
     const line = lines[i].replace(/\u3000/g, ' ').trim();
     if(!line) continue;
-
-    if(SEC_ONLY_RE.test(line)){
-      finish();
-      section = line.match(SEC_ONLY_RE)[1];
-      continue;
-    }
-
+    if(SEC_ONLY_RE.test(line)){ finish(); section = line.match(SEC_ONLY_RE)[1]; continue; }
     let label = null, rest = '';
-    const snm = line.match(SEC_NUM_RE);
-    const lm  = line.match(LESSON_RE);
-    if(snm){
-      section = snm[1];
-      label = snm[1] + snm[2];
-      rest = line.slice(snm[0].length);
-    } else if(lm){
-      label = section + lm[1];
-      rest = line.slice(lm[0].length);
-    }
-
-    if(label !== null){
-      finish();
-      rest = rest.replace(TRIM_HEAD, '');
-      cur = { label, hanzi: collectHanzi(rest, 0) };
-      continue;
-    }
-
+    const snm = line.match(SEC_NUM_RE); const lm = line.match(LESSON_RE);
+    if(snm){ section = snm[1]; label = snm[1] + snm[2]; rest = line.slice(snm[0].length); }
+    else if(lm){ label = section + lm[1]; rest = line.slice(lm[0].length); }
+    if(label !== null){ finish(); rest = rest.replace(TRIM_HEAD, ''); cur = { label, hanzi: collectHanzi(rest, 0) }; continue; }
     if(cur) cur.hanzi += collectAllHanzi(line);
   }
   finish();
   return out;
 }
-
 function mergeSheet(entries, field){
   const grouped = new Map();
   entries.forEach(({ label, hanzi }) => {
@@ -3679,12 +2096,8 @@ function mergeSheet(entries, field){
     const name = label.slice(0, 60);
     const uniq = [...new Set(parseChars(list.join('')))];
     if(!uniq.length) return;
-    if(!state.lessonLibrary[name]){
-      state.lessonLibrary[name] = { chars:'', wordgroups:'', words:'' };
-      added++;
-    } else {
-      updated++;
-    }
+    if(!state.lessonLibrary[name]){ state.lessonLibrary[name] = { chars:'', wordgroups:'', words:'' }; added++; }
+    else updated++;
     const item = state.lessonLibrary[name];
     const oldList = (field === 'chars') ? parseChars(item.chars) : parseChars(item.wordgroups);
     const merged = [...oldList];
@@ -3693,87 +2106,43 @@ function mergeSheet(entries, field){
   });
   return { added, updated };
 }
-
 $('adminLibSyncBtn').addEventListener('click', () => {
-  $('uploadWriteFile').value = '';
-  $('uploadReadFile').value = '';
-  $('uploadWriteName').textContent = '';
-  $('uploadReadName').textContent = '';
+  $('uploadWriteFile').value = ''; $('uploadReadFile').value = '';
+  $('uploadWriteName').textContent = ''; $('uploadReadName').textContent = '';
   const prog = $('uploadProgress');
-  prog.className = 'upload-progress';
-  prog.textContent = '可只上传其中一个，也可以两个一起上传';
+  prog.className = 'upload-progress'; prog.textContent = '可只上传其中一个，也可以两个一起上传';
   $('uploadSyncBtn').disabled = false;
   uploadSyncModal.classList.add('show');
 });
-$('uploadWriteFile').addEventListener('change', e => {
-  const f = e.target.files[0];
-  $('uploadWriteName').textContent = f ? ('已选择：' + f.name) : '';
-});
-$('uploadReadFile').addEventListener('change', e => {
-  const f = e.target.files[0];
-  $('uploadReadName').textContent = f ? ('已选择：' + f.name) : '';
-});
+$('uploadWriteFile').addEventListener('change', e => { const f = e.target.files[0]; $('uploadWriteName').textContent = f ? ('已选择：' + f.name) : ''; });
+$('uploadReadFile').addEventListener('change', e => { const f = e.target.files[0]; $('uploadReadName').textContent = f ? ('已选择：' + f.name) : ''; });
 $('uploadCancel').addEventListener('click', () => uploadSyncModal.classList.remove('show'));
-uploadSyncModal.addEventListener('click', e => {
-  if(e.target === uploadSyncModal) uploadSyncModal.classList.remove('show');
-});
-
+uploadSyncModal.addEventListener('click', e => { if(e.target === uploadSyncModal) uploadSyncModal.classList.remove('show'); });
 $('uploadSyncBtn').addEventListener('click', async () => {
   const writeFile = $('uploadWriteFile').files[0];
   const readFile  = $('uploadReadFile').files[0];
   const prog = $('uploadProgress');
-  if(!writeFile && !readFile){
-    prog.className = 'upload-progress err';
-    prog.textContent = '请至少选择一个 PDF 文件';
-    return;
-  }
+  if(!writeFile && !readFile){ prog.className = 'upload-progress err'; prog.textContent = '请至少选择一个 PDF 文件'; return; }
   $('uploadSyncBtn').disabled = true;
   try{
     let writeEntries = [], readEntries = [];
-    if(writeFile){
-      prog.className = 'upload-progress busy';
-      prog.textContent = '正在解析写字表…';
-      const text = await extractPdfText(writeFile);
-      writeEntries = parseHanziSheet(text);
-    }
-    if(readFile){
-      prog.className = 'upload-progress busy';
-      prog.textContent = '正在解析识字表…';
-      const text = await extractPdfText(readFile);
-      readEntries = parseHanziSheet(text);
-    }
-    if(!writeEntries.length && !readEntries.length){
-      prog.className = 'upload-progress err';
-      prog.textContent = '未能从 PDF 中解析出内容，请确认文件格式是否与示例一致';
-      toast('⚠️ 解析失败，请检查 PDF 内容');
-      return;
-    }
+    if(writeFile){ prog.className='upload-progress busy'; prog.textContent='正在解析写字表…'; writeEntries = parseHanziSheet(await extractPdfText(writeFile)); }
+    if(readFile){ prog.className='upload-progress busy'; prog.textContent='正在解析识字表…'; readEntries = parseHanziSheet(await extractPdfText(readFile)); }
+    if(!writeEntries.length && !readEntries.length){ prog.className='upload-progress err'; prog.textContent='未能解析出内容'; toast('⚠️ 解析失败'); return; }
     const r1 = mergeSheet(writeEntries, 'chars');
     const r2 = mergeSheet(readEntries, 'wordgroups');
     saveLocalState(); uploadToCloud();
     renderLessonLibrary(); populateLessonSelects();
-
     prog.className = 'upload-progress ok';
-    prog.textContent =
-      `✅ 写字表 ${writeEntries.length} 条 · 识字表 ${readEntries.length} 条` +
-      ` · 新增 ${r1.added + r2.added} 篇 · 更新 ${r1.updated + r2.updated} 篇`;
-
-    toast(
-      `✅ 同步完成<br>` +
-      `写字表：${writeEntries.length} 条 · 识字表：${readEntries.length} 条<br>` +
-      `新增 ${r1.added + r2.added} 篇 · 更新 ${r1.updated + r2.updated} 篇<br>` +
-      `抄写词语请自行在课文库里补充`,
-      4200
-    );
+    prog.textContent = `✅ 写字表 ${writeEntries.length} 条 · 识字表 ${readEntries.length} 条 · 新增 ${r1.added + r2.added} 篇 · 更新 ${r1.updated + r2.updated} 篇`;
+    toast(`✅ 同步完成<br>写字表：${writeEntries.length} 条 · 识字表：${readEntries.length} 条<br>新增 ${r1.added + r2.added} 篇 · 更新 ${r1.updated + r2.updated} 篇`, 4200);
     setTimeout(() => uploadSyncModal.classList.remove('show'), 1200);
   }catch(err){
     console.error(err);
     prog.className = 'upload-progress err';
     prog.textContent = '解析失败：' + (err && err.message ? err.message : '未知错误');
     toast('⚠️ 解析失败：' + escapeHtml(err && err.message ? err.message : '未知错误'));
-  }finally{
-    $('uploadSyncBtn').disabled = false;
-  }
+  }finally{ $('uploadSyncBtn').disabled = false; }
 });
 
 let editingLibName = '';
@@ -3796,41 +2165,28 @@ $('libEditSave').addEventListener('click', () => {
   const chars = $('libEditChars').value.trim().slice(0,600);
   const wordgroups = $('libEditWordgroups').value.trim().slice(0,600);
   const words = $('libEditWords').value.trim().slice(0,600);
-  if(!chars && !wordgroups && !words){ toast('会写字 / 会识字 / 抄写词语至少填一项'); return; }
+  if(!chars && !wordgroups && !words){ toast('至少填一项'); return; }
   if(newName !== editingLibName) delete state.lessonLibrary[editingLibName];
   state.lessonLibrary[newName] = { chars, wordgroups, words };
   saveLocalState(); uploadToCloud();
   libEditModal.classList.remove('show');
   renderLessonLibrary(); populateLessonSelects();
-  toast('✅ 已更新课文库：'+escapeHtml(newName));
+  toast('✅ 已更新：'+escapeHtml(newName));
 });
 
 let editingTaskId = null;
 function openTaskEdit(id){
-  const info = findTask(id);
-  if(!info) return;
+  const info = findTask(id); if(!info) return;
   editingTaskId = id;
   const t = info.task;
   $('taskEditText').value = t.text;
   $('taskEditMin').value = t.minutes;
   $('taskEditSun').value = t.sun;
   const wrap = $('taskEditExtraWrap');
-  if(t.type === 'preview'){
-    wrap.style.display = '';
-    $('taskEditExtraLabel').textContent = '预习生字（空格分隔）';
-    $('taskEditExtra').value = (t.chars || []).join(' ');
-  } else if(t.type === 'wordgroup'){
-    wrap.style.display = '';
-    $('taskEditExtraLabel').textContent = '抄写并组词（空格分隔）';
-    $('taskEditExtra').value = (t.words || []).join(' ');
-  } else if(t.type === 'copy'){
-    wrap.style.display = '';
-    $('taskEditExtraLabel').textContent = '抄写词语（空格分隔）';
-    $('taskEditExtra').value = (t.words || []).join(' ');
-  } else {
-    wrap.style.display = 'none';
-    $('taskEditExtra').value = '';
-  }
+  if(t.type === 'preview'){ wrap.style.display = ''; $('taskEditExtraLabel').textContent = '预习生字（空格分隔）'; $('taskEditExtra').value = (t.chars || []).join(' '); }
+  else if(t.type === 'wordgroup'){ wrap.style.display = ''; $('taskEditExtraLabel').textContent = '抄写并组词（空格分隔）'; $('taskEditExtra').value = (t.words || []).join(' '); }
+  else if(t.type === 'copy'){ wrap.style.display = ''; $('taskEditExtraLabel').textContent = '抄写词语（空格分隔）'; $('taskEditExtra').value = (t.words || []).join(' '); }
+  else { wrap.style.display = 'none'; $('taskEditExtra').value = ''; }
   taskEditModal.classList.add('show');
   setTimeout(() => $('taskEditText').focus(), 120);
 }
@@ -3838,17 +2194,14 @@ $('taskEditCancel').addEventListener('click', () => taskEditModal.classList.remo
 taskEditModal.addEventListener('click', e => { if(e.target === taskEditModal) taskEditModal.classList.remove('show'); });
 $('taskEditSave').addEventListener('click', () => {
   if(!editingTaskId) return;
-  const info = findTask(editingTaskId);
-  if(!info) return;
+  const info = findTask(editingTaskId); if(!info) return;
   const t = info.task;
   const text = $('taskEditText').value.trim();
   if(!text){ toast('请输入作业内容'); return; }
-  t.text = text.slice(0,200);
-  const m = parseFloat($('taskEditMin').value);
-  const s = parseInt($('taskEditSun').value, 10);
+  t.text = text.slice(0,500);
+  const m = parseFloat($('taskEditMin').value); const s = parseInt($('taskEditSun').value, 10);
   t.minutes = clamp(isFinite(m) && m > 0 ? m : 10, 0.5, 120);
   t.sun = clamp(isFinite(s) && s > 0 ? s : 30, 1, 500);
-
   if(t.type === 'preview'){
     const chars = [...new Set(parseChars($('taskEditExtra').value))].slice(0,60);
     if(chars.length) t.chars = chars;
@@ -3856,13 +2209,11 @@ $('taskEditSave').addEventListener('click', () => {
     const words = parseWords($('taskEditExtra').value).slice(0,60);
     if(words.length) t.words = words;
   }
-
-  if(runtimeMap[t.id]){
-    const ms = t.minutes*60000;
-    const rt = runtimeMap[t.id];
-    if(rt.totalMs !== ms){
-      rt.totalMs = ms; rt.leftMs = ms; rt.rounds = 0; rt.holdDogAtEnd = false;
-    }
+  if(live.taskId === t.id && live.owner === myClientId){
+    live.totalMs = t.minutes * 60000;
+    if(live.mode === 'running') live.startAt = Date.now() - (live.totalMs - calcLiveLeftMs(live));
+    else live.leftMs = Math.min(live.leftMs, live.totalMs);
+    pushLive(true);
   }
   saveLocalState(); uploadToCloud();
   taskEditModal.classList.remove('show');
@@ -3893,16 +2244,8 @@ function renderLessonHint(kind){
   const hint = $(cfg.hint);
   if(!hint) return;
   const { name, items } = lessonPickItems(kind);
-  if(!name){
-    hint.className = 'aa-hint';
-    hint.textContent = '选好课文直接点「添加」即可，不用手动输入';
-    return;
-  }
-  if(!items.length){
-    hint.className = 'aa-hint warn';
-    hint.textContent = '「' + name + '」还没有' + cfg.label + '内容，请到下面「课文库」里补充';
-    return;
-  }
+  if(!name){ hint.className = 'aa-hint'; hint.textContent = '选好课文直接点「添加」即可，不用手动输入'; return; }
+  if(!items.length){ hint.className = 'aa-hint warn'; hint.textContent = '「' + name + '」还没有' + cfg.label + '内容，请到下面「课文库」里补充'; return; }
   const shown = items.slice(0, 24).join(' ');
   hint.className = 'aa-hint ok';
   hint.textContent = '将添加 ' + items.length + ' ' + cfg.unit + '：' + shown + (items.length > 24 ? ' …' : '');
@@ -3916,110 +2259,92 @@ Object.keys(LESSON_PICK).forEach(kind => {
 $('adminAddPreviewBtn').addEventListener('click', () => {
   const { name, items } = lessonPickItems('preview');
   if(!name){ toast('请先选择课文'); return; }
-  if(!items.length){ toast('「'+escapeHtml(name)+'」还没有会写字，请到「课文库」补充'); return; }
+  if(!items.length){ toast('「'+escapeHtml(name)+'」还没有会写字'); return; }
   const chars = items.slice(0, 60);
   const cfg = getUnitCfg('preview');
   const minutes = clamp(Math.round(chars.length * cfg.min), 1, 120);
   const sun = clamp(Math.round(chars.length * cfg.sun), 1, 500);
-  const task = makeTask(`预习生字（${chars.length}字）`, minutes, sun, { type:'preview', chars });
-  state.subjects.chinese.push(task);
+  state.subjects.chinese.push(makeTask(`预习生字（${chars.length}字）`, minutes, sun, { type:'preview', chars }));
   saveLocalState(); uploadToCloud();
   const sel = $('adminPreviewLessonSelect'); if(sel) sel.value = '';
   renderLessonHint('preview');
   renderBoard(); refreshAllCards(); renderAdminPanel();
-  toast('✅ 已添加「'+escapeHtml(name)+'」会写字（'+chars.length+'字）');
+  toast('✅ 已添加「'+escapeHtml(name)+'」会写字');
 });
-
 $('adminAddWordgroupBtn').addEventListener('click', () => {
   const { name, items } = lessonPickItems('wordgroup');
   if(!name){ toast('请先选择课文'); return; }
-  if(!items.length){ toast('「'+escapeHtml(name)+'」还没有会识字，请到「课文库」补充'); return; }
+  if(!items.length){ toast('「'+escapeHtml(name)+'」还没有会识字'); return; }
   const chars = items.slice(0, 60);
   const cfg = getUnitCfg('wordgroup');
   const minutes = clamp(Math.round(chars.length * cfg.min), 1, 120);
   const sun = clamp(Math.round(chars.length * cfg.sun), 1, 500);
-  const task = makeTask(`抄写并组词（${chars.length}字）`, minutes, sun, { type:'wordgroup', words: chars });
-  state.subjects.chinese.push(task);
+  state.subjects.chinese.push(makeTask(`抄写并组词（${chars.length}字）`, minutes, sun, { type:'wordgroup', words: chars }));
   saveLocalState(); uploadToCloud();
   const sel = $('adminWordgroupLessonSelect'); if(sel) sel.value = '';
   renderLessonHint('wordgroup');
   renderBoard(); refreshAllCards(); renderAdminPanel();
-  toast('✅ 已添加「'+escapeHtml(name)+'」抄写并组词（'+chars.length+'字）');
+  toast('✅ 已添加「'+escapeHtml(name)+'」抄写并组词');
 });
-
 $('adminAddCopyBtn').addEventListener('click', () => {
   const { name, items } = lessonPickItems('copy');
   if(!name){ toast('请先选择课文'); return; }
-  if(!items.length){ toast('「'+escapeHtml(name)+'」还没有抄写词语，请到「课文库」补充'); return; }
+  if(!items.length){ toast('「'+escapeHtml(name)+'」还没有抄写词语'); return; }
   const words = items.slice(0, 60);
   const cfg = getUnitCfg('copy');
   const minutes = clamp(Math.round(words.length * cfg.min), 1, 120);
   const sun = clamp(Math.round(words.length * cfg.sun), 1, 500);
-  const task = makeTask(`抄写词语（${words.length}组）`, minutes, sun, { type:'copy', words });
-  state.subjects.chinese.push(task);
+  state.subjects.chinese.push(makeTask(`抄写词语（${words.length}组）`, minutes, sun, { type:'copy', words }));
   saveLocalState(); uploadToCloud();
   const sel = $('adminCopyLessonSelect'); if(sel) sel.value = '';
   renderLessonHint('copy');
   renderBoard(); refreshAllCards(); renderAdminPanel();
-  toast('✅ 已添加「'+escapeHtml(name)+'」抄写词语（'+words.length+'组）');
+  toast('✅ 已添加「'+escapeHtml(name)+'」抄写词语');
 });
-
 $('adminAddChineseBtn').addEventListener('click', () => {
   const textEl = $('adminAddChineseText');
-  const minEl = $('adminAddChineseMin');
-  const sunEl = $('adminAddChineseSun');
+  const minEl = $('adminAddChineseMin'); const sunEl = $('adminAddChineseSun');
   const text = textEl.value.trim();
   if(!text){ toast('请输入作业内容'); return; }
   const minutes = clamp(parseFloat(minEl.value)||10, 1, 120);
   const sun = clamp(parseInt(sunEl.value,10)||30, 1, 500);
   rememberInput('chineseMin', minutes); rememberInput('chineseSun', sun);
-  const task = makeTask(text, minutes, sun);
-  state.subjects.chinese.push(task);
+  state.subjects.chinese.push(makeTask(text, minutes, sun));
   saveLocalState(); uploadToCloud();
   textEl.value = '';
   renderBoard(); refreshAllCards(); renderAdminPanel();
-  toast('✅ 已添加任务：「'+escapeHtml(text)+'」');
+  toast('✅ 已添加任务');
 });
-
 $('adminAddMathBtn').addEventListener('click', () => {
   const textEl = $('adminAddMathText');
-  const minEl = $('adminAddMathMin');
-  const sunEl = $('adminAddMathSun');
+  const minEl = $('adminAddMathMin'); const sunEl = $('adminAddMathSun');
   const text = textEl.value.trim();
   if(!text){ toast('请输入作业内容'); return; }
   const minutes = clamp(parseFloat(minEl.value)||10, 1, 120);
   const sun = clamp(parseInt(sunEl.value,10)||30, 1, 500);
   rememberInput('mathMin', minutes); rememberInput('mathSun', sun);
-  const task = makeTask(text, minutes, sun);
-  state.subjects.math.push(task);
+  state.subjects.math.push(makeTask(text, minutes, sun));
   saveLocalState(); uploadToCloud();
   textEl.value = '';
   renderBoard(); refreshAllCards(); renderAdminPanel();
-  toast('✅ 已添加任务：「'+escapeHtml(text)+'」');
+  toast('✅ 已添加任务');
 });
-
 $('adminAddEnglishBtn').addEventListener('click', () => {
   const textEl = $('adminAddEnglishText');
-  const minEl = $('adminAddEnglishMin');
-  const sunEl = $('adminAddEnglishSun');
+  const minEl = $('adminAddEnglishMin'); const sunEl = $('adminAddEnglishSun');
   const text = textEl.value.trim();
   if(!text){ toast('请输入英语作业内容'); return; }
   const minutes = clamp(parseFloat(minEl.value)||10, 1, 120);
   const sun = clamp(parseInt(sunEl.value,10)||30, 1, 500);
   const task = makeTask(text, minutes, sun);
   state.subjects.english.push(task);
-  rememberInput('englishMin', minutes);
-  rememberInput('englishSun', sun);
+  rememberInput('englishMin', minutes); rememberInput('englishSun', sun);
   saveLocalState(); uploadToCloud();
   textEl.value = '';
   renderBoard(); refreshAllCards(); renderAdminPanel();
-  toast('✅ 已添加英语作业：「'+escapeHtml(text)+'」');
+  toast('✅ 已添加英语作业');
 });
-
-$('adminDateInput').addEventListener('change', e => {
-  const v = e.target.value;
-  if(v) switchDate(v);
-});
+$('adminDateInput').addEventListener('change', e => { const v = e.target.value; if(v) switchDate(v); });
 $('adminGoToday').addEventListener('click', () => switchDate(todayStr()));
 
 $('adminLocalDownloadBtn').addEventListener('click', () => {
@@ -4027,52 +2352,27 @@ $('adminLocalDownloadBtn').addEventListener('click', () => {
     saveLocalState();
     const backup = JSON.parse(JSON.stringify(state));
     backup.__backupType = 'study_board_local_backup';
-    backup.__backupVersion = 1;
     backup.__backupTime = new Date().toISOString();
-
-    const blob = new Blob([JSON.stringify(backup, null, 2)], {
-      type: 'application/json;charset=utf-8'
-    });
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = '学习打卡台_本地备份_' +
-      new Date().toISOString().slice(0,10) + '.json';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    a.download = '学习打卡台_本地备份_' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     toast('✅ 本地数据已下载');
-  }catch(e){
-    console.error(e);
-    toast('⚠️ 本地下载失败');
-  }
+  }catch(e){ toast('⚠️ 本地下载失败'); }
 });
-
-$('adminLocalUploadBtn').addEventListener('click', () => {
-  $('adminLocalUploadFile').value = '';
-  $('adminLocalUploadFile').click();
-});
-
+$('adminLocalUploadBtn').addEventListener('click', () => { $('adminLocalUploadFile').value = ''; $('adminLocalUploadFile').click(); });
 $('adminLocalUploadFile').addEventListener('change', async (e) => {
   const file = e.target.files && e.target.files[0];
   if(!file) return;
-
   try{
-    const text = await file.text();
-    const imported = JSON.parse(text);
-
-    if(!imported || !imported.days){
-      throw new Error('不是有效的学习打卡台本地备份文件');
-    }
-
-    if(!confirm('确定要导入这份本地数据吗？\\n导入后会覆盖当前本地学习数据。')) return;
-
+    const imported = JSON.parse(await file.text());
+    if(!imported || !imported.days) throw new Error('不是有效的备份文件');
+    if(!confirm('确定要导入吗？\\n导入后会覆盖当前本地数据。')) return;
     const newDays = {};
-    Object.keys(imported.days).forEach(k => {
-      newDays[k] = normalizeDay(imported.days[k]);
-    });
-
+    Object.keys(imported.days).forEach(k => { newDays[k] = normalizeDay(imported.days[k]); });
     state.days = newDays;
     state.date = imported.date || todayStr();
     state.sun = Number(imported.sun) || 0;
@@ -4080,93 +2380,66 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
     state.sunLog = Array.isArray(imported.sunLog) ? imported.sunLog : [];
     state.settings = normalizeSettings(imported.settings);
     state.lessonLibrary = normalizeLessonLibrary(imported.lessonLibrary);
-    state.parentPassword = (typeof imported.parentPassword === 'string'
-      && /^\d{4}$/.test(imported.parentPassword))
-      ? imported.parentPassword : MASTER_PASSWORD;
-
+    state.parentPassword = (typeof imported.parentPassword === 'string' && /^\d{4}$/.test(imported.parentPassword)) ? imported.parentPassword : MASTER_PASSWORD;
     if(!state.days[state.date]) state.days[state.date] = makeDay();
-
-    saveLocalState();
-    renderStats();
-    renderBoard();
-    refreshAllCards();
-    updateDogBar();
-    updateMainBtn();
+    saveLocalState(); renderStats(); renderBoard(); refreshAllCards();
+    updateDogBar(); updateMainBtn();
     if(isAdminMode) renderAdminPanel();
     populateLessonSelects();
-
     let synced = false;
-    try{ synced = await uploadToCloud(true); }catch(err){ console.warn('导入后云端同步失败', err); }
-
-    toast(synced ? '✅ 本地数据导入成功，已同步到云端' : '✅ 本地数据导入成功（云端同步失败，请点「强制上传本地数据」）');
+    try{ synced = await uploadToCloud(true); }catch(err){}
+    toast(synced ? '✅ 导入成功并同步到云端' : '✅ 导入成功（云端同步失败）');
   }catch(err){
     console.error(err);
-    toast('⚠️ 本地上传失败：' + err.message);
+    toast('⚠️ 导入失败：' + err.message);
   }
 });
-
 $('adminForceSyncBtn').addEventListener('click', async () => {
   if(!dataRef){ toast('⚠️ 云端未连接'); return; }
   updateSyncInfo('正在上传…');
   const ok = await uploadToCloud(true);
-  toast(ok ? '✅ 已上传本地数据到云端' : '⚠️ 上传失败：请检查网络或云端权限');
-  if(!ok) updateSyncInfo('上传失败：请检查网络或云端权限');
+  toast(ok ? '✅ 已上传本地数据到云端' : '⚠️ 上传失败');
 });
 $('adminForcePullBtn').addEventListener('click', async () => {
   if(!dataRef){ toast('⚠️ 云端未连接'); return; }
   updateSyncInfo('正在读取云端…');
   const result = await readCloudOnce();
-  if(result.state === 'has-data'
-     && result.data && result.data.days
-     && Object.keys(result.data.days).length){
-    lastPushedUpdatedAt = 0;
-    lastRemoteUpdatedAt = 0;
+  if(result.state === 'has-data' && result.data && result.data.days && Object.keys(result.data.days).length){
+    lastPushedUpdatedAt = 0; lastRemoteUpdatedAt = 0;
     applyRemoteState(result.data);
     toast('✅ 已从云端拉取最新数据');
-  } else if(result.state === 'empty'){
-    toast('⚠️ 云端暂无数据');
-    updateSyncInfo('云端暂无数据');
-  } else {
-    toast('⚠️ 读取云端失败，请检查网络');
-    updateSyncInfo('读取云端失败');
-  }
+  } else if(result.state === 'empty'){ toast('⚠️ 云端暂无数据'); }
+  else { toast('⚠️ 读取云端失败'); }
 });
 
-document.querySelectorAll('.subject-tab').forEach(tab => {
-  tab.addEventListener('click', () => switchSubject(tab.dataset.tab));
-});
-
+document.querySelectorAll('.subject-tab').forEach(tab => { tab.addEventListener('click', () => switchSubject(tab.dataset.tab)); });
 mainBtn.addEventListener('click', onMainBtnClick);
 
 window.addEventListener('resize', () => {
   updateDogBar();
-  /* ★ 轨道宽度可能变化，重新测量并刷新眼睛位置 */
-  eyeRailW = -1;
-  measureEyeRail();
-  updateEyeUI();
+  eyeRailW = -1; measureEyeRail(); updateEyeUI();
 });
 
 let wasRunning = false;
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState === 'hidden'){
-    if(running){ wasRunning = true; running = false; cancelAnimationFrame(rafId); rafId = null; dogEl.classList.remove('running'); }
+    if(live.mode === 'running' && isMyLive()){
+      wasRunning = true;
+      cancelAnimationFrame(rafId); rafId = null;
+      dogEl.classList.remove('running');
+    }
   } else {
-    if(wasRunning && activeId){
+    if(wasRunning && live.taskId && live.mode === 'running'){
       wasRunning = false;
-      const rt = runtimeMap[activeId];
-      if(rt && rt.leftMs > 0){
-        running = true; lastTs = performance.now();
-        rafId = requestAnimationFrame(tick);
-        dogEl.classList.add('running');
-        refreshAllCards(); updateDogBar(); updateMainBtn();
-      }
-    } else { updateDogBar(); updateMainBtn(); }
-    /* 若护眼提醒还在跑，回来时确保 tick 恢复 */
+      lastTs = performance.now();
+      rafId = requestAnimationFrame(tick);
+      dogEl.classList.add('running');
+    }
+    refreshAllCards(); updateDogBar(); updateMainBtn();
     if(eyeTimer.active) ensureTickRunning();
   }
 });
 
-/* ★ 只在 http/https 下注册 SW，避免 file:// 直接打开时报错 */
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js')
@@ -4175,6 +2448,10 @@ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
   });
 }
 
+/* ============================================================
+   启动
+============================================================ */
+loadPhotos();
 state = attachSubjectsProxy(loadLocalState());
 state.date = todayStr();
 if(!state.days[state.date]) state.days[state.date] = makeDay();
@@ -4187,39 +2464,31 @@ switchSubject('chinese');
 refreshAllCards();
 requestAnimationFrame(() => {
   measureEyeRail();
-  updateEyeUI();   /* ★ 初始化护眼卡片 UI */
+  updateEyeUI();
   updateDogBar();
   updateMainBtn();
 });
 
-/* ============================================================
-   ☁️ 启动同步
-============================================================ */
 const familyIdEl = document.getElementById('familyIdText');
 if(familyIdEl) familyIdEl.textContent = FAMILY_ID;
 
 if(dataRef && fbSet && fbGet && fbOnValue){
   (async () => {
     const result = await readCloudOnce();
-    if(result.state === 'has-data'
-       && result.data && result.data.days
-       && Object.keys(result.data.days).length){
+    if(result.state === 'has-data' && result.data && result.data.days && Object.keys(result.data.days).length){
       applyRemoteState(result.data);
-      console.log('✅ 已从云端加载数据（以云端为准）');
+      console.log('✅ 已从云端加载数据');
     }
     else if(result.state === 'empty'){
-      console.log('☁️ 云端确认为空，用本地数据初始化并上传');
+      console.log('☁️ 云端为空，用本地数据初始化');
       await uploadToCloud(true);
     }
-    else {
-      console.warn('⚠️ 读取云端失败（可能是网络问题），暂不上传');
-      showSyncStatus('⚠️ 云端读取失败，稍后重试', 'offline');
-    }
+    else { showSyncStatus('⚠️ 云端读取失败', 'offline'); }
     freshBoot = false;
     startCloudSync();
     updateSyncInfo();
     if(nameMigrated && result.state !== 'error'){
-      try{ await uploadToCloud(true); }catch(e){ console.warn('改名回写云端失败', e); }
+      try{ await uploadToCloud(true); }catch(e){}
     }
   })();
 } else {
@@ -4227,5 +2496,3 @@ if(dataRef && fbSet && fbGet && fbOnValue){
   showSyncStatus('📴 纯本地模式', 'offline');
 }
 </script>
-</body>
-</html>
