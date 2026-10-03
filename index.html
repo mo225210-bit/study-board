@@ -284,6 +284,16 @@
   .task-card.active{border-color:#FFC107;box-shadow:0 0 0 3px rgba(255,193,7,.4),0 6px 16px rgba(0,0,0,.16)}
   .task-card.active.paused-card{border-color:#FFB74D;box-shadow:0 0 0 3px rgba(255,183,77,.4)}
   .task-card.active.chomping-card{border-color:#FF7043;box-shadow:0 0 0 3px rgba(255,112,67,.4)}
+  /* ★ 护眼警告：作业卡片也一起闪烁 */
+  .task-card.eye-alert{
+    border-color:#E53935!important;
+    box-shadow:0 0 0 3px rgba(229,57,53,.5),0 6px 16px rgba(229,57,53,.35)!important;
+    animation:taskEyeAlert 1s ease-in-out infinite;
+  }
+  @keyframes taskEyeAlert{
+    0%,100%{box-shadow:0 0 0 3px rgba(229,57,53,.4),0 6px 16px rgba(229,57,53,.2)}
+    50%{box-shadow:0 0 0 7px rgba(229,57,53,.65),0 6px 22px rgba(229,57,53,.45)}
+  }
   .task-card.done{background:rgba(238,248,236,.97);border-color:#B7E0A8;animation:cardDone .6s ease}
   @keyframes cardDone{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,193,7,.75)}
     50%{transform:scale(1.03);box-shadow:0 0 0 9px rgba(255,193,7,0)}100%{transform:scale(1)}}
@@ -388,7 +398,7 @@
     font-weight:400;color:#000000;
   }
 
-  /* ★ 田字格内的倒计时进度条：高度加倍，位于字体下方，覆盖在田字格之上 */
+  /* 田字格进度条：高度加倍，字体下方 */
   .mizi-bar{
     position:absolute;left:0;bottom:0;height:8px;width:0;
     border-radius:0 4px 4px 0;
@@ -787,7 +797,6 @@
     .char-pinyin{font-size:14px;max-width:66px}
     .char-info{font-size:11px}
     .char-grid{gap:6px}
-    /* 小屏田字格进度条高度同步翻倍 */
     .mizi-bar{height:7px;border-radius:0 3.5px 3.5px 0}
     .eye-card{gap:5px;padding:7px 9px}
     .eye-time{font-size:14px;min-width:46px}
@@ -858,7 +867,6 @@
   .drag-handle{font-size:15px;color:#7a9aaa;flex:none}
 
   .word-group.no-char-info .char-info{display:none}
-
 </style>
 </head>
 <body>
@@ -1239,7 +1247,8 @@
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
         孩子点「开始」后自动开始用眼倒计时。用眼到时间会响铃提醒休息；<br>
         不点「放松眼睛」的话，之后每 1 分钟再响铃一次，直到点为止。<br>
-        护眼提醒会一直持续到当天所有作业写完。
+        护眼提醒会一直持续到当天所有作业写完。<br>
+        <b style="color:#FFD54F">用眼时间到 → 作业倒计时自动暂停，放松结束后自动继续。</b>
       </p>
       <div class="admin-add-row inline-row">
         <input class="aa-num" id="adminEyeUseMin" type="number" min="1" max="120" step="1" placeholder="分钟">
@@ -1338,7 +1347,6 @@
         保存「课文名 → 会写字 / 会识字 / 抄写词语」。添加任务时只需在上方选择课文名，点「添加」即可生成，无需手动输入。
         <b style="color:#FFD54F">双击条目可重新编辑。</b>
       </p>
-
       <div class="admin-add-row">
         <button class="aa-btn" id="adminLibSyncBtn">📤 上传写字表 / 识字表</button>
       </div>
@@ -1434,7 +1442,7 @@ const MAX_PHOTOS_PER_TASK = 3;
 const PHOTO_MAX_SIZE = 800;
 const PHOTO_QUALITY = 0.55;
 
-/* ★ 全局计时权威状态（跨设备 / 刷新持久化 的核心） */
+/* ★ 全局计时权威状态 */
 const DEFAULT_LIVE = {
   activeId: '',
   status: 'idle',        // 'idle' | 'running' | 'paused' | 'chomping'
@@ -1443,11 +1451,18 @@ const DEFAULT_LIVE = {
   totalMs: 0,
   rounds: 0,
   chompUntil: 0,
+  /* ★ 单元倒计时：单次 = 一个字 / 一组 的时间 */
+  unitMs: 0,
+  unitIndex: 0,
+  unitTotal: 0,
+  /* 护眼 */
   eyeActive: false,
   eyeMode: 'idle',       // 'idle' | 'use' | 'need-rest' | 'rest'
   eyeStageStart: 0,
   eyeTotalMs: 0,
   eyeNagCount: 0,
+  eyePausedTask: false,  // 护眼是否暂停了作业
+  /* 声音 */
   soundSeq: 0,
   soundKind: '',
   ownerTab: '',
@@ -1873,10 +1888,11 @@ function liveEyeLeftMs(L){
 function syncRuntimeFromLive(){
   const L = state.live;
   if(!L || !L.activeId) return;
+  const unitMs = L.unitMs || L.totalMs || 60000;
   const rt = runtimeMap[L.activeId] || (runtimeMap[L.activeId] = {
-    totalMs: L.totalMs, leftMs: L.totalMs, rounds: 0, holdDogAtEnd: false
+    totalMs: unitMs, leftMs: unitMs, rounds: 0, holdDogAtEnd: false
   });
-  rt.totalMs = L.totalMs;
+  rt.totalMs = unitMs;
   rt.leftMs = liveLeftMs(L);
   rt.rounds = L.rounds;
   rt.holdDogAtEnd = (L.status === 'chomping');
@@ -1947,7 +1963,6 @@ function liveHandle(pack){
       syncRuntimeFromLive();
       checkAndPlaySound();
       renderAllLiveUI();
-      /* ★ 保证本地 tick 处于运行状态（移动端可能之前停过） */
       if(state.live.activeId || state.live.eyeActive) ensureTickRunning();
     }
   }
@@ -1957,6 +1972,7 @@ function renderAllLiveUI(){
   if(activeId) updateCardVisual(activeId);
   updateEyeUI();
   updateMainBtn();
+  updateEyeAlertOnTask();
   if(charTimer.active) paintCharBarsFromLive();
 }
 
@@ -2019,7 +2035,6 @@ function applyRemoteState(remote){
   if(typeof remote.parentPassword === 'string' && /^\d{4}$/.test(remote.parentPassword)){
     state.parentPassword = remote.parentPassword;
   }
-  /* ★ 应用云端 live（仅当远端更新） */
   if(remote.live && typeof remote.live === 'object'){
     const remoteLiveAt = Number(remote.live.updatedAt) || 0;
     const localLiveAt = Number(state.live && state.live.updatedAt) || 0;
@@ -2034,19 +2049,19 @@ function applyRemoteState(remote){
   syncRuntimeFromLive();
   checkAndPlaySound();
   updateDogBar(); updateMainBtn(); updateDateText(); updateEyeUI();
+  updateEyeAlertOnTask();
   if(charTimer.active) paintCharBarsFromLive();
   if(isAdminMode) renderAdminPanel();
   isRemoteUpdate = false;
   showSyncStatus('☁️ 已从云端更新', 'online');
   updateSyncInfo();
-  /* ★ 关键：云端有活跃任务/护眼时，强制启动 tick（修复移动端停止问题） */
   if(state.live && (state.live.activeId || state.live.eyeActive)){
     ensureTickRunning();
-    /* 保证 charTimer 已初始化 */
     setTimeout(() => {
       if(state.live.activeId && (!charTimer.active || charTimer.taskId !== state.live.activeId)){
         initCharTimer(state.live.activeId);
       }
+      updateEyeAlertOnTask();
     }, 60);
   }
 }
@@ -2094,24 +2109,60 @@ function showSyncStatus(text, cls){
 }
 
 /* ============================================================
-   音效
+   🔊 音效（含 iOS 解锁）
 ============================================================ */
 let audioCtx = null;
+let audioUnlocked = false;
+
 function ensureAudio(){
-  if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){audioCtx=null;} }
-  if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  if(!audioCtx){
+    try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){audioCtx=null;}
+  }
+  if(audioCtx && audioCtx.state === 'suspended'){
+    try{ audioCtx.resume(); }catch(e){}
+  }
   return audioCtx;
 }
+/* ★ iOS / iPad 默认浏览器需要用户手势解锁音频 */
+function unlockAudio(){
+  try{
+    if(!audioCtx){
+      audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    }
+    if(audioCtx.state === 'suspended'){
+      audioCtx.resume().then(() => {
+        audioUnlocked = true;
+        // 播放一个静音 buffer 完全解锁
+        try{
+          const buf = audioCtx.createBuffer(1, 1, 22050);
+          const src = audioCtx.createBufferSource();
+          src.buffer = buf;
+          src.connect(audioCtx.destination);
+          src.start(0);
+        }catch(e){}
+      }).catch(()=>{});
+    } else {
+      audioUnlocked = true;
+    }
+  }catch(e){}
+}
+document.addEventListener('touchstart', unlockAudio, { passive: true });
+document.addEventListener('touchend', unlockAudio, { passive: true });
+document.addEventListener('click', unlockAudio);
+document.addEventListener('keydown', unlockAudio);
+
 function tone(freq,start,dur,type,vol){
   if(!audioCtx) return;
-  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-  o.type = type||'sine';
-  o.frequency.setValueAtTime(freq,start);
-  g.gain.setValueAtTime(0.0001,start);
-  g.gain.linearRampToValueAtTime(vol||0.12,start+0.012);
-  g.gain.exponentialRampToValueAtTime(0.0001,start+dur);
-  o.connect(g); g.connect(audioCtx.destination);
-  o.start(start); o.stop(start+dur+0.02);
+  try{
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = type||'sine';
+    o.frequency.setValueAtTime(freq,start);
+    g.gain.setValueAtTime(0.0001,start);
+    g.gain.linearRampToValueAtTime(vol||0.12,start+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001,start+dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(start); o.stop(start+dur+0.02);
+  }catch(e){}
 }
 function playSound(kind){
   if(!ensureAudio()) return;
@@ -2431,6 +2482,7 @@ function renderBoard(){
   mathTabCountEl.textContent    = state.subjects.math.filter(t=>!t.done).length;
   englishTabCountEl.textContent = state.subjects.english.filter(t=>!t.done).length;
   rebindCharTimer();
+  updateEyeAlertOnTask();
 }
 function renderSubjectCards(subject, listEl){
   listEl.innerHTML = '';
@@ -2549,6 +2601,8 @@ function updateCardVisual(id){
     if(pauseState.active) cls += ' paused-card';
     if(rt && rt.holdDogAtEnd) cls += ' chomping-card';
   }
+  /* ★ 保留 eye-alert 类 */
+  if(ref.el.classList.contains('eye-alert')) cls += ' eye-alert';
   ref.el.className = cls;
   if(rt && isActive){
     if(pauseState.active){
@@ -2578,8 +2632,23 @@ function updateCardVisual(id){
 }
 function refreshAllCards(){ Object.keys(cardRefs).forEach(id => updateCardVisual(id)); }
 
+/* ★ 护眼警告：作业卡片也一起闪烁 */
+function updateEyeAlertOnTask(){
+  const L = state.live;
+  const alert = !!(L && L.eyeActive && L.eyeMode === 'need-rest');
+  Object.keys(cardRefs).forEach(id => {
+    const ref = cardRefs[id];
+    if(!ref || !ref.el) return;
+    if(alert && id === L.activeId){
+      if(!ref.el.classList.contains('eye-alert')) ref.el.classList.add('eye-alert');
+    } else {
+      if(ref.el.classList.contains('eye-alert')) ref.el.classList.remove('eye-alert');
+    }
+  });
+}
+
 /* ============================================================
-   田字格倒计时（★ 完全从 state.live 派生，刷新后自动恢复）
+   田字格倒计时（★ 从 live 派生，刷新后自动恢复）
 ============================================================ */
 function charBarEnsure(mizi){
   let bar = mizi.querySelector('.mizi-bar');
@@ -2671,45 +2740,47 @@ function rebindCharTimer(){
   attachCharBars(charTimer.units, false);
   paintCharBarsFromLive();
 }
-/* ★ 从 live 派生田字格进度，刷新/多端切换后自动恢复 */
+/* ★ 从 live 派生田字格进度 */
 function paintCharBarsFromLive(){
   if(!charTimer.active || !charTimer.units.length) return;
   const L = state.live;
   if(!L || L.activeId !== charTimer.taskId){
-    /* 任务不匹配：全部归零 */
     charTimer.units.forEach(u => u.bars.forEach(b => {
       if(b.__w !== '0%'){ b.__w = '0%'; b.style.width = '0%'; }
     }));
     return;
   }
-  const totalMs = Math.max(1, L.totalMs || 1);
-  let elapsed;
-  if(L.status === 'paused') elapsed = totalMs - (L.leftAtStart || 0);
-  else if(L.status === 'chomping') elapsed = totalMs;
-  else elapsed = totalMs - liveLeftMs(L);
-  elapsed = clamp(elapsed, 0, totalMs);
+  const N = charTimer.units.length;
+  const unitTotal = Math.max(1, L.unitTotal || N);
+  const unitIndex = Math.min(L.unitIndex || 0, unitTotal - 1);
+  const unitMs = Math.max(1, L.unitMs || 1);
+  const left = liveLeftMs(L);
+  let unitProgress;
+  if(L.status === 'chomping') unitProgress = 1;
+  else unitProgress = clamp(1 - left / unitMs, 0, 1);
 
-  /* 计算单位权重总和 */
+  const overallProgress = clamp((unitIndex + unitProgress) / unitTotal, 0, 1);
+
   let S = 0;
-  for(let i = 0; i < charTimer.units.length; i++) S += charTimer.units[i].totalMs;
+  for(let i = 0; i < N; i++) S += charTimer.units[i].totalMs;
   if(S <= 0) return;
-  const target = (elapsed / totalMs) * S;
+  const target = overallProgress * S;
 
-  let acc = 0, index = 0, unitElapsed = 0;
-  for(let i = 0; i < charTimer.units.length; i++){
+  let acc = 0, idx = 0, unitElapsed = 0;
+  for(let i = 0; i < N; i++){
     const u = charTimer.units[i];
-    if(target < acc + u.totalMs || i === charTimer.units.length - 1){
-      index = i;
+    if(target < acc + u.totalMs || i === N - 1){
+      idx = i;
       unitElapsed = clamp(target - acc, 0, u.totalMs);
       break;
     }
     acc += u.totalMs;
   }
-  charTimer.index = index;
+  charTimer.index = idx;
   charTimer.units.forEach((u, i) => {
     let w;
-    if(i < index) w = '100%';
-    else if(i === index) w = (clamp(unitElapsed / u.totalMs, 0, 1) * 100) + '%';
+    if(i < idx) w = '100%';
+    else if(i === idx) w = (clamp(unitElapsed / u.totalMs, 0, 1) * 100) + '%';
     else w = '0%';
     u.bars.forEach(b => {
       if(b.__w !== w){ b.__w = w; b.style.width = w; }
@@ -2768,9 +2839,9 @@ function updateEyeUI(){
 /* ============================================================
    运行时
 ============================================================ */
-function ensureRuntime(task){
+function ensureRuntime(task, unitMs){
   if(!runtimeMap[task.id]){
-    const ms = clamp(Number(task.minutes)||10,0.5,120)*60000;
+    const ms = unitMs || clamp(Number(task.minutes)||10,0.5,120)*60000;
     runtimeMap[task.id] = {totalMs:ms,leftMs:ms,rounds:0,holdDogAtEnd:false};
   }
   return runtimeMap[task.id];
@@ -2927,34 +2998,61 @@ function tick(){
   const now = Date.now();
   const amOwner = isLiveOwner();
 
-  /* 处理 task 状态 */
+  /* 处理 task 状态（单字/单元倒计时） */
   if(L.activeId){
     if(L.status === 'running' && amOwner){
       const left = liveLeftMs(L);
       if(left <= 0){
+        /* ★ 单元倒计时结束 → 扣 1 金币 → 进入下一个单元 */
         L.rounds = (L.rounds || 0) + 1;
         L.status = 'chomping';
         L.chompUntil = now + CHOMP_HOLD_MS;
-        L.leftAtStart = L.totalMs;
+
+        /* 推进单元（循环） */
+        const unitTotal = Math.max(1, L.unitTotal || 1);
+        let nextIdx = (L.unitIndex || 0) + 1;
+        if(nextIdx >= unitTotal) nextIdx = 0;
+        L.unitIndex = nextIdx;
+
+        /* 计算下一个单元时长（不同单元可能不同） */
+        const info = findTask(L.activeId);
+        if(info){
+          const ref = cardRefs[L.activeId];
+          if(ref && ref.el){
+            const grid = ref.el.querySelector('.char-grid');
+            if(grid){
+              const built = buildCharUnits(info.task, grid);
+              if(built.units.length > 0){
+                const idx = nextIdx % built.units.length;
+                L.unitMs = built.units[idx].totalMs;
+              }
+            }
+          }
+        }
+        if(!L.unitMs) L.unitMs = L.totalMs || 60000;
+
         L.startedAt = now;
+        L.leftAtStart = L.unitMs;
         L.soundSeq = (L.soundSeq || 0) + 1;
         L.soundKind = 'round';
+
+        /* 扣金币 */
         state.sun -= 1;
-        pushSunLog(-1, '未完成扣 1 金币');
+        pushSunLog(-1, '超时扣 1 金币');
         sunAnchor.classList.add('eaten');
         dogEl.classList.remove('running');
         dogEl.classList.add('chomp');
         bumpPill(sunPillEl);
         flySunAway(1);
         setTimeout(() => { sunAnchor.classList.remove('eaten'); }, 650);
-        toast('⏰ 第 <b>' + L.rounds + '</b> 轮结束，任务未完成！<br>扣掉 1 颗金币 💰', 3200);
+        toast('⏰ 超时！扣掉 1 颗金币 💰', 3200);
         pushLive();
       }
     }
     if(L.status === 'chomping' && amOwner && now >= L.chompUntil){
       L.status = 'running';
       L.startedAt = now;
-      L.leftAtStart = L.totalMs;
+      L.leftAtStart = L.unitMs || 60000;
       pushLive();
     }
   }
@@ -2968,6 +3066,17 @@ function tick(){
         L.eyeStageStart = now;
         L.eyeTotalMs = 0;
         L.eyeNagCount = 0;
+
+        /* ★ 用眼时间到 → 暂停作业 */
+        if(L.activeId && L.status === 'running'){
+          const taskLeft = liveLeftMs(L);
+          L.status = 'paused';
+          L.leftAtStart = Math.max(0, taskLeft);
+          L.startedAt = now;
+          L.eyePausedTask = true;
+          setCharPaused(true); lastCharPaused = true;
+        }
+
         L.soundSeq = (L.soundSeq || 0) + 1;
         L.soundKind = 'eyeAlert';
         pushLive();
@@ -2991,6 +3100,18 @@ function tick(){
         L.eyeStageStart = now;
         L.eyeTotalMs = cfg.useMin * 60000;
         L.eyeNagCount = 0;
+
+        /* ★ 放松结束 → 作业自动继续 */
+        if(L.eyePausedTask && L.activeId){
+          L.eyePausedTask = false;
+          if(L.status === 'paused'){
+            L.status = 'running';
+            L.startedAt = now;
+            /* leftAtStart 保持不变，从暂停处继续 */
+            setCharPaused(false); lastCharPaused = false;
+          }
+        }
+
         L.soundSeq = (L.soundSeq || 0) + 1;
         L.soundKind = 'restDone';
         pushLive();
@@ -2999,7 +3120,7 @@ function tick(){
     }
   }
 
-  /* 同步 legacy 状态 + runtimeMap */
+  /* 同步 legacy */
   syncLegacyFromLive();
   syncRuntimeFromLive();
 
@@ -3013,7 +3134,7 @@ function tick(){
     }
   }
 
-  /* ★ 田字格进度：直接从 live 派生（刷新/多端均自动恢复） */
+  /* 田字格进度：从 live 派生 */
   if(charTimer.active && charTimer.taskId === L.activeId){
     paintCharBarsFromLive();
     const wantPaused = (L.status === 'paused');
@@ -3042,8 +3163,8 @@ function tick(){
   if(activeId) updateCardVisual(activeId);
   updateEyeUI();
   updateMainBtn();
+  updateEyeAlertOnTask();
 
-  /* 判定是否需要继续 tick */
   const needTick = !!L.activeId || L.eyeActive;
   if(!needTick && tickTimer){
     clearInterval(tickTimer); tickTimer = null;
@@ -3066,17 +3187,32 @@ function liveStartTask(taskId){
   const info = findTask(taskId);
   if(!info || info.task.done) return;
   const L = state.live;
-  const totalMs = clamp(Number(info.task.minutes)||10, 0.5, 120) * 60000;
+  const task = info.task;
+
+  /* 初始化田字格以获取单元信息 */
+  if(!charTimer.active || charTimer.taskId !== taskId){
+    initCharTimer(taskId);
+  }
+  const unitTotal = charTimer.active ? Math.max(1, charTimer.units.length) : 1;
+  const unitMs = charTimer.active && charTimer.units.length > 0
+    ? charTimer.units[0].totalMs
+    : clamp(Number(task.minutes)||10, 0.5, 120) * 60000;
+
   L.activeId = taskId;
   L.status = 'running';
   L.startedAt = Date.now();
-  L.leftAtStart = totalMs;
-  L.totalMs = totalMs;
+  L.leftAtStart = unitMs;
+  L.unitMs = unitMs;
+  L.unitIndex = 0;
+  L.unitTotal = unitTotal;
+  L.totalMs = clamp(Number(task.minutes)||10, 0.5, 120) * 60000;
   L.rounds = 0;
   L.chompUntil = 0;
+  L.eyePausedTask = false;
   L.ownerTab = TAB_ID;
   L.soundSeq = (L.soundSeq || 0) + 1;
   L.soundKind = 'start';
+
   if(!L.eyeActive){
     const cfg = getEyeCfg();
     L.eyeActive = true;
@@ -3085,10 +3221,16 @@ function liveStartTask(taskId){
     L.eyeTotalMs = cfg.useMin * 60000;
     L.eyeNagCount = 0;
   }
-  ensureRuntime(info.task);
+
+  ensureRuntime(task, unitMs);
+  const rt = runtimeMap[taskId];
+  rt.totalMs = unitMs;
+  rt.leftMs = unitMs;
+  rt.rounds = 0;
+  rt.holdDogAtEnd = false;
+
   ensureTickRunning();
   pushLive();
-  /* 立即初始化田字格 */
   if(!charTimer.active || charTimer.taskId !== taskId) initCharTimer(taskId);
   else rebindCharTimer();
   lastCharPaused = false;
@@ -3096,6 +3238,7 @@ function liveStartTask(taskId){
   paintCharBarsFromLive();
   refreshAllCards();
   updateDogBar(); updateMainBtn();
+  updateEyeAlertOnTask();
   scrollToCard(taskId);
 }
 function livePause(){
@@ -3119,6 +3262,7 @@ function liveResume(){
   if(!L.activeId || L.status !== 'paused') return;
   L.status = 'running';
   L.startedAt = Date.now();
+  L.eyePausedTask = false;   /* 用户主动继续 → 清掉护眼暂停标记 */
   L.ownerTab = TAB_ID;
   L.soundSeq = (L.soundSeq || 0) + 1;
   L.soundKind = 'resume';
@@ -3135,8 +3279,12 @@ function liveStopTask(){
   L.startedAt = 0;
   L.leftAtStart = 0;
   L.totalMs = 0;
+  L.unitMs = 0;
+  L.unitIndex = 0;
+  L.unitTotal = 0;
   L.rounds = 0;
   L.chompUntil = 0;
+  L.eyePausedTask = false;
   clearCharTimer();
   pushLive();
 }
@@ -3144,6 +3292,17 @@ function liveStartEyeRest(){
   const L = state.live;
   if(!L.eyeActive) return;
   if(L.eyeMode !== 'use' && L.eyeMode !== 'need-rest') return;
+
+  /* ★ 若作业正在运行，暂停它 */
+  if(L.activeId && L.status === 'running'){
+    const taskLeft = liveLeftMs(L);
+    L.status = 'paused';
+    L.leftAtStart = Math.max(0, taskLeft);
+    L.startedAt = Date.now();
+    L.eyePausedTask = true;
+    setCharPaused(true); lastCharPaused = true;
+  }
+
   const cfg = getEyeCfg();
   L.eyeMode = 'rest';
   L.eyeStageStart = Date.now();
@@ -3161,6 +3320,7 @@ function liveStopEyeCare(){
   L.eyeStageStart = 0;
   L.eyeTotalMs = 0;
   L.eyeNagCount = 0;
+  L.eyePausedTask = false;
   pushLive();
 }
 
@@ -4446,6 +4606,7 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
     updateDogBar();
     updateMainBtn();
     updateEyeUI();
+    updateEyeAlertOnTask();
     if(isAdminMode) renderAdminPanel();
     populateLessonSelects();
     let synced = false;
@@ -4500,7 +4661,6 @@ window.addEventListener('resize', () => {
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState === 'visible'){
     lastTs = performance.now();
-    /* ★ 回到前台：确保 tick 在跑，并重新派生 UI */
     if(state.live && (state.live.activeId || state.live.eyeActive)) ensureTickRunning();
     syncLegacyFromLive();
     syncRuntimeFromLive();
@@ -4508,7 +4668,6 @@ document.addEventListener('visibilitychange', () => {
     renderAllLiveUI();
   }
 });
-/* 页面获得焦点时也检查一次（移动端从后台切回时更可靠） */
 window.addEventListener('focus', () => {
   lastTs = performance.now();
   if(state.live && (state.live.activeId || state.live.eyeActive)) ensureTickRunning();
@@ -4559,6 +4718,7 @@ requestAnimationFrame(() => {
   updateEyeUI();
   updateDogBar();
   updateMainBtn();
+  updateEyeAlertOnTask();
 });
 
 /* ★ 从持久化状态恢复倒计时（刷新后不会复位） */
@@ -4572,9 +4732,15 @@ requestAnimationFrame(() => {
     L.startedAt = 0;
     L.leftAtStart = 0;
     L.totalMs = 0;
+    L.unitMs = 0;
+    L.unitIndex = 0;
+    L.unitTotal = 0;
     return;
   }
-  ensureRuntime(info.task);
+  /* 兼容旧数据：没有 unitMs 时退化为整个任务时长 */
+  if(!L.unitMs) L.unitMs = L.totalMs || 60000;
+  if(!L.unitTotal) L.unitTotal = 1;
+  ensureRuntime(info.task, L.unitMs);
   if(L.status === 'running' || L.status === 'chomping'){
     L.ownerTab = TAB_ID;
     L.updatedAt = Date.now();
@@ -4589,6 +4755,7 @@ requestAnimationFrame(() => {
       initCharTimer(state.live.activeId);
       if(state.live.status === 'paused'){ setCharPaused(true); lastCharPaused = true; }
       paintCharBarsFromLive();
+      updateEyeAlertOnTask();
     }
   }, 220);
 })();
