@@ -818,7 +818,7 @@
       <button class="cal-btn" id="calBtn" title="切换日期">
         📅<span class="cal-dot"></span>
       </button>
-      <div class="pill sun-pill" id="sunPill">☀️ <span id="sunCount">0</span></div>
+      <div class="pill sun-pill" id="sunPill">🪙 <span id="sunCount">0</span></div>
       <div class="pill streak-pill">🔥 <span id="streakCount">0</span>天</div>
     </div>
   </header>
@@ -827,7 +827,7 @@
     <div class="timer-row">
       <div class="track" id="track">
         <div class="track-fill" id="trackFill"></div>
-        <div class="sun-anchor" id="sunAnchor">☀️</div>
+        <div class="sun-anchor" id="sunAnchor">🪙</div>
         <div class="track-time" id="trackTime">--:--</div>
         <div class="dog-wrap" id="dogWrap"><div class="dog" id="dog">🐕</div></div>
       </div>
@@ -919,7 +919,7 @@
   </div>
 
   <div class="timer-hint" style="margin-top:-3px">
-    打勾 ✓ 表示完成 · 再次点击可取消完成并同步减少阳光
+    打勾 ✓ 表示完成 · 再次点击可取消完成并同步减少金币
   </div>
 
 </div>
@@ -1005,7 +1005,7 @@
 <div class="modal" id="taskEditModal">
   <div class="modal-card">
     <h3>✏️ 编辑作业</h3>
-    <p>双击作业条目可随时修改内容、时长与阳光</p>
+    <p>双击作业条目可随时修改内容、时长与金币</p>
     <div class="form-field">
       <label>作业内容</label>
       <input type="text" id="taskEditText" maxlength="200" placeholder="作业内容">
@@ -1020,7 +1020,7 @@
         <input type="number" id="taskEditMin" min="0.5" max="120" step="0.5">
       </div>
       <div class="form-field">
-        <label>阳光奖励 ☀️</label>
+        <label>金币奖励 🪙</label>
         <input type="number" id="taskEditSun" min="1" max="500" step="1">
       </div>
     </div>
@@ -1086,8 +1086,8 @@
         </select>
         <input class="aa-num" id="unitPreviewMin" type="number" step="0.5" min="0.5" max="20" placeholder="分钟">
         <span class="aa-unit">分钟/字</span>
-        <input class="aa-num" id="unitPreviewSun" type="number" step="0.5" min="0.5" max="50" placeholder="阳光">
-        <span class="aa-unit">阳光/字</span>
+        <input class="aa-num" id="unitPreviewSun" type="number" step="0.5" min="0.5" max="50" placeholder="金币">
+        <span class="aa-unit">金币/字</span>
         <button class="aa-btn" id="adminAddPreviewBtn">添加</button>
       </div>
 
@@ -1098,8 +1098,8 @@
         </select>
         <input class="aa-num" id="unitWordgroupMin" type="number" step="0.5" min="0.5" max="20" placeholder="分钟">
         <span class="aa-unit">分钟/字</span>
-        <input class="aa-num" id="unitWordgroupSun" type="number" step="0.5" min="0.5" max="50" placeholder="阳光">
-        <span class="aa-unit">阳光/字</span>
+        <input class="aa-num" id="unitWordgroupSun" type="number" step="0.5" min="0.5" max="50" placeholder="金币">
+        <span class="aa-unit">金币/字</span>
         <button class="aa-btn" id="adminAddWordgroupBtn">添加</button>
       </div>
 
@@ -1110,8 +1110,8 @@
         </select>
         <input class="aa-num" id="unitCopyMin" type="number" step="0.5" min="0.5" max="20" placeholder="分钟">
         <span class="aa-unit">分钟/组</span>
-        <input class="aa-num" id="unitCopySun" type="number" step="0.5" min="0.5" max="50" placeholder="阳光">
-        <span class="aa-unit">阳光/组</span>
+        <input class="aa-num" id="unitCopySun" type="number" step="0.5" min="0.5" max="50" placeholder="金币">
+        <span class="aa-unit">金币/组</span>
         <button class="aa-btn" id="adminAddCopyBtn">添加</button>
       </div>
 
@@ -1120,8 +1120,8 @@
         <input class="aa-text" id="adminAddChineseText" placeholder="作业内容，例：背诵《静夜思》">
         <input class="aa-num" id="adminAddChineseMin" type="number" value="10" min="1" max="120" placeholder="分钟">
         <span class="aa-unit">分钟</span>
-        <input class="aa-num" id="adminAddChineseSun" type="number" value="30" min="1" max="500" placeholder="阳光">
-        <span class="aa-unit">阳光</span>
+        <input class="aa-num" id="adminAddChineseSun" type="number" value="30" min="1" max="500" placeholder="金币">
+        <span class="aa-unit">金币</span>
         <button class="aa-btn" id="adminAddChineseBtn">添加</button>
       </div>
     </div>
@@ -1138,8 +1138,8 @@
         <input class="aa-text" id="adminAddMathText" placeholder="作业内容，例：口算练习30题">
         <input class="aa-num" id="adminAddMathMin" type="number" value="10" min="1" max="120" placeholder="分钟">
         <span class="aa-unit">分钟</span>
-        <input class="aa-num" id="adminAddMathSun" type="number" value="30" min="1" max="500" placeholder="阳光">
-        <span class="aa-unit">阳光</span>
+        <input class="aa-num" id="adminAddMathSun" type="number" value="30" min="1" max="500" placeholder="金币">
+        <span class="aa-unit">金币</span>
         <button class="aa-btn" id="adminAddMathBtn">添加</button>
       </div>
     </div>
@@ -1156,8 +1156,8 @@
         <input class="aa-text" id="adminAddEnglishText" placeholder="作业内容，例：抄写单词 apple 5 遍">
         <input class="aa-num" id="adminAddEnglishMin" type="number" value="10" min="1" max="120" placeholder="分钟">
         <span class="aa-unit">分钟</span>
-        <input class="aa-num" id="adminAddEnglishSun" type="number" value="30" min="1" max="500" placeholder="阳光">
-        <span class="aa-unit">阳光</span>
+        <input class="aa-num" id="adminAddEnglishSun" type="number" value="30" min="1" max="500" placeholder="金币">
+        <span class="aa-unit">金币</span>
         <button class="aa-btn" id="adminAddEnglishBtn">添加</button>
       </div>
     </div>
@@ -1206,7 +1206,7 @@
       <div class="admin-stats">
         <div class="admin-stat-card">
           <div class="asc-num" id="adminStatSun">0</div>
-          <div class="asc-label">☀️ 当前阳光</div>
+          <div class="asc-label">🪙 当前金币</div>
         </div>
         <div class="admin-stat-card">
           <div class="asc-num" id="adminStatDone">0/0</div>
@@ -1220,15 +1220,15 @@
     </div>
 
     <div class="admin-section collapsed" id="adminPanelSun">
-      <h3>☀️ 阳光调整 <span class="badge" id="adminSunBadge">0 ☀️</span></h3>
+      <h3>🪙 金币调整 <span class="badge" id="adminSunBadge">0 🪙</span></h3>
       <div class="admin-add-row inline-row">
         <select class="aa-select" id="adminSunReason">
           <option value="兑换奖励">🎁 兑换奖励</option>
           <option value="手动扣除">➖ 手动扣除</option>
           <option value="手动增加">➕ 手动增加</option>
         </select>
-        <input class="aa-num" id="adminSunAmount" type="number" min="1" max="9999" step="1" value="30" placeholder="阳光">
-        <span class="aa-unit">☀️</span>
+        <input class="aa-num" id="adminSunAmount" type="number" min="1" max="9999" step="1" value="30" placeholder="金币">
+        <span class="aa-unit">🪙</span>
         <button class="aa-btn" id="adminSunMinusBtn"
           style="background:linear-gradient(180deg,#FF8A80,#EF5350);border-color:#EF5350;box-shadow:0 3px 0 #C62828;color:#fff">➖ 扣除</button>
         <button class="aa-btn" id="adminSunPlusBtn"
@@ -2037,20 +2037,4 @@ function renderCharCard(char){
       ${miziSvg()}
       <span class="mizi-char">${escapeHtml(char)}</span>
     </div>
-    <div class="char-info">偏旁：${escapeHtml(info[0])}</div>
-    <div class="char-info">结构：${escapeHtml(info[1])}</div>
-  </div>`;
-}
-
-function renderWordGroup(word, showInfo){
-  if(showInfo === undefined) showInfo = true;
-  const chars = [...word].filter(c => /[\u4e00-\u9fa5]/.test(c));
-  if(!chars.length) return '';
-  const wrapCls = showInfo ? 'word-group' : 'word-group no-char-info';
-  return `<div class="${wrapCls}" data-word-group="1">${chars.map(c => {
-    const py = getPinyin(c);
-    return `<div class="wg-item">
-      <div class="char-pinyin">${py ? escapeHtml(py) : '&nbsp;'}</div>
-      <div class="mizi" data-char="${escapeAttr(c)}" title="单击查看笔顺，双击标记删除线">
-        ${miziSvg()}
-       
+    <div class="char
