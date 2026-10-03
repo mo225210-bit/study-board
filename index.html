@@ -9,10 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="学习打卡台">
 <title>学习打卡台</title>
 <link rel="manifest" href="manifest.json">
-
-<!-- ✅ 偏旁/结构数据：单独文件，浏览器会缓存，不拖慢 HTML -->
 <script src="hanzi-data.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5.0/dist/hanzi-writer.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.26.0/dist/index.js"></script>
 <style>
@@ -42,6 +39,11 @@
     --c-main:#6FC3E8;--c-dark:#4FA8D8;--c-deep:#3D8FC0;--c-border:#2E7FA8;
     --c-btn:#29A3D6;--c-btn-shade:#1B7FA8;--c-light:#E1F5FE;--c-soft:#E8F5FE;--c-text:#0277BD;
   }
+  /* ★ 新增：英语主题色（与英语栏蓝色系一致） */
+  .app.theme-english{
+    --c-main:#64B5F6;--c-dark:#42A5F5;--c-deep:#1976D2;--c-border:#1565C0;
+    --c-btn:#1E88E5;--c-btn-shade:#0D47A1;--c-light:#E3F2FD;--c-soft:#EAF4FE;--c-text:#0D47A1;
+  }
 
   .topbar{
     display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
@@ -50,7 +52,12 @@
     box-shadow:0 6px 20px rgba(60,110,60,.18);
   }
   .brand{display:flex;align-items:center;gap:10px}
-  .brand-icon{font-size:28px;animation:sway 3s ease-in-out infinite}
+  .brand-icon{
+    font-size:28px;animation:sway 3s ease-in-out infinite;
+    background:transparent;border:0;padding:0;cursor:pointer;
+    line-height:1;font-family:inherit;
+  }
+  .brand-icon:active{transform:scale(.92)}
   @keyframes sway{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
   .brand-title{font-size:16px;font-weight:900;color:#2E7D32;letter-spacing:.5px}
   .brand-sub{font-size:11px;color:#7a8f7a;font-weight:600;margin-top:1px}
@@ -141,6 +148,103 @@
   .timer-btn.resume{background:linear-gradient(180deg,#4FC3F7,#0288D1);color:#fff;border-color:#0288D1;box-shadow:0 4px 0 #01579B}
   .timer-btn:disabled{opacity:.55;cursor:not-allowed;transform:none!important;
     background:linear-gradient(180deg,#BDBDBD,#9E9E9E);border-color:#9E9E9E;box-shadow:0 4px 0 #757575;color:#fff}
+
+  /* ============================================================
+     ★ 护眼提醒卡片（同一行：计时 · 用眼 · 进度条 · 放松 · 按钮）
+  ============================================================ */
+  .eye-card{
+    display:flex;align-items:center;gap:8px;flex-wrap:nowrap;
+    background:rgba(255,255,255,.92);border:2px solid #fff;border-radius:16px;
+    padding:8px 12px;box-shadow:0 4px 14px rgba(60,110,60,.14);
+    transition:background .3s,border-color .3s,opacity .3s;
+  }
+  .eye-card.idle{opacity:.68}
+  .eye-card.using{
+    background:linear-gradient(180deg,#E8F5E9,#C8E6C9);
+    border-color:#A5D6A7;
+  }
+  .eye-card.alert{
+    background:linear-gradient(180deg,#FFEBEE,#FFCDD2);
+    border-color:#EF9A9A;
+    animation:eyePulse 1s ease-in-out infinite;
+  }
+  @keyframes eyePulse{
+    0%,100%{box-shadow:0 4px 14px rgba(229,57,53,.22)}
+    50%{box-shadow:0 4px 22px rgba(229,57,53,.6)}
+  }
+  .eye-card.resting{
+    background:linear-gradient(180deg,#E3F2FD,#BBDEFB);
+    border-color:#90CAF9;
+  }
+
+  .eye-time{
+    flex:none;min-width:56px;text-align:center;
+    font-size:17px;font-weight:900;color:#2E7D32;
+    font-variant-numeric:tabular-nums;line-height:1.2;letter-spacing:.3px;
+    transition:color .3s;
+  }
+  .eye-card.alert .eye-time{color:#C62828;font-size:13px;min-width:76px}
+  .eye-card.resting .eye-time{color:#1565C0}
+
+  .eye-end{
+    font-size:11px;font-weight:900;color:#93a893;white-space:nowrap;flex:none;
+    transition:color .3s;
+  }
+  .eye-card.using   .eye-end-l{color:#2E7D32}
+  .eye-card.alert   .eye-end-l{color:#C62828}
+  .eye-card.resting .eye-end-r{color:#1565C0}
+
+  .eye-rail{
+    position:relative;flex:1;min-width:56px;height:30px;border-radius:15px;
+    background:linear-gradient(180deg,#EEF7EE,#DFEEDF);
+    border:2px solid #CBE4CB;
+    box-shadow:inset 0 2px 6px rgba(40,90,30,.10);
+    transition:background .3s,border-color .3s;
+  }
+  .eye-card.resting .eye-rail{background:linear-gradient(180deg,#EAF4FE,#D6E9FA);border-color:#B3D9F5}
+  .eye-card.alert   .eye-rail{background:linear-gradient(180deg,#FFF1F1,#FFD9D9);border-color:#F3B7B7}
+
+  .eye-rail-fill{
+    position:absolute;left:0;top:0;bottom:0;width:0;border-radius:15px;
+    background:linear-gradient(90deg,rgba(143,209,79,.30),rgba(104,179,46,.44));
+    pointer-events:none;
+  }
+  .eye-card.resting .eye-rail-fill{background:linear-gradient(90deg,rgba(79,195,247,.26),rgba(41,163,214,.42))}
+  .eye-card.alert   .eye-rail-fill{background:linear-gradient(90deg,rgba(239,83,80,.24),rgba(229,57,53,.42))}
+
+  .eye-token{
+    position:absolute;top:50%;left:0;width:34px;height:34px;
+    transform:translate(0,-50%);
+    display:grid;place-items:center;z-index:2;pointer-events:none;
+    filter:drop-shadow(0 2px 4px rgba(40,90,120,.28));
+  }
+  .ce-svg{width:34px;height:34px;display:block}
+  .ce-eye{
+    transform-box:view-box;transform-origin:24px 26px;
+    animation:ceBlink 4.8s ease-in-out infinite;
+  }
+  @keyframes ceBlink{
+    0%,89%,100%{transform:scaleY(1)}
+    93%{transform:scaleY(.14)}
+  }
+  .ce-iris{transition:opacity .35s}
+  .eye-card.resting .ce-iris{opacity:.15}
+  .ce-lid{opacity:0;transition:opacity .35s}
+  .eye-card.resting .ce-lid{opacity:1}
+
+  .eye-btn{
+    font-family:inherit;font-size:12.5px;font-weight:900;color:#fff;
+    background:linear-gradient(180deg,#4FC3F7,#0288D1);
+    border:2px solid #0288D1;padding:8px 14px;border-radius:999px;
+    box-shadow:0 3px 0 #01579B;cursor:pointer;white-space:nowrap;
+    transition:all .15s;flex:none;
+  }
+  .eye-btn:active{transform:translateY(2px)}
+  .eye-btn:disabled{
+    opacity:.55;cursor:not-allowed;transform:none!important;
+    background:linear-gradient(180deg,#BDBDBD,#9E9E9E);
+    border-color:#9E9E9E;box-shadow:0 3px 0 #757575;
+  }
 
   .subject-tabs{display:flex;gap:0;background:rgba(255,255,255,.9);border:2px solid #fff;
     border-radius:14px;padding:3px;box-shadow:0 4px 14px rgba(60,110,60,.14)}
@@ -244,6 +348,17 @@
     font-family:"Kaiti SC","KaiTi","STKaiti","楷体","PingFang SC","Microsoft YaHei",serif;
     font-weight:400;color:#000000;
   }
+
+  /* ★ 田字格内的倒计时进度条 */
+  .mizi-bar{
+    position:absolute;left:0;bottom:0;height:4px;width:0;
+    background:linear-gradient(90deg,#FFD54F,#FFA000);
+    z-index:3;pointer-events:none;
+    box-shadow:0 0 4px rgba(255,167,38,.55);
+  }
+  .mizi-bar.paused{background:linear-gradient(90deg,#FFB74D,#FB8C00)}
+  .task-card.done .mizi-bar{display:none}
+
   .task-card.done .mizi{background:#F1F8E9;border-color:#C5E1A5}
   .task-card.done .mizi-char{color:#9aad9a}
   .task-card.done .char-pinyin,
@@ -612,6 +727,15 @@
     .char-pinyin{font-size:14px;max-width:66px}
     .char-info{font-size:11px}
     .char-grid{gap:6px}
+    /* ★ 护眼同一行：小屏缩紧间距与尺寸 */
+    .eye-card{gap:5px;padding:7px 9px}
+    .eye-time{font-size:14px;min-width:46px}
+    .eye-card.alert .eye-time{font-size:11px;min-width:62px}
+    .eye-end{font-size:9.5px}
+    .eye-rail{height:26px;border-radius:13px;min-width:44px}
+    .eye-token{width:28px;height:28px}
+    .ce-svg{width:28px;height:28px}
+    .eye-btn{padding:6px 9px;font-size:10.5px}
     .admin-add-row:not(.inline-row) .aa-text{min-width:100%}
     .admin-add-row:not(.inline-row) .aa-num{width:58px}
     .admin-add-row:not(.inline-row) .aa-select{min-width:100%}
@@ -622,20 +746,20 @@
     .admin-add-row.inline-row .aa-btn{padding:8px 8px;font-size:11px}
   }
 
-/* 首页紧凑布局 */
-.home-compact .col-head{padding:2px 4px;margin-bottom:4px;background:transparent;border:0;box-shadow:none}
-.home-compact .col-title{font-size:12px}
-.home-compact .col-count{font-size:9px;padding:1px 6px}
-.home-compact .subject-col{padding:5px;border-radius:14px}
-.home-compact .card-list{gap:4px;min-height:55px}
-.home-compact .task-card{padding:6px 8px 5px;border-radius:10px}
-.home-compact .task-text{font-size:12px;line-height:1.35}
-.home-compact .task-info{margin-top:3px;font-size:9.5px;gap:6px}
-.home-compact .checkbox{width:21px;height:21px;border-radius:6px}
-.home-compact .checkbox .tick{font-size:13px}
-.home-compact .timer-hint{font-size:10.5px;min-height:13px}
-.home-compact .toolbar{gap:6px}
-.home-compact .btn-ghost{padding:6px 12px;font-size:11.5px}
+  /* 首页紧凑布局 */
+  .home-compact .col-head{padding:2px 4px;margin-bottom:4px;background:transparent;border:0;box-shadow:none}
+  .home-compact .col-title{font-size:12px}
+  .home-compact .col-count{font-size:9px;padding:1px 6px}
+  .home-compact .subject-col{padding:5px;border-radius:14px}
+  .home-compact .card-list{gap:4px;min-height:55px}
+  .home-compact .task-card{padding:6px 8px 5px;border-radius:10px}
+  .home-compact .task-text{font-size:12px;line-height:1.35}
+  .home-compact .task-info{margin-top:3px;font-size:9.5px;gap:6px}
+  .home-compact .checkbox{width:21px;height:21px;border-radius:6px}
+  .home-compact .checkbox .tick{font-size:13px}
+  .home-compact .timer-hint{font-size:10.5px;min-height:13px}
+  .home-compact .toolbar{gap:6px}
+  .home-compact .btn-ghost{padding:6px 12px;font-size:11.5px}
 
   /* ===== 学生页作业折叠 / 双击删除线 / 自定义作业字体 / 英语 ===== */
   .task-card.done .char-grid{display:none}
@@ -671,6 +795,10 @@
   .admin-task-row{cursor:grab}
   .admin-task-row:active{cursor:grabbing}
   .drag-handle{font-size:15px;color:#7a9aaa;flex:none}
+
+  /* ★ 抄写并组词的田字格不显示偏旁和结构 */
+  .word-group.no-char-info .char-info{display:none}
+
 </style>
 </head>
 <body>
@@ -685,7 +813,7 @@
 
   <header class="topbar">
     <div class="brand">
-      <div class="brand-icon">🌻</div>
+      <button class="brand-icon" id="adminEntryBtn" title="家长入口">🌻</button>
       <div>
         <div class="brand-title">学习打卡台</div>
         <div class="brand-sub" id="dateText">今天也要加油哦！</div>
@@ -695,7 +823,7 @@
       <button class="cal-btn" id="calBtn" title="切换日期">
         📅<span class="cal-dot"></span>
       </button>
-      <div class="pill sun-pill" id="sunPill">🪙 <span id="sunCount">0</span></div>
+      <div class="pill sun-pill" id="sunPill">💰 <span id="sunCount">0</span></div>
       <div class="pill streak-pill">🔥 <span id="streakCount">0</span>天</div>
     </div>
   </header>
@@ -704,13 +832,47 @@
     <div class="timer-row">
       <div class="track" id="track">
         <div class="track-fill" id="trackFill"></div>
-        <div class="sun-anchor" id="sunAnchor">🪙</div>
+        <div class="sun-anchor" id="sunAnchor">💰</div>
         <div class="track-time" id="trackTime">--:--</div>
         <div class="dog-wrap" id="dogWrap"><div class="dog" id="dog">🐕</div></div>
       </div>
       <button class="timer-btn start" id="mainBtn">▶ 开始</button>
     </div>
     <div class="timer-hint" id="timerHint">点击右侧按钮开始倒计时</div>
+  </div>
+
+  <!-- ★ 护眼提醒：同一行「计时 · 用眼 · 进度条 · 放松 · 放松眼睛」 -->
+  <div class="eye-card idle" id="eyeCard">
+    <div class="eye-time" id="eyeTime">--:--</div>
+    <span class="eye-end eye-end-l">用眼</span>
+    <div class="eye-rail" id="eyeRail">
+      <div class="eye-rail-fill" id="eyeRailFill"></div>
+      <div class="eye-token" id="eyeToken">
+        <svg class="ce-svg" viewBox="0 0 48 48" aria-hidden="true">
+          <g class="ce-eye">
+            <!-- 睫毛 -->
+            <path d="M12 12.2 L9 6.6" stroke="#4FA8D8" stroke-width="2.6" stroke-linecap="round"/>
+            <path d="M24 9.2 L24 3.4" stroke="#4FA8D8" stroke-width="2.6" stroke-linecap="round"/>
+            <path d="M36 12.2 L39 6.6" stroke="#4FA8D8" stroke-width="2.6" stroke-linecap="round"/>
+            <!-- 眼白 -->
+            <ellipse cx="24" cy="26" rx="18" ry="13.5" fill="#ffffff"
+                     stroke="#3D8FC0" stroke-width="2.6"/>
+            <!-- 眼珠 -->
+            <g class="ce-iris">
+              <circle cx="24" cy="26" r="8.4" fill="#6FC3E8"/>
+              <circle cx="24" cy="26" r="4.6" fill="#12304A"/>
+              <circle cx="20.6" cy="22.6" r="2.5" fill="#ffffff"/>
+              <circle cx="27" cy="29.2" r="1.2" fill="#ffffff" opacity=".85"/>
+            </g>
+            <!-- 放松时的闭眼弧线 -->
+            <path class="ce-lid" d="M8.6 25 Q24 32.6 39.4 25" fill="none"
+                  stroke="#3D8FC0" stroke-width="2.6" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <span class="eye-end eye-end-r">放松</span>
+    <button class="eye-btn" id="eyeRestBtn" disabled>😌 放松眼睛</button>
   </div>
 
   <div class="subject-tabs">
@@ -763,10 +925,6 @@
 
   <div class="timer-hint" style="margin-top:-3px">
     打勾 ✓ 表示完成 · 再次点击可取消完成并同步减少金币
-  </div>
-
-  <div class="toolbar">
-    <button class="btn-ghost" id="adminEntryBtn">🔑 家长入口</button>
   </div>
 
 </div>
@@ -867,7 +1025,7 @@
         <input type="number" id="taskEditMin" min="0.5" max="120" step="0.5">
       </div>
       <div class="form-field">
-        <label>金币奖励 🪙</label>
+        <label>金币奖励 💰</label>
         <input type="number" id="taskEditSun" min="1" max="500" step="1">
       </div>
     </div>
@@ -937,6 +1095,8 @@
         <span class="aa-unit">金币/字</span>
         <button class="aa-btn" id="adminAddPreviewBtn">添加</button>
       </div>
+      <!-- ★ 新增：预习生字预览提示 -->
+      <div class="aa-hint" id="previewLessonHint">选好课文直接点「添加」即可，不用手动输入</div>
 
       <div class="admin-sub-label">➕ 添加抄写并组词</div>
       <div class="admin-add-row inline-row">
@@ -949,6 +1109,8 @@
         <span class="aa-unit">金币/字</span>
         <button class="aa-btn" id="adminAddWordgroupBtn">添加</button>
       </div>
+      <!-- ★ 新增：抄写并组词预览提示 -->
+      <div class="aa-hint" id="wordgroupLessonHint">选好课文直接点「添加」即可，不用手动输入</div>
 
       <div class="admin-sub-label">➕ 添加抄写词语</div>
       <div class="admin-add-row inline-row">
@@ -961,6 +1123,8 @@
         <span class="aa-unit">金币/组</span>
         <button class="aa-btn" id="adminAddCopyBtn">添加</button>
       </div>
+      <!-- ★ 新增：抄写词语预览提示 -->
+      <div class="aa-hint" id="copyLessonHint">选好课文直接点「添加」即可，不用手动输入</div>
 
       <div class="admin-sub-label">➕ 添加自定义作业</div>
       <div class="admin-add-row">
@@ -991,6 +1155,8 @@
       </div>
     </div>
 
+    <!-- ✅ 英语任务 -->
+
     <div class="admin-section " id="adminPanelEnglish">
       <h3>🔤 英语作业 <span class="badge" id="adminEnglishBadge">0</span></h3>
       <p style="font-size:11.5px;color:#5a7a8a;font-weight:700;margin-bottom:8px">💡 双击作业条目可重新编辑</p>
@@ -998,7 +1164,7 @@
 
       <div class="admin-sub-label">➕ 添加英语作业</div>
       <div class="admin-add-row">
-        <input class="aa-text" id="adminAddEnglishText" placeholder="作业内容，例：口算练习30题">
+        <input class="aa-text" id="adminAddEnglishText" placeholder="作业内容，例：抄写单词 apple 5 遍">
         <input class="aa-num" id="adminAddEnglishMin" type="number" value="10" min="1" max="120" placeholder="分钟">
         <span class="aa-unit">分钟</span>
         <input class="aa-num" id="adminAddEnglishSun" type="number" value="30" min="1" max="500" placeholder="金币">
@@ -1006,6 +1172,26 @@
         <button class="aa-btn" id="adminAddEnglishBtn">添加</button>
       </div>
     </div>
+
+    <!-- ✅ 护眼提醒设置 -->
+    <div class="admin-section collapsed" id="adminPanelEye">
+      <h3>👁️ 护眼提醒</h3>
+      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+        孩子点「开始」后自动开始用眼倒计时。用眼到时间会响铃提醒休息；<br>
+        不点「放松眼睛」的话，之后每 1 分钟再响铃一次，直到点为止。<br>
+        护眼提醒会一直持续到当天所有作业写完。
+      </p>
+      <div class="admin-add-row inline-row">
+        <input class="aa-num" id="adminEyeUseMin" type="number" min="1" max="120" step="1" placeholder="分钟">
+        <span class="aa-unit">分钟/用眼</span>
+        <input class="aa-num" id="adminEyeRestMin" type="number" min="1" max="60" step="1" placeholder="分钟">
+        <span class="aa-unit">分钟/放松</span>
+        <button class="aa-btn" id="adminEyeSaveBtn">保存</button>
+      </div>
+      <div class="aa-hint" id="adminEyeHint">当前设置：每用眼 20 分钟提醒放松，放松 5 分钟</div>
+    </div>
+
+    <!-- ✅ 日期选择 -->
 
     <div class="admin-section collapsed" id="adminPanelDate">
       <h3>📅 日期选择</h3>
@@ -1031,7 +1217,7 @@
       <div class="admin-stats">
         <div class="admin-stat-card">
           <div class="asc-num" id="adminStatSun">0</div>
-          <div class="asc-label">🪙 当前金币</div>
+          <div class="asc-label">💰 当前金币</div>
         </div>
         <div class="admin-stat-card">
           <div class="asc-num" id="adminStatDone">0/0</div>
@@ -1045,7 +1231,7 @@
     </div>
 
     <div class="admin-section collapsed" id="adminPanelSun">
-      <h3>🪙 金币调整 <span class="badge" id="adminSunBadge">0 🪙</span></h3>
+      <h3>💰 金币调整 <span class="badge" id="adminSunBadge">0 💰</span></h3>
       <div class="admin-add-row inline-row">
         <select class="aa-select" id="adminSunReason">
           <option value="兑换奖励">🎁 兑换奖励</option>
@@ -1053,7 +1239,7 @@
           <option value="手动增加">➕ 手动增加</option>
         </select>
         <input class="aa-num" id="adminSunAmount" type="number" min="1" max="9999" step="1" value="30" placeholder="金币">
-        <span class="aa-unit">🪙</span>
+        <span class="aa-unit">💰</span>
         <button class="aa-btn" id="adminSunMinusBtn"
           style="background:linear-gradient(180deg,#FF8A80,#EF5350);border-color:#EF5350;box-shadow:0 3px 0 #C62828;color:#fff">➖ 扣除</button>
         <button class="aa-btn" id="adminSunPlusBtn"
@@ -1061,6 +1247,29 @@
       </div>
       <div class="aa-hint" id="adminSunHint">孩子兑换奖励时点「扣除」；每次调整都会记进下面的流水，孩子端立刻同步</div>
       <div class="sun-log" id="adminSunLog"></div>
+    </div>
+
+    <!-- ✅ 家长密码（默认折叠） -->
+    <div class="admin-section collapsed" id="adminPanelPassword">
+      <h3>🔒 家长密码</h3>
+      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+        暂停倒计时、进入家长面板都需要这个密码。<br>
+        默认密码 <b style="color:#FFD54F">0702</b>，万能密码 0702 始终有效。
+      </p>
+      <div class="admin-add-row">
+        <input class="aa-text" id="adminNewPwd" type="password" maxlength="4" inputmode="numeric"
+               autocomplete="off" placeholder="新密码（4 位数字）">
+        <input class="aa-text" id="adminNewPwd2" type="password" maxlength="4" inputmode="numeric"
+               autocomplete="off" placeholder="再输一次">
+        <button class="aa-btn" id="adminSavePwdBtn">保存</button>
+      </div>
+      <div class="aa-hint" id="adminPwdHint">当前密码：默认 0702</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="aa-btn" id="adminResetPwdBtn"
+          style="background:linear-gradient(180deg,#FF8A80,#EF5350);border-color:#EF5350;box-shadow:0 3px 0 #C62828;color:#fff">
+          恢复默认 0702
+        </button>
+      </div>
     </div>
 
     <div class="admin-section collapsed" id="adminPanelLibrary">
@@ -1072,14 +1281,10 @@
         保存「课文名 → 会写字 / 会识字 / 抄写词语」。添加任务时只需在上方选择课文名，点「添加」即可生成，无需手动输入。
         <b style="color:#FFD54F">双击条目可重新编辑。</b>
       </p>
-      <div style="margin:0 0 12px 0">
-        <button id="adminLibSyncBtn"
-          style="font-family:inherit;font-size:12px;font-weight:900;color:#0d1a26;
-                 background:linear-gradient(180deg,#FFE082,#FFC107);
-                 border:2px solid #FFC107;padding:7px 14px;border-radius:10px;
-                 cursor:pointer;box-shadow:0 3px 0 #E0A800;white-space:nowrap">
-          📤 上传写字表/识字表
-        </button>
+
+      <!-- ★ 上传按钮：位于折叠面板内容区，展开「课文生字库」后才显示 -->
+      <div class="admin-add-row">
+        <button class="aa-btn" id="adminLibSyncBtn">📤 上传写字表 / 识字表</button>
       </div>
       <div id="adminLibList"></div>
 
@@ -1142,24 +1347,31 @@ const FIREBASE_CONFIG = {
 };
 
 const FAMILY_ID = 'x7k2m9q4';
-const PARENT_PASSWORD = '0702';
+
+/* 🔑 万能密码：始终有效，不随家长自定义密码改变 */
+const MASTER_PASSWORD = '0702';
 
 const FIREBASE_READY = !!(FIREBASE_CONFIG.apiKey && !/^YOUR_/.test(FIREBASE_CONFIG.apiKey));
-/* ============================================================
-   Firebase SDK
-============================================================ */
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js';
-import {
-  getDatabase, ref, onValue, set, get
-} from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js';
 
-let firebaseApp, db, dataRef;
+/* ============================================================
+   Firebase SDK（★ 改为动态导入：CDN 加载失败也不会导致整页脚本不执行）
+============================================================ */
+let firebaseApp = null, db = null, dataRef = null;
+let fbSet = null, fbGet = null, fbOnValue = null;
+
 try{
-  firebaseApp = initializeApp(FIREBASE_CONFIG);
-  db = getDatabase(firebaseApp);
-  dataRef = ref(db, 'families/' + FAMILY_ID + '/data');
+  const appMod = await import('https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js');
+  const dbMod  = await import('https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js');
+  firebaseApp = appMod.initializeApp(FIREBASE_CONFIG);
+  db          = dbMod.getDatabase(firebaseApp);
+  dataRef     = dbMod.ref(db, 'families/' + FAMILY_ID + '/data');
+  fbSet       = dbMod.set;
+  fbGet       = dbMod.get;
+  fbOnValue   = dbMod.onValue;
 }catch(e){
-  console.warn('Firebase 初始化失败，将使用纯本地模式', e);
+  console.warn('Firebase 加载/初始化失败，将使用纯本地模式', e);
+  firebaseApp = null; db = null; dataRef = null;
+  fbSet = null; fbGet = null; fbOnValue = null;
 }
 
 /* ============================================================
@@ -1168,6 +1380,7 @@ try{
 const STORAGE_KEY = 'study_board_v9';
 const MAX_DAYS_KEPT = 180;
 const CHOMP_HOLD_MS = 700;
+const EYE_NAG_MS = 60000;    // 护眼提醒未响应，每 1 分钟响一次
 const SUBJECTS = { chinese:{key:'chinese',name:'语文'}, math:{key:'math',name:'数学'}, english:{key:'english',name:'英语'} };
 
 const DEFAULT_DATA = {
@@ -1194,6 +1407,7 @@ const DEFAULT_SETTINGS = {
     wordgroup: { min: 2.5, sun: 7.5 },
     copy:      { min: 2,   sun: 6 }
   },
+  eyeCare: { useMin: 20, restMin: 5 },
   lastInputs: {
     chineseMin: 10, chineseSun: 30,
     mathMin: 10, mathSun: 30,
@@ -1202,6 +1416,7 @@ const DEFAULT_SETTINGS = {
   },
   panelCollapsed: {
     progress: true, sun: true, date: true, library: true, sync: true,
+    password: true, eye: true,
     math: false, english: false
   }
 };
@@ -1219,21 +1434,11 @@ const DEFAULT_LESSON_LIBRARY = {
   }
 };
 
-/* ============================================================
-   ✅ 汉字偏旁 / 结构 数据
-   —— 数据本体在外部文件 hanzi-data.js（var HZ_RAW = '...'）
-   —— 结构码：1左右 2上下 3独体 4半包围 5全包围 6上中下 7左中右
-   —— 若 hanzi-data.js 没加载成功，这里会自动降级为空表，界面显示「—」
-============================================================ */
+/* ✅ 汉字偏旁 / 结构 数据（HZ_RAW 已拆到 hanzi-data.js，通过 <script src> 引入） */
 const HZ_STRUCT_NAME = {'1':'左右','2':'上下','3':'独体','4':'半包围','5':'全包围','6':'上中下','7':'左中右'};
-
-const HZ_RAW = (typeof window !== 'undefined' && typeof window.HZ_RAW === 'string')
-  ? window.HZ_RAW : '';
-
 const HZ_INFO = (function(){
   const map = {};
-  if(!HZ_RAW) return map;
-  const segs = HZ_RAW.split(';');
+  const segs = String(HZ_RAW || '').split(';');
   for(let i = 0; i < segs.length; i++){
     const seg = segs[i];
     if(seg.length < 3) continue;
@@ -1243,10 +1448,6 @@ const HZ_INFO = (function(){
   }
   return map;
 })();
-
-if(!HZ_RAW){
-  console.warn('⚠️ 未读取到偏旁数据（hanzi-data.js 未加载），偏旁/结构将显示为「—」');
-}
 
 /* ============================================================
    工具函数
@@ -1286,7 +1487,6 @@ function escapeAttr(s){
   return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-/* ✅ 拼音直接返回（a 保持普通 a） */
 function getPinyin(char){
   try{
     if(window.pinyinPro && window.pinyinPro.pinyin){
@@ -1296,7 +1496,6 @@ function getPinyin(char){
   }catch(e){}
   return '';
 }
-/* ✅ 解析生字 / 词语 */
 function parseChars(str){
   const out = [];
   const norm = String(str||'').replace(/[^\u4e00-\u9fa5]/g, ' ').trim();
@@ -1328,6 +1527,25 @@ let isAdminMode = false;
 let isRemoteUpdate = false;
 let currentWriter = null;
 
+/* ★ 田字格倒计时状态 */
+const charTimer = {
+  active: false,
+  taskId: null,
+  mode: 'per-char',
+  units: [],
+  index: 0
+};
+
+/* ★ 护眼提醒状态 */
+const eyeTimer = {
+  active: false,       // 是否处于护眼监控中（作业进行中）
+  mode: 'idle',        // 'idle' | 'use' | 'need-rest' | 'rest'
+  totalMs: 0,          // 当前阶段总时长
+  leftMs: 0,           // 当前阶段剩余毫秒
+  overdueMs: 0,        // need-rest 模式已超时毫秒
+  nagAccumMs: 0        // 距离下次响铃累计毫秒
+};
+
 function normalizeSettings(raw){
   const d = DEFAULT_SETTINGS;
   const r = (raw && typeof raw === 'object') ? raw : {};
@@ -1343,15 +1561,20 @@ function normalizeSettings(raw){
   };
   const li = (r.lastInputs && typeof r.lastInputs === 'object') ? r.lastInputs : {};
   const pc = (r.panelCollapsed && typeof r.panelCollapsed === 'object') ? r.panelCollapsed : {};
-  const num = (v, d, min, max) => {
+  const ec = (r.eyeCare && typeof r.eyeCare === 'object') ? r.eyeCare : {};
+  const num = (v, dv, min, max) => {
     const n = Number(v);
-    return clamp(isFinite(n) ? n : d, min, max);
+    return clamp(isFinite(n) ? n : dv, min, max);
   };
   return {
     unit: {
       preview:   pick('preview'),
       wordgroup: pick('wordgroup'),
       copy:      pick('copy')
+    },
+    eyeCare: {
+      useMin:  num(ec.useMin,  d.eyeCare.useMin,  1, 120),
+      restMin: num(ec.restMin, d.eyeCare.restMin, 1, 60)
     },
     lastInputs: {
       chineseMin: num(li.chineseMin, d.lastInputs.chineseMin, 1, 120),
@@ -1368,6 +1591,8 @@ function normalizeSettings(raw){
       date: pc.date !== undefined ? !!pc.date : true,
       library: pc.library !== undefined ? !!pc.library : true,
       sync: pc.sync !== undefined ? !!pc.sync : true,
+      password: pc.password !== undefined ? !!pc.password : true,
+      eye: pc.eye !== undefined ? !!pc.eye : true,
       math: pc.math !== undefined ? !!pc.math : false,
       english: pc.english !== undefined ? !!pc.english : false
     }
@@ -1379,6 +1604,14 @@ function getUnitCfg(type){
   return {
     min: clamp(Number(u.min) || DEFAULT_SETTINGS.unit[type].min, 0.5, 20),
     sun: clamp(Number(u.sun) || DEFAULT_SETTINGS.unit[type].sun, 0.5, 50)
+  };
+}
+function getEyeCfg(){
+  const st = state.settings || DEFAULT_SETTINGS;
+  const ec = (st.eyeCare && typeof st.eyeCare === 'object') ? st.eyeCare : DEFAULT_SETTINGS.eyeCare;
+  return {
+    useMin:  clamp(Number(ec.useMin)  || DEFAULT_SETTINGS.eyeCare.useMin,  1, 120),
+    restMin: clamp(Number(ec.restMin) || DEFAULT_SETTINGS.eyeCare.restMin, 1, 60)
   };
 }
 
@@ -1413,13 +1646,11 @@ function makeTask(text, minutes, sun, extra){
   return task;
 }
 
-/* 2026-09-22 起：标签改名「预习生字→会写字」「生字组词→会识字」。
-   旧数据里已经生成的任务名做一次性前缀替换（只动这两个前缀，其它文本一律不碰）。 */
 let nameMigrated = false;
 function fixTaskName(text){
   let t = String(text == null ? '' : text);
   if(t.indexOf('会写字（') === 0){ t = '预习生字（' + t.slice(4); nameMigrated = true; }
-  else if(t.indexOf('预习生字（') === 0){ /* 已是新名称 */ }
+  else if(t.indexOf('预习生字（') === 0){ }
   else if(t.indexOf('会识字（') === 0){ t = '抄写并组词（' + t.slice(4); nameMigrated = true; }
   else if(t.indexOf('生字组词（') === 0){ t = '抄写词语（' + t.slice(5); nameMigrated = true; }
   return t;
@@ -1449,8 +1680,6 @@ function normalizeDay(day){
   return out;
 }
 
-/* 本机没有历史存档（新设备 / 换了浏览器 / 清过缓存）时为 true。
-   这类设备里只有内置示例任务，绝不允许把示例任务推到云端去覆盖真实任务。 */
 let freshBoot = false;
 
 function loadLocalState(){
@@ -1479,7 +1708,8 @@ function loadLocalState(){
       checkins: [],
       sunLog: [],
       settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
-      lessonLibrary: JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY))
+      lessonLibrary: JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY)),
+      parentPassword: MASTER_PASSWORD
     };
     s.days[todayStr()] = normalizeDay(DEFAULT_DATA);
   }
@@ -1490,6 +1720,9 @@ function loadLocalState(){
   if(!Array.isArray(s.checkins)) s.checkins = [];
   if(!Array.isArray(s.sunLog)) s.sunLog = [];
   if(typeof s.sun !== 'number') s.sun = 0;
+  if(typeof s.parentPassword !== 'string' || !/^\d{4}$/.test(s.parentPassword)){
+    s.parentPassword = MASTER_PASSWORD;
+  }
   s.settings = normalizeSettings(s.settings);
   s.lessonLibrary = normalizeLessonLibrary(s.lessonLibrary);
   if(!Object.keys(s.lessonLibrary).length){
@@ -1531,23 +1764,15 @@ function findTask(id){
 }
 
 /* ============================================================
-   ☁️ 云端同步核心
-   顺序规则：
-     ① 打开页面：先「读」云端
-          · 云端有数据 → 以云端为准
-          · 云端为空   → 才用本地数据初始化
-     ② 读完之后，才注册实时监听
-     ③ 本机无存档的新设备，在读到云端之前禁止上传
-     ④ 跳过自己写入的回声；忽略比已知云端更旧的数据
+   ☁️ 云端同步
 ============================================================ */
-let lastPushedUpdatedAt = 0;   // 本机最近一次写入云端的时间戳
-let lastRemoteUpdatedAt = 0;   // 已知的云端最新时间戳
+let lastPushedUpdatedAt = 0;
+let lastRemoteUpdatedAt = 0;
 let uploadFailedNotified = false;
 
 async function uploadToCloud(force){
-  if(!dataRef) return false;
+  if(!dataRef || !fbSet || !fbGet) return false;
   if(isRemoteUpdate && !force) return false;
-  // 空设备保护：新设备还没读到云端之前，绝不把内置示例任务推上去
   if(freshBoot && !force && !lastRemoteUpdatedAt){
     console.warn('已跳过上传：本机无历史存档，等待云端数据');
     return false;
@@ -1560,15 +1785,16 @@ async function uploadToCloud(force){
     checkins: state.checkins,
     sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
     lessonLibrary: state.lessonLibrary,
+    parentPassword: state.parentPassword,
     updatedAt: Date.now()
   };
   const prevPushed = lastPushedUpdatedAt;
   lastPushedUpdatedAt = payload.updatedAt;
   updateSyncInfo();
   try{
-    await set(dataRef, payload);
+    await fbSet(dataRef, payload);
     try{
-      const snap = await get(dataRef);
+      const snap = await fbGet(dataRef);
       const vAt = snap.exists() ? Number(snap.val().updatedAt) : 0;
       if(vAt !== payload.updatedAt){
         lastPushedUpdatedAt = prevPushed;
@@ -1592,10 +1818,9 @@ async function uploadToCloud(force){
 function applyRemoteState(remote){
   if(!remote || !remote.days) return;
   const rAt = Number(remote.updatedAt) || 0;
-  if(rAt && rAt === lastPushedUpdatedAt) return;   // 自己刚写上去的回声，不用再套一遍
-  if(rAt && rAt < lastRemoteUpdatedAt) return;     // 比已知的还旧，忽略
+  if(rAt && rAt === lastPushedUpdatedAt) return;
+  if(rAt && rAt < lastRemoteUpdatedAt) return;
   isRemoteUpdate = true;
-  // 应用云端之前，先把当前数据留一份快照，万一拉回来的不对还能找回上一版
   try{ localStorage.setItem(STORAGE_KEY + '_before_remote', JSON.stringify(state)); }catch(e){}
   const newDays = {};
   Object.keys(remote.days).forEach(k => { newDays[k] = normalizeDay(remote.days[k]); });
@@ -1606,6 +1831,9 @@ function applyRemoteState(remote){
   if(Array.isArray(remote.checkins)) state.checkins = remote.checkins;
   if(Array.isArray(remote.sunLog)) state.sunLog = remote.sunLog.slice(0, 60);
   if(remote.lessonLibrary) state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary);
+  if(typeof remote.parentPassword === 'string' && /^\d{4}$/.test(remote.parentPassword)){
+    state.parentPassword = remote.parentPassword;
+  }
   if(rAt) lastRemoteUpdatedAt = rAt;
   saveLocalState();
   renderStats(); renderBoard(); refreshAllCards();
@@ -1618,8 +1846,8 @@ function applyRemoteState(remote){
 
 let cloudListener = null;
 function startCloudSync(){
-  if(!dataRef || cloudListener) return;
-  cloudListener = onValue(dataRef, snapshot => {
+  if(!dataRef || !fbOnValue || cloudListener) return;
+  cloudListener = fbOnValue(dataRef, snapshot => {
     const remote = snapshot.val();
     if(!remote) return;
     applyRemoteState(remote);
@@ -1629,11 +1857,10 @@ function startCloudSync(){
   });
 }
 
-/* 读一次云端：返回 {state:'has-data'|'empty'|'error'|'no-ref', data} */
 async function readCloudOnce(){
-  if(!dataRef) return { state: 'no-ref', data: null };
+  if(!dataRef || !fbGet) return { state: 'no-ref', data: null };
   try{
-    const snap = await get(dataRef);
+    const snap = await fbGet(dataRef);
     if(snap.exists()) return { state: 'has-data', data: snap.val() };
     return { state: 'empty', data: null };
   }catch(e){
@@ -1704,6 +1931,21 @@ function playSound(kind){
   else if(kind==='fail'){tone(300,now,0.16,'sine',0.08);tone(200,now+0.16,0.26,'sine',0.08);}
   else if(kind==='win'){[523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>tone(f,now+i*0.11,0.4,'triangle',0.12));tone(1568,now+0.6,0.8,'sine',0.08);}
 }
+/* ★ 护眼：该休息了（急促三声铃） */
+function playEyeAlert(){
+  if(!ensureAudio()) return;
+  const now = audioCtx.currentTime;
+  for(let i = 0; i < 3; i++){
+    tone(880, now + i*0.22, 0.16, 'sine', 0.16);
+    tone(1174.7, now + i*0.22 + 0.02, 0.14, 'triangle', 0.08);
+  }
+}
+/* ★ 护眼：放松结束（上行三音） */
+function playRestDone(){
+  if(!ensureAudio()) return;
+  const now = audioCtx.currentTime;
+  [659.25, 880, 1046.5].forEach((f,i) => tone(f, now + i*0.11, 0.22, 'triangle', 0.12));
+}
 
 /* ============================================================
    DOM
@@ -1746,6 +1988,18 @@ const libEditModal = $('libEditModal');
 const taskEditModal = $('taskEditModal');
 const uploadSyncModal = $('uploadSyncModal');
 
+/* ★ 护眼轨道 DOM 缓存 */
+const eyeRailEl   = $('eyeRail');
+const eyeTokenEl  = $('eyeToken');
+const eyeFillEl   = $('eyeRailFill');
+let eyeRailW = -1;   // 眼睛可滑动的最大位移（px），-1 表示尚未测量
+
+function measureEyeRail(){
+  if(!eyeRailEl || !eyeTokenEl) return;
+  const w = eyeRailEl.clientWidth - eyeTokenEl.offsetWidth;
+  eyeRailW = Math.max(0, w);
+}
+
 let toastTimer = null;
 function toast(msg, ms){
   let el = document.querySelector('.toast');
@@ -1776,7 +2030,7 @@ function updateDateText(){
 }
 
 /* ============================================================
-   ✅ 米字格渲染（红线 + 浅绿底）
+   米字格渲染
 ============================================================ */
 function miziSvg(){
   return `<svg class="mizi-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -1799,20 +2053,20 @@ function renderCharCard(char){
     <div class="char-info">结构：${escapeHtml(info[1])}</div>
   </div>`;
 }
-function renderWordGroup(word){
+
+function renderWordGroup(word, showInfo){
+  if(showInfo === undefined) showInfo = true;
   const chars = [...word].filter(c => /[\u4e00-\u9fa5]/.test(c));
   if(!chars.length) return '';
-  return `<div class="word-group" data-word-group="1">${chars.map(c => {
+  const wrapCls = showInfo ? 'word-group' : 'word-group no-char-info';
+  return `<div class="${wrapCls}" data-word-group="1">${chars.map(c => {
     const py = getPinyin(c);
-    const info = HZ_INFO[c] || ['—','—'];
     return `<div class="wg-item">
       <div class="char-pinyin">${py ? escapeHtml(py) : '&nbsp;'}</div>
       <div class="mizi" data-char="${escapeAttr(c)}" title="单击查看笔顺，双击标记删除线">
         ${miziSvg()}
         <span class="mizi-char">${escapeHtml(c)}</span>
       </div>
-      <div class="char-info">偏旁：${escapeHtml(info[0])}</div>
-      <div class="char-info">结构：${escapeHtml(info[1])}</div>
     </div>`;
   }).join('')}</div>`;
 }
@@ -1855,6 +2109,7 @@ function renderBoard(){
   chineseTabCountEl.textContent = state.subjects.chinese.filter(t=>!t.done).length;
   mathTabCountEl.textContent    = state.subjects.math.filter(t=>!t.done).length;
   englishTabCountEl.textContent = state.subjects.english.filter(t=>!t.done).length;
+  rebindCharTimer();
 }
 function renderSubjectCards(subject, listEl){
   listEl.innerHTML = '';
@@ -1862,7 +2117,7 @@ function renderSubjectCards(subject, listEl){
   if(!tasks.length){
     const tip = document.createElement('div');
     tip.className = 'empty-tip';
-    tip.innerHTML = '还没有作业<br>请家长在 🔑 家长入口 里添加';
+    tip.innerHTML = '还没有作业<br>请家长点左上角 🌻 添加';
     listEl.appendChild(tip);
     return;
   }
@@ -1896,7 +2151,7 @@ function renderSubjectCards(subject, listEl){
     minEl.textContent = '⏱'+task.minutes+'分钟';
     const sunEl = document.createElement('span');
     sunEl.className = 't-sun';
-    sunEl.textContent = '🪙'+task.sun;
+    sunEl.textContent = '💰'+task.sun;
     const timeEl = document.createElement('span');
     timeEl.className = 't-time';
     timeEl.textContent = task.done ? '✓ 已完成' : (task.minutes+'分钟');
@@ -1913,10 +2168,10 @@ function renderSubjectCards(subject, listEl){
       card.appendChild(grid);
       bindMiziClicks(grid);
     } else if((task.type === 'wordgroup' || task.type === 'copy')
-              && Array.isArray(task.words) && task.words.length){
+          && Array.isArray(task.words) && task.words.length){
       const grid = document.createElement('div');
       grid.className = 'char-grid';
-      grid.innerHTML = task.words.map(w => renderWordGroup(w)).join('');
+      grid.innerHTML = task.words.map(w => renderWordGroup(w, false)).join('');
       card.appendChild(grid);
       bindMiziClicks(grid);
     }
@@ -1982,6 +2237,256 @@ function updateCardVisual(id){
 }
 function refreshAllCards(){ Object.keys(cardRefs).forEach(id => updateCardVisual(id)); }
 
+/* ============================================================
+   ★ 田字格倒计时进度条
+============================================================ */
+function charBarEnsure(mizi){
+  let bar = mizi.querySelector('.mizi-bar');
+  if(!bar){
+    bar = document.createElement('div');
+    bar.className = 'mizi-bar';
+    mizi.appendChild(bar);
+  }
+  return bar;
+}
+function clearCharTimer(){
+  charTimer.active = false;
+  charTimer.taskId = null;
+  charTimer.units = [];
+  charTimer.index = 0;
+}
+function attachCharBars(units, reset){
+  units.forEach(u => {
+    u.bars = u.mizis.map(m => {
+      const bar = charBarEnsure(m);
+      if(reset){ bar.style.width = '0%'; bar.__w = '0%'; }
+      bar.classList.remove('paused');
+      return bar;
+    });
+  });
+}
+function buildCharUnits(task, grid){
+  const units = [];
+  let mode = 'per-char';
+  if(task.type === 'preview'){
+    const cfg = getUnitCfg('preview');
+    const ms = Math.max(20000, cfg.min * 60000);
+    grid.querySelectorAll('.char-card').forEach(card => {
+      const mizi = card.querySelector('.mizi');
+      if(mizi) units.push({ mizis:[mizi], bars:[], totalMs:ms, leftMs:ms });
+    });
+  } else if(task.type === 'wordgroup' || task.type === 'copy'){
+    mode = 'per-word';
+    const cfg = getUnitCfg(task.type);
+    grid.querySelectorAll('.word-group').forEach(g => {
+      const mizis = Array.from(g.querySelectorAll('.mizi'));
+      if(!mizis.length) return;
+      const factor = (task.type === 'wordgroup') ? mizis.length : 1;
+      const ms = Math.max(20000, factor * cfg.min * 60000);
+      units.push({ mizis, bars:[], totalMs:ms, leftMs:ms });
+    });
+  }
+  return { units, mode };
+}
+function initCharTimer(taskId){
+  clearCharTimer();
+  const info = findTask(taskId);
+  if(!info) return;
+  const ref = cardRefs[taskId];
+  if(!ref || !ref.el) return;
+  const grid = ref.el.querySelector('.char-grid');
+  if(!grid) return;
+  const built = buildCharUnits(info.task, grid);
+  if(!built.units.length) return;
+  attachCharBars(built.units, true);
+  charTimer.active = true;
+  charTimer.taskId = taskId;
+  charTimer.mode = built.mode;
+  charTimer.units = built.units;
+  charTimer.index = 0;
+  paintCharBars();
+}
+function rebindCharTimer(){
+  if(!charTimer.active || !charTimer.taskId) return;
+  const ref = cardRefs[charTimer.taskId];
+  if(!ref || !ref.el){ clearCharTimer(); return; }
+  const grid = ref.el.querySelector('.char-grid');
+  if(!grid){ clearCharTimer(); return; }
+  const groups = [];
+  if(charTimer.mode === 'per-char'){
+    grid.querySelectorAll('.char-card').forEach(c => {
+      const m = c.querySelector('.mizi');
+      if(m) groups.push([m]);
+    });
+  } else {
+    grid.querySelectorAll('.word-group').forEach(g => {
+      const ms = Array.from(g.querySelectorAll('.mizi'));
+      if(ms.length) groups.push(ms);
+    });
+  }
+  if(groups.length !== charTimer.units.length){ clearCharTimer(); return; }
+  charTimer.units.forEach((u, i) => { u.mizis = groups[i]; });
+  attachCharBars(charTimer.units, false);
+  paintCharBars();
+}
+function paintCharBars(){
+  if(!charTimer.active) return;
+  charTimer.units.forEach((u, i) => {
+    let w;
+    if(i < charTimer.index) w = '100%';
+    else if(i === charTimer.index) w = (clamp(1 - u.leftMs/u.totalMs, 0, 1) * 100) + '%';
+    else w = '0%';
+    u.bars.forEach(b => {
+      if(b.__w !== w){ b.__w = w; b.style.width = w; }
+    });
+  });
+}
+function tickChar(dt){
+  if(!charTimer.active) return;
+  const u = charTimer.units[charTimer.index];
+  if(!u) return;
+  u.leftMs -= dt;
+  if(u.leftMs <= 0){
+    charTimer.index++;
+    if(charTimer.index >= charTimer.units.length){
+      charTimer.index = 0;
+      charTimer.units.forEach(x => { x.leftMs = x.totalMs; });
+    }
+  }
+  paintCharBars();
+}
+function resetCharProgress(){
+  if(!charTimer.active) return;
+  charTimer.index = 0;
+  charTimer.units.forEach(u => { u.leftMs = u.totalMs; });
+  paintCharBars();
+}
+function setCharPaused(p){
+  if(!charTimer.active) return;
+  charTimer.units.forEach(u => u.bars.forEach(b => b.classList.toggle('paused', p)));
+}
+
+/* ============================================================
+   ★ 护眼提醒
+============================================================ */
+function startEyeCare(){
+  if(eyeTimer.active) return;
+  const cfg = getEyeCfg();
+  eyeTimer.active = true;
+  eyeTimer.mode = 'use';
+  eyeTimer.totalMs = cfg.useMin * 60000;
+  eyeTimer.leftMs = eyeTimer.totalMs;
+  eyeTimer.overdueMs = 0;
+  eyeTimer.nagAccumMs = 0;
+  measureEyeRail();
+  updateEyeUI();
+  ensureTickRunning();
+}
+function stopEyeCare(){
+  eyeTimer.active = false;
+  eyeTimer.mode = 'idle';
+  eyeTimer.totalMs = 0;
+  eyeTimer.leftMs = 0;
+  eyeTimer.overdueMs = 0;
+  eyeTimer.nagAccumMs = 0;
+  updateEyeUI();
+}
+function startEyeRest(){
+  if(!eyeTimer.active) return;
+  if(eyeTimer.mode !== 'use' && eyeTimer.mode !== 'need-rest') return;
+  const cfg = getEyeCfg();
+  eyeTimer.mode = 'rest';
+  eyeTimer.totalMs = cfg.restMin * 60000;
+  eyeTimer.leftMs = eyeTimer.totalMs;
+  eyeTimer.overdueMs = 0;
+  eyeTimer.nagAccumMs = 0;
+  measureEyeRail();
+  updateEyeUI();
+  toast('😌 放松眼睛计时开始（' + cfg.restMin + ' 分钟）', 2200);
+}
+function tickEye(dt){
+  if(!eyeTimer.active) return;
+  if(eyeTimer.mode === 'use'){
+    eyeTimer.leftMs -= dt;
+    if(eyeTimer.leftMs <= 0){
+      eyeTimer.leftMs = 0;
+      eyeTimer.mode = 'need-rest';
+      eyeTimer.overdueMs = 0;
+      eyeTimer.nagAccumMs = 0;
+      playEyeAlert();
+      toast('⏰ 该放松眼睛啦！点「放松眼睛」休息一下', 3400);
+    }
+    updateEyeUI();
+  } else if(eyeTimer.mode === 'need-rest'){
+    eyeTimer.overdueMs += dt;
+    eyeTimer.nagAccumMs += dt;
+    if(eyeTimer.nagAccumMs >= EYE_NAG_MS){
+      eyeTimer.nagAccumMs -= EYE_NAG_MS;
+      playEyeAlert();
+      toast('⚠️ 还没放松眼睛哦，快点「放松眼睛」吧', 2600);
+    }
+    updateEyeUI();
+  } else if(eyeTimer.mode === 'rest'){
+    eyeTimer.leftMs -= dt;
+    if(eyeTimer.leftMs <= 0){
+      const cfg = getEyeCfg();
+      eyeTimer.mode = 'use';
+      eyeTimer.totalMs = cfg.useMin * 60000;
+      eyeTimer.leftMs = eyeTimer.totalMs;
+      eyeTimer.overdueMs = 0;
+      eyeTimer.nagAccumMs = 0;
+      playRestDone();
+      toast('✅ 放松结束，继续加油！', 2200);
+    }
+    updateEyeUI();
+  }
+}
+
+/* ★ 把 0~1 的进度换算成眼睛在轨道上的位置：0=用眼端，1=放松端 */
+function moveEyeToken(p){
+  if(!eyeTokenEl || !eyeRailEl) return;
+  if(eyeRailW < 0) measureEyeRail();
+  const x = eyeRailW * clamp(p, 0, 1);
+  eyeTokenEl.style.transform = 'translate(' + x.toFixed(2) + 'px, -50%)';
+  if(eyeFillEl) eyeFillEl.style.width = (clamp(p, 0, 1) * 100) + '%';
+}
+
+function updateEyeUI(){
+  const card = $('eyeCard');
+  if(!card) return;
+  const timeEl  = $('eyeTime');
+  const btn = $('eyeRestBtn');
+
+  let p = 0;   // 0 = 用眼端，1 = 放松端
+
+  if(!eyeTimer.active){
+    card.className = 'eye-card idle';
+    if(timeEl) timeEl.textContent = '--:--';
+    if(btn){ btn.disabled = true; btn.textContent = '😌 放松眼睛'; }
+    p = 0;
+  } else if(eyeTimer.mode === 'use'){
+    card.className = 'eye-card using';
+    if(timeEl) timeEl.textContent = fmtMs(eyeTimer.leftMs);
+    if(btn){ btn.disabled = false; btn.textContent = '😌 放松眼睛'; }
+    p = eyeTimer.totalMs > 0 ? 1 - (eyeTimer.leftMs / eyeTimer.totalMs) : 0;
+  } else if(eyeTimer.mode === 'need-rest'){
+    card.className = 'eye-card alert';
+    if(timeEl) timeEl.textContent = '已等待' + fmtMs(eyeTimer.overdueMs);
+    if(btn){ btn.disabled = false; btn.textContent = '😌 开始放松'; }
+    p = 1;
+  } else if(eyeTimer.mode === 'rest'){
+    card.className = 'eye-card resting';
+    if(timeEl) timeEl.textContent = fmtMs(eyeTimer.leftMs);
+    if(btn){ btn.disabled = true; btn.textContent = '放松中…'; }
+    p = eyeTimer.totalMs > 0 ? (eyeTimer.leftMs / eyeTimer.totalMs) : 0;
+  }
+
+  moveEyeToken(p);
+}
+
+/* ============================================================
+   运行时
+============================================================ */
 function ensureRuntime(task){
   if(!runtimeMap[task.id]){
     const ms = clamp(Number(task.minutes)||10,0.5,120)*60000;
@@ -2095,7 +2600,7 @@ function flySunAway(n){
   const rect = sunPillEl.getBoundingClientRect();
   const el = document.createElement('div');
   el.className = 'fly-sun-away';
-  el.textContent = '−'+n+'🪙';
+  el.textContent = '−'+n+'💰';
   el.style.left = (rect.left+rect.width/2-26)+'px';
   el.style.top  = (rect.top+rect.height/2-12)+'px';
   document.body.appendChild(el);
@@ -2127,11 +2632,13 @@ function tick(now){
     const rt = runtimeMap[activeId];
     if(rt && !rt.holdDogAtEnd){
       rt.leftMs -= dt;
+      tickChar(dt);
       if(rt.leftMs <= 0){
         rt.rounds = (rt.rounds||0)+1;
         rt.leftMs = rt.totalMs;
         rt.holdDogAtEnd = true;
-        eatSun(1, '⏰ 第 <b>'+rt.rounds+'</b> 轮结束，任务未完成！<br>扣掉 1 颗金币 🪙');
+        resetCharProgress();
+        eatSun(1, '⏰ 第 <b>'+rt.rounds+'</b> 轮结束，任务未完成！<br>扣掉 1 颗金币 💰');
         const myRound = rt.rounds;
         setTimeout(() => {
           if(!activeId || !runtimeMap[activeId]) return;
@@ -2144,10 +2651,14 @@ function tick(now){
       }
     }
   }
+  /* ★ 护眼倒计时独立运行（与主倒计时无关） */
+  tickEye(dt);
+
   updateDogBar();
   if(activeId) updateCardVisual(activeId);
   updateMainBtn();
-  const needsTick = pauseState.active || (running && activeId);
+
+  const needsTick = pauseState.active || (running && activeId) || eyeTimer.active;
   if(needsTick) rafId = requestAnimationFrame(tick);
   else rafId = null;
 }
@@ -2156,6 +2667,8 @@ function stopTick(){
   running=false; pauseState.active=false; pauseState.leftMs=0;
   cancelAnimationFrame(rafId); rafId=null;
   dogEl.classList.remove('running','paused','chomp');
+  /* ★ 护眼提醒还在跑，就继续让它 tick */
+  if(eyeTimer.active) ensureTickRunning();
 }
 function startTask(id){
   const info = findTask(id);
@@ -2169,25 +2682,49 @@ function startTask(id){
   running = true;
   dogEl.classList.remove('paused','chomp');
   dogEl.classList.add('running');
+  if(charTimer.active && charTimer.taskId === id){
+    rebindCharTimer();
+  } else {
+    initCharTimer(id);
+  }
+  setCharPaused(false);
+  /* ★ 首次开始作业 → 开启护眼提醒 */
+  if(!eyeTimer.active) startEyeCare();
   playSound('start');
   ensureTickRunning();
   refreshAllCards(); updateDogBar(); updateMainBtn();
   scrollToCard(id);
 }
-let pwdPurpose = 'pause';
-function requestPause(){
-  if(!activeId || !running) return;
-  running = false;
-  pauseState.active = false;
-  pauseState.leftMs = 0;
-  dogEl.classList.remove('running','paused','chomp');
-  playSound('pause');
-  refreshAllCards(); updateDogBar(); updateMainBtn();
-  toast('⏸ 已暂停，倒计时停留在当前时间', 1800);
+
+/* ============================================================
+   🔒 密码验证
+============================================================ */
+let pwdPurpose = '';
+
+function currentParentPassword(){
+  return (state && typeof state.parentPassword === 'string' && /^\d{4}$/.test(state.parentPassword))
+    ? state.parentPassword
+    : MASTER_PASSWORD;
+}
+function checkPassword(val){
+  const v = String(val == null ? '' : val).trim();
+  if(!v) return false;
+  if(v === MASTER_PASSWORD) return true;
+  return v === currentParentPassword();
+}
+function openPwdModal(title, sub){
+  pwdTitle.textContent = title;
+  pwdSub.textContent = sub;
+  pwdInput.value = '';
+  pwdInput.classList.remove('error');
+  pwdTip.textContent = '';
+  pwdTip.classList.remove('err');
+  pwdModalEl.classList.add('show');
+  setTimeout(() => pwdInput.focus(), 120);
 }
 function confirmPassword(){
   const val = (pwdInput.value||'').trim();
-  if(val !== PARENT_PASSWORD){
+  if(!checkPassword(val)){
     pwdInput.classList.remove('error');
     void pwdInput.offsetWidth;
     pwdInput.classList.add('error');
@@ -2199,7 +2736,27 @@ function confirmPassword(){
     return;
   }
   pwdModalEl.classList.remove('show');
-  if(pwdPurpose === 'admin') enterAdminMode();
+  const purpose = pwdPurpose;
+  pwdPurpose = '';
+  if(purpose === 'admin') enterAdminMode();
+  else if(purpose === 'pause') doPause();
+}
+
+function requestPause(){
+  if(!activeId || !running) return;
+  pwdPurpose = 'pause';
+  openPwdModal('⏸ 暂停确认', '暂停倒计时需要家长密码');
+}
+function doPause(){
+  if(!activeId || !running) return;
+  running = false;
+  pauseState.active = false;
+  pauseState.leftMs = 0;
+  dogEl.classList.remove('running','paused','chomp');
+  setCharPaused(true);
+  playSound('pause');
+  refreshAllCards(); updateDogBar(); updateMainBtn();
+  toast('⏸ 已暂停，倒计时停留在当前时间', 1800);
 }
 function resumeFromPause(){
   if(!pauseState.active) return;
@@ -2258,6 +2815,8 @@ function completeTask(id){
     running=false; pauseState.active=false; pauseState.leftMs=0;
     dogEl.classList.remove('running','paused','chomp');
     cancelAnimationFrame(rafId); rafId=null;
+    clearCharTimer();
+    if(eyeTimer.active) ensureTickRunning();
   }
   const reward = task.sun;
   task.done = true;
@@ -2268,7 +2827,7 @@ function completeTask(id){
   bumpPill(sunPillEl);
   renderStats();
   renderBoard();
-  toast('✅ 「'+escapeHtml(task.text)+'」完成！<br>结算 +'+reward+' 🪙', 2400);
+  toast('✅ 「'+escapeHtml(task.text)+'」完成！<br>结算 +'+reward+' 💰', 2400);
   setTimeout(() => autoStartNext(), 700);
 }
 function autoStartNext(){
@@ -2277,6 +2836,8 @@ function autoStartNext(){
     activeId=null; running=false; pauseState.active=false; pauseState.leftMs=0;
     dogEl.classList.remove('running','paused','chomp');
     cancelAnimationFrame(rafId); rafId=null;
+    clearCharTimer();
+    stopEyeCare();          /* ★ 作业全部完成 → 关闭护眼提醒 */
     updateDogBar(); updateMainBtn(); refreshAllCards();
     setTimeout(celebrate, 900);
     return false;
@@ -2288,6 +2849,7 @@ function autoStartNext(){
   running = true;
   dogEl.classList.remove('paused','chomp');
   dogEl.classList.add('running');
+  initCharTimer(next.id);
   playSound('start');
   ensureTickRunning();
   refreshAllCards(); updateDogBar(); updateMainBtn();
@@ -2310,7 +2872,7 @@ function flySun(fromEl){
   const to = sunPillEl.getBoundingClientRect();
   const el = document.createElement('div');
   el.className = 'fly-sun';
-  el.textContent = '🪙';
+  el.textContent = '💰';
   el.style.left = (from.left+from.width/2-14)+'px';
   el.style.top  = (from.top+from.height/2-14)+'px';
   document.body.appendChild(el);
@@ -2323,15 +2885,16 @@ function flySun(fromEl){
   setTimeout(() => el.remove(), 950);
 }
 function celebrate(){
+  stopEyeCare();   /* ★ 稳妥起见，庆祝时也关掉护眼提醒 */
   if(!state.checkins.includes(state.date)) state.checkins.push(state.date);
   saveLocalState(); uploadToCloud();
   renderStats();
   playSound('win');
   confetti();
-  toast('🎉 全部完成啦！<br>今天的作业全部完成！', 4200);
+  toast('🎉 全部完成啦！', 4200);
 }
 function confetti(){
-  const emojis = ['⭐','🪙','✨','🎉','🌈','💚','🌟','🍀'];
+  const emojis = ['⭐','💰','✨','🎉','🌈','💚','🌟','🍀'];
   for(let i=0;i<28;i++){
     const el = document.createElement('div');
     el.className='confetti';
@@ -2359,9 +2922,11 @@ function switchSubject(subject){
 
 function switchDate(dateStr){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return;
+  stopEyeCare();     /* ★ 换日期 → 关掉护眼提醒 */
   stopTick();
   activeId = null;
   runtimeMap = {};
+  clearCharTimer();
   state.date = dateStr;
   if(!state.days[state.date]) state.days[state.date] = makeDay();
   saveLocalState(); uploadToCloud();
@@ -2511,19 +3076,15 @@ $('pwdCancel').addEventListener('click', () => pwdModalEl.classList.remove('show
 pwdInput.addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); confirmPassword(); } });
 pwdInput.addEventListener('input', () => {
   pwdInput.classList.remove('error'); pwdTip.textContent=''; pwdTip.classList.remove('err');
-  if(pwdPurpose === 'admin' && pwdInput.value.trim() === PARENT_PASSWORD) confirmPassword();
+  const v = pwdInput.value.trim();
+  if(v.length >= 4) confirmPassword();
 });
 pwdModalEl.addEventListener('click', e => { if(e.target===pwdModalEl) pwdModalEl.classList.remove('show'); });
 
+/* ★ 家长入口：点左上角向日葵 */
 $('adminEntryBtn').addEventListener('click', () => {
   pwdPurpose = 'admin';
-  pwdTitle.textContent = '🔑 家长验证';
-  pwdSub.textContent = '请输入家长密码进入管理面板';
-  pwdInput.value='';
-  pwdInput.classList.remove('error');
-  pwdTip.textContent=''; pwdTip.classList.remove('err');
-  pwdModalEl.classList.add('show');
-  setTimeout(() => pwdInput.focus(), 120);
+  openPwdModal('🔑 家长验证', '请输入家长密码进入管理面板');
 });
 
 function enterAdminMode(){
@@ -2542,6 +3103,11 @@ function exitAdminMode(){
 }
 $('adminExitBtn').addEventListener('click', exitAdminMode);
 $('adminCloseBtn').addEventListener('click', exitAdminMode);
+
+/* ★ 护眼按钮：手动开始放松 */
+$('eyeRestBtn').addEventListener('click', () => {
+  startEyeRest();
+});
 
 function renderAdminPanel(){
   if(!isAdminMode) return;
@@ -2570,13 +3136,71 @@ function renderAdminPanel(){
   renderLessonLibrary();
   populateLessonSelects();
   renderSunPanel();
+  renderPwdPanel();
+  renderEyePanel();
   applyAdminPanelStates();
   syncLastInputFields();
 }
 
 /* ------------------------------------------------------------
-   🪙 金币调整（家长端手动扣除 / 增加，用于兑换奖励）
-   每条调整都写进 state.sunLog 流水，随云端同步，孩子端立刻能看到
+   👁️ 护眼提醒设置
+------------------------------------------------------------ */
+function renderEyePanel(){
+  const st = state.settings || DEFAULT_SETTINGS;
+  const ec = (st.eyeCare && typeof st.eyeCare === 'object') ? st.eyeCare : DEFAULT_SETTINGS.eyeCare;
+  const useEl = $('adminEyeUseMin');
+  const restEl = $('adminEyeRestMin');
+  if(useEl) useEl.value = ec.useMin;
+  if(restEl) restEl.value = ec.restMin;
+  const hint = $('adminEyeHint');
+  if(hint){
+    hint.className = 'aa-hint ok';
+    hint.textContent = '当前设置：每用眼 ' + ec.useMin + ' 分钟提醒放松，放松 ' + ec.restMin + ' 分钟';
+  }
+}
+$('adminEyeSaveBtn').addEventListener('click', () => {
+  const useV  = clamp(Math.round(parseFloat($('adminEyeUseMin').value)  || 20), 1, 120);
+  const restV = clamp(Math.round(parseFloat($('adminEyeRestMin').value) || 5),  1, 60);
+  if(!state.settings) state.settings = {};
+  state.settings.eyeCare = { useMin: useV, restMin: restV };
+  saveLocalState(); uploadToCloud();
+  renderEyePanel();
+  toast('✅ 护眼提醒设置已保存');
+});
+
+/* ------------------------------------------------------------
+   🔒 家长密码面板
+------------------------------------------------------------ */
+function renderPwdPanel(){
+  const hint = $('adminPwdHint');
+  if(!hint) return;
+  const cur = currentParentPassword();
+  hint.className = 'aa-hint';
+  hint.textContent = (cur === MASTER_PASSWORD)
+    ? '当前密码：默认 0702（万能密码同样有效）'
+    : '当前已设置自定义密码（万能密码 0702 仍然有效）';
+}
+$('adminSavePwdBtn').addEventListener('click', () => {
+  const a = ($('adminNewPwd').value || '').trim();
+  const b = ($('adminNewPwd2').value || '').trim();
+  if(!/^\d{4}$/.test(a)){ toast('请输入 4 位数字密码'); return; }
+  if(a !== b){ toast('两次输入的密码不一致'); return; }
+  state.parentPassword = a;
+  saveLocalState(); uploadToCloud();
+  $('adminNewPwd').value = ''; $('adminNewPwd2').value = '';
+  renderPwdPanel();
+  toast('✅ 家长密码已更新');
+});
+$('adminResetPwdBtn').addEventListener('click', () => {
+  if(!confirm('确定恢复默认密码 0702 吗？')) return;
+  state.parentPassword = MASTER_PASSWORD;
+  saveLocalState(); uploadToCloud();
+  renderPwdPanel();
+  toast('✅ 已恢复默认密码 0702');
+});
+
+/* ------------------------------------------------------------
+   💰 金币调整
 ------------------------------------------------------------ */
 function pushSunLog(delta, reason){
   if(!Array.isArray(state.sunLog)) state.sunLog = [];
@@ -2603,7 +3227,7 @@ function changeSun(delta, reason){
 
 function renderSunPanel(){
   const badge = $('adminSunBadge');
-  if(badge) badge.textContent = state.sun + ' 🪙';
+  if(badge) badge.textContent = state.sun + ' 💰';
   const logEl = $('adminSunLog');
   if(!logEl) return;
   const log = Array.isArray(state.sunLog) ? state.sunLog : [];
@@ -2623,7 +3247,7 @@ function renderSunPanel(){
     return '<div class="sun-log-row">'
       + '<span class="sl-time">' + escapeHtml(time) + '</span>'
       + '<span class="sl-reason">' + escapeHtml(String(e.reason || '')) + '</span>'
-      + '<span class="sl-delta ' + cls + '">' + (d > 0 ? '+' : '') + d + ' 🪙</span>'
+      + '<span class="sl-delta ' + cls + '">' + (d > 0 ? '+' : '') + d + ' 💰</span>'
       + '</div>';
   }).join('');
 }
@@ -2633,19 +3257,19 @@ function adminSunAdjust(sign){
   const reasonEl = $('adminSunReason');
   const amount = Math.abs(Math.round(Number(amtEl && amtEl.value) || 0));
   if(!amount){ toast('请输入要调整的金币数量'); return; }
-  if(amount > 9999){ toast('一次最多调整 9999 🪙'); return; }
+  if(amount > 9999){ toast('一次最多调整 9999 💰'); return; }
   const reason = reasonEl ? reasonEl.value : '手动调整';
   const delta = sign < 0 ? -amount : amount;
   const now = Math.round(Number(state.sun) || 0);
   if(delta < 0 && now - amount < 0){
-    if(!confirm('当前金币只有 ' + now + ' 🪙，扣除 ' + amount + ' 后为 ' + (now - amount) + ' 🪙。\n确定继续吗？')) return;
+    if(!confirm('当前金币只有 ' + now + ' 💰，扣除 ' + amount + ' 后为 ' + (now - amount) + ' 💰。\n确定继续吗？')) return;
   }else{
-    if(!confirm((delta < 0 ? '扣除 ' : '增加 ') + amount + ' 🪙（' + reason + '）？')) return;
+    if(!confirm((delta < 0 ? '扣除 ' : '增加 ') + amount + ' 💰（' + reason + '）？')) return;
   }
   if(!changeSun(delta, reason)) return;
   toast(delta < 0
-    ? '✅ 已扣除 ' + amount + ' 🪙（' + escapeHtml(reason) + '）'
-    : '✅ 已增加 ' + amount + ' 🪙（' + escapeHtml(reason) + '）', 2600);
+    ? '✅ 已扣除 ' + amount + ' 💰（' + escapeHtml(reason) + '）'
+    : '✅ 已增加 ' + amount + ' 💰（' + escapeHtml(reason) + '）', 2600);
 }
 $('adminSunMinusBtn').addEventListener('click', () => adminSunAdjust(-1));
 $('adminSunPlusBtn').addEventListener('click', () => adminSunAdjust(1));
@@ -2665,7 +3289,7 @@ function renderAdminTaskList(subject, listId, badgeId){
       <span class="drag-handle">☷</span>
       <div class="at-check ${t.done?'done':''}" data-toggle="${escapeAttr(t.id)}">✓</div>
       <div class="at-text ${t.done?'done':''}">${escapeHtml(t.text)}</div>
-      <div class="at-meta">⏱${t.minutes}分钟 · 🪙${t.sun}</div>
+      <div class="at-meta">⏱${t.minutes}分钟 · 💰${t.sun}</div>
       <button class="at-del" data-del="${escapeAttr(t.id)}" data-subject="${subject}">删除</button>
     </div>
   `).join('');
@@ -2684,7 +3308,7 @@ function renderAdminTaskList(subject, listId, badgeId){
       const info = findTask(id);
       if(info && info.task.done) state.sun -= Number(info.task.sun)||0;
       state.subjects[subj] = state.subjects[subj].filter(t => t.id !== id);
-      if(activeId === id){ stopTick(); activeId = null; }
+      if(activeId === id){ stopTick(); activeId = null; clearCharTimer(); }
       cleanupRuntime();
       saveLocalState(); uploadToCloud();
       renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
@@ -2756,6 +3380,8 @@ function applyAdminPanelStates(){
     adminPanelDate: pc.date,
     adminPanelLibrary: pc.library,
     adminPanelSync: pc.sync,
+    adminPanelPassword: pc.password,
+    adminPanelEye: pc.eye,
     adminPanelMath: pc.math,
     adminPanelEnglish: pc.english
   };
@@ -2768,7 +3394,8 @@ function setupAdminPanelToggles(){
   const map = {
     adminPanelProgress:'progress', adminPanelSun:'sun', adminPanelDate:'date',
     adminPanelMath:'math', adminPanelEnglish:'english',
-    adminPanelLibrary:'library', adminPanelSync:'sync'
+    adminPanelLibrary:'library', adminPanelSync:'sync',
+    adminPanelPassword:'password', adminPanelEye:'eye'
   };
   Object.entries(map).forEach(([id,key]) => {
     const panel=$(id);
@@ -2890,7 +3517,6 @@ function populateLessonSelects(){
   }catch(e){}
 }
 
-/* ✅ 课文库：添加 */
 $('adminLibAddBtn').addEventListener('click', () => {
   const nameEl = $('adminLibLesson');
   const charsEl = $('adminLibChars');
@@ -2910,7 +3536,7 @@ $('adminLibAddBtn').addEventListener('click', () => {
 });
 
 /* ============================================================
-   ✅ 上传写字表 / 识字表 → 自动解析生成课文库
+   上传写字表 / 识字表
 ============================================================ */
 let pdfJsLoading = null;
 function loadPdfJs(){
@@ -3241,15 +3867,16 @@ $('taskEditSave').addEventListener('click', () => {
   saveLocalState(); uploadToCloud();
   taskEditModal.classList.remove('show');
   editingTaskId = null;
+  if(charTimer.active && charTimer.taskId === t.id) initCharTimer(t.id);
   renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
   renderAdminPanel();
   toast('✅ 已保存修改');
 });
 
 const LESSON_PICK = {
-  preview:   { sel:'adminPreviewLessonSelect',   hint:'previewLessonHint',   field:'chars',      unit:'字', label:'会写字' },
+  preview:   { sel:'adminPreviewLessonSelect',   hint:'previewLessonHint',   field:'chars', unit:'字', label:'会写字' },
   wordgroup: { sel:'adminWordgroupLessonSelect', hint:'wordgroupLessonHint', field:'chars', unit:'字', label:'会写字' },
-  copy:      { sel:'adminCopyLessonSelect',      hint:'copyLessonHint',      field:'words',      unit:'组', label:'抄写词语' }
+  copy:      { sel:'adminCopyLessonSelect',      hint:'copyLessonHint',      field:'words', unit:'组', label:'抄写词语' }
 };
 function lessonPickItems(kind){
   const cfg = LESSON_PICK[kind];
@@ -3395,7 +4022,6 @@ $('adminDateInput').addEventListener('change', e => {
 });
 $('adminGoToday').addEventListener('click', () => switchDate(todayStr()));
 
-// 本地下载：把当前学习数据完整保存为 JSON 文件
 $('adminLocalDownloadBtn').addEventListener('click', () => {
   try{
     saveLocalState();
@@ -3423,7 +4049,6 @@ $('adminLocalDownloadBtn').addEventListener('click', () => {
   }
 });
 
-// 本地上传：从 JSON 备份恢复当前学习数据
 $('adminLocalUploadBtn').addEventListener('click', () => {
   $('adminLocalUploadFile').value = '';
   $('adminLocalUploadFile').click();
@@ -3443,7 +4068,6 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
 
     if(!confirm('确定要导入这份本地数据吗？\\n导入后会覆盖当前本地学习数据。')) return;
 
-    // 走现有的数据标准化逻辑，兼容当前版本的数据结构
     const newDays = {};
     Object.keys(imported.days).forEach(k => {
       newDays[k] = normalizeDay(imported.days[k]);
@@ -3456,6 +4080,9 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
     state.sunLog = Array.isArray(imported.sunLog) ? imported.sunLog : [];
     state.settings = normalizeSettings(imported.settings);
     state.lessonLibrary = normalizeLessonLibrary(imported.lessonLibrary);
+    state.parentPassword = (typeof imported.parentPassword === 'string'
+      && /^\d{4}$/.test(imported.parentPassword))
+      ? imported.parentPassword : MASTER_PASSWORD;
 
     if(!state.days[state.date]) state.days[state.date] = makeDay();
 
@@ -3468,7 +4095,6 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
     if(isAdminMode) renderAdminPanel();
     populateLessonSelects();
 
-    // 导入后同时同步到云端，保持家长端/孩子端一致（用户主动导入 → 强制上传）
     let synced = false;
     try{ synced = await uploadToCloud(true); }catch(err){ console.warn('导入后云端同步失败', err); }
 
@@ -3493,7 +4119,6 @@ $('adminForcePullBtn').addEventListener('click', async () => {
   if(result.state === 'has-data'
      && result.data && result.data.days
      && Object.keys(result.data.days).length){
-    // 手动拉取：强制采用云端数据，跳过时间戳保护
     lastPushedUpdatedAt = 0;
     lastRemoteUpdatedAt = 0;
     applyRemoteState(result.data);
@@ -3507,14 +4132,19 @@ $('adminForcePullBtn').addEventListener('click', async () => {
   }
 });
 
-
 document.querySelectorAll('.subject-tab').forEach(tab => {
   tab.addEventListener('click', () => switchSubject(tab.dataset.tab));
 });
 
 mainBtn.addEventListener('click', onMainBtnClick);
 
-window.addEventListener('resize', updateDogBar);
+window.addEventListener('resize', () => {
+  updateDogBar();
+  /* ★ 轨道宽度可能变化，重新测量并刷新眼睛位置 */
+  eyeRailW = -1;
+  measureEyeRail();
+  updateEyeUI();
+});
 
 let wasRunning = false;
 document.addEventListener('visibilitychange', () => {
@@ -3531,10 +4161,13 @@ document.addEventListener('visibilitychange', () => {
         refreshAllCards(); updateDogBar(); updateMainBtn();
       }
     } else { updateDogBar(); updateMainBtn(); }
+    /* 若护眼提醒还在跑，回来时确保 tick 恢复 */
+    if(eyeTimer.active) ensureTickRunning();
   }
 });
 
-if('serviceWorker' in navigator){
+/* ★ 只在 http/https 下注册 SW，避免 file:// 直接打开时报错 */
+if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js')
       .then(reg => console.log('SW 注册成功:', reg.scope))
@@ -3552,15 +4185,20 @@ saveLocalState();
 renderStats(); renderBoard();
 switchSubject('chinese');
 refreshAllCards();
-requestAnimationFrame(() => { updateDogBar(); updateMainBtn(); });
+requestAnimationFrame(() => {
+  measureEyeRail();
+  updateEyeUI();   /* ★ 初始化护眼卡片 UI */
+  updateDogBar();
+  updateMainBtn();
+});
 
 /* ============================================================
-   ☁️ 启动同步：先读云端 → 云端有数据就以云端为准 → 最后才挂实时监听
+   ☁️ 启动同步
 ============================================================ */
 const familyIdEl = document.getElementById('familyIdText');
 if(familyIdEl) familyIdEl.textContent = FAMILY_ID;
 
-if(dataRef){
+if(dataRef && fbSet && fbGet && fbOnValue){
   (async () => {
     const result = await readCloudOnce();
     if(result.state === 'has-data'
@@ -3580,13 +4218,13 @@ if(dataRef){
     freshBoot = false;
     startCloudSync();
     updateSyncInfo();
-    // 任务名刚做过迁移 → 把改名后的数据回写云端，保证家长端/孩子端一致
     if(nameMigrated && result.state !== 'error'){
       try{ await uploadToCloud(true); }catch(e){ console.warn('改名回写云端失败', e); }
     }
   })();
 } else {
-  updateSyncInfo('未连接云端（纯本地模式）');
+  updateSyncInfo('未连接（纯本地模式）');
+  showSyncStatus('📴 纯本地模式', 'offline');
 }
 </script>
 </body>
