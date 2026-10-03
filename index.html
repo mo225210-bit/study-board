@@ -108,9 +108,12 @@
     border:3px solid var(--c-border);box-shadow:inset 0 4px 10px rgba(40,90,30,.12);transition:all .3s}
   .track.paused{border-color:#FFB74D;background:linear-gradient(180deg,#FFF8E1,#FFE0B2)}
   .track.chomping{border-color:#FF7043;background:linear-gradient(180deg,#FFF3E0,#FFCCBC)}
-  .track-fill{position:absolute;top:0;right:0;bottom:0;width:0;
-    background:linear-gradient(90deg,rgba(255,183,77,.18),rgba(255,152,0,.40));pointer-events:none;transition:all .3s}
-  .sun-anchor{position:absolute;left:8px;top:50%;transform:translateY(-50%);
+  /* ★ 进度条改为「左→右」增长，与狗狗前进方向完全一致 */
+  .track-fill{position:absolute;top:0;left:0;bottom:0;width:0;
+    background:linear-gradient(90deg,rgba(255,183,77,.18),rgba(255,152,0,.42));
+    pointer-events:none;transition:none}
+  /* ★ 太阳移到右侧终点（狗狗跑到终点会吃掉它） */
+  .sun-anchor{position:absolute;right:8px;top:50%;transform:translateY(-50%);
     font-size:28px;line-height:1;z-index:2;
     text-shadow:0 0 9px rgba(255,200,0,.9)}
   .sun-anchor.eaten{animation:sunEaten .65s ease forwards}
@@ -122,6 +125,9 @@
   .track-time.chomping{color:#BF360C}
   .dog-wrap{position:absolute;top:0;left:0;height:100%;width:42px;
     display:flex;align-items:center;justify-content:center;will-change:transform;z-index:3}
+  /* ★ 狗狗 emoji 默认朝左，翻转后朝右前进 */
+  .dog-flip{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+    transform:scaleX(-1)}
   .dog{font-size:32px;line-height:1;transform-origin:50% 100%}
   .dog.running{animation:dogRun .34s ease-in-out infinite}
   .dog.paused{animation:dogPause 2.2s ease-in-out infinite}
@@ -713,7 +719,7 @@
         <div class="track-fill" id="trackFill"></div>
         <div class="sun-anchor" id="sunAnchor">💰</div>
         <div class="track-time" id="trackTime">--:--</div>
-        <div class="dog-wrap" id="dogWrap"><div class="dog" id="dog">🐕</div></div>
+        <div class="dog-wrap" id="dogWrap"><div class="dog-flip"><div class="dog" id="dog">🐕</div></div></div>
       </div>
       <button class="timer-btn start" id="mainBtn">▶ 开始</button>
     </div>
@@ -2368,14 +2374,17 @@ function cleanupRuntime(){
   for(const id in runtimeMap){ if(!ids.has(id)) delete runtimeMap[id]; }
   if(activeId && !ids.has(activeId)){ activeId = null; }
 }
+
+/* ★ 狗狗位置：从左（0）到右（1），与进度条方向一致 */
 function setDogProgress(p){
   const trackW = trackEl.clientWidth || 300;
   const dogW = dogWrap.offsetWidth || 42;
-  const startX = Math.max(0, trackW-dogW-6);
-  const endX = 2;
-  const t = clamp(p,0,1);
-  dogWrap.style.transform = `translateX(${startX+(endX-startX)*t}px)`;
+  const startX = 4;
+  const endX = Math.max(startX, trackW - dogW - 40);   /* 右侧留出太阳的位置 */
+  const t = clamp(p, 0, 1);
+  dogWrap.style.transform = `translateX(${startX + (endX - startX) * t}px)`;
 }
+
 function updateDogBar(){
   if(!activeId){
     trackEl.className='track';
@@ -2391,7 +2400,9 @@ function updateDogBar(){
   const rt = runtimeMap[activeId];
   if(!info || !rt){ activeId=null; updateDogBar(); return; }
   const name = info.task.text;
+
   if(pauseState.active){
+    /* ★ 暂停（含放松眼睛期间）：进度条完全冻结 */
     trackEl.className = 'track paused';
     const p = rt.totalMs>0 ? 1-rt.leftMs/rt.totalMs : 0;
     setDogProgress(p);
@@ -2399,24 +2410,29 @@ function updateDogBar(){
     trackFill.style.width = (p*100)+'%';
     trackTime.className = 'track-time paused';
     trackTime.textContent = fmtMs(rt.leftMs);
-    timerHint.innerHTML = '⏸ <span class="paused-t">已暂停</span>：'+escapeHtml(name)+' · 点「▶ 继续」恢复';
+    const eyeResting = state.live && state.live.eyeMode === 'rest';
+    timerHint.innerHTML = eyeResting
+      ? '😌 <span class="paused-t">放松眼睛中</span>：'+escapeHtml(name)+' · 放松结束自动继续'
+      : '⏸ <span class="paused-t">已暂停</span>：'+escapeHtml(name)+' · 点「▶ 继续」恢复';
     return;
   }
+
   if(rt.overdue){
-    /* ★ 超时后：主进度条按单份时间循环倒计时 */
+    /* ★ 超时后：狗狗停在终点，进度条按单份时间循环 */
     const L = state.live || {};
     const unitMs = Math.max(1, Number(L.unitMs) || 1);
     const left = liveLeftMs(L);
     const frac = clamp(left / unitMs, 0, 1);   /* 1 → 0 */
     trackEl.className = 'track chomping';
-    setDogProgress(1 - frac);
+    setDogProgress(1);
     trackFill.className = 'track-fill';
-    trackFill.style.width = (frac * 100) + '%';
+    trackFill.style.width = ((1 - frac) * 100) + '%';
     trackTime.className = 'track-time chomping';
     trackTime.textContent = fmtMs(left);
     timerHint.innerHTML = '⏰ <span class="chomp-t">已超时</span> · 已扣 '+rt.rounds+' 个金币 · 倒计时结束再扣 1 个';
     return;
   }
+
   trackEl.className = 'track';
   const p = rt.totalMs>0 ? 1-rt.leftMs/rt.totalMs : 0;
   setDogProgress(p);
@@ -2588,6 +2604,8 @@ function tick(){
         toast('⚠️ 还没放松眼睛哦，快点「放松眼睛」吧', 2600);
       }
     } else if(L.eyeMode === 'rest'){
+      /* ★ 放松眼睛期间：确保任务倒计时处于暂停，进度条冻结 */
+      if(L.activeId && L.status === 'running') silentPauseTask();
       const left = liveEyeLeftMs(L);
       if(left <= 0){
         const cfg = getEyeCfg();
@@ -2597,6 +2615,7 @@ function tick(){
         L.eyeNagCount = 0;
         L.soundSeq = (L.soundSeq || 0) + 1;
         L.soundKind = 'restDone';
+        /* ★ 放松结束：任务倒计时自动继续，进度条继续走 */
         silentResumeTask();
         pushLive();
         toast('✅ 放松结束，继续加油！', 2200);
@@ -2757,6 +2776,7 @@ function liveStartEyeRest(){
   L.eyeTotalMs = cfg.restMin * 60000;
   L.eyeNagCount = 0;
   L.ownerTab = TAB_ID;
+  /* ★ 放松眼睛：暂停任务倒计时 → 总进度条冻结 */
   silentPauseTask();
   pushLive();
   toast('😌 放松眼睛开始（' + cfg.restMin + ' 分钟），任务倒计时已暂停', 2600);
