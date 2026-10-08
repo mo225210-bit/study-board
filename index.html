@@ -108,11 +108,9 @@
     border:3px solid var(--c-border);box-shadow:inset 0 4px 10px rgba(40,90,30,.12);transition:all .3s}
   .track.paused{border-color:#FFB74D;background:linear-gradient(180deg,#FFF8E1,#FFE0B2)}
   .track.chomping{border-color:#FF7043;background:linear-gradient(180deg,#FFF3E0,#FFCCBC)}
-  /* ★ 进度条改为「左→右」增长，与狗狗前进方向完全一致 */
   .track-fill{position:absolute;top:0;left:0;bottom:0;width:0;
     background:linear-gradient(90deg,rgba(255,183,77,.18),rgba(255,152,0,.42));
     pointer-events:none;transition:none}
-  /* ★ 太阳移到右侧终点（狗狗跑到终点会吃掉它） */
   .sun-anchor{position:absolute;right:8px;top:50%;transform:translateY(-50%);
     font-size:28px;line-height:1;z-index:2;
     text-shadow:0 0 9px rgba(255,200,0,.9)}
@@ -125,7 +123,6 @@
   .track-time.chomping{color:#BF360C}
   .dog-wrap{position:absolute;top:0;left:0;height:100%;width:42px;
     display:flex;align-items:center;justify-content:center;will-change:transform;z-index:3}
-  /* ★ 狗狗 emoji 默认朝左，翻转后朝右前进 */
   .dog-flip{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
     transform:scaleX(-1)}
   .dog{font-size:32px;line-height:1;transform-origin:50% 100%}
@@ -210,11 +207,13 @@
 
   .subject-tabs{display:flex;gap:0;background:rgba(255,255,255,.9);border:2px solid #fff;
     border-radius:14px;padding:3px;box-shadow:0 4px 14px rgba(60,110,60,.14)}
-  .subject-tab{flex:1;font-family:inherit;font-size:13px;font-weight:900;padding:7px 6px;
+  .subject-tab{flex:1;font-family:inherit;font-size:13px;font-weight:900;padding:7px 4px;
     border-radius:14px;cursor:pointer;border:none;background:transparent;color:#7a8f7a;
-    transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+    transition:all .2s;display:flex;align-items:center;justify-content:center;gap:4px}
   .subject-tab.active{background:linear-gradient(180deg,#8FD14F,#68B32E);color:#fff;box-shadow:0 3px 0 #4E8A22}
   .subject-tab.active[data-tab="math"]{background:linear-gradient(180deg,#6FC3E8,#29A3D6);box-shadow:0 3px 0 #1B7FA8}
+  .subject-tab.active[data-tab="english"]{background:linear-gradient(180deg,#64B5F6,#1976D2);box-shadow:0 3px 0 #0D47A1}
+  .subject-tab.active[data-tab="shop"]{background:linear-gradient(180deg,#FFB74D,#F57C00);box-shadow:0 3px 0 #E65100}
   .subject-tab .tab-count{font-size:11px;background:rgba(255,255,255,.35);padding:1px 7px;border-radius:999px}
   .subject-tab.active .tab-count{background:rgba(255,255,255,.3)}
   .tab-panel{display:none}
@@ -230,14 +229,26 @@
     background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 24px,transparent 24px 48px),
       linear-gradient(180deg,#6FC3E8 0%,#4FA8D8 55%,#3D8FC0 100%);
     border-color:#2E7FA8;box-shadow:inset 0 -8px 18px rgba(0,0,0,.10),0 8px 22px rgba(30,70,100,.22)}
+  .subject-col[data-subject="english"]{
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 24px,transparent 24px 48px),
+      linear-gradient(180deg,#9CCBFF 0%,#6EA8E5 55%,#4C87C7 100%);
+    border-color:#3B6FA8;box-shadow:inset 0 -8px 18px rgba(0,0,0,.10),0 8px 22px rgba(30,70,100,.22)}
+  .subject-col[data-subject="shop"]{
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 24px,transparent 24px 48px),
+      linear-gradient(180deg,#FFCC80 0%,#FFA726 55%,#F57C00 100%);
+    border-color:#E65100;box-shadow:inset 0 -8px 18px rgba(0,0,0,.10),0 8px 22px rgba(160,90,10,.24)}
   .col-head{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;
     gap:6px;background:rgba(255,255,255,.92);border:2px solid #fff;border-radius:15px;
     padding:5px 8px;margin-bottom:5px;box-shadow:0 3px 10px rgba(0,0,0,.12)}
   .col-title{font-size:13px;font-weight:900;color:#2E7D32;white-space:nowrap}
   .subject-col[data-subject="math"] .col-title{color:#0277BD}
+  .subject-col[data-subject="english"] .col-title{color:#1565C0}
+  .subject-col[data-subject="shop"] .col-title{color:#E65100}
   .col-count{font-size:10.5px;font-weight:900;color:#fff;background:#68B32E;padding:2px 8px;
     border-radius:999px;margin-left:4px}
   .subject-col[data-subject="math"] .col-count{background:#29A3D6}
+  .subject-col[data-subject="english"] .col-count{background:#1976D2}
+  .subject-col[data-subject="shop"] .col-count{background:#F57C00}
 
   .card-list{position:relative;z-index:2;display:flex;flex-direction:column;gap:5px;min-height:70px}
   .empty-tip{text-align:center;font-size:11.5px;font-weight:700;color:rgba(255,255,255,.92);
@@ -265,15 +276,16 @@
   .card-body{flex:1;min-width:0}
   .task-text{font-size:13px;font-weight:800;color:#2b3a2b;line-height:1.5;word-break:break-word}
   .task-card.done .task-text{text-decoration:line-through;color:#9aad9a}
-  .task-info{display:flex;align-items:center;gap:8px;margin-top:5px;font-size:10.5px;
-    font-weight:900;flex-wrap:wrap}
-  .task-info .t-min{color:#5b7a5b}
-  .task-info .t-sun{color:#B8860B}
-  .task-info .t-time{color:#2E7D32;font-variant-numeric:tabular-nums;font-size:13px}
+  /* ★ 第9条：任务左下角难度、时间、金币的图标与字体加大 */
+  .task-info{display:flex;align-items:center;gap:10px;margin-top:6px;
+    font-size:13.5px;font-weight:900;flex-wrap:wrap}
+  .task-info .t-min{color:#5b7a5b;font-size:13.5px}
+  .task-info .t-sun{color:#B8860B;font-size:13.5px}
+  .task-info .t-time{color:#2E7D32;font-variant-numeric:tabular-nums;font-size:15.5px}
   .task-info .t-time.paused{color:#EF6C00}
   .task-info .t-time.chomping{color:#BF360C}
   .task-info .t-time.done-t{color:#43A047}
-  .stars-mini{color:#FFA000;letter-spacing:-.6px;font-size:10px}
+  .stars-mini{color:#FFA000;letter-spacing:-.3px;font-size:14px}
   .card-progress{position:absolute;left:0;bottom:0;height:3.5px;width:0;
     background:linear-gradient(90deg,#FFD54F,#FFA000);transition:width .3s linear}
   .card-progress.paused{background:linear-gradient(90deg,#FFB74D,#FB8C00)}
@@ -293,6 +305,29 @@
     border-radius:999px;background:#EF5350;color:#fff;
     font-size:9.5px;font-weight:900;line-height:16px;text-align:center;
     padding:0 4px;border:1.5px solid #fff}
+
+  /* ★ 兑换卡片 */
+  .shop-card{
+    position:relative;overflow:hidden;background:rgba(255,255,255,.97);
+    border:2px solid #fff;border-radius:12px;padding:10px 12px;
+    display:flex;align-items:center;gap:12px;
+    box-shadow:0 3px 9px rgba(0,0,0,.13);transition:all .16s;
+  }
+  .shop-card:active{transform:scale(.99)}
+  .shop-icon{font-size:34px;line-height:1;flex:none;width:46px;text-align:center}
+  .shop-info{flex:1;min-width:0}
+  .shop-name{font-size:15.5px;font-weight:900;color:#2b3a2b;line-height:1.3}
+  .shop-meta{display:flex;gap:12px;margin-top:5px;font-size:13px;font-weight:900;flex-wrap:wrap}
+  .shop-meta .shop-cost{color:#D84315}
+  .shop-meta .shop-gain{color:#2E7D32}
+  .shop-btn{
+    font-family:inherit;font-size:14px;font-weight:900;color:#fff;
+    background:linear-gradient(180deg,#FFB74D,#F57C00);
+    border:2px solid #F57C00;padding:10px 18px;border-radius:999px;
+    box-shadow:0 3px 0 #E65100;cursor:pointer;white-space:nowrap;flex:none;
+    transition:all .15s;
+  }
+  .shop-btn:active{transform:translateY(2px)}
 
   .photo-card{max-width:600px}
   .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:10px}
@@ -343,7 +378,7 @@
   .char-info{font-size:12.5px;font-weight:700;color:#000000;white-space:nowrap;
     text-align:center;line-height:1.35;letter-spacing:-.2px}
   .word-group{display:flex;gap:5px;align-items:flex-start;
-    padding:4px;border-radius:6px;background:rgba(143,209,79,.08)}
+    padding:4px;border-radius:6px;background:transparent}
   .wg-item{display:flex;flex-direction:column;align-items:center;gap:1px;flex:none}
 
   .toolbar{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
@@ -379,6 +414,12 @@
   .form-field input[type="file"]{padding:8px 10px;font-size:12.5px;cursor:pointer}
   .form-row{display:flex;gap:10px}
   .form-row .form-field{flex:1}
+
+  /* ★ 复选框样式 */
+  .chk-label{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800;
+    color:#5b7a5b;cursor:pointer;user-select:none;padding:6px 2px;line-height:1.5}
+  .chk-label input{width:20px;height:20px;cursor:pointer;accent-color:#68B32E;flex:none;margin:0}
+  .admin-add-row .chk-label{color:#8aa8c8}
 
   .upload-progress{margin-top:10px;font-size:12px;font-weight:800;color:#5b7a5b;
     text-align:center;min-height:18px;line-height:1.6}
@@ -450,6 +491,31 @@
     transition:transform .8s ease-out,opacity .8s ease-out}
   .confetti{position:fixed;top:-44px;z-index:10000;pointer-events:none;animation:fall 2.6s linear forwards}
   @keyframes fall{to{transform:translateY(108vh) rotate(720deg);opacity:0}}
+
+  /* ★ 护眼遮罩：浅红色半透明，缓慢渐变，点任意处开始放松 */
+  .eye-overlay{
+    position:fixed;inset:0;z-index:450;
+    background:rgba(255,90,90,.34);
+    opacity:0;pointer-events:none;
+    transition:opacity 2.4s ease,background .7s ease;
+    display:flex;align-items:center;justify-content:center;
+    backdrop-filter:blur(1.5px);
+  }
+  .eye-overlay.show{opacity:1;pointer-events:auto}
+  .eye-overlay.resting{background:rgba(70,165,255,.26)}
+  .eye-overlay-msg{
+    color:#fff;text-align:center;font-weight:900;
+    text-shadow:0 3px 16px rgba(0,0,0,.5),0 0 30px rgba(255,255,255,.45);
+    line-height:1.5;padding:24px;user-select:none;pointer-events:none;
+  }
+  .eye-overlay-msg .eom-icon{font-size:60px;line-height:1;margin-bottom:12px}
+  .eye-overlay-msg .eom-num{font-size:76px;line-height:1;font-variant-numeric:tabular-nums}
+  .eye-overlay-msg .eom-tip{font-size:18px;margin-top:14px;letter-spacing:1px}
+  @media (max-width:500px){
+    .eye-overlay-msg .eom-num{font-size:60px}
+    .eye-overlay-msg .eom-icon{font-size:48px}
+    .eye-overlay-msg .eom-tip{font-size:16px}
+  }
 
   .admin-bar{position:fixed;bottom:0;left:0;right:0;z-index:200;
     background:linear-gradient(180deg,#1a2a3a,#0d1a26);
@@ -573,6 +639,28 @@
     white-space:nowrap;flex:none}
   .lib-row .lib-del:hover{background:rgba(239,83,80,.3)}
 
+  /* ★ 兑换项目管理行 */
+  .shop-admin-row{
+    display:flex;align-items:center;gap:6px;padding:8px;
+    background:rgba(255,255,255,.05);border-radius:10px;margin-bottom:6px;
+  }
+  .shop-admin-row input{
+    font-family:inherit;font-weight:800;color:#E0E8F0;
+    background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);
+    padding:7px 8px;border-radius:8px;outline:none;transition:all .15s;min-width:0;
+  }
+  .shop-admin-row input:focus{border-color:#FFD54F;background:rgba(255,255,255,.12)}
+  .shop-admin-row .sa-icon{width:46px;text-align:center;font-size:18px;flex:none;padding:6px 2px}
+  .shop-admin-row .sa-name{flex:1;font-size:13px;min-width:70px}
+  .shop-admin-row .sa-min{width:64px;text-align:center;font-size:12.5px;flex:none;padding:7px 2px}
+  .shop-admin-row .sa-sun{width:68px;text-align:center;font-size:12.5px;flex:none;padding:7px 2px}
+  .shop-admin-row .sa-del{
+    flex:none;width:32px;height:32px;border-radius:8px;border:1px solid rgba(239,83,80,.35);
+    background:rgba(239,83,80,.15);color:#EF5350;font-size:14px;font-weight:900;cursor:pointer;
+    font-family:inherit;
+  }
+  .shop-admin-row .sa-del:active{transform:scale(.92)}
+
   .sync-status{position:fixed;top:10px;right:10px;z-index:250;
     font-size:11px;font-weight:800;padding:4px 12px;border-radius:999px;
     transition:all .3s;pointer-events:none;opacity:0}
@@ -611,6 +699,21 @@
     .mini-btn{width:26px;height:26px;font-size:13px;border-radius:8px}
     #adminSunReason{width:104px;font-size:11.5px;padding:8px 5px}
     #adminSunAmount{width:76px;font-size:15px;padding:8px 4px}
+    /* ★ 手机上任务信息仍然加大 */
+    .task-info{font-size:12px;gap:8px}
+    .task-info .t-min,.task-info .t-sun{font-size:12px}
+    .task-info .t-time{font-size:14px}
+    .stars-mini{font-size:12.5px}
+    .shop-card{padding:9px 10px;gap:9px}
+    .shop-icon{font-size:28px;width:38px}
+    .shop-name{font-size:14px}
+    .shop-meta{font-size:12px;gap:9px}
+    .shop-btn{padding:9px 14px;font-size:13px}
+    .shop-admin-row{gap:4px;padding:6px}
+    .shop-admin-row .sa-icon{width:38px;font-size:15px}
+    .shop-admin-row .sa-min{width:54px;font-size:11.5px}
+    .shop-admin-row .sa-sun{width:58px;font-size:11.5px}
+    .shop-admin-row .sa-name{font-size:12px}
   }
 
   .home-compact .col-head{padding:2px 4px;margin-bottom:4px;background:transparent;border:0;box-shadow:none}
@@ -620,7 +723,10 @@
   .home-compact .card-list{gap:4px;min-height:55px}
   .home-compact .task-card{padding:6px 8px 5px;border-radius:10px}
   .home-compact .task-text{font-size:12px;line-height:1.35}
-  .home-compact .task-info{margin-top:3px;font-size:9.5px;gap:6px}
+  .home-compact .task-info{margin-top:5px;font-size:12px;gap:7px}
+  .home-compact .task-info .t-min,.home-compact .task-info .t-sun{font-size:12px}
+  .home-compact .task-info .t-time{font-size:14px}
+  .home-compact .stars-mini{font-size:12.5px}
   .home-compact .checkbox{width:21px;height:21px;border-radius:6px}
   .home-compact .checkbox .tick{font-size:13px}
   .home-compact .timer-hint{font-size:10.5px;min-height:13px}
@@ -629,7 +735,6 @@
 
   .task-card.done .char-grid{display:none}
 
-  /* ★ 双击 → 绿色对勾（字保持不变淡，仅加勾） */
   .mizi.checked{
     background:#E8F5E9;
     border-color:#66BB6A;
@@ -657,23 +762,11 @@
     .mizi.checked::after{font-size:22px;right:1px}
   }
 
-  .word-group{background:transparent}
   .custom-task-text{
     font-family:"Kaiti SC","KaiTi","STKaiti","楷体","PingFang SC","Microsoft YaHei",serif;
     font-size:24px!important;line-height:1.28!important;font-weight:400!important;color:#000;
   }
   .task-card.done .custom-task-text{color:#9aad9a}
-  .subject-col[data-subject="english"]{
-    background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 24px,transparent 24px 48px),
-      linear-gradient(180deg,#9CCBFF 0%,#6EA8E5 55%,#4C87C7 100%);
-    border-color:#3B6FA8;
-    box-shadow:inset 0 -8px 18px rgba(0,0,0,.10),0 8px 22px rgba(30,70,100,.22)
-  }
-  .subject-col[data-subject="english"] .col-title{color:#1565C0}
-  .subject-col[data-subject="english"] .col-count{background:#1976D2}
-  .subject-tab.active[data-tab="english"]{
-    background:linear-gradient(180deg,#64B5F6,#1976D2);box-shadow:0 3px 0 #0D47A1
-  }
 
   .admin-section.collapsed{padding-bottom:8px}
   .admin-section>h3{cursor:pointer;user-select:none}
@@ -696,6 +789,11 @@
 <div class="cloud c2"></div>
 <div class="cloud c3"></div>
 <div class="sync-status" id="syncStatus"></div>
+
+<!-- ★ 护眼遮罩 -->
+<div class="eye-overlay" id="eyeOverlay">
+  <div class="eye-overlay-msg" id="eyeOverlayMsg"></div>
+</div>
 
 <div class="app home-compact" id="appRoot">
   <header class="topbar">
@@ -757,6 +855,7 @@
     <button class="subject-tab active" data-tab="chinese">📖 语文 <span class="tab-count" id="chineseTabCount">0</span></button>
     <button class="subject-tab" data-tab="math">🔢 数学 <span class="tab-count" id="mathTabCount">0</span></button>
     <button class="subject-tab" data-tab="english">🔤 英语 <span class="tab-count" id="englishTabCount">0</span></button>
+    <button class="subject-tab" data-tab="shop">🎁 兑换</button>
   </div>
 
   <div class="tab-panel active" id="panel-chinese">
@@ -775,6 +874,12 @@
     <section class="subject-col" data-subject="english">
       <div class="col-head"><div><span class="col-title">🔤 英语</span><span class="col-count" id="englishCount">0</span></div></div>
       <div class="card-list" id="englishList"></div>
+    </section>
+  </div>
+  <div class="tab-panel" id="panel-shop">
+    <section class="subject-col" data-subject="shop">
+      <div class="col-head"><div><span class="col-title">🎁 兑换中心</span><span class="col-count" id="shopCount">0</span></div></div>
+      <div class="card-list" id="shopList"></div>
     </section>
   </div>
 
@@ -853,6 +958,9 @@
     <div class="form-row">
       <div class="form-field"><label>时长（分钟）</label><input type="number" id="taskEditMin" min="0.5" max="120" step="0.5"></div>
       <div class="form-field"><label>金币奖励 💰</label><input type="number" id="taskEditSun" min="1" max="500" step="1"></div>
+    </div>
+    <div class="form-field" id="taskEditPenaltyWrap">
+      <label class="chk-label"><input type="checkbox" id="taskEditPenalty"> 超时扣金币（每超时 1 分钟扣 1 个）</label>
     </div>
     <div class="modal-actions">
       <button class="btn-ghost" id="taskEditCancel">取消</button>
@@ -951,6 +1059,9 @@
         <span class="aa-unit">金币</span>
         <button class="aa-btn" id="adminAddChineseBtn">添加</button>
       </div>
+      <div class="admin-add-row" style="margin-top:2px">
+        <label class="chk-label"><input type="checkbox" id="adminAddChinesePenalty"> 超时扣金币（每超时 1 分钟扣 1 个，默认不勾选）</label>
+      </div>
     </div>
 
     <!-- ② 数学 -->
@@ -965,6 +1076,9 @@
         <input class="aa-num" id="adminAddMathSun" type="number" value="30" min="1" max="500">
         <span class="aa-unit">金币</span>
         <button class="aa-btn" id="adminAddMathBtn">添加</button>
+      </div>
+      <div class="admin-add-row" style="margin-top:2px">
+        <label class="chk-label"><input type="checkbox" id="adminAddMathPenalty"> 超时扣金币（每超时 1 分钟扣 1 个，默认不勾选）</label>
       </div>
     </div>
 
@@ -981,9 +1095,35 @@
         <span class="aa-unit">金币</span>
         <button class="aa-btn" id="adminAddEnglishBtn">添加</button>
       </div>
+      <div class="admin-add-row" style="margin-top:2px">
+        <label class="chk-label"><input type="checkbox" id="adminAddEnglishPenalty"> 超时扣金币（每超时 1 分钟扣 1 个，默认不勾选）</label>
+      </div>
     </div>
 
-    <!-- ④ 日期 -->
+    <!-- ④ 兑换项目 -->
+    <div class="admin-section collapsed" id="adminPanelShop">
+      <h3>🎁 兑换项目管理 <span class="badge" id="adminShopBadge">0 项</span></h3>
+      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+        孩子点「兑换」时会按这里的设置扣/加金币。<br>
+        <b style="color:#FFD54F">金币填负数 = 扣除（消耗金币）；填正数 = 增加（奖励金币）。</b><br>
+        图标可以用任意 Emoji，比如 🎮 📱 🏃 🪢 📺 📚 🎧 🍦 🍭 🎨
+      </p>
+      <div id="adminShopList"></div>
+      <div class="admin-sub-label">➕ 添加兑换项目</div>
+      <div class="admin-add-row inline-row">
+        <input class="aa-num" id="adminShopIcon" type="text" maxlength="4" value="🎁" placeholder="🎁"
+               style="width:52px;text-align:center;font-size:18px;padding-left:2px;padding-right:2px">
+        <input class="aa-text" id="adminShopName" placeholder="项目名称（如：玩手机）">
+        <input class="aa-num" id="adminShopMin" type="number" min="1" max="240" step="5" value="30" placeholder="分钟">
+        <span class="aa-unit">分钟</span>
+        <input class="aa-num" id="adminShopSun" type="number" min="-999" max="999" step="5" value="-30" placeholder="金币">
+        <span class="aa-unit">金币</span>
+        <button class="aa-btn" id="adminShopAddBtn">添加</button>
+      </div>
+      <div class="aa-hint" id="adminShopHint">金币填负数表示扣除（消耗），填正数表示增加（奖励）</div>
+    </div>
+
+    <!-- ⑤ 日期 -->
     <div class="admin-section collapsed" id="adminPanelDate">
       <h3>📅 日期选择</h3>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
@@ -992,7 +1132,7 @@
       </div>
     </div>
 
-    <!-- ⑤ 金币 -->
+    <!-- ⑥ 金币 -->
     <div class="admin-section collapsed" id="adminPanelSun">
       <h3>💰 金币调整 <span class="badge" id="adminSunBadge">0 个 💰</span></h3>
       <div class="admin-add-row inline-row">
@@ -1010,7 +1150,7 @@
       <div class="sun-log" id="adminSunLog"></div>
     </div>
 
-    <!-- ⑥ 进度 -->
+    <!-- ⑦ 进度 -->
     <div class="admin-section collapsed" id="adminPanelProgress">
       <h3>📊 进度总览 <span class="badge" id="adminTodayBadge"></span></h3>
       <div class="admin-stats">
@@ -1020,13 +1160,14 @@
       </div>
     </div>
 
-    <!-- ⑦ 护眼 -->
+    <!-- ⑧ 护眼 -->
     <div class="admin-section collapsed" id="adminPanelEye">
       <h3>👁️ 护眼提醒</h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
         孩子点「开始」后自动开始用眼倒计时。用眼到时间会响铃提醒休息；<br>
         不点「放松眼睛」的话，之后每 <b style="color:#FFD54F">30 秒</b> 再响铃一次，直到点为止。<br>
-        按下「放松眼睛」后任务倒计时自动暂停，放松结束自动继续。
+        按下「放松眼睛」后任务倒计时自动暂停，放松结束自动继续。<br>
+        <b style="color:#FFD54F">放松时会每 5 秒语音报数一次（倒着数）。</b>
       </p>
       <div class="admin-add-row inline-row">
         <input class="aa-num" id="adminEyeUseMin" type="number" min="1" max="120" step="1">
@@ -1038,7 +1179,7 @@
       <div class="aa-hint" id="adminEyeHint"></div>
     </div>
 
-    <!-- ⑧ 课文库 -->
+    <!-- ⑨ 课文库 -->
     <div class="admin-section collapsed" id="adminPanelLibrary">
       <h3>📚 课文生字 / 组词 / 词语库 <span class="badge" id="adminLibBadge">0 条</span></h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
@@ -1054,7 +1195,7 @@
       <div class="admin-add-row"><button class="aa-btn" id="adminLibAddBtn" style="flex:1">💾 保存到课文库</button></div>
     </div>
 
-    <!-- ⑨ 密码 -->
+    <!-- ⑩ 密码 -->
     <div class="admin-section collapsed" id="adminPanelPassword">
       <h3>🔒 家长密码</h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
@@ -1072,7 +1213,7 @@
       </div>
     </div>
 
-    <!-- ⑩ 云端 -->
+    <!-- ⑪ 云端 -->
     <div class="admin-section collapsed" id="adminPanelSync">
       <h3>☁️ 云端同步</h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
@@ -1128,7 +1269,8 @@ try{
 ============================================================ */
 const STORAGE_KEY = 'study_board_v9';
 const MAX_DAYS_KEPT = 180;
-const EYE_NAG_MS = 30000;     /* ★ 护眼催提醒 30 秒一次 */
+const EYE_NAG_MS = 30000;     /* 护眼催提醒 30 秒一次 */
+const OVERDUE_MINUTE_MS = 60000; /* ★ 超时每满 1 分钟扣 1 个金币 */
 const SUBJECTS = { chinese:{key:'chinese',name:'语文'}, math:{key:'math',name:'数学'}, english:{key:'english',name:'英语'} };
 
 const MAX_PHOTOS_PER_TASK = 3;
@@ -1138,23 +1280,27 @@ const PHOTO_QUALITY = 0.55;
 /* ★ 全局计时权威状态 */
 const DEFAULT_LIVE = {
   activeId: '',
-  status: 'idle',           // 'idle' | 'running' | 'paused'
+  status: 'idle',           // 'idle' | 'running' | 'paused' | 'timeup'
   startedAt: 0,
   leftAtStart: 0,
   totalMs: 0,
-  unitMs: 0,                // ★ 单份时间（一个字或一个词）
-  overdue: false,           // ★ 是否已进入超时循环
-  cycleStart: 0,            // ★ 超时循环当前轮起始时间
+  unitMs: 0,
+  overdue: false,
+  cycleStart: 0,
   rounds: 0,
   eyeActive: false,
   eyeMode: 'idle',          // 'idle' | 'use' | 'need-rest' | 'rest'
   eyeStageStart: 0,
   eyeTotalMs: 0,
   eyeNagCount: 0,
+  eyePaused: false,          // ★ 任务完成时暂停用眼计时
+  eyePausedLeftMs: 0,
+  eyeLastNarrated: -1,       // ★ 上次播报的秒数
   soundSeq: 0,
   soundKind: '',
   ownerTab: '',
   taskPausedByRest: false,
+  tab: 'chinese',            // ★ 多端同步当前页面
   updatedAt: 0
 };
 
@@ -1183,7 +1329,6 @@ const DEFAULT_SETTINGS = {
     copy:      { min: 2,   sun: 6 }
   },
   eyeCare: { useMin: 20, restMin: 5 },
-  /* ★ 记住上一次选择的课文 */
   lessonPick: { preview: '', wordgroup: '', copy: '' },
   lastInputs: {
     chineseMin: 10, chineseSun: 30,
@@ -1193,9 +1338,20 @@ const DEFAULT_SETTINGS = {
   },
   panelCollapsed: {
     progress: true, sun: true, date: true, library: true, sync: true,
-    password: true, eye: true, math: false, english: false
+    password: true, eye: true, math: false, english: false, shop: true
   }
 };
+
+/* ★ 兑换项目默认值（sun 为负数表示消耗金币，正数表示奖励金币） */
+const DEFAULT_SHOP = [
+  { id:'sh_phone',  icon:'🎮', name:'玩手机',     minutes:30, sun:-50 },
+  { id:'sh_pad',    icon:'📱', name:'玩平板',     minutes:30, sun:-50 },
+  { id:'sh_out',    icon:'🏃', name:'户外活动',   minutes:30, sun:-30 },
+  { id:'sh_rope',   icon:'🪢', name:'跳绳',       minutes:15, sun:-20 },
+  { id:'sh_video',  icon:'📺', name:'看英语视频', minutes:20, sun:-30 },
+  { id:'sh_book',   icon:'📚', name:'看书',       minutes:30, sun:-20 },
+  { id:'sh_listen', icon:'🎧', name:'听英语',     minutes:20, sun:-20 }
+];
 
 const DEFAULT_LESSON_LIBRARY = {
   "小蝌蚪找妈妈": {
@@ -1314,7 +1470,6 @@ function normalizeSettings(raw){
   const li = (r.lastInputs && typeof r.lastInputs === 'object') ? r.lastInputs : {};
   const pc = (r.panelCollapsed && typeof r.panelCollapsed === 'object') ? r.panelCollapsed : {};
   const ec = (r.eyeCare && typeof r.eyeCare === 'object') ? r.eyeCare : {};
-  /* ★ 上次选择的课文 */
   const lp = (r.lessonPick && typeof r.lessonPick === 'object') ? r.lessonPick : {};
   const num = (v, dv, min, max) => {
     const n = Number(v);
@@ -1346,7 +1501,8 @@ function normalizeSettings(raw){
       password: pc.password !== undefined ? !!pc.password : true,
       eye: pc.eye !== undefined ? !!pc.eye : true,
       math: pc.math !== undefined ? !!pc.math : false,
-      english: pc.english !== undefined ? !!pc.english : false
+      english: pc.english !== undefined ? !!pc.english : false,
+      shop: pc.shop !== undefined ? !!pc.shop : true
     }
   };
 }
@@ -1380,6 +1536,22 @@ function normalizeLessonLibrary(raw){
   });
   return out;
 }
+/* ★ 兑换项目规范化 */
+function normalizeShop(raw){
+  if(!Array.isArray(raw)) return null;
+  return raw.map(item => {
+    const it = item || {};
+    const m = Number(it.minutes);
+    const s = Number(it.sun);
+    return {
+      id: it.id ? String(it.id) : newId(),
+      icon: String(it.icon || '🎁').slice(0,4) || '🎁',
+      name: String(it.name || '兑换项').slice(0,30),
+      minutes: clamp(isFinite(m) && m > 0 ? Math.round(m) : 30, 1, 240),
+      sun: clamp(isFinite(s) ? Math.round(s) : -30, -999, 999)
+    };
+  }).filter(x => x.name);
+}
 function makeTask(text, minutes, sun, extra){
   const task = {
     id: newId(),
@@ -1391,7 +1563,15 @@ function makeTask(text, minutes, sun, extra){
   };
   if(extra && extra.chars) task.chars = extra.chars.slice(0, 60);
   if(extra && extra.words) task.words = extra.words.slice(0, 60);
+  /* ★ 自定义作业的超时扣金币开关 */
+  if(task.type === 'custom' && extra && extra.penalty === true) task.penalty = true;
   return task;
+}
+/* ★ 判断某作业是否启用「超时扣金币」 */
+function taskPenaltyOn(task){
+  if(!task) return false;
+  if(task.type === 'custom') return task.penalty === true;
+  return true;
 }
 let nameMigrated = false;
 function fixTaskName(text){
@@ -1423,6 +1603,7 @@ function normalizeDay(day){
         minutes: clamp(Number(t.minutes)||10, 0.5, 120),
         sun: clamp(Math.round(Number(t.sun)||30), 1, 500)
       };
+      if(type === 'custom' && t.penalty === true) item.penalty = true;
       if(type === 'preview' && Array.isArray(t.chars)) item.chars = t.chars.slice(0,60);
       if((type === 'wordgroup' || type === 'copy') && Array.isArray(t.words)) item.words = t.words.slice(0,60);
       if(Array.isArray(t.checkedChars)) item.checkedChars = t.checkedChars.slice(0,300).map(String);
@@ -1449,6 +1630,7 @@ function loadLocalState(){
       days: {}, date: todayStr(), sun: 0, checkins: [], sunLog: [],
       settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
       lessonLibrary: JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY)),
+      shop: JSON.parse(JSON.stringify(DEFAULT_SHOP)),
       parentPassword: MASTER_PASSWORD,
       live: JSON.parse(JSON.stringify(DEFAULT_LIVE))
     };
@@ -1465,14 +1647,24 @@ function loadLocalState(){
   s.settings = normalizeSettings(s.settings);
   s.lessonLibrary = normalizeLessonLibrary(s.lessonLibrary);
   if(!Object.keys(s.lessonLibrary).length) s.lessonLibrary = JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY));
+  /* ★ 兑换项目 */
+  const shopNorm = normalizeShop(s.shop);
+  if(shopNorm === null){
+    s.shop = JSON.parse(JSON.stringify(DEFAULT_SHOP));
+  } else {
+    s.shop = shopNorm;
+  }
   if(!s.live || typeof s.live !== 'object'){
     s.live = JSON.parse(JSON.stringify(DEFAULT_LIVE));
   } else {
     s.live = Object.assign({}, DEFAULT_LIVE, s.live);
-    // 新字段兜底
     if(typeof s.live.unitMs !== 'number') s.live.unitMs = 0;
     if(typeof s.live.overdue !== 'boolean') s.live.overdue = false;
     if(typeof s.live.cycleStart !== 'number') s.live.cycleStart = 0;
+    if(typeof s.live.eyePaused !== 'boolean') s.live.eyePaused = false;
+    if(typeof s.live.eyePausedLeftMs !== 'number') s.live.eyePausedLeftMs = 0;
+    if(typeof s.live.eyeLastNarrated !== 'number') s.live.eyeLastNarrated = -1;
+    if(typeof s.live.tab !== 'string' || !s.live.tab) s.live.tab = 'chinese';
   }
   return s;
 }
@@ -1513,16 +1705,12 @@ let lastSoundSeq = 0;
 
 function isLiveOwner(){ return state && state.live && state.live.ownerTab === TAB_ID; }
 
-/* ★ 返回当前任务的剩余时间（超时后返回本轮循环剩余） */
+/* ★ 返回当前任务的剩余时间 */
 function liveLeftMs(L){
   L = L || (state && state.live);
   if(!L || !L.activeId) return 0;
-  if(L.status === 'paused') return L.leftAtStart;
+  if(L.status === 'paused' || L.status === 'timeup') return L.leftAtStart;
   if(L.status === 'running'){
-    if(L.overdue){
-      // 超时循环：本轮 unitMs 剩余
-      return Math.max(0, L.unitMs - (Date.now() - L.cycleStart));
-    }
     if(L.leftAtStart <= 0) return 0;
     return Math.max(0, L.leftAtStart - (Date.now() - L.startedAt));
   }
@@ -1531,6 +1719,8 @@ function liveLeftMs(L){
 function liveEyeLeftMs(L){
   L = L || (state && state.live);
   if(!L || !L.eyeActive) return 0;
+  /* ★ 任务完成时用眼计时被暂停 */
+  if(L.eyeMode === 'use' && L.eyePaused) return L.eyePausedLeftMs;
   if(L.eyeMode === 'use' || L.eyeMode === 'rest') return Math.max(0, L.eyeTotalMs - (Date.now() - L.eyeStageStart));
   if(L.eyeMode === 'need-rest') return Date.now() - L.eyeStageStart;
   return 0;
@@ -1552,7 +1742,7 @@ function syncLegacyFromLive(){
   if(L.activeId){
     activeId = L.activeId;
     running = (L.status === 'running');
-    pauseState.active = (L.status === 'paused');
+    pauseState.active = (L.status === 'paused' || L.status === 'timeup');
     pauseState.leftMs = L.status === 'paused' ? L.leftAtStart : 0;
   } else {
     activeId = null; running = false; pauseState.active = false; pauseState.leftMs = 0;
@@ -1606,6 +1796,7 @@ function liveHandle(pack){
       syncLegacyFromLive();
       syncRuntimeFromLive();
       checkAndPlaySound();
+      applyTabFromLive();          /* ★ 多端同步页面切换 */
       renderAllLiveUI();
       if(state.live.activeId || state.live.eyeActive) ensureTickRunning();
     }
@@ -1617,6 +1808,13 @@ function renderAllLiveUI(){
   updateEyeUI();
   updateMainBtn();
   if(charTimer.active) paintCharBarsFromLive();
+}
+/* ★ 多端同步：根据 live.tab 切换页面 */
+function applyTabFromLive(){
+  if(!state || !state.live) return;
+  const t = state.live.tab;
+  if(!t) return;
+  if(t !== currentSubject) switchSubject(t, true);
 }
 
 /* ============================================================
@@ -1635,6 +1833,7 @@ async function uploadToCloud(force){
     sun: state.sun, checkins: state.checkins,
     sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
     lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword,
+    shop: state.shop,
     live: state.live, updatedAt: Date.now()
   };
   const prevPushed = lastPushedUpdatedAt;
@@ -1665,6 +1864,8 @@ function applyRemoteState(remote){
   if(Array.isArray(remote.sunLog)) state.sunLog = remote.sunLog.slice(0, 60);
   if(remote.lessonLibrary) state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary);
   if(typeof remote.parentPassword === 'string' && /^\d{4}$/.test(remote.parentPassword)) state.parentPassword = remote.parentPassword;
+  const shopNorm = normalizeShop(remote.shop);
+  if(shopNorm !== null) state.shop = shopNorm;
   if(remote.live && typeof remote.live === 'object'){
     const remoteLiveAt = Number(remote.live.updatedAt) || 0;
     const localLiveAt = Number(state.live && state.live.updatedAt) || 0;
@@ -1673,6 +1874,9 @@ function applyRemoteState(remote){
       if(typeof state.live.unitMs !== 'number') state.live.unitMs = 0;
       if(typeof state.live.overdue !== 'boolean') state.live.overdue = false;
       if(typeof state.live.cycleStart !== 'number') state.live.cycleStart = 0;
+      if(typeof state.live.eyePaused !== 'boolean') state.live.eyePaused = false;
+      if(typeof state.live.eyeLastNarrated !== 'number') state.live.eyeLastNarrated = -1;
+      if(typeof state.live.tab !== 'string' || !state.live.tab) state.live.tab = 'chinese';
     }
   }
   if(rAt) lastRemoteUpdatedAt = rAt;
@@ -1680,6 +1884,8 @@ function applyRemoteState(remote){
   renderStats(); renderBoard(); refreshAllCards();
   syncLegacyFromLive(); syncRuntimeFromLive(); checkAndPlaySound();
   updateDogBar(); updateMainBtn(); updateDateText(); updateEyeUI();
+  applyTabFromLive();
+  if(currentSubject === 'shop') renderShop();
   if(charTimer.active) paintCharBarsFromLive();
   if(isAdminMode) renderAdminPanel();
   isRemoteUpdate = false;
@@ -1724,14 +1930,54 @@ function showSyncStatus(text, cls){
 }
 
 /* ============================================================
-   音效
+   音效（★ 第6条：加强 iPad / iOS 音频解锁）
 ============================================================ */
 let audioCtx = null;
+let audioUnlocked = false;
+
 function ensureAudio(){
-  if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){audioCtx=null;} }
-  if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  if(!audioCtx){
+    try{
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(AC) audioCtx = new AC();
+    }catch(e){ audioCtx = null; }
+  }
+  if(audioCtx && audioCtx.state === 'suspended'){
+    try{ audioCtx.resume(); }catch(e){}
+  }
   return audioCtx;
 }
+/* ★ 用静音 buffer 解锁 iOS / iPad 音频 */
+function unlockAudio(){
+  try{
+    const ctx = ensureAudio();
+    if(!ctx) return;
+    if(ctx.state === 'suspended'){ try{ ctx.resume(); }catch(e){} }
+    if(!audioUnlocked){
+      const buf = ctx.createBuffer(1, 1, 22050);
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.connect(ctx.destination);
+      try{ src.start(0); }catch(e){}
+      audioUnlocked = true;
+    }
+  }catch(e){}
+}
+['touchstart','touchend','mousedown','click','keydown','pointerdown'].forEach(ev => {
+  document.addEventListener(ev, unlockAudio, { passive: true, capture: true });
+});
+/* 从后台切回时恢复音频上下文 */
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible'){
+    const ctx = ensureAudio();
+    if(ctx && ctx.state === 'suspended'){ try{ ctx.resume(); }catch(e){} }
+  }
+});
+window.addEventListener('pageshow', () => {
+  const ctx = ensureAudio();
+  if(ctx && ctx.state === 'suspended'){ try{ ctx.resume(); }catch(e){} }
+});
+
 function tone(freq,start,dur,type,vol){
   if(!audioCtx) return;
   const o = audioCtx.createOscillator(), g = audioCtx.createGain();
@@ -1744,7 +1990,9 @@ function tone(freq,start,dur,type,vol){
   o.start(start); o.stop(start+dur+0.02);
 }
 function playSound(kind){
-  if(!ensureAudio()) return;
+  const ctx = ensureAudio();
+  if(!ctx) return;
+  if(ctx.state === 'suspended'){ try{ ctx.resume(); }catch(e){} }
   const now = audioCtx.currentTime;
   if(kind==='hit'){
     const o=audioCtx.createOscillator(),g=audioCtx.createGain();
@@ -1764,21 +2012,42 @@ function playSound(kind){
   }
   else if(kind==='fail'){tone(300,now,0.16,'sine',0.08);tone(200,now+0.16,0.26,'sine',0.08);}
   else if(kind==='win'){[523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>tone(f,now+i*0.11,0.4,'triangle',0.12));tone(1568,now+0.6,0.8,'sine',0.08);}
-  /* ★ 新增：相机/照片保存提示音 */
   else if(kind==='photo'){[880,1174.7,1396.9].forEach((f,i)=>tone(f,now+i*0.06,0.16,'triangle',0.11));}
 }
 function playEyeAlert(){
-  if(!ensureAudio()) return;
+  const ctx = ensureAudio();
+  if(!ctx) return;
   const now = audioCtx.currentTime;
-  for(let i = 0; i < 3; i++){
-    tone(880, now + i*0.22, 0.16, 'sine', 0.16);
-    tone(1174.7, now + i*0.22 + 0.02, 0.14, 'triangle', 0.08);
+  for(let i = 0; i < 4; i++){
+    tone(880, now + i*0.24, 0.18, 'sine', 0.20);
+    tone(1174.7, now + i*0.24 + 0.02, 0.16, 'triangle', 0.11);
   }
+  /* ★ iPad 兜底：同时振动 + 尽可能再补一次 */
+  try{ if(navigator.vibrate) navigator.vibrate([180,80,180,80,180]); }catch(e){}
 }
 function playRestDone(){
-  if(!ensureAudio()) return;
+  const ctx = ensureAudio();
+  if(!ctx) return;
   const now = audioCtx.currentTime;
   [659.25, 880, 1046.5].forEach((f,i) => tone(f, now + i*0.11, 0.22, 'triangle', 0.12));
+}
+
+/* ★ 语音报数（放松眼睛时每 5 秒一次） */
+function speakNumber(n){
+  if(!('speechSynthesis' in window)) return;
+  try{
+    window.speechSynthesis.cancel();
+    setTimeout(() => {
+      try{
+        const u = new SpeechSynthesisUtterance(String(n));
+        u.lang = 'zh-CN';
+        u.rate = 1.15;
+        u.pitch = 1.05;
+        u.volume = 1;
+        window.speechSynthesis.speak(u);
+      }catch(e){}
+    }, 60);
+  }catch(e){}
 }
 
 /* ============================================================
@@ -1996,7 +2265,6 @@ cameraInput.addEventListener('change', async (e) => {
     renderBoard(); refreshAllCards();
     if(isAdminMode) renderAdminPanel();
     if(photoViewTaskId === taskId) renderPhotoGrid(taskId);
-    /* ★ 播放提示音 */
     try{ ensureAudio(); playSound('photo'); }catch(e){}
     toast('✅ 照片已保存');
   }catch(err){
@@ -2094,9 +2362,9 @@ function renderSubjectCards(subject, listEl){
     const st = sunToStars(task.sun);
     stars.textContent = '★'.repeat(st)+'☆'.repeat(5-st);
     const minEl = document.createElement('span'); minEl.className = 't-min';
-    minEl.textContent = '⏱'+task.minutes+'分钟';
+    minEl.textContent = '⏱ '+task.minutes+'分钟';
     const sunEl = document.createElement('span'); sunEl.className = 't-sun';
-    sunEl.textContent = '💰'+task.sun+'个';
+    sunEl.textContent = '💰 '+task.sun+'个';
     const timeEl = document.createElement('span'); timeEl.className = 't-time';
     timeEl.textContent = task.done ? '✓ 已完成' : (task.minutes+'分钟');
     info.appendChild(stars); info.appendChild(minEl); info.appendChild(sunEl); info.appendChild(timeEl);
@@ -2154,15 +2422,22 @@ function updateCardVisual(id){
     return;
   }
   const isActive = activeId === id;
+  const L = state.live || {};
   let cls = 'task-card';
   if(isActive){
     cls += ' active';
-    if(pauseState.active) cls += ' paused-card';
-    if(rt && rt.overdue) cls += ' chomping-card';
+    if(L.status === 'timeup') cls += ' chomping-card';
+    else if(pauseState.active) cls += ' paused-card';
+    else if(rt && rt.overdue) cls += ' chomping-card';
   }
   ref.el.className = cls;
   if(rt && isActive){
-    if(pauseState.active){
+    if(L.status === 'timeup'){
+      ref.timeEl.className = 't-time chomping';
+      ref.timeEl.textContent = '时间到';
+      ref.progressEl.className = 'card-progress chomping';
+      ref.progressEl.style.width = '100%';
+    } else if(pauseState.active){
       ref.timeEl.className = 't-time paused';
       ref.timeEl.textContent = fmtMs(rt.leftMs);
       const p = rt.totalMs>0 ? 1-rt.leftMs/rt.totalMs : 0;
@@ -2170,7 +2445,7 @@ function updateCardVisual(id){
       ref.progressEl.style.width = (clamp(p,0,1)*100)+'%';
     } else if(rt.overdue){
       ref.timeEl.className = 't-time chomping';
-      ref.timeEl.textContent = '超时 ' + rt.rounds + ' 个';
+      ref.timeEl.textContent = '超时 ' + rt.rounds + ' 分钟';
       ref.progressEl.className = 'card-progress chomping';
       ref.progressEl.style.width = '100%';
     } else {
@@ -2190,9 +2465,68 @@ function updateCardVisual(id){
 function refreshAllCards(){ Object.keys(cardRefs).forEach(id => updateCardVisual(id)); }
 
 /* ============================================================
+   ★ 兑换中心
+============================================================ */
+function renderShop(){
+  const listEl = $('shopList');
+  const countEl = $('shopCount');
+  if(!listEl) return;
+  const items = state.shop || [];
+  if(countEl) countEl.textContent = items.length;
+  if(!items.length){
+    listEl.innerHTML = '<div class="empty-tip">还没有兑换项目<br>请家长点左上角 🌻 添加</div>';
+    return;
+  }
+  listEl.innerHTML = items.map(item => {
+    const cost = Number(item.sun) || 0;
+    const costLabel = cost < 0
+      ? '<span class="shop-cost">💰 需要 ' + Math.abs(cost) + ' 个</span>'
+      : (cost > 0
+          ? '<span class="shop-gain">💰 获得 ' + cost + ' 个</span>'
+          : '<span class="shop-cost">💰 免费</span>');
+    return '<div class="shop-card" data-id="' + escapeAttr(item.id) + '">' +
+      '<div class="shop-icon">' + escapeHtml(item.icon) + '</div>' +
+      '<div class="shop-info">' +
+        '<div class="shop-name">' + escapeHtml(item.name) + '</div>' +
+        '<div class="shop-meta"><span>⏱ ' + item.minutes + ' 分钟</span>' + costLabel + '</div>' +
+      '</div>' +
+      '<button class="shop-btn" data-shop-buy="' + escapeAttr(item.id) + '">兑换</button>' +
+    '</div>';
+  }).join('');
+  listEl.querySelectorAll('[data-shop-buy]').forEach(btn => {
+    btn.addEventListener('click', () => doRedeem(btn.dataset.shopBuy));
+  });
+}
+function doRedeem(id){
+  const item = (state.shop || []).find(x => x.id === id);
+  if(!item) return;
+  const cost = Number(item.sun) || 0;
+  const now = Math.round(Number(state.sun) || 0);
+  if(cost < 0 && now < Math.abs(cost)){
+    toast('💰 金币不足！还差 ' + (Math.abs(cost) - now) + ' 个', 2800);
+    playSound('fail');
+    return;
+  }
+  const costText = cost < 0
+    ? '消耗 ' + Math.abs(cost) + ' 个金币'
+    : (cost > 0 ? '获得 ' + cost + ' 个金币' : '不消耗金币');
+  if(!confirm('确定兑换「' + item.name + '」（' + item.minutes + ' 分钟）吗？\n' + costText)) return;
+  state.sun = now + cost;
+  pushSunLog(cost, '兑换：' + item.name + '（' + item.minutes + '分钟）');
+  saveLocalState(); uploadToCloud();
+  renderStats();
+  bumpPill(sunPillEl);
+  if(cost < 0) flySunAway(Math.abs(cost));
+  else if(cost > 0) flySun(sunPillEl);
+  renderShop();
+  if(isAdminMode) renderAdminPanel();
+  try{ ensureAudio(); playSound('win'); }catch(e){}
+  confetti();
+  toast('🎉 兑换成功：' + escapeHtml(item.name) + '<br>' + costText, 3200);
+}
+
+/* ============================================================
    田字格倒计时
-   ★ 每个字/词一份时间：按顺序每个字走 unitMs，然后下一个字
-   ★ 所有字计时结束后进度条停在满格（暂停）
 ============================================================ */
 function charBarEnsure(mizi){
   let bar = mizi.querySelector('.mizi-bar');
@@ -2271,7 +2605,6 @@ function rebindCharTimer(){
   attachCharBars(charTimer.units, false);
   paintCharBarsFromLive();
 }
-/* ★ 关键函数：田字格进度条 */
 function paintCharBarsFromLive(){
   if(!charTimer.active || !charTimer.units.length) return;
   const L = state.live;
@@ -2282,8 +2615,8 @@ function paintCharBarsFromLive(){
     return;
   }
 
-  /* ★ 超时后：所有字/词计时结束，进度条停在满格（暂停不动） */
-  if(L.overdue){
+  /* 超时 / 时间到：所有字/词进度条满格 */
+  if(L.overdue || L.status === 'timeup'){
     charTimer.units.forEach(u => {
       u.bars.forEach(b => {
         if(b.__s !== 1){ b.__s = 1; b.style.transform = 'scaleX(1)'; }
@@ -2292,7 +2625,6 @@ function paintCharBarsFromLive(){
     return;
   }
 
-  /* 正常阶段：按顺序，每个字/词一份时间，走完一个进入下一个 */
   const totalMs = Math.max(1, L.totalMs);
   let elapsed;
   if(L.status === 'paused') elapsed = totalMs - (L.leftAtStart || 0);
@@ -2317,7 +2649,7 @@ function setCharPaused(p){
 }
 
 /* ============================================================
-   ★ 护眼 UI
+   ★ 护眼 UI + 遮罩
 ============================================================ */
 function moveEyeToken(p){
   if(!eyeTokenEl) return;
@@ -2343,6 +2675,10 @@ function updateEyeUI(){
     if(timeEl) timeEl.textContent = fmtMs(left);
     if(btn){ btn.disabled = false; btn.textContent = '😌 放松眼睛'; }
     p = L.eyeTotalMs > 0 ? 1 - (left / L.eyeTotalMs) : 0;
+    if(L.eyePaused){
+      card.className = 'eye-card idle';
+      if(btn){ btn.disabled = true; btn.textContent = '⏸ 已暂停'; }
+    }
   } else if(L.eyeMode === 'need-rest'){
     card.className = 'eye-card alert';
     const overdue = liveEyeLeftMs(L);
@@ -2357,7 +2693,49 @@ function updateEyeUI(){
     p = L.eyeTotalMs > 0 ? (left / L.eyeTotalMs) : 0;
   }
   moveEyeToken(p);
+  updateEyeOverlay();
 }
+
+/* ★ 护眼遮罩 */
+let lastOverlayHtml = '';
+let lastOverlayCls = '';
+function updateEyeOverlay(){
+  const ov = $('eyeOverlay');
+  const msg = $('eyeOverlayMsg');
+  if(!ov) return;
+  const L = state.live;
+  let cls = 'eye-overlay';
+  let html = '';
+  if(L && L.eyeActive){
+    if(L.eyeMode === 'need-rest'){
+      cls += ' show';
+      html = '<div class="eom-icon">😌</div><div class="eom-tip">点击任意位置开始放松眼睛</div>';
+    } else if(L.eyeMode === 'rest'){
+      cls += ' show resting';
+      const left = liveEyeLeftMs(L);
+      const secs = Math.max(0, Math.ceil(left / 1000));
+      html = '<div class="eom-num">' + secs + '</div><div class="eom-tip">放松中 · 请看向远处</div>';
+    }
+  }
+  if(cls !== lastOverlayCls){ ov.className = cls; lastOverlayCls = cls; }
+  if(msg && html !== lastOverlayHtml){
+    msg.innerHTML = html;
+    lastOverlayHtml = html;
+  }
+}
+/* 点击遮罩 → 开始放松 */
+(function bindEyeOverlay(){
+  const ov = $('eyeOverlay');
+  if(!ov) return;
+  ov.addEventListener('click', () => {
+    const L = state.live;
+    if(!L || !L.eyeActive) return;
+    if(L.eyeMode === 'need-rest'){
+      unlockAudio();
+      liveStartEyeRest();
+    }
+  });
+})();
 
 /* ============================================================
    运行时
@@ -2375,12 +2753,11 @@ function cleanupRuntime(){
   if(activeId && !ids.has(activeId)){ activeId = null; }
 }
 
-/* ★ 狗狗位置：从左（0）到右（1），与进度条方向一致 */
 function setDogProgress(p){
   const trackW = trackEl.clientWidth || 300;
   const dogW = dogWrap.offsetWidth || 42;
   const startX = 4;
-  const endX = Math.max(startX, trackW - dogW - 40);   /* 右侧留出太阳的位置 */
+  const endX = Math.max(startX, trackW - dogW - 40);
   const t = clamp(p, 0, 1);
   dogWrap.style.transform = `translateX(${startX + (endX - startX) * t}px)`;
 }
@@ -2400,9 +2777,21 @@ function updateDogBar(){
   const rt = runtimeMap[activeId];
   if(!info || !rt){ activeId=null; updateDogBar(); return; }
   const name = info.task.text;
+  const L = state.live || {};
+
+  /* ★ 时间到（未开启超时扣金币） */
+  if(L.status === 'timeup'){
+    trackEl.className = 'track chomping';
+    setDogProgress(1);
+    trackFill.className = 'track-fill';
+    trackFill.style.width = '100%';
+    trackTime.className = 'track-time chomping';
+    trackTime.textContent = '00:00';
+    timerHint.innerHTML = '⏰ <span class="chomp-t">时间到</span>：' + escapeHtml(name) + ' · 点打勾完成';
+    return;
+  }
 
   if(pauseState.active){
-    /* ★ 暂停（含放松眼睛期间）：进度条完全冻结 */
     trackEl.className = 'track paused';
     const p = rt.totalMs>0 ? 1-rt.leftMs/rt.totalMs : 0;
     setDogProgress(p);
@@ -2417,19 +2806,17 @@ function updateDogBar(){
     return;
   }
 
+  /* ★ 超时：每满 1 分钟扣 1 个金币，剩余时间显示到下一次扣款的倒计时 */
   if(rt.overdue){
-    /* ★ 超时后：狗狗停在终点，进度条按单份时间循环 */
-    const L = state.live || {};
-    const unitMs = Math.max(1, Number(L.unitMs) || 1);
     const left = liveLeftMs(L);
-    const frac = clamp(left / unitMs, 0, 1);   /* 1 → 0 */
+    const frac = clamp(left / OVERDUE_MINUTE_MS, 0, 1);
     trackEl.className = 'track chomping';
     setDogProgress(1);
     trackFill.className = 'track-fill';
     trackFill.style.width = ((1 - frac) * 100) + '%';
     trackTime.className = 'track-time chomping';
     trackTime.textContent = fmtMs(left);
-    timerHint.innerHTML = '⏰ <span class="chomp-t">已超时</span> · 已扣 '+rt.rounds+' 个金币 · 倒计时结束再扣 1 个';
+    timerHint.innerHTML = '⏰ <span class="chomp-t">已超时</span> · 已扣 '+rt.rounds+' 个金币 · 满 1 分钟再扣 1 个';
     return;
   }
 
@@ -2451,6 +2838,7 @@ function updateDogBar(){
 }
 function updateMainBtn(){
   mainBtn.classList.remove('start','pause','resume');
+  const L = state.live || {};
   if(!activeId){
     const first = allTasks().find(t=>!t.done);
     if(first){ mainBtn.classList.add('start'); mainBtn.textContent='▶ 开始'; mainBtn.disabled=false; }
@@ -2459,6 +2847,10 @@ function updateMainBtn(){
   }
   const info = findTask(activeId);
   if(!info || info.task.done){ mainBtn.classList.add('start'); mainBtn.textContent='▶ 开始'; mainBtn.disabled=false; return; }
+  /* ★ 时间到（未扣金币）：给一个「下一个」出口 */
+  if(L.status === 'timeup'){
+    mainBtn.classList.add('start'); mainBtn.textContent='▶ 下一个'; mainBtn.disabled=false; return;
+  }
   if(pauseState.active){ mainBtn.classList.add('resume'); mainBtn.textContent = '▶ 继续'; mainBtn.disabled = false; return; }
   if(running){ mainBtn.classList.add('pause'); mainBtn.textContent='⏸ 暂停'; mainBtn.disabled=false; return; }
   const rt = runtimeMap[activeId];
@@ -2517,7 +2909,7 @@ function confetti(){
 }
 
 /* ============================================================
-   ★ 静默暂停 / 恢复（护眼放松自动使用）
+   ★ 静默暂停 / 恢复（放松眼睛、任务完成时使用）
 ============================================================ */
 function silentPauseTask(){
   const L = state.live;
@@ -2537,6 +2929,15 @@ function silentResumeTask(){
   L.status = 'running';
   L.startedAt = Date.now();
 }
+/* ★ 任务完成时暂停用眼计时 */
+function pauseEyeForTaskEnd(){
+  const L = state.live;
+  if(!L || !L.eyeActive) return;
+  if(L.eyeMode === 'use' && !L.eyePaused){
+    L.eyePausedLeftMs = liveEyeLeftMs(L);
+    L.eyePaused = true;
+  }
+}
 
 /* ============================================================
    ★ 计时主循环
@@ -2549,49 +2950,70 @@ function tick(){
   const now = Date.now();
   const amOwner = isLiveOwner();
 
-  /* ★ 超时判断：正常倒计时到 0 或 超时循环一轮走完 */
+  /* ★ 超时判断：每满 1 分钟扣 1 个金币 */
   if(L.activeId && L.status === 'running' && amOwner){
+    const info = findTask(L.activeId);
+    const penaltyOn = info ? taskPenaltyOn(info.task) : false;
     const left = liveLeftMs(L);
     if(left <= 0){
-      const isFirstOverdue = !L.overdue;
-      L.overdue = true;
-      L.cycleStart = now;
-      L.rounds = (L.rounds || 0) + 1;
-      L.soundSeq = (L.soundSeq || 0) + 1;
-      L.soundKind = 'round';
-      state.sun -= 1;
-      pushSunLog(-1, '超时扣 1 个金币');
-      renderStats();
-      /* 视觉反馈 */
-      sunAnchor.classList.add('eaten');
-      dogEl.classList.remove('running');
-      dogEl.classList.add('chomp');
-      bumpPill(sunPillEl);
-      flySunAway(1);
-      setTimeout(() => { sunAnchor.classList.remove('eaten'); }, 650);
-      setTimeout(() => {
-        if(L.status === 'running' && !L.overdue){ dogEl.classList.remove('chomp'); dogEl.classList.add('running'); }
-      }, 600);
-      toast(isFirstOverdue
-        ? '⏰ 任务已超时！<br>扣掉 1 个金币 💰（累计 ' + L.rounds + ' 个）'
-        : '⏰ 又超时啦！扣掉 1 个金币 💰（累计 ' + L.rounds + ' 个）', 3000);
-      pushLive();
+      if(!penaltyOn){
+        /* 不扣金币 → 停在 0 */
+        L.status = 'timeup';
+        L.leftAtStart = 0;
+        L.soundSeq = (L.soundSeq || 0) + 1;
+        L.soundKind = 'pause';
+        pushLive();
+        toast('⏰ 时间到啦！点打勾完成即可', 3000);
+      } else if(!L.overdue){
+        /* 刚进入超时：开始第一分钟倒计时（此刻不扣） */
+        L.overdue = true;
+        L.rounds = 0;
+        L.leftAtStart = OVERDUE_MINUTE_MS;
+        L.startedAt = now;
+        L.soundSeq = (L.soundSeq || 0) + 1;
+        L.soundKind = 'round';
+        pushLive();
+        toast('⏰ 任务超时啦！<br>每超时 1 分钟扣 1 个金币 💰', 3000);
+      } else {
+        /* 又满 1 分钟 → 扣 1 个金币 */
+        L.rounds = (L.rounds || 0) + 1;
+        L.leftAtStart = OVERDUE_MINUTE_MS;
+        L.startedAt = now;
+        L.soundSeq = (L.soundSeq || 0) + 1;
+        L.soundKind = 'round';
+        state.sun -= 1;
+        pushSunLog(-1, '超时扣 1 个金币');
+        renderStats();
+        sunAnchor.classList.add('eaten');
+        dogEl.classList.remove('running');
+        dogEl.classList.add('chomp');
+        bumpPill(sunPillEl);
+        flySunAway(1);
+        setTimeout(() => { sunAnchor.classList.remove('eaten'); }, 650);
+        setTimeout(() => {
+          if(L.status === 'running' && L.overdue){ dogEl.classList.remove('chomp'); dogEl.classList.add('running'); }
+        }, 600);
+        toast('⏰ 超时 ' + L.rounds + ' 分钟，扣掉 1 个金币 💰', 3000);
+        pushLive();
+      }
     }
   }
 
   /* 护眼逻辑 */
   if(L.eyeActive && amOwner){
     if(L.eyeMode === 'use'){
-      const left = liveEyeLeftMs(L);
-      if(left <= 0){
-        L.eyeMode = 'need-rest';
-        L.eyeStageStart = now;
-        L.eyeTotalMs = 0;
-        L.eyeNagCount = 0;
-        L.soundSeq = (L.soundSeq || 0) + 1;
-        L.soundKind = 'eyeAlert';
-        pushLive();
-        toast('⏰ 该放松眼睛啦！点「放松眼睛」休息一下', 3400);
+      if(!L.eyePaused){
+        const left = liveEyeLeftMs(L);
+        if(left <= 0){
+          L.eyeMode = 'need-rest';
+          L.eyeStageStart = now;
+          L.eyeTotalMs = 0;
+          L.eyeNagCount = 0;
+          L.soundSeq = (L.soundSeq || 0) + 1;
+          L.soundKind = 'eyeAlert';
+          pushLive();
+          toast('⏰ 该放松眼睛啦！点屏幕任意位置开始', 3400);
+        }
       }
     } else if(L.eyeMode === 'need-rest'){
       const overdue = now - L.eyeStageStart;
@@ -2601,21 +3023,26 @@ function tick(){
         L.soundSeq = (L.soundSeq || 0) + 1;
         L.soundKind = 'eyeAlert';
         pushLive();
-        toast('⚠️ 还没放松眼睛哦，快点「放松眼睛」吧', 2600);
+        toast('⚠️ 还没放松眼睛哦，快点屏幕任意位置吧', 2600);
       }
     } else if(L.eyeMode === 'rest'){
-      /* ★ 放松眼睛期间：确保任务倒计时处于暂停，进度条冻结 */
       if(L.activeId && L.status === 'running') silentPauseTask();
       const left = liveEyeLeftMs(L);
+      const secs = Math.max(0, Math.ceil(left / 1000));
+      /* ★ 每 5 秒报数一次 */
+      if(secs % 5 === 0 && L.eyeLastNarrated !== secs){
+        L.eyeLastNarrated = secs;
+        speakNumber(secs);
+      }
       if(left <= 0){
         const cfg = getEyeCfg();
         L.eyeMode = 'use';
         L.eyeStageStart = now;
         L.eyeTotalMs = cfg.useMin * 60000;
         L.eyeNagCount = 0;
+        L.eyeLastNarrated = -1;
         L.soundSeq = (L.soundSeq || 0) + 1;
         L.soundKind = 'restDone';
-        /* ★ 放松结束：任务倒计时自动继续，进度条继续走 */
         silentResumeTask();
         pushLive();
         toast('✅ 放松结束，继续加油！', 2200);
@@ -2634,7 +3061,7 @@ function tick(){
 
   if(charTimer.active && charTimer.taskId === L.activeId){
     paintCharBarsFromLive();
-    const wantPaused = (L.status === 'paused');
+    const wantPaused = (L.status === 'paused' || L.status === 'timeup');
     if(wantPaused !== lastCharPaused){ setCharPaused(wantPaused); lastCharPaused = wantPaused; }
   }
 
@@ -2674,7 +3101,6 @@ function liveStartTask(taskId){
   if(!info || info.task.done) return;
   const L = state.live;
   const totalMs = clamp(Number(info.task.minutes)||10, 0.5, 120) * 60000;
-  /* ★ 计算单份时间 */
   let unitMs = totalMs;
   const type = info.task.type;
   if(type === 'preview' || type === 'wordgroup' || type === 'copy'){
@@ -2694,13 +3120,19 @@ function liveStartTask(taskId){
   L.taskPausedByRest = false;
   L.soundSeq = (L.soundSeq || 0) + 1;
   L.soundKind = 'start';
-  if(!L.eyeActive){
+  L.tab = currentSubject === 'shop' ? 'chinese' : currentSubject;
+  /* ★ 护眼：优先恢复被暂停的用眼计时，否则开启新周期 */
+  if(L.eyeActive && L.eyeMode === 'use' && L.eyePaused){
+    L.eyeStageStart = Date.now() - (L.eyeTotalMs - L.eyePausedLeftMs);
+    L.eyePaused = false;
+  } else if(!L.eyeActive){
     const cfg = getEyeCfg();
     L.eyeActive = true;
     L.eyeMode = 'use';
     L.eyeStageStart = Date.now();
     L.eyeTotalMs = cfg.useMin * 60000;
     L.eyeNagCount = 0;
+    L.eyeLastNarrated = -1;
   }
   ensureRuntime(info.task);
   ensureTickRunning();
@@ -2735,12 +3167,7 @@ function liveResume(){
   const L = state.live;
   if(!L.activeId || L.status !== 'paused') return;
   L.status = 'running';
-  if(L.overdue){
-    /* 超时循环：把 cycleStart 调整到从剩余时间继续 */
-    L.cycleStart = Date.now() - (L.unitMs - L.leftAtStart);
-  } else {
-    L.startedAt = Date.now();
-  }
+  L.startedAt = Date.now();
   L.ownerTab = TAB_ID;
   L.taskPausedByRest = false;
   L.soundSeq = (L.soundSeq || 0) + 1;
@@ -2775,10 +3202,13 @@ function liveStartEyeRest(){
   L.eyeStageStart = Date.now();
   L.eyeTotalMs = cfg.restMin * 60000;
   L.eyeNagCount = 0;
+  L.eyeLastNarrated = -1;       /* ★ 报数从起始值开始 */
   L.ownerTab = TAB_ID;
-  /* ★ 放松眼睛：暂停任务倒计时 → 总进度条冻结 */
   silentPauseTask();
   pushLive();
+  /* ★ 立刻报出第一个数 */
+  try{ speakNumber(Math.round(cfg.restMin * 60)); }catch(e){}
+  L.eyeLastNarrated = Math.round(cfg.restMin * 60);
   toast('😌 放松眼睛开始（' + cfg.restMin + ' 分钟），任务倒计时已暂停', 2600);
 }
 function liveStopEyeCare(){
@@ -2789,6 +3219,9 @@ function liveStopEyeCare(){
   L.eyeStageStart = 0;
   L.eyeTotalMs = 0;
   L.eyeNagCount = 0;
+  L.eyeLastNarrated = -1;
+  L.eyePaused = false;
+  L.eyePausedLeftMs = 0;
   pushLive();
 }
 
@@ -2797,6 +3230,13 @@ function liveStopEyeCare(){
 ============================================================ */
 function onMainBtnClick(){
   const L = state.live;
+  /* 时间到（未扣金币）：跳到下一个任务 */
+  if(L.activeId && L.status === 'timeup'){
+    const next = allTasks().find(t => !t.done && t.id !== L.activeId);
+    if(next) liveStartTask(next.id);
+    else { liveStopTask(); updateMainBtn(); }
+    return;
+  }
   if(L.activeId && L.status === 'paused'){ liveResume(); return; }
   if(L.activeId && L.status === 'running'){ requestPause(); return; }
   if(!L.activeId){
@@ -2886,7 +3326,10 @@ function completeTask(id){
   const info = findTask(id);
   if(!info || info.task.done) return;
   const task = info.task;
-  if(state.live.activeId === id){ liveStopTask(); }
+  if(state.live.activeId === id){
+    pauseEyeForTaskEnd();     /* ★ 用眼计时暂停，等按开始再继续 */
+    liveStopTask();
+  }
   const reward = task.sun;
   task.done = true;
   state.sun += reward;
@@ -2897,35 +3340,43 @@ function completeTask(id){
   bumpPill(sunPillEl);
   renderBoard();
   toast('✅ 「'+escapeHtml(task.text)+'」完成！<br>结算 +'+reward+' 个 💰', 2400);
-  setTimeout(() => autoStartNext(), 700);
-}
-function autoStartNext(){
-  const next = allTasks().find(t=>!t.done);
-  if(!next){
-    liveStopTask(); liveStopEyeCare();
+
+  const remaining = allTasks().filter(t => !t.done);
+  if(!remaining.length){
     if(!state.checkins.includes(state.date)) state.checkins.push(state.date);
+    liveStopEyeCare();
     saveLocalState(); uploadToCloud();
     renderStats();
     state.live.soundSeq = (state.live.soundSeq||0) + 1;
     state.live.soundKind = 'win';
     pushLive();
     confetti();
-    toast('🎉 全部完成啦！', 4200);
-    return false;
+    setTimeout(() => toast('🎉 全部完成啦！', 4200), 900);
+  } else {
+    /* ★ 第7条：不自动开始下一个任务 */
+    setTimeout(() => toast('👉 点「▶ 开始」继续下一个任务', 2600), 1200);
   }
-  liveStartTask(next.id);
-  return true;
+  if(isAdminMode) renderAdminPanel();
+  updateMainBtn();
 }
 
 /* ============================================================
    切换科目 / 日期
 ============================================================ */
-function switchSubject(subject){
+function switchSubject(subject, fromRemote){
   currentSubject = subject;
   document.querySelectorAll('.subject-tab').forEach(t => { t.classList.toggle('active', t.dataset.tab === subject); });
   document.querySelectorAll('.tab-panel').forEach(p => { p.classList.toggle('active', p.id === 'panel-' + subject); });
   appRootEl.classList.toggle('theme-math', subject === 'math');
   appRootEl.classList.toggle('theme-english', subject === 'english');
+  if(subject === 'shop') renderShop();
+  /* ★ 多端同步当前页面 */
+  if(!fromRemote && state && state.live){
+    if(state.live.tab !== subject){
+      state.live.tab = subject;
+      pushLive();
+    }
+  }
 }
 function switchDate(dateStr){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return;
@@ -2936,6 +3387,7 @@ function switchDate(dateStr){
   saveLocalState(); uploadToCloud();
   updateDateText(); renderBoard(); renderStats();
   refreshAllCards(); updateDogBar(); updateMainBtn();
+  if(currentSubject === 'shop') renderShop();
   if(isAdminMode) renderAdminPanel();
   const isToday = dateStr === todayStr();
   toast(isToday ? '📅 已切换到今天' : '📅 已切换到 ' + dateLabel(dateStr).replace('今天 · ','').replace('昨天 · ',''), 2200);
@@ -3093,6 +3545,7 @@ $('eyeRestBtn').addEventListener('click', () => {
   if(!L.eyeActive) return;
   if(L.eyeMode !== 'use' && L.eyeMode !== 'need-rest') return;
   L.ownerTab = TAB_ID;
+  unlockAudio();
   liveStartEyeRest();
 });
 
@@ -3122,6 +3575,7 @@ function renderAdminPanel(){
   renderAdminTaskList('math', 'adminMathList', 'adminMathBadge');
   renderAdminTaskList('english', 'adminEnglishList', 'adminEnglishBadge');
   renderLessonLibrary(); populateLessonSelects();
+  renderAdminShop();              /* ★ 兑换项目管理 */
   renderSunPanel(); renderPwdPanel(); renderEyePanel();
   applyAdminPanelStates(); syncLastInputFields();
 }
@@ -3134,7 +3588,7 @@ function renderEyePanel(){
   const hint = $('adminEyeHint');
   if(hint){
     hint.className = 'aa-hint ok';
-    hint.textContent = '当前设置：每用眼 ' + ec.useMin + ' 分钟提醒放松，放松 ' + ec.restMin + ' 分钟（等待时每 30 秒提醒一次）';
+    hint.textContent = '当前设置：每用眼 ' + ec.useMin + ' 分钟提醒放松，放松 ' + ec.restMin + ' 分钟（等待时每 30 秒提醒一次，放松时每 5 秒语音报数）';
   }
 }
 $('adminEyeSaveBtn').addEventListener('click', () => {
@@ -3228,6 +3682,79 @@ function adminSunAdjust(sign){
 }
 $('adminSunMinusBtn').addEventListener('click', () => adminSunAdjust(-1));
 $('adminSunPlusBtn').addEventListener('click', () => adminSunAdjust(1));
+
+/* ★ 兑换项目管理 */
+function renderAdminShop(){
+  const list = $('adminShopList');
+  const badge = $('adminShopBadge');
+  if(!list) return;
+  const items = state.shop || [];
+  if(badge) badge.textContent = items.length + ' 项';
+  if(!items.length){
+    list.innerHTML = '<div class="admin-empty">还没有兑换项目，在下方添加</div>';
+    return;
+  }
+  list.innerHTML = items.map(item => (
+    '<div class="shop-admin-row" data-id="' + escapeAttr(item.id) + '">' +
+      '<input class="sa-icon" value="' + escapeAttr(item.icon) + '" maxlength="4" title="图标">' +
+      '<input class="sa-name" value="' + escapeAttr(item.name) + '" maxlength="30" title="名称">' +
+      '<input class="sa-min" type="number" value="' + item.minutes + '" min="1" max="240" step="5" title="分钟">' +
+      '<input class="sa-sun" type="number" value="' + item.sun + '" min="-999" max="999" step="5" title="金币（负=扣除，正=增加）">' +
+      '<button class="sa-del" data-del="' + escapeAttr(item.id) + '" title="删除">✕</button>' +
+    '</div>'
+  )).join('');
+
+  list.querySelectorAll('.shop-admin-row').forEach(row => {
+    const id = row.dataset.id;
+    const item = items.find(x => x.id === id);
+    if(!item) return;
+    row.querySelector('.sa-icon').addEventListener('change', e => {
+      item.icon = String(e.target.value || '🎁').trim().slice(0,4) || '🎁';
+      saveLocalState(); uploadToCloud(); renderShop();
+    });
+    row.querySelector('.sa-name').addEventListener('change', e => {
+      item.name = String(e.target.value || '兑换项').trim().slice(0,30) || '兑换项';
+      saveLocalState(); uploadToCloud(); renderShop();
+    });
+    row.querySelector('.sa-min').addEventListener('change', e => {
+      item.minutes = clamp(Math.round(Number(e.target.value) || 30), 1, 240);
+      e.target.value = item.minutes;
+      saveLocalState(); uploadToCloud(); renderShop();
+    });
+    row.querySelector('.sa-sun').addEventListener('change', e => {
+      item.sun = clamp(Math.round(Number(e.target.value) || 0), -999, 999);
+      e.target.value = item.sun;
+      saveLocalState(); uploadToCloud(); renderShop();
+    });
+    row.querySelector('.sa-del').addEventListener('click', () => {
+      if(!confirm('确定删除兑换项目「' + item.name + '」吗？')) return;
+      state.shop = (state.shop || []).filter(x => x.id !== id);
+      saveLocalState(); uploadToCloud();
+      renderAdminShop(); renderShop();
+      toast('已删除兑换项目');
+    });
+  });
+}
+$('adminShopAddBtn').addEventListener('click', () => {
+  const iconEl = $('adminShopIcon');
+  const nameEl = $('adminShopName');
+  const minEl = $('adminShopMin');
+  const sunEl = $('adminShopSun');
+  const icon = String(iconEl.value || '🎁').trim().slice(0,4) || '🎁';
+  const name = String(nameEl.value || '').trim().slice(0,30);
+  if(!name){ toast('请输入兑换项目名称'); return; }
+  const minutes = clamp(Math.round(Number(minEl.value) || 30), 1, 240);
+  const sun = clamp(Math.round(Number(sunEl.value) || -30), -999, 999);
+  if(!Array.isArray(state.shop)) state.shop = [];
+  state.shop.push({ id: newId(), icon, name, minutes, sun });
+  saveLocalState(); uploadToCloud();
+  nameEl.value = '';
+  iconEl.value = '🎁';
+  minEl.value = 30;
+  sunEl.value = -30;
+  renderAdminShop(); renderShop();
+  toast('✅ 已添加兑换项目：' + escapeHtml(name));
+});
 
 function renderAdminTaskList(subject, listId, badgeId){
   const list = document.getElementById(listId);
@@ -3324,7 +3851,8 @@ function applyAdminPanelStates(){
   const map = {
     adminPanelProgress: pc.progress, adminPanelSun: pc.sun, adminPanelDate: pc.date,
     adminPanelLibrary: pc.library, adminPanelSync: pc.sync, adminPanelPassword: pc.password,
-    adminPanelEye: pc.eye, adminPanelMath: pc.math, adminPanelEnglish: pc.english
+    adminPanelEye: pc.eye, adminPanelMath: pc.math, adminPanelEnglish: pc.english,
+    adminPanelShop: pc.shop
   };
   Object.entries(map).forEach(([id,collapsed]) => {
     const el=$(id); if(el) el.classList.toggle('collapsed', !!collapsed);
@@ -3335,7 +3863,7 @@ function setupAdminPanelToggles(){
     adminPanelProgress:'progress', adminPanelSun:'sun', adminPanelDate:'date',
     adminPanelMath:'math', adminPanelEnglish:'english',
     adminPanelLibrary:'library', adminPanelSync:'sync',
-    adminPanelPassword:'password', adminPanelEye:'eye'
+    adminPanelPassword:'password', adminPanelEye:'eye', adminPanelShop:'shop'
   };
   Object.entries(map).forEach(([id,key]) => {
     const panel=$(id); if(!panel) return;
@@ -3424,7 +3952,6 @@ function renderLessonLibrary(){
   });
 }
 
-/* ★ 记住上一次选择的课文 */
 function saveLessonPick(kind, value){
   if(!state.settings) state.settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
   if(!state.settings.lessonPick) state.settings.lessonPick = { preview:'', wordgroup:'', copy:'' };
@@ -3672,10 +4199,22 @@ function openTaskEdit(id){
   $('taskEditMin').value = t.minutes;
   $('taskEditSun').value = t.sun;
   const wrap = $('taskEditExtraWrap');
+  const penWrap = $('taskEditPenaltyWrap');
+  const penEl = $('taskEditPenalty');
   if(t.type === 'preview'){ wrap.style.display = ''; $('taskEditExtraLabel').textContent = '预习生字（空格分隔）'; $('taskEditExtra').value = (t.chars || []).join(' '); }
   else if(t.type === 'wordgroup'){ wrap.style.display = ''; $('taskEditExtraLabel').textContent = '抄写并组词（空格分隔）'; $('taskEditExtra').value = (t.words || []).join(' '); }
   else if(t.type === 'copy'){ wrap.style.display = ''; $('taskEditExtraLabel').textContent = '抄写词语（空格分隔）'; $('taskEditExtra').value = (t.words || []).join(' '); }
   else { wrap.style.display = 'none'; $('taskEditExtra').value = ''; }
+  /* ★ 只有自定义作业才显示超时扣金币开关 */
+  if(penWrap && penEl){
+    if(t.type === 'custom'){
+      penWrap.style.display = '';
+      penEl.checked = (t.penalty === true);
+    } else {
+      penWrap.style.display = 'none';
+      penEl.checked = false;
+    }
+  }
   taskEditModal.classList.add('show');
   setTimeout(() => $('taskEditText').focus(), 120);
 }
@@ -3698,6 +4237,10 @@ $('taskEditSave').addEventListener('click', () => {
   } else if(t.type === 'wordgroup' || t.type === 'copy'){
     const words = parseWords($('taskEditExtra').value).slice(0,60);
     if(words.length) t.words = words;
+  } else if(t.type === 'custom'){
+    const penEl = $('taskEditPenalty');
+    if(penEl && penEl.checked) t.penalty = true;
+    else delete t.penalty;
   }
   saveLocalState(); uploadToCloud();
   taskEditModal.classList.remove('show');
@@ -3733,7 +4276,6 @@ function renderLessonHint(kind){
   hint.className = 'aa-hint ok';
   hint.textContent = '将添加 ' + items.length + ' ' + cfg.unit + '：' + shown + (items.length > 24 ? ' …' : '');
 }
-/* ★ 选择课文时记住选择 */
 Object.keys(LESSON_PICK).forEach(kind => {
   const cfg = LESSON_PICK[kind];
   const sel = $(cfg.sel);
@@ -3784,19 +4326,23 @@ $('adminAddCopyBtn').addEventListener('click', () => {
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加「'+escapeHtml(name)+'」抄写词语');
 });
+
+/* ★ 自定义作业：带「超时扣金币」开关 */
 $('adminAddChineseBtn').addEventListener('click', () => {
   const textEl = $('adminAddChineseText');
   const minEl = $('adminAddChineseMin');
   const sunEl = $('adminAddChineseSun');
+  const penEl = $('adminAddChinesePenalty');
   const text = textEl.value.trim();
   if(!text){ toast('请输入作业内容'); return; }
   const minutes = clamp(parseFloat(minEl.value)||10, 1, 120);
   const sun = clamp(parseInt(sunEl.value,10)||30, 1, 500);
   rememberInput('chineseMin', minutes); rememberInput('chineseSun', sun);
-  const task = makeTask(text, minutes, sun);
+  const task = makeTask(text, minutes, sun, { penalty: !!(penEl && penEl.checked) });
   state.subjects.chinese.push(task);
   saveLocalState(); uploadToCloud();
   textEl.value = '';
+  if(penEl) penEl.checked = false;
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加任务：「'+escapeHtml(text)+'」');
 });
@@ -3804,15 +4350,17 @@ $('adminAddMathBtn').addEventListener('click', () => {
   const textEl = $('adminAddMathText');
   const minEl = $('adminAddMathMin');
   const sunEl = $('adminAddMathSun');
+  const penEl = $('adminAddMathPenalty');
   const text = textEl.value.trim();
   if(!text){ toast('请输入作业内容'); return; }
   const minutes = clamp(parseFloat(minEl.value)||10, 1, 120);
   const sun = clamp(parseInt(sunEl.value,10)||30, 1, 500);
   rememberInput('mathMin', minutes); rememberInput('mathSun', sun);
-  const task = makeTask(text, minutes, sun);
+  const task = makeTask(text, minutes, sun, { penalty: !!(penEl && penEl.checked) });
   state.subjects.math.push(task);
   saveLocalState(); uploadToCloud();
   textEl.value = '';
+  if(penEl) penEl.checked = false;
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加任务：「'+escapeHtml(text)+'」');
 });
@@ -3820,15 +4368,17 @@ $('adminAddEnglishBtn').addEventListener('click', () => {
   const textEl = $('adminAddEnglishText');
   const minEl = $('adminAddEnglishMin');
   const sunEl = $('adminAddEnglishSun');
+  const penEl = $('adminAddEnglishPenalty');
   const text = textEl.value.trim();
   if(!text){ toast('请输入英语作业内容'); return; }
   const minutes = clamp(parseFloat(minEl.value)||10, 1, 120);
   const sun = clamp(parseInt(sunEl.value,10)||30, 1, 500);
-  const task = makeTask(text, minutes, sun);
+  const task = makeTask(text, minutes, sun, { penalty: !!(penEl && penEl.checked) });
   state.subjects.english.push(task);
   rememberInput('englishMin', minutes); rememberInput('englishSun', sun);
   saveLocalState(); uploadToCloud();
   textEl.value = '';
+  if(penEl) penEl.checked = false;
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加英语作业：「'+escapeHtml(text)+'」');
 });
@@ -3840,7 +4390,7 @@ $('adminLocalDownloadBtn').addEventListener('click', () => {
     saveLocalState();
     const backup = JSON.parse(JSON.stringify(state));
     backup.__backupType = 'study_board_local_backup';
-    backup.__backupVersion = 1;
+    backup.__backupVersion = 2;
     backup.__backupTime = new Date().toISOString();
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -3869,6 +4419,8 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
     state.sunLog = Array.isArray(imported.sunLog) ? imported.sunLog : [];
     state.settings = normalizeSettings(imported.settings);
     state.lessonLibrary = normalizeLessonLibrary(imported.lessonLibrary);
+    const shopNorm = normalizeShop(imported.shop);
+    if(shopNorm !== null) state.shop = shopNorm;
     state.parentPassword = (typeof imported.parentPassword === 'string' && /^\d{4}$/.test(imported.parentPassword)) ? imported.parentPassword : MASTER_PASSWORD;
     if(imported.live && typeof imported.live === 'object'){
       state.live = Object.assign({}, DEFAULT_LIVE, imported.live);
@@ -3877,6 +4429,7 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
     saveLocalState(); renderStats(); renderBoard(); refreshAllCards();
     syncLegacyFromLive(); syncRuntimeFromLive();
     updateDogBar(); updateMainBtn(); updateEyeUI();
+    if(currentSubject === 'shop') renderShop();
     if(isAdminMode) renderAdminPanel();
     populateLessonSelects();
     let synced = false;
@@ -3907,9 +4460,9 @@ $('adminForcePullBtn').addEventListener('click', async () => {
    事件绑定
 ============================================================ */
 document.querySelectorAll('.subject-tab').forEach(tab => {
-  tab.addEventListener('click', () => switchSubject(tab.dataset.tab));
+  tab.addEventListener('click', () => { unlockAudio(); switchSubject(tab.dataset.tab); });
 });
-mainBtn.addEventListener('click', onMainBtnClick);
+mainBtn.addEventListener('click', () => { unlockAudio(); onMainBtnClick(); });
 
 window.addEventListener('resize', () => { updateDogBar(); updateEyeUI(); });
 document.addEventListener('visibilitychange', () => {
@@ -3957,7 +4510,7 @@ dateTextEl.textContent = dateLabel(state.date);
 updateDateText();
 saveLocalState();
 renderStats(); renderBoard();
-switchSubject('chinese');
+switchSubject(state.live.tab && ['chinese','math','english','shop'].indexOf(state.live.tab) >= 0 ? state.live.tab : 'chinese', true);
 refreshAllCards();
 
 requestAnimationFrame(() => { updateEyeUI(); updateDogBar(); updateMainBtn(); });
