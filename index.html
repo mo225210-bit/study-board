@@ -268,9 +268,11 @@
   .checkbox{flex:none;width:23px;height:23px;border-radius:7px;border:2.5px solid #A5D6A7;
     background:#fff;display:grid;place-items:center;margin-top:1px;cursor:pointer;transition:all .2s}
   .subject-col[data-subject="math"] .checkbox{border-color:#90CAF9}
+  /* ★ 需要先拍照的作业，勾选框呈现"锁定"样式 */
+  .checkbox.locked{border-style:dashed;opacity:.5}
   .checkbox .tick{color:#fff;font-size:16px;font-weight:900;line-height:1;opacity:0;
     transform:scale(.4);transition:all .25s cubic-bezier(.34,1.56,.64,1)}
-  .task-card.done .checkbox{background:#43A047;border-color:#43A047}
+  .task-card.done .checkbox{background:#43A047;border-color:#43A047;opacity:1}
   .subject-col[data-subject="math"] .task-card.done .checkbox{background:#039BE5;border-color:#039BE5}
   .task-card.done .checkbox .tick{opacity:1;transform:scale(1)}
   .card-body{flex:1;min-width:0}
@@ -517,10 +519,26 @@
   .eye-overlay-msg .eom-icon{font-size:60px;line-height:1;margin-bottom:12px}
   .eye-overlay-msg .eom-num{font-size:76px;line-height:1;font-variant-numeric:tabular-nums}
   .eye-overlay-msg .eom-tip{font-size:18px;margin-top:14px;letter-spacing:1px}
+
+  /* ★ 护眼全屏页上的「提示音开关」 */
+  .eye-sound-btn{
+    position:absolute;top:18px;right:18px;z-index:8;
+    font-family:inherit;font-size:14px;font-weight:900;
+    color:#fff;background:rgba(255,255,255,.26);
+    border:2px solid rgba(255,255,255,.65);
+    padding:11px 20px;border-radius:999px;cursor:pointer;
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    box-shadow:0 6px 18px rgba(0,0,0,.28);
+    transition:all .18s;white-space:nowrap;letter-spacing:.5px;
+  }
+  .eye-sound-btn:active{transform:scale(.94)}
+  .eye-sound-btn.off{background:rgba(0,0,0,.42);border-color:rgba(255,255,255,.32);opacity:.85}
+
   @media (max-width:500px){
     .eye-overlay-msg .eom-num{font-size:60px}
     .eye-overlay-msg .eom-icon{font-size:48px}
     .eye-overlay-msg .eom-tip{font-size:16px}
+    .eye-sound-btn{font-size:12.5px;padding:9px 15px;top:12px;right:12px}
   }
 
   .admin-bar{position:fixed;bottom:0;left:0;right:0;z-index:200;
@@ -809,8 +827,9 @@
 <div class="cloud c3"></div>
 <div class="sync-status" id="syncStatus"></div>
 
-<!-- ★ 护眼遮罩 -->
+<!-- ★ 护眼遮罩（含提示音开关） -->
 <div class="eye-overlay" id="eyeOverlay">
+  <button class="eye-sound-btn" id="eyeSoundBtn" type="button">🔔 提示音 开</button>
   <div class="eye-overlay-msg" id="eyeOverlayMsg"></div>
 </div>
 
@@ -902,7 +921,7 @@
     </section>
   </div>
 
-  <div class="timer-hint" style="margin-top:-3px">打勾 ✓ 需要家长密码 · 📷 可拍照留证 · 🖼️ 查看作业照片</div>
+  <div class="timer-hint" style="margin-top:-3px">自定义作业可直接勾选完成 · 📷 其他作业需先拍照再勾选 · 🖼️ 查看作业照片</div>
 </div>
 
 <div class="modal" id="calModal">
@@ -1186,7 +1205,9 @@
         孩子点「开始」后自动开始用眼倒计时。用眼到时间会响铃提醒休息；<br>
         不点「放松眼睛」的话，之后每 <b style="color:#FFD54F">30 秒</b> 再响铃一次，直到点为止。<br>
         按下「放松眼睛」后任务倒计时自动暂停，放松结束自动继续。<br>
-        <b style="color:#FFD54F">放松时会每 5 秒语音报数一次（倒着数）。</b>
+        <b style="color:#FFD54F">放松时会每 5 秒语音报数一次（倒着数）。</b><br>
+        <b style="color:#FFD54F">作业全部完成、或每晚 21:00 自动重置时，护眼提醒会自动取消。</b><br>
+        提示音可在护眼全屏页面右上角的按钮上随时开/关。
       </p>
       <div class="admin-add-row inline-row">
         <input class="aa-num" id="adminEyeUseMin" type="number" min="1" max="120" step="1">
@@ -1218,7 +1239,7 @@
     <div class="admin-section collapsed" id="adminPanelPassword">
       <h3>🔒 家长密码</h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
-        暂停倒计时、作业打勾、进入家长面板都需要这个密码。<br>
+        暂停倒计时、进入家长面板都需要这个密码。<br>
         默认密码 <b style="color:#FFD54F">0702</b>，万能密码 0702 始终有效。
       </p>
       <div class="admin-add-row">
@@ -1290,6 +1311,7 @@ const STORAGE_KEY = 'study_board_v9';
 const MAX_DAYS_KEPT = 180;
 const EYE_NAG_MS = 30000;
 const OVERDUE_MINUTE_MS = 60000;
+const NIGHT_RESET_HOUR = 21;            /* ★ 每晚 21:00 重置 */
 const SUBJECTS = { chinese:{key:'chinese',name:'语文'}, math:{key:'math',name:'数学'}, english:{key:'english',name:'英语'} };
 
 const MAX_PHOTOS_PER_TASK = 3;
@@ -1346,7 +1368,8 @@ const DEFAULT_SETTINGS = {
     wordgroup: { min: 2.5, sun: 7.5 },
     copy:      { min: 2,   sun: 6 }
   },
-  eyeCare: { useMin: 20, restMin: 5 },
+  /* ★ 默认用眼 20 分钟 / 放松 2 分钟，sound = 护眼提示音开关 */
+  eyeCare: { useMin: 20, restMin: 2, sound: true },
   lessonPick: { preview: '', wordgroup: '', copy: '' },
   lastInputs: {
     chineseMin: 10, chineseSun: 30,
@@ -1493,9 +1516,16 @@ function normalizeSettings(raw){
     const n = Number(v);
     return clamp(isFinite(n) ? n : dv, min, max);
   };
+  /* ★ 一次性迁移：老的默认「20 分钟用眼 / 5 分钟放松」→ 新默认 2 分钟放松 */
+  let restRaw = ec.restMin;
+  if(Number(restRaw) === 5 && Number(ec.useMin) === 20) restRaw = 2;
   return {
     unit: { preview: pick('preview'), wordgroup: pick('wordgroup'), copy: pick('copy') },
-    eyeCare: { useMin: num(ec.useMin, d.eyeCare.useMin, 1, 120), restMin: num(ec.restMin, d.eyeCare.restMin, 1, 60) },
+    eyeCare: {
+      useMin:  num(ec.useMin, d.eyeCare.useMin, 1, 120),
+      restMin: num(restRaw,  d.eyeCare.restMin, 1, 60),
+      sound:   ec.sound !== false            /* ★ 护眼提示音开关，默认开 */
+    },
     lessonPick: {
       preview:   String(lp.preview   || '').slice(0,60),
       wordgroup: String(lp.wordgroup || '').slice(0,60),
@@ -1539,6 +1569,14 @@ function getEyeCfg(){
     useMin:  clamp(Number(ec.useMin)  || DEFAULT_SETTINGS.eyeCare.useMin,  1, 120),
     restMin: clamp(Number(ec.restMin) || DEFAULT_SETTINGS.eyeCare.restMin, 1, 60)
   };
+}
+/* ★ 护眼提示音是否开启 */
+function eyeSoundOn(){
+  try{
+    const ec = state && state.settings && state.settings.eyeCare;
+    if(!ec) return true;
+    return ec.sound !== false;
+  }catch(e){ return true; }
 }
 function normalizeLessonLibrary(raw){
   const out = {};
@@ -1650,6 +1688,7 @@ function loadLocalState(){
       lessonLibrary: JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY)),
       shop: JSON.parse(JSON.stringify(DEFAULT_SHOP)),
       parentPassword: MASTER_PASSWORD,
+      lastNightReset: '',                 /* ★ 记录最后一次 21:00 重置日期 */
       live: JSON.parse(JSON.stringify(DEFAULT_LIVE))
     };
     s.days[todayStr()] = normalizeDay(DEFAULT_DATA);
@@ -1661,6 +1700,7 @@ function loadLocalState(){
   if(!Array.isArray(s.checkins)) s.checkins = [];
   if(!Array.isArray(s.sunLog)) s.sunLog = [];
   if(typeof s.sun !== 'number') s.sun = 0;
+  if(typeof s.lastNightReset !== 'string') s.lastNightReset = '';
   if(typeof s.parentPassword !== 'string' || !/^\d{4}$/.test(s.parentPassword)) s.parentPassword = MASTER_PASSWORD;
   s.settings = normalizeSettings(s.settings);
   s.lessonLibrary = normalizeLessonLibrary(s.lessonLibrary);
@@ -1845,6 +1885,7 @@ async function uploadToCloud(force){
     sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
     lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword,
     shop: state.shop,
+    lastNightReset: state.lastNightReset || '',
     live: state.live, updatedAt: Date.now()
   };
   const prevPushed = lastPushedUpdatedAt;
@@ -1875,6 +1916,7 @@ function applyRemoteState(remote){
   if(Array.isArray(remote.sunLog)) state.sunLog = remote.sunLog.slice(0, 60);
   if(remote.lessonLibrary) state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary);
   if(typeof remote.parentPassword === 'string' && /^\d{4}$/.test(remote.parentPassword)) state.parentPassword = remote.parentPassword;
+  if(typeof remote.lastNightReset === 'string') state.lastNightReset = remote.lastNightReset;
   const shopNorm = normalizeShop(remote.shop);
   if(shopNorm !== null) state.shop = shopNorm;
   if(remote.live && typeof remote.live === 'object'){
@@ -2023,7 +2065,9 @@ function playSound(kind){
   else if(kind==='win'){[523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>tone(f,now+i*0.11,0.4,'triangle',0.12));tone(1568,now+0.6,0.8,'sine',0.08);}
   else if(kind==='photo'){[880,1174.7,1396.9].forEach((f,i)=>tone(f,now+i*0.06,0.16,'triangle',0.11));}
 }
+/* ★ 护眼提示音：受「提示音开关」控制 */
 function playEyeAlert(){
+  if(!eyeSoundOn()) return;
   const ctx = ensureAudio();
   if(!ctx) return;
   const now = audioCtx.currentTime;
@@ -2039,7 +2083,9 @@ function playRestDone(){
   const now = audioCtx.currentTime;
   [659.25, 880, 1046.5].forEach((f,i) => tone(f, now + i*0.11, 0.22, 'triangle', 0.12));
 }
+/* ★ 放松语音报数：同样受「提示音开关」控制 */
 function speakNumber(n){
+  if(!eyeSoundOn()) return;
   if(!('speechSynthesis' in window)) return;
   try{
     window.speechSynthesis.cancel();
@@ -2354,7 +2400,10 @@ function renderSubjectCards(subject, listEl){
     card.className = 'task-card' + (task.done?' done':'');
 
     const top = document.createElement('div'); top.className = 'card-top';
-    const cb = document.createElement('div'); cb.className = 'checkbox';
+    const cb = document.createElement('div');
+    /* ★ 非自定义作业：没拍照前勾选框呈"锁定"虚线样式 */
+    const needPhotoFirst = (task.type !== 'custom') && !task.done && getTaskPhotos(task).length === 0;
+    cb.className = 'checkbox' + (needPhotoFirst ? ' locked' : '');
     cb.innerHTML = '<span class="tick">✓</span>';
     cb.addEventListener('click', e => { e.stopPropagation(); toggleTaskDone(task.id); });
 
@@ -2756,6 +2805,7 @@ function updateEyeOverlay(){
     msg.innerHTML = html;
     lastOverlayHtml = html;
   }
+  updateEyeSoundBtn();
 }
 (function bindEyeOverlay(){
   const ov = $('eyeOverlay');
@@ -2767,6 +2817,35 @@ function updateEyeOverlay(){
       unlockAudio();
       liveStartEyeRest();
     }
+  });
+})();
+
+/* ★ 护眼提示音开关按钮 */
+function updateEyeSoundBtn(){
+  const btn = $('eyeSoundBtn');
+  if(!btn) return;
+  const on = eyeSoundOn();
+  btn.classList.toggle('off', !on);
+  btn.textContent = on ? '🔔 提示音 开' : '🔕 提示音 关';
+}
+(function bindEyeSoundBtn(){
+  const btn = $('eyeSoundBtn');
+  if(!btn) return;
+  btn.addEventListener('click', e => {
+    e.stopPropagation();   /* 不要触发「点击任意位置开始放松」 */
+    if(!state.settings) state.settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+    if(!state.settings.eyeCare || typeof state.settings.eyeCare !== 'object'){
+      state.settings.eyeCare = Object.assign({}, DEFAULT_SETTINGS.eyeCare);
+    }
+    const wasOn = eyeSoundOn();
+    state.settings.eyeCare.sound = !wasOn;
+    saveLocalState(); uploadToCloud();
+    updateEyeSoundBtn();
+    if(!wasOn){
+      /* 打开时试听一下，让家长确认能听见 */
+      try{ unlockAudio(); playEyeAlert(); }catch(err){}
+    }
+    toast(wasOn ? '🔕 护眼提示音已关闭' : '🔔 护眼提示音已开启', 1800);
   });
 })();
 
@@ -3232,9 +3311,10 @@ function liveStartEyeRest(){
   L.eyeLastNarrated = Math.round(cfg.restMin * 60);
   toast('😌 放松眼睛开始（' + cfg.restMin + ' 分钟），任务倒计时已暂停', 2600);
 }
+/* ★ 取消护眼提醒（作业全部完成 / 21:00 重置 时调用） */
 function liveStopEyeCare(){
   const L = state.live;
-  if(!L.eyeActive) return;
+  if(!L || !L.eyeActive) return;
   L.eyeActive = false;
   L.eyeMode = 'idle';
   L.eyeStageStart = 0;
@@ -3244,6 +3324,7 @@ function liveStopEyeCare(){
   L.eyePaused = false;
   L.eyePausedLeftMs = 0;
   pushLive();
+  updateEyeUI();
 }
 
 /* ============================================================
@@ -3322,11 +3403,24 @@ function requestPause(){
   pwdPurpose = 'pause';
   openPwdModal('⏸ 暂停确认', '暂停倒计时需要家长密码');
 }
+/* ★ 学生页打勾规则：
+   - 自定义作业：直接勾选完成，不需要密码
+   - 非自定义作业（预习生字 / 抄写并组词 / 抄写词语）：必须先拍照，才能勾选完成
+*/
 function toggleTaskDone(id){
   const info = findTask(id); if(!info) return;
   if(isAdminMode){ doToggleTaskDone(id); return; }
-  pendingCheckId = id; pwdPurpose = 'check';
-  openPwdModal('🔑 家长确认', info.task.done ? '取消完成需要家长密码' : '确认完成作业需要家长密码');
+
+  const task = info.task;
+  if(!task.done && task.type !== 'custom'){
+    const photos = getTaskPhotos(task);
+    if(!photos.length){
+      toast('📷 请先拍照上传作业照片，才能点完成哦', 3200);
+      playSound('fail');
+      return;
+    }
+  }
+  doToggleTaskDone(id);
 }
 function doToggleTaskDone(id){
   const info = findTask(id); if(!info) return;
@@ -3364,6 +3458,7 @@ function completeTask(id){
   const remaining = allTasks().filter(t => !t.done);
   if(!remaining.length){
     if(!state.checkins.includes(state.date)) state.checkins.push(state.date);
+    /* ★ 作业全部完成 → 取消护眼提醒 */
     liveStopEyeCare();
     saveLocalState(); uploadToCloud();
     renderStats();
@@ -3371,7 +3466,8 @@ function completeTask(id){
     state.live.soundKind = 'win';
     pushLive();
     confetti();
-    setTimeout(() => toast('🎉 全部完成啦！', 4200), 900);
+    updateEyeUI();
+    setTimeout(() => toast('🎉 全部完成啦！<br>护眼提醒已关闭，好好休息～', 4200), 900);
   } else {
     setTimeout(() => toast('👉 点「▶ 开始」继续下一个任务', 2600), 1200);
   }
@@ -3410,6 +3506,43 @@ function switchDate(dateStr){
   const isToday = dateStr === todayStr();
   toast(isToday ? '📅 已切换到今天' : '📅 已切换到 ' + dateLabel(dateStr).replace('今天 · ','').replace('昨天 · ',''), 2200);
 }
+
+/* ============================================================
+   ★ 每晚 21:00 自动重置
+   —— 停止所有倒计时、取消护眼提醒、清空当天打卡进度
+============================================================ */
+function maybeNightlyReset(){
+  if(!state) return;
+  const now = new Date();
+  if(now.getHours() < NIGHT_RESET_HOUR) return;
+  const d = todayStr();
+  if(state.lastNightReset === d) return;
+  state.lastNightReset = d;
+
+  liveStopTask();
+  liveStopEyeCare();
+
+  /* 重置当天打卡进度（作业条目保留，勾选与照片清空） */
+  const day = state.days[state.date];
+  if(day){
+    ['chinese','math','english'].forEach(k => {
+      (day[k] || []).forEach(t => {
+        t.done = false;
+        delete t.checkedChars;
+        delete t.photos;
+      });
+    });
+  }
+
+  saveLocalState(); uploadToCloud();
+  renderStats(); renderBoard(); refreshAllCards();
+  updateDogBar(); updateMainBtn(); updateEyeUI();
+  if(currentSubject === 'shop') renderShop();
+  if(isAdminMode) renderAdminPanel();
+  toast('🌙 晚上 9 点啦，今日打卡已重置，护眼提醒已关闭', 4200);
+}
+setInterval(maybeNightlyReset, 20000);
+setTimeout(maybeNightlyReset, 800);
 
 /* ============================================================
    日历
@@ -3606,14 +3739,17 @@ function renderEyePanel(){
   const hint = $('adminEyeHint');
   if(hint){
     hint.className = 'aa-hint ok';
-    hint.textContent = '当前设置：每用眼 ' + ec.useMin + ' 分钟提醒放松，放松 ' + ec.restMin + ' 分钟（等待时每 30 秒提醒一次，放松时每 5 秒语音报数）';
+    hint.textContent = '当前设置：每用眼 ' + ec.useMin + ' 分钟提醒放松，放松 ' + ec.restMin + ' 分钟'
+      + '（等待时每 30 秒提醒一次，放松时每 5 秒语音报数）'
+      + '　提示音：' + (ec.sound !== false ? '开启 🔔' : '关闭 🔕');
   }
 }
 $('adminEyeSaveBtn').addEventListener('click', () => {
   const useV  = clamp(Math.round(parseFloat($('adminEyeUseMin').value)  || 20), 1, 120);
-  const restV = clamp(Math.round(parseFloat($('adminEyeRestMin').value) || 5),  1, 60);
+  const restV = clamp(Math.round(parseFloat($('adminEyeRestMin').value) || 2),  1, 60);
+  const prevSound = eyeSoundOn();     /* ★ 保留当前的提示音开关状态 */
   if(!state.settings) state.settings = {};
-  state.settings.eyeCare = { useMin: useV, restMin: restV };
+  state.settings.eyeCare = { useMin: useV, restMin: restV, sound: prevSound };
   saveLocalState(); uploadToCloud();
   renderEyePanel();
   toast('✅ 护眼提醒设置已保存');
@@ -4546,6 +4682,7 @@ document.addEventListener('visibilitychange', () => {
     syncLegacyFromLive(); syncRuntimeFromLive();
     if(charTimer.active) paintCharBarsFromLive();
     renderAllLiveUI();
+    maybeNightlyReset();
   }
 });
 window.addEventListener('focus', () => {
