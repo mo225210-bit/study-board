@@ -954,7 +954,6 @@
     <div class="cal-week"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div>
     <div class="cal-grid" id="calGrid"></div>
     <div class="cal-actions">
-      <button class="btn-ghost" id="calSyncPrevBtn">📋 手动同步前一天</button>
       <button class="btn-ghost" id="calTodayBtn">📌 回到今天</button>
       <button class="btn-main" id="calCloseBtn">关闭</button>
     </div>
@@ -1326,14 +1325,16 @@ const FAMILY_ID = 'x7k2m9q4';
 const MASTER_PASSWORD = '0702';
 
 let firebaseApp = null, db = null, dataRef = null;
-let fbSet = null, fbGet = null, fbOnValue = null;
+let fbSet = null, fbGet = null, fbOnValue = null, fbRef = null, historyRef = null;
 
 try{
   const appMod = await import('https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js');
   const dbMod  = await import('https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js');
   firebaseApp = appMod.initializeApp(FIREBASE_CONFIG);
   db          = dbMod.getDatabase(firebaseApp);
+  fbRef       = dbMod.ref;
   dataRef     = dbMod.ref(db, 'families/' + FAMILY_ID + '/data');
+  historyRef  = dbMod.ref(db, 'families/' + FAMILY_ID + '/history');
   fbSet       = dbMod.set;
   fbGet       = dbMod.get;
   fbOnValue   = dbMod.onValue;
@@ -2153,6 +2154,62 @@ async function uploadToCloud(force){
     return false;
   }
 }
+/* ============================================================
+   🗂️ 数据历史文档：最新状态排第一，之后按时间从新到旧排列
+   家长端仅在关闭管理面板且确有修改时保存；学生端每次勾选/取消完成时保存。
+============================================================ */
+let adminEntrySnapshot = null;
+function getEditableStateForCompare(){
+  return JSON.stringify({
+    days: state.days, date: state.date, settings: state.settings,
+    sun: state.sun, checkins: state.checkins, sunLog: state.sunLog,
+    lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword,
+    shop: state.shop, wordBank: state.wordBank,
+    lastNightReset: state.lastNightReset || '', eyeSoundOffDate: state.eyeSoundOffDate || ''
+  });
+}
+function makeHistorySnapshot(reason){
+  return {
+    savedAt: Date.now(), reason: reason || '数据修改',
+    data: {
+      days: JSON.parse(JSON.stringify(state.days)), date: state.date,
+      settings: JSON.parse(JSON.stringify(state.settings)), sun: state.sun,
+      checkins: JSON.parse(JSON.stringify(state.checkins || [])),
+      sunLog: JSON.parse(JSON.stringify(state.sunLog || [])),
+      lessonLibrary: JSON.parse(JSON.stringify(state.lessonLibrary || {})),
+      parentPassword: state.parentPassword, shop: JSON.parse(JSON.stringify(state.shop || [])),
+      wordBank: JSON.parse(JSON.stringify(state.wordBank || {})),
+      lastNightReset: state.lastNightReset || '', eyeSoundOffDate: state.eyeSoundOffDate || '',
+      live: JSON.parse(JSON.stringify(state.live || {})), updatedAt: Date.now()
+    }
+  };
+}
+async function saveHistorySnapshot(reason){
+  try{
+    const entry = makeHistorySnapshot(reason);
+    if(historyRef && fbGet && fbSet){
+      const snap = await fbGet(historyRef);
+      let entries = snap.exists() ? snap.val() : [];
+      if(!Array.isArray(entries)) entries = Array.isArray(entries && entries.entries) ? entries.entries : [];
+      // Keep the newest record at index 0; all previous backups move down.
+      entries.unshift(entry);
+      await fbSet(historyRef, entries);
+    } else {
+      let entries = [];
+      try{ entries = JSON.parse(localStorage.getItem(STORAGE_KEY + '_history') || '[]'); }catch(e){}
+      if(!Array.isArray(entries)) entries = [];
+      entries.unshift(entry);
+      localStorage.setItem(STORAGE_KEY + '_history', JSON.stringify(entries));
+    }
+    showSyncStatus('🗂️ 已生成数据备份', 'online');
+    return true;
+  }catch(e){
+    console.warn('保存数据历史失败', e);
+    showSyncStatus('⚠️ 数据备份失败，请检查网络', 'offline');
+    return false;
+  }
+}
+
 function applyRemoteState(remote){
   if(!remote || !remote.days) return;
   const rAt = Number(remote.updatedAt) || 0;
@@ -3712,10 +3769,12 @@ function doToggleTaskDone(id){
     saveLocalState(); uploadToCloud();
     renderStats(); renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
     if(isAdminMode) renderAdminPanel();
+    if(!isAdminMode) saveHistorySnapshot('学生取消作业完成');
     toast('↩️ 已取消完成（关联日期同步更新）');
     return;
   }
   completeTask(id);
+  if(!isAdminMode) saveHistorySnapshot('学生勾选作业完成');
 }
 function completeTask(id){
   const info = findTask(id);
@@ -3987,6 +4046,7 @@ $('adminEntryBtn').addEventListener('click', () => {
   openPwdModal('🔑 家长验证', '请输入家长密码进入管理面板');
 });
 function enterAdminMode(){
+  adminEntrySnapshot = getEditableStateForCompare();
   isAdminMode = true;
   adminBar.classList.add('show');
   adminPanel.classList.add('show');
@@ -3995,6 +4055,9 @@ function enterAdminMode(){
   toast('🔓 已进入家长管理模式', 2500);
 }
 function exitAdminMode(){
+  const changed = adminEntrySnapshot !== null && adminEntrySnapshot !== getEditableStateForCompare();
+  adminEntrySnapshot = null;
+  if(changed){ saveLocalState(); uploadToCloud(true); saveHistorySnapshot('家长端修改'); }
   isAdminMode = false;
   adminBar.classList.remove('show');
   adminPanel.classList.remove('show');
@@ -4943,22 +5006,8 @@ $('adminAddEnglishBtn').addEventListener('click', () => {
 $('adminDateInput').addEventListener('change', e => { const v = e.target.value; if(v) switchDate(v); });
 $('adminGoToday').addEventListener('click', () => switchDate(todayStr()));
 
-/* ★ 同步前一天按钮（日历 / 家长面板） */
+/* ★ 家长面板手动同步前一天按钮 */
 (function bindSyncPrevButtons(){
-  const calSyncBtn = $('calSyncPrevBtn');
-  if(calSyncBtn){
-    calSyncBtn.addEventListener('click', () => {
-      const r = syncFromPreviousDay(state.date, { force: true });
-      if(r.ok){
-        calModal.classList.remove('show');
-        toast('✅ 已从 ' + r.srcDate + ' 同步 ' + r.count + ' 项作业');
-      } else if(r.reason === 'no-source'){
-        toast('⚠️ 前一天没有作业可同步');
-      } else {
-        toast('⚠️ 同步失败');
-      }
-    });
-  }
   const adminSyncBtn = $('adminSyncPrevBtn');
   if(adminSyncBtn){
     adminSyncBtn.addEventListener('click', () => {
