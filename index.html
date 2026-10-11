@@ -469,30 +469,15 @@
     display:flex;align-items:center;justify-content:center;position:relative}
   .stroke-stage svg{display:block}
 
-  /* ===== 语音组词 ===== */
-  .stroke-tools{display:flex;gap:6px;margin-top:12px;align-items:stretch}
-  .stroke-tools .voice-btn{flex:none;font-family:inherit;font-size:12.5px;font-weight:900;color:#fff;
-    background:linear-gradient(180deg,#81C784,#43A047);border:2px solid #43A047;
-    padding:9px 12px;border-radius:10px;box-shadow:0 3px 0 #2E7D32;cursor:pointer;white-space:nowrap;transition:all .15s}
-  .stroke-tools .voice-btn:active{transform:translateY(2px)}
-  .stroke-tools .voice-btn.listening{background:linear-gradient(180deg,#EF9A9A,#E53935);border-color:#E53935;
-    box-shadow:0 3px 0 #B71C1C;animation:eyePulse 1s ease-in-out infinite}
-  .stroke-tools .voice-btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
-  .stroke-tools .voice-input{flex:1;min-width:0;font-family:inherit;font-size:12.5px;font-weight:700;
-    color:#2b3a2b;background:#F6FBF6;border:2px solid #D7E8D7;padding:8px 10px;border-radius:10px;outline:none}
+  /* ===== 手动组词 ===== */
+  .stroke-tools{display:flex;gap:8px;margin-top:12px;align-items:stretch}
+  .stroke-tools .voice-input{flex:1;min-width:0;font-family:inherit;font-size:14px;font-weight:700;
+    color:#2b3a2b;background:#F6FBF6;border:2px solid #D7E8D7;padding:10px 12px;border-radius:10px;outline:none}
   .stroke-tools .voice-input:focus{border-color:#7CC47C;background:#fff}
-  .stroke-tools .voice-add-btn{flex:none;font-family:inherit;font-size:12.5px;font-weight:900;color:#fff;
+  .stroke-tools .voice-add-btn{flex:none;font-family:inherit;font-size:13px;font-weight:900;color:#fff;
     background:linear-gradient(180deg,#4FC3F7,#0288D1);border:2px solid #0288D1;
     padding:9px 12px;border-radius:10px;box-shadow:0 3px 0 #01579B;cursor:pointer;white-space:nowrap}
   .stroke-tools .voice-add-btn:active{transform:translateY(2px)}
-  .voice-status{font-size:11.5px;font-weight:800;color:#8a9a8a;min-height:15px;margin-top:6px;text-align:center}
-  .voice-status.err{color:#E53935}
-  .voice-status.ok{color:#2E7D32}
-  .voice-cands{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;justify-content:center}
-  .voice-cand{font-family:inherit;font-size:13px;font-weight:800;color:#2E7D32;
-    background:#EAF6E6;border:2px solid #C5E1A5;padding:6px 12px;border-radius:999px;cursor:pointer;transition:all .15s}
-  .voice-cand:active{transform:scale(.95)}
-  .voice-cand:disabled{opacity:.45;cursor:default}
   .stroke-words{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;justify-content:center;
     padding-top:10px;border-top:1px dashed #DCEED4;max-height:220px;overflow-y:auto;overflow-x:hidden}
   .sw-item{position:relative;padding:3px 6px;border-radius:8px;background:#F4FAF4;border:1px solid #E0EDE0}
@@ -500,7 +485,7 @@
     border:0;background:rgba(229,57,53,.9);color:#fff;font-size:10px;font-weight:900;
     cursor:pointer;line-height:1;display:grid;place-items:center;padding:0;font-family:inherit}
   .sw-empty{font-size:11.5px;font-weight:700;color:#8a9a8a;padding:6px 0;width:100%}
-  /* 语音组词生成的田字格加大，方便孩子看清和书写 */
+  /* 手动组词生成的田字格加大，方便孩子看清和书写 */
   .stroke-words .mizi{width:60px;height:60px;border-color:#B7E0A8}
   .stroke-words .mizi-char{font-size:42px}
   .stroke-words .char-pinyin{font-size:14px;max-width:64px}
@@ -969,7 +954,7 @@
     <div class="cal-week"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div>
     <div class="cal-grid" id="calGrid"></div>
     <div class="cal-actions">
-      <button class="btn-ghost" id="calSyncPrevBtn">📋 手动同步作业</button>
+      <button class="btn-ghost" id="calSyncPrevBtn">📋 手动同步前一天</button>
       <button class="btn-ghost" id="calTodayBtn">📌 回到今天</button>
       <button class="btn-main" id="calCloseBtn">关闭</button>
     </div>
@@ -984,12 +969,9 @@
     <div class="stroke-stage" id="strokeStage"></div>
 
     <div class="stroke-tools">
-      <button class="voice-btn" id="strokeVoiceBtn" type="button">🎤 语音组词</button>
-      <input class="voice-input" id="strokeVoiceInput" type="text" maxlength="8" placeholder="也可手动输入词语">
-      <button class="voice-add-btn" id="strokeVoiceAddBtn" type="button">添加</button>
+      <input class="voice-input" id="strokeVoiceInput" type="text" maxlength="8" placeholder="输入包含当前生字的词语">
+      <button class="voice-add-btn" id="strokeVoiceAddBtn" type="button">添加词语</button>
     </div>
-    <div class="voice-status" id="strokeVoiceStatus"></div>
-    <div class="voice-cands" id="strokeVoiceCands"></div>
     <div class="stroke-words" id="strokeWords"></div>
 
     <div class="modal-actions">
@@ -1133,6 +1115,23 @@
         <button class="aa-btn" id="adminAddCopyBtn">添加</button>
       </div>
       <div class="aa-hint" id="copyLessonHint">选好课文直接点「添加」即可</div>
+      <div class="admin-sub-label">⚡ 快速添加日常作业</div>
+      <div class="admin-add-row inline-row">
+        <span class="aa-unit" style="font-size:14px;color:#2E7D32;font-weight:900">📚 每日阅读</span>
+        <input class="aa-num" id="quickReadingMin" type="number" value="20" min="1" max="120" aria-label="每日阅读分钟">
+        <span class="aa-unit">分钟</span>
+        <input class="aa-num" id="quickReadingSun" type="number" value="30" min="1" max="500" aria-label="每日阅读金币">
+        <span class="aa-unit">金币</span>
+        <button class="aa-btn" id="quickAddReadingBtn">添加</button>
+      </div>
+      <div class="admin-add-row inline-row">
+        <span class="aa-unit" style="font-size:14px;color:#2E7D32;font-weight:900">🤸 跳绳</span>
+        <input class="aa-num" id="quickRopeMin" type="number" value="10" min="1" max="120" aria-label="跳绳分钟">
+        <span class="aa-unit">分钟</span>
+        <input class="aa-num" id="quickRopeSun" type="number" value="20" min="1" max="500" aria-label="跳绳金币">
+        <span class="aa-unit">金币</span>
+        <button class="aa-btn" id="quickAddRopeBtn">添加</button>
+      </div>
       <div class="admin-sub-label">➕ 添加自定义作业</div>
       <div class="admin-add-row">
         <textarea class="aa-text" id="adminAddChineseText" rows="3" placeholder="作业内容"></textarea>
@@ -1715,6 +1714,7 @@ function normalizeDay(day){
         sun: clamp(Math.round(Number(t.sun)||30), 1, 500)
       };
       if(type === 'custom' && t.penalty === true) item.penalty = true;
+      if(typeof t.syncKey === 'string' && t.syncKey) item.syncKey = t.syncKey;
       if(type === 'preview' && Array.isArray(t.chars)) item.chars = t.chars.slice(0,60);
       if((type === 'wordgroup' || type === 'copy') && Array.isArray(t.words)) item.words = t.words.slice(0,60);
       if(Array.isArray(t.checkedChars)) item.checkedChars = t.checkedChars.slice(0,300).map(String);
@@ -1817,44 +1817,52 @@ function dayHasTasks(dateStr){
   if(!d) return false;
   return ['chinese','math','english'].some(k => (d[k] || []).length > 0);
 }
-function cloneTaskForNewDay(t){
+function cloneTaskForNewDay(t, syncKey){
   const nt = JSON.parse(JSON.stringify(t));
   nt.id = newId();
-  nt.done = false;
+  nt.syncKey = syncKey || t.syncKey || t.id;
+  // 首次手动同步时保留前一天的完成状态；之后通过 syncKey 维持跨日期关联。
+  nt.done = !!t.done;
   delete nt.photos;
-  delete nt.checkedChars;
   return nt;
 }
 function syncFromPreviousDay(targetDate, opts){
   opts = opts || {};
-  if(!state.days[targetDate]) state.days[targetDate] = makeDay();
-  if(!opts.force && dayHasTasks(targetDate)) return { ok:false, reason:'has-tasks' };
-
-  let srcDate = null;
   const d = new Date(targetDate + 'T00:00:00');
-  for(let i = 1; i <= 7; i++){
-    d.setDate(d.getDate() - 1);
-    const ds = fmtDate(d);
-    if(dayHasTasks(ds)){ srcDate = ds; break; }
-  }
-  if(!srcDate) return { ok:false, reason:'no-source' };
+  d.setDate(d.getDate() - 1);
+  const srcDate = fmtDate(d);
+  if(!dayHasTasks(srcDate)) return { ok:false, reason:'no-source', srcDate };
 
   const src = state.days[srcDate];
   const out = makeDay();
   let count = 0;
   ['chinese','math','english'].forEach(k => {
-    out[k] = (src[k] || []).map(t => { count++; return cloneTaskForNewDay(t); });
+    out[k] = (src[k] || []).map(t => {
+      // 原任务和今天的副本共用 syncKey，后续任意一天打勾/取消都会同步到整组。
+      if(!t.syncKey) t.syncKey = t.id;
+      count++;
+      return cloneTaskForNewDay(t, t.syncKey);
+    });
   });
   state.days[targetDate] = out;
 
+  saveLocalState(); uploadToCloud();
   if(state.date === targetDate){
-    saveLocalState(); uploadToCloud();
     renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
     if(isAdminMode) renderAdminPanel();
-  } else {
-    saveLocalState(); uploadToCloud();
   }
   return { ok:true, srcDate, count };
+}
+function getLinkedTasks(task){
+  if(!task || !task.syncKey) return [task].filter(Boolean);
+  const found = [];
+  Object.keys(state.days || {}).forEach(date => {
+    const day = state.days[date];
+    ['chinese','math','english'].forEach(k => (day[k] || []).forEach(t => {
+      if(t.syncKey === task.syncKey) found.push(t);
+    }));
+  });
+  return found.length ? found : [task];
 }
 /* ============================================================
    ★ 剩余字数 → 收紧总倒计时
@@ -1930,10 +1938,8 @@ function applyCheckedDurationCap(taskId){
 }
 
 /* ============================================================
-   ★ 语音组词
+   ★ 手动组词
 ============================================================ */
-let voiceRec = null;
-let voiceListening = false;
 
 function renderWordMizi(word){
   const chars = [...word].filter(c => /[\u4e00-\u9fa5]/.test(c));
@@ -1950,7 +1956,7 @@ function renderStrokeWords(char){
   if(!box) return;
   const list = (state.wordBank && state.wordBank[char]) ? state.wordBank[char] : [];
   if(!list.length){
-    box.innerHTML = '<div class="sw-empty">还没有组词，点「🎤 语音组词」试试</div>';
+    box.innerHTML = '<div class="sw-empty">还没有组词，请在上方手动输入词语</div>';
     return;
   }
   box.innerHTML = list.map((w, i) =>
@@ -1990,130 +1996,6 @@ function removeCharWord(char, index){
   if(!arr.length) delete state.wordBank[char];
   saveLocalState(); uploadToCloud();
   renderStrokeWords(char);
-}
-
-function extractWordCandidates(text, ch){
-  const out = [];
-  const push = w => {
-    w = String(w || '').trim();
-    if(!w) return;
-    if(w.indexOf(ch) < 0) return;
-    if(!/^[\u4e00-\u9fa5]+$/.test(w)) return;
-    if(w.length > 6) return;
-    if(out.indexOf(w) >= 0) return;
-    out.push(w);
-  };
-  const clean = String(text || '').replace(/[^\u4e00-\u9fa5]/g, ' ');
-  clean.split(/\s+/).filter(Boolean).forEach(seg => {
-    if(seg.indexOf(ch) < 0) return;
-    if(seg.length <= 3) push(seg);
-    for(let i = 0; i + 2 <= seg.length; i++) push(seg.slice(i, i + 2));
-    if(seg.length >= 3 && seg.length <= 6) push(seg);
-  });
-  return out.slice(0, 12);
-}
-
-function resetVoiceUI(){
-  const btn = $('strokeVoiceBtn');
-  const status = $('strokeVoiceStatus');
-  const cands = $('strokeVoiceCands');
-  if(cands) cands.innerHTML = '';
-  if(status){ status.textContent = ''; status.className = 'voice-status'; }
-  if(btn){
-    btn.classList.remove('listening');
-    btn.textContent = '🎤 语音组词';
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    btn.disabled = !SR;
-    if(!SR && status){ status.textContent = '当前浏览器不支持语音识别，可手动输入'; }
-  }
-  voiceListening = false;
-  const input = $('strokeVoiceInput');
-  if(input) input.value = '';
-}
-
-function startVoice(){
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const btn = $('strokeVoiceBtn');
-  const status = $('strokeVoiceStatus');
-  const cands = $('strokeVoiceCands');
-  if(!SR){
-    if(status){ status.className = 'voice-status err'; status.textContent = '当前浏览器不支持语音识别，请手动输入'; }
-    return;
-  }
-  if(voiceListening && voiceRec){ try{ voiceRec.stop(); }catch(e){} return; }
-
-  try{
-    voiceRec = new SR();
-    voiceRec.lang = 'zh-CN';
-    voiceRec.interimResults = false;
-    voiceRec.maxAlternatives = 5;
-    voiceRec.continuous = false;
-  }catch(e){
-    if(status){ status.className = 'voice-status err'; status.textContent = '语音识别初始化失败'; }
-    return;
-  }
-  voiceListening = true;
-  if(btn){ btn.classList.add('listening'); btn.textContent = '⏹ 正在听…'; }
-  if(status){ status.className = 'voice-status'; status.textContent = '请说出包含「' + lastStrokeChar + '」的词语…'; }
-  if(cands) cands.innerHTML = '';
-
-  voiceRec.onresult = ev => {
-    const texts = [];
-    for(let i = 0; i < ev.results.length; i++){
-      for(let j = 0; j < ev.results[i].length; j++) texts.push(ev.results[i][j].transcript || '');
-    }
-    handleVoiceText(texts.join(' '));
-  };
-  voiceRec.onerror = ev => {
-    const err = ev && ev.error ? ev.error : 'unknown';
-    if(status){
-      status.className = 'voice-status err';
-      const messages = {
-        'not-allowed': '语音服务或麦克风被浏览器禁止。请用 HTTPS/正式网页打开，并在地址栏允许麦克风；若是 file:// 本地打开，语音识别可能被禁止。也可直接手动输入词语。',
-        'service-not-allowed': '浏览器语音识别服务不可用/被禁用。请用 Chrome 或 Edge，通过 HTTPS 网页打开，检查麦克风权限和网络；手动输入仍可使用。',
-        'aborted': '语音识别被中断（常见于重复点击、切换页面或浏览器服务中断）。请稍等后再点一次；也可手动输入。',
-        'audio-capture': '没有检测到可用麦克风，请检查系统输入设备和浏览器权限。',
-        'network': '语音识别网络服务连接失败，请检查网络后重试，或手动输入。',
-        'no-speech': '没有听到语音，请靠近麦克风再说一次。',
-        'language-not-supported': '当前语音服务不支持中文识别，请换用最新版 Chrome/Edge。',
-        'not-supported': '当前浏览器不支持语音识别，请换用最新版 Chrome/Edge 或手动输入。'
-      };
-      status.textContent = messages[err] || ('语音识别失败（' + err + '）。请检查浏览器权限/网络，或手动输入词语。');
-    }
-  };
-  voiceRec.onend = () => {
-    voiceListening = false;
-    if(btn){ btn.classList.remove('listening'); btn.textContent = '🎤 语音组词'; }
-  };
-  try{ voiceRec.start(); }
-  catch(e){
-    voiceListening = false;
-    if(btn){ btn.classList.remove('listening'); btn.textContent = '🎤 语音组词'; }
-    if(status){ status.className = 'voice-status err'; status.textContent = '无法启动语音识别'; }
-  }
-}
-
-function handleVoiceText(text){
-  const ch = lastStrokeChar;
-  const status = $('strokeVoiceStatus');
-  const cands = $('strokeVoiceCands');
-  const list = extractWordCandidates(text, ch);
-  if(!list.length){
-    if(status){ status.className = 'voice-status err'; status.textContent = '没听清包含「' + ch + '」的词语，再试一次吧'; }
-    if(cands) cands.innerHTML = '';
-    return;
-  }
-  if(status){ status.className = 'voice-status ok'; status.textContent = '识别到这些词语，点一下添加：'; }
-  if(cands){
-    cands.innerHTML = list.map(w =>
-      '<button class="voice-cand" type="button" data-vc="' + escapeAttr(w) + '">' + escapeHtml(w) + '</button>'
-    ).join('');
-    cands.querySelectorAll('[data-vc]').forEach(b => {
-      b.addEventListener('click', () => {
-        if(addCharWord(ch, b.dataset.vc)) b.disabled = true;
-      });
-    });
-  }
 }
 
 /* ============================================================
@@ -3820,14 +3702,17 @@ function toggleTaskDone(id){
 }
 function doToggleTaskDone(id){
   const info = findTask(id); if(!info) return;
-  if(info.task.done){
-    info.task.done = false;
-    state.sun -= Number(info.task.sun) || 0;
-    pushSunLog(-(Number(info.task.sun)||0), '取消完成：' + info.task.text);
+  const task = info.task;
+  const linked = getLinkedTasks(task);
+  if(linked.some(t => t.done)){
+    linked.forEach(t => { t.done = false; });
+    const reward = Number(task.sun) || 0;
+    state.sun -= reward;
+    pushSunLog(-reward, '取消完成：' + task.text);
     saveLocalState(); uploadToCloud();
     renderStats(); renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
     if(isAdminMode) renderAdminPanel();
-    toast('↩️ 已取消完成');
+    toast('↩️ 已取消完成（关联日期同步更新）');
     return;
   }
   completeTask(id);
@@ -3836,12 +3721,20 @@ function completeTask(id){
   const info = findTask(id);
   if(!info || info.task.done) return;
   const task = info.task;
+  const linked = getLinkedTasks(task);
+  // 若关联日期中已有一份完成记录，不重复发放奖励，只同步勾选状态。
+  if(linked.some(t => t.done)){
+    linked.forEach(t => { t.done = true; });
+    saveLocalState(); uploadToCloud(); renderBoard(); refreshAllCards();
+    toast('✅ 关联日期已同步完成，不重复奖励');
+    return;
+  }
   if(state.live.activeId === id){
     pauseEyeForTaskEnd();
     liveStopTask();
   }
   const reward = task.sun;
-  task.done = true;
+  linked.forEach(t => { t.done = true; });
   state.sun += reward;
   saveLocalState(); uploadToCloud();
   renderStats();
@@ -3920,7 +3813,8 @@ function maybeNightlyReset(){
   if(day){
     ['chinese','math','english'].forEach(k => {
       (day[k] || []).forEach(t => {
-        t.done = false;
+        if(t.syncKey) getLinkedTasks(t).forEach(linkedTask => { linkedTask.done = false; });
+        else t.done = false;
         delete t.checkedChars;
         delete t.photos;
       });
@@ -4012,9 +3906,10 @@ function showStroke(char){
   const info = HZ_INFO[char] || ['—','—'];
   strokeMetaEl.textContent = `偏旁：${info[0]} · 结构：${info[1]}`;
   strokeStage.innerHTML = '';
-  /* ★ 渲染已保存组词 + 重置语音 UI */
+  /* 渲染已保存组词，并清空手动输入框 */
   renderStrokeWords(char);
-  resetVoiceUI();
+  const wordInput = $('strokeVoiceInput');
+  if(wordInput) wordInput.value = '';
   strokeModal.classList.add('show');
   setTimeout(() => playStroke(char), 60);
 }
@@ -4049,22 +3944,18 @@ function playStroke(char){
 }
 $('strokeReplay').addEventListener('click', () => { if(lastStrokeChar) playStroke(lastStrokeChar); });
 $('strokeClose').addEventListener('click', () => {
-  try{ if(voiceRec && voiceListening) voiceRec.stop(); }catch(e){}
   strokeModal.classList.remove('show'); strokeStage.innerHTML = ''; currentWriter = null;
 });
 strokeModal.addEventListener('click', e => {
   if(e.target === strokeModal){
-    try{ if(voiceRec && voiceListening) voiceRec.stop(); }catch(e){}
-    strokeModal.classList.remove('show'); strokeStage.innerHTML = ''; currentWriter = null;
+      strokeModal.classList.remove('show'); strokeStage.innerHTML = ''; currentWriter = null;
   }
 });
 
-/* ★ 语音组词按钮绑定 */
-(function bindStrokeVoice(){
-  const btn = $('strokeVoiceBtn');
+/* ★ 手动组词输入绑定 */
+(function bindManualWordInput(){
   const addBtn = $('strokeVoiceAddBtn');
   const input = $('strokeVoiceInput');
-  if(btn) btn.addEventListener('click', startVoice);
   if(addBtn) addBtn.addEventListener('click', () => {
     const v = (input && input.value || '').trim();
     if(!v){ toast('请输入词语'); return; }
@@ -4410,7 +4301,11 @@ function renderAdminTaskList(subject, listId, badgeId){
       const id = el.dataset.del;
       const subj = el.dataset.subject;
       const info = findTask(id);
-      if(info && info.task.done) state.sun -= Number(info.task.sun)||0;
+      if(info && info.task.done){
+        const linked = getLinkedTasks(info.task);
+        const otherDone = linked.some(t => t !== info.task && t.done);
+        if(!otherDone) state.sun -= Number(info.task.sun)||0;
+      }
       state.subjects[subj] = state.subjects[subj].filter(t => t.id !== id);
       if(state.live.activeId === id){ liveStopTask(); }
       cleanupRuntime();
@@ -4976,6 +4871,18 @@ $('adminAddCopyBtn').addEventListener('click', () => {
   toast('✅ 已添加「'+escapeHtml(name)+'」抄写词语');
 });
 
+function addQuickChineseTask(text, minId, sunId){
+  const minutes = clamp(parseFloat($(minId).value) || 10, 1, 120);
+  const sun = clamp(parseInt($(sunId).value, 10) || 10, 1, 500);
+  const task = makeTask(text, minutes, sun);
+  state.subjects.chinese.push(task);
+  saveLocalState(); uploadToCloud();
+  renderBoard(); refreshAllCards(); renderAdminPanel();
+  toast('✅ 已添加「' + escapeHtml(text) + '」');
+}
+$('quickAddReadingBtn').addEventListener('click', () => addQuickChineseTask('每日阅读', 'quickReadingMin', 'quickReadingSun'));
+$('quickAddRopeBtn').addEventListener('click', () => addQuickChineseTask('跳绳', 'quickRopeMin', 'quickRopeSun'));
+
 $('adminAddChineseBtn').addEventListener('click', () => {
   const textEl = $('adminAddChineseText');
   const minEl = $('adminAddChineseMin');
@@ -5046,7 +4953,7 @@ $('adminGoToday').addEventListener('click', () => switchDate(todayStr()));
         calModal.classList.remove('show');
         toast('✅ 已从 ' + r.srcDate + ' 同步 ' + r.count + ' 项作业');
       } else if(r.reason === 'no-source'){
-        toast('⚠️ 往前 7 天都没有作业可同步');
+        toast('⚠️ 前一天没有作业可同步');
       } else {
         toast('⚠️ 同步失败');
       }
@@ -5057,7 +4964,7 @@ $('adminGoToday').addEventListener('click', () => switchDate(todayStr()));
     adminSyncBtn.addEventListener('click', () => {
       const r = syncFromPreviousDay(state.date, { force: true });
       if(r.ok) toast('✅ 已从 ' + r.srcDate + ' 同步 ' + r.count + ' 项作业');
-      else if(r.reason === 'no-source') toast('⚠️ 往前 7 天都没有作业可同步');
+      else if(r.reason === 'no-source') toast('⚠️ 前一天没有作业可同步');
       else toast('⚠️ 同步失败');
     });
   }
