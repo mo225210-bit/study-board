@@ -500,11 +500,14 @@
     border:0;background:rgba(229,57,53,.9);color:#fff;font-size:10px;font-weight:900;
     cursor:pointer;line-height:1;display:grid;place-items:center;padding:0;font-family:inherit}
   .sw-empty{font-size:11.5px;font-weight:700;color:#8a9a8a;padding:6px 0;width:100%}
-  .stroke-words .mizi{width:38px;height:38px;border-color:#B7E0A8}
-  .stroke-words .mizi-char{font-size:26px}
-  .stroke-words .char-pinyin{font-size:11px;max-width:44px}
-  .stroke-words .word-group{gap:2px;padding:2px}
-  .stroke-words .wg-item{gap:0}
+  /* 语音组词生成的田字格加大，方便孩子看清和书写 */
+  .stroke-words .mizi{width:60px;height:60px;border-color:#B7E0A8}
+  .stroke-words .mizi-char{font-size:42px}
+  .stroke-words .char-pinyin{font-size:14px;max-width:64px}
+  .stroke-words .char-info{font-size:12px}
+  .stroke-words .word-group{gap:5px;padding:4px}
+  .stroke-words .wg-item{gap:2px}
+  .stroke-words{max-height:320px;gap:10px}
 
   .pwd-lock{font-size:42px;text-align:center;line-height:1;margin-bottom:8px}
   .pwd-input-wrap{position:relative;margin:6px 0 4px}
@@ -1349,9 +1352,12 @@ const OVERDUE_MINUTE_MS = 60000;
 const NIGHT_RESET_HOUR = 21;
 const SUBJECTS = { chinese:{key:'chinese',name:'语文'}, math:{key:'math',name:'数学'}, english:{key:'english',name:'英语'} };
 
-/* ★ 国定假日（YYYY-MM-DD），按需补充，周末自动识别 */
+/* ★ 法定休息日与调休上班日覆盖：调休上班日优先级最高 */
 const REST_HOLIDAYS = new Set([
   // 示例：'2026-10-01','2026-10-02','2026-10-03',
+]);
+const MAKEUP_WORKDAYS = new Set([
+  '2026-10-10' // 国庆节调休上班日：周六按上课日处理，不自动同步休息日作业
 ]);
 
 const MAX_PHOTOS_PER_TASK = 3;
@@ -1807,6 +1813,8 @@ function hasPendingWork(){
    ★ 休息日自动同步
 ============================================================ */
 function isRestDay(dateStr){
+  // 调休上班日必须优先判断，不能仅凭周六/周日自动当作休息日
+  if(MAKEUP_WORKDAYS.has(dateStr)) return false;
   if(REST_HOLIDAYS.has(dateStr)) return true;
   const d = new Date(dateStr + 'T00:00:00');
   const w = d.getDay();
@@ -1835,6 +1843,9 @@ function syncFromPreviousDay(targetDate, opts){
   for(let i = 1; i <= 7; i++){
     d.setDate(d.getDate() - 1);
     const ds = fmtDate(d);
+    // 调休上班日虽然有作业，但休息日自动同步时不把它当作普通上课日来源；
+    // 例如周日自动同步时跳过周六调休上班日，回溯到周五。
+    if(MAKEUP_WORKDAYS.has(ds)) continue;
     if(dayHasTasks(ds)){ srcDate = ds; break; }
   }
   if(!srcDate) return { ok:false, reason:'no-source' };
@@ -2073,11 +2084,20 @@ function startVoice(){
     handleVoiceText(texts.join(' '));
   };
   voiceRec.onerror = ev => {
+    const err = ev && ev.error ? ev.error : 'unknown';
     if(status){
       status.className = 'voice-status err';
-      status.textContent = ev.error === 'not-allowed'
-        ? '麦克风未授权，请在浏览器设置里允许'
-        : ('识别失败：' + ev.error);
+      const messages = {
+        'not-allowed': '语音服务或麦克风被浏览器禁止。请用 HTTPS/正式网页打开，并在地址栏允许麦克风；若是 file:// 本地打开，语音识别可能被禁止。也可直接手动输入词语。',
+        'service-not-allowed': '浏览器语音识别服务不可用/被禁用。请用 Chrome 或 Edge，通过 HTTPS 网页打开，检查麦克风权限和网络；手动输入仍可使用。',
+        'aborted': '语音识别被中断（常见于重复点击、切换页面或浏览器服务中断）。请稍等后再点一次；也可手动输入。',
+        'audio-capture': '没有检测到可用麦克风，请检查系统输入设备和浏览器权限。',
+        'network': '语音识别网络服务连接失败，请检查网络后重试，或手动输入。',
+        'no-speech': '没有听到语音，请靠近麦克风再说一次。',
+        'language-not-supported': '当前语音服务不支持中文识别，请换用最新版 Chrome/Edge。',
+        'not-supported': '当前浏览器不支持语音识别，请换用最新版 Chrome/Edge 或手动输入。'
+      };
+      status.textContent = messages[err] || ('语音识别失败（' + err + '）。请检查浏览器权限/网络，或手动输入词语。');
     }
   };
   voiceRec.onend = () => {
