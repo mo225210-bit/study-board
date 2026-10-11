@@ -969,7 +969,7 @@
     <div class="cal-week"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div>
     <div class="cal-grid" id="calGrid"></div>
     <div class="cal-actions">
-      <button class="btn-ghost" id="calSyncPrevBtn">📋 同步前一天</button>
+      <button class="btn-ghost" id="calSyncPrevBtn">📋 手动同步作业</button>
       <button class="btn-ghost" id="calTodayBtn">📌 回到今天</button>
       <button class="btn-main" id="calCloseBtn">关闭</button>
     </div>
@@ -1208,7 +1208,7 @@
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <input type="date" id="adminDateInput" style="font-family:inherit;font-size:13px;font-weight:800;color:#E0E8F0;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);padding:8px 12px;border-radius:10px;outline:none">
         <button class="aa-btn" id="adminGoToday">回到今天</button>
-        <button class="aa-btn" id="adminSyncPrevBtn" style="background:linear-gradient(180deg,#90CAF9,#42A5F5);border-color:#42A5F5;box-shadow:0 3px 0 #1976D2;color:#fff">📋 同步前一天作业</button>
+        <button class="aa-btn" id="adminSyncPrevBtn" style="background:linear-gradient(180deg,#90CAF9,#42A5F5);border-color:#42A5F5;box-shadow:0 3px 0 #1976D2;color:#fff">📋 手动同步前一天作业</button>
       </div>
     </div>
 
@@ -1810,16 +1810,8 @@ function hasPendingWork(){
 }
 
 /* ============================================================
-   ★ 休息日自动同步
+   作业同步：仅由家长手动点击按钮触发，不自动同步
 ============================================================ */
-function isRestDay(dateStr){
-  // 调休上班日必须优先判断，不能仅凭周六/周日自动当作休息日
-  if(MAKEUP_WORKDAYS.has(dateStr)) return false;
-  if(REST_HOLIDAYS.has(dateStr)) return true;
-  const d = new Date(dateStr + 'T00:00:00');
-  const w = d.getDay();
-  return w === 0 || w === 6;
-}
 function dayHasTasks(dateStr){
   const d = state.days[dateStr];
   if(!d) return false;
@@ -1843,9 +1835,6 @@ function syncFromPreviousDay(targetDate, opts){
   for(let i = 1; i <= 7; i++){
     d.setDate(d.getDate() - 1);
     const ds = fmtDate(d);
-    // 调休上班日虽然有作业，但休息日自动同步时不把它当作普通上课日来源；
-    // 例如周日自动同步时跳过周六调休上班日，回溯到周五。
-    if(MAKEUP_WORKDAYS.has(ds)) continue;
     if(dayHasTasks(ds)){ srcDate = ds; break; }
   }
   if(!srcDate) return { ok:false, reason:'no-source' };
@@ -1867,14 +1856,6 @@ function syncFromPreviousDay(targetDate, opts){
   }
   return { ok:true, srcDate, count };
 }
-function autoSyncRestDay(dateStr){
-  if(!dateStr) return false;
-  if(!isRestDay(dateStr)) return false;
-  if(dayHasTasks(dateStr)) return false;
-  const r = syncFromPreviousDay(dateStr, {});
-  return !!r.ok;
-}
-
 /* ============================================================
    ★ 剩余字数 → 收紧总倒计时
 ============================================================ */
@@ -3912,20 +3893,13 @@ function switchDate(dateStr){
   runtimeMap = {}; clearCharTimer();
   state.date = dateStr;
   if(!state.days[state.date]) state.days[state.date] = makeDay();
-  /* ★ 休息日自动同步 */
-  let synced = false;
-  try{ synced = autoSyncRestDay(state.date); }catch(e){ console.warn('休息日同步失败', e); }
   saveLocalState(); uploadToCloud();
   updateDateText(); renderBoard(); renderStats();
   refreshAllCards(); updateDogBar(); updateMainBtn();
   if(currentSubject === 'shop') renderShop();
   if(isAdminMode) renderAdminPanel();
   const isToday = dateStr === todayStr();
-  if(synced){
-    toast('📅 已切换到 ' + dateLabel(dateStr).replace('今天 · ','').replace('昨天 · ','') + '<br>🧩 休息日作业已自动同步', 3000);
-  } else {
-    toast(isToday ? '📅 已切换到今天' : '📅 已切换到 ' + dateLabel(dateStr).replace('今天 · ','').replace('昨天 · ',''), 2200);
-  }
+  toast(isToday ? '📅 已切换到今天' : '📅 已切换到 ' + dateLabel(dateStr).replace('今天 · ','').replace('昨天 · ',''), 2200);
 }
 
 /* ============================================================
@@ -5220,9 +5194,6 @@ saveLocalState();
 renderStats(); renderBoard();
 switchSubject(state.live.tab && ['chinese','math','english','shop'].indexOf(state.live.tab) >= 0 ? state.live.tab : 'chinese', true);
 refreshAllCards();
-
-/* ★ 启动时自动同步休息日作业（如果今天/当前日是休息日且还没有作业） */
-try{ autoSyncRestDay(state.date); }catch(e){ console.warn('启动时休息日同步失败', e); }
 
 requestAnimationFrame(() => { updateEyeUI(); updateDogBar(); updateMainBtn(); });
 
