@@ -14,10 +14,16 @@
 <script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.26.0/dist/index.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
+  :root{
+    --font-body:"Kaiti SC","STKaiti","KaiTi","楷体","KaiTi_GB2312","PingFang SC","Microsoft YaHei",serif;
+    --font-title:var(--font-body);
+    --font-mizi:"Kaiti SC","STKaiti","KaiTi","楷体","KaiTi_GB2312","PingFang SC","Microsoft YaHei",serif;
+    --font-pinyin:var(--font-body);
+  }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
   body{
-    font-family:"Kaiti SC","STKaiti","KaiTi","楷体","KaiTi_GB2312","PingFang SC","Microsoft YaHei",serif;
+    font-family:var(--font-body);
     background:linear-gradient(180deg,#78C7F2 0%,#9BD9F7 24%,#BDE8FA 48%,#D8F2FF 70%,#EEF9FF 100%);
     min-height:100vh;overflow-x:hidden;user-select:none;color:#2b3a2b;
   }
@@ -371,7 +377,7 @@
   .mizi-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
   .mizi-svg line{stroke:rgba(229,115,115,.55);stroke-width:1;stroke-dasharray:4 3;vector-effect:non-scaling-stroke}
   .mizi-char{position:relative;z-index:2;font-size:38px;line-height:1;
-    font-family:"Kaiti SC","KaiTi","STKaiti","楷体","PingFang SC","Microsoft YaHei",serif;
+    font-family:var(--font-mizi);
     font-weight:400;color:#000000;transition:opacity .2s,transform .2s}
   .mizi-bar{position:absolute;left:0;bottom:0;height:8px;width:100%;
     border-radius:0 4px 4px 0;
@@ -385,6 +391,7 @@
   .task-card.done .char-pinyin,
   .task-card.done .char-info{color:#9aad9a}
   .char-pinyin{font-size:16px;font-weight:700;color:#000000;letter-spacing:.3px;
+    font-family:var(--font-pinyin);
     max-width:78px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
     text-align:center;line-height:1.2}
   .char-info{font-size:12.5px;font-weight:700;color:#000000;white-space:nowrap;
@@ -849,6 +856,11 @@
   .char-info.char-page:hover{color:#1565C0}
   .char-info.char-page .page-num{font-weight:900}
 
+  /* ===== 标题/字典大字号字体（家长端可设置） ===== */
+  h1,h2,h3,h4,.panel-head2,.admin-label,.sheet-title,.dict-head h3{font-family:var(--font-title)}
+  .dict-head .dict-cur-char{font-family:var(--font-mizi)}
+  .char-info.char-page{font-family:var(--font-body)}
+
   /* ===== 查字典弹窗 ===== */
   .dict-card{max-width:1020px;height:86vh;display:flex;flex-direction:column;padding:14px}
   .dict-head{display:flex;align-items:center;justify-content:space-between;
@@ -1180,8 +1192,8 @@
       <button class="btn-ghost" id="dictCloseBtn" type="button">关闭</button>
     </div>
     <div class="dict-file-row">
-      <label>📄 汉字表1（1-362页）<input type="file" id="dictFile1" accept=".pdf,application/pdf"></label>
-      <label>📄 汉字表2（363-664页）<input type="file" id="dictFile2" accept=".pdf,application/pdf"></label>
+      <label>📄 汉字表1<input type="file" id="dictFile1" accept=".pdf,application/pdf" title="仅在根目录未找到文件时使用"></label>
+      <label>📄 汉字表2<input type="file" id="dictFile2" accept=".pdf,application/pdf" title="仅在根目录未找到文件时使用"></label>
       <span id="dictFileStatus">提示：双击 PDF 页面即可标记该生字的页码</span>
     </div>
     <div class="dict-layout">
@@ -1204,8 +1216,8 @@
           <div class="dict-pages" id="dictPages"></div>
           <div class="dict-empty" id="dictEmpty">
             <div style="font-size:34px">📖</div>
-            <div>请先上传《汉字表》PDF（汉字表1 / 汉字表2）</div>
-            <div style="font-size:12px;opacity:.75">汉字表1 第 1 页 = 总第 1 页 · 汉字表2 第 1 页 = 总第 363 页</div>
+            <div>正在自动载入《汉字表1.pdf / 汉字表2.pdf》…</div>
+            <div style="font-size:12px;opacity:.75">请将汉字表 PDF 放在 index.html 同一目录（汉字表1 第 1 页 = 总第 1 页 · 汉字表2 第 1 页 = 总第 363 页）</div>
           </div>
         </div>
       </section>
@@ -1448,6 +1460,39 @@
       <div class="aa-hint" id="adminTtFontHint"></div>
     </div>
 
+    <div class="admin-section collapsed" id="adminPanelFont">
+      <h3>🔤 字体设置</h3>
+      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+        可分别为<b style="color:#FFD54F">标题、正文、田字格、拼音</b>选择字体，保存后学生端立即生效。<br>
+        田字格里的汉字、生字拼音、页面标题和正文会按分类分别应用所选字体。
+      </p>
+      <div id="adminFontRows" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div class="admin-sub-label">👀 效果预览</div>
+      <div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;background:#fff;border:2px solid #D7E8D7;border-radius:12px;padding:12px">
+        <div style="text-align:center">
+          <div style="font-size:11px;color:#7a9aaa;font-weight:700;margin-bottom:4px">标题</div>
+          <div id="fontPreviewTitle" style="font-size:18px;font-weight:900;color:#2b3a2b">学习打卡台</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:11px;color:#7a9aaa;font-weight:700;margin-bottom:4px">正文</div>
+          <div id="fontPreviewBody" style="font-size:14px;font-weight:700;color:#2b3a2b">预习生字真有趣</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:11px;color:#7a9aaa;font-weight:700;margin-bottom:4px">田字格</div>
+          <div class="mizi" style="width:54px;height:54px;margin:0 auto"><div class="mizi-char" id="fontPreviewMizi" style="font-size:38px">字</div></div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:11px;color:#7a9aaa;font-weight:700;margin-bottom:4px">拼音</div>
+          <div id="fontPreviewPinyin" class="char-pinyin" style="font-size:16px;max-width:none">xué xí</div>
+        </div>
+      </div>
+      <div class="admin-add-row" style="margin-top:10px">
+        <button class="aa-btn" id="adminFontSaveBtn" style="flex:1">💾 保存字体设置</button>
+        <button class="aa-btn" id="adminFontResetBtn" style="background:linear-gradient(180deg,#FF8A80,#EF5350);border-color:#EF5350;box-shadow:0 3px 0 #C62828;color:#fff">恢复默认楷体</button>
+      </div>
+      <div class="aa-hint" id="adminFontHint"></div>
+    </div>
+
     <div class="admin-section collapsed" id="adminPanelPassword">
       <h3>🔒 家长密码</h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
@@ -1611,6 +1656,37 @@ const DEFAULT_DATA = {
   ]
 };
 
+/* ============================================================
+   字体设置（家长端可分类设置）
+============================================================ */
+const FONT_OPTIONS = {
+  kaiti:    { label:'楷体',     css:'"Kaiti SC","STKaiti","KaiTi","楷体","KaiTi_GB2312",serif' },
+  songti:   { label:'宋体',     css:'"Songti SC","STSong","SimSun","宋体","Noto Serif CJK SC",serif' },
+  heiti:    { label:'黑体',     css:'"PingFang SC","Hiragino Sans GB","Microsoft YaHei","SimHei","黑体",sans-serif' },
+  fangsong: { label:'仿宋',     css:'"STFangsong","FangSong","仿宋","FangSong_GB2312",serif' },
+  lishu:    { label:'隶书',     css:'"LiSu","隶书","STLiti",serif' },
+  xingkai:  { label:'行楷',     css:'"Xingkai SC","STXingkai","行楷","HanziPen SC",serif' },
+  youyuan:  { label:'幼圆',     css:'"YouYuan","幼圆","Yuanti SC",sans-serif' },
+  default:  { label:'系统默认', css:'-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif' }
+};
+const FONT_CATEGORIES = [
+  { key:'title',  label:'标题',   varName:'--font-title' },
+  { key:'body',   label:'正文',   varName:'--font-body' },
+  { key:'mizi',   label:'田字格', varName:'--font-mizi' },
+  { key:'pinyin', label:'拼音',   varName:'--font-pinyin' }
+];
+function normalizeFontKey(v, dv){
+  return (typeof v === 'string' && FONT_OPTIONS[v]) ? v : dv;
+}
+function applyFontSettings(){
+  const fs = (state && state.settings && state.settings.fonts) || DEFAULT_SETTINGS.fonts;
+  const root = document.documentElement;
+  FONT_CATEGORIES.forEach(c => {
+    const opt = FONT_OPTIONS[fs[c.key]] || FONT_OPTIONS[DEFAULT_SETTINGS.fonts[c.key]];
+    root.style.setProperty(c.varName, opt.css);
+  });
+}
+
 const DEFAULT_SETTINGS = {
   unit: {
     preview:   { min: 2,   sun: 6 },
@@ -1618,6 +1694,7 @@ const DEFAULT_SETTINGS = {
     copy:      { min: 2,   sun: 6 }
   },
   eyeCare: { useMin: 20, restMin: 2 },
+  fonts: { title:'kaiti', body:'kaiti', mizi:'kaiti', pinyin:'kaiti' },
   lessonPick: { preview: '', wordgroup: '', copy: '' },
   lastInputs: {
     chineseMin: 10, chineseSun: 10,
@@ -1628,7 +1705,7 @@ const DEFAULT_SETTINGS = {
   panelCollapsed: {
     progress: true, sun: true, date: true, library: true, sync: true,
     password: true, eye: true, math: false, english: false, shop: true,
-    timetable: true
+    timetable: true, font: true
   },
   ttFontSize: 12.5,
   ttLineHeight: 1.4
@@ -1815,6 +1892,7 @@ function normalizeSettings(raw){
   const pc = (r.panelCollapsed && typeof r.panelCollapsed === 'object') ? r.panelCollapsed : {};
   const ec = (r.eyeCare && typeof r.eyeCare === 'object') ? r.eyeCare : {};
   const lp = (r.lessonPick && typeof r.lessonPick === 'object') ? r.lessonPick : {};
+  const fo = (r.fonts && typeof r.fonts === 'object') ? r.fonts : {};
   const num = (v, dv, min, max) => {
     const n = Number(v);
     return clamp(isFinite(n) ? n : dv, min, max);
@@ -1826,6 +1904,12 @@ function normalizeSettings(raw){
     eyeCare: {
       useMin:  num(ec.useMin, d.eyeCare.useMin, 1, 120),
       restMin: num(restRaw,  d.eyeCare.restMin, 1, 60)
+    },
+    fonts: {
+      title:  normalizeFontKey(fo.title,  d.fonts.title),
+      body:   normalizeFontKey(fo.body,   d.fonts.body),
+      mizi:   normalizeFontKey(fo.mizi,   d.fonts.mizi),
+      pinyin: normalizeFontKey(fo.pinyin, d.fonts.pinyin)
     },
     lessonPick: {
       preview:   String(lp.preview   || '').slice(0,60),
@@ -1852,7 +1936,8 @@ function normalizeSettings(raw){
       math: pc.math !== undefined ? !!pc.math : false,
       english: pc.english !== undefined ? !!pc.english : false,
       shop: pc.shop !== undefined ? !!pc.shop : true,
-      timetable: pc.timetable !== undefined ? !!pc.timetable : true
+      timetable: pc.timetable !== undefined ? !!pc.timetable : true,
+      font: pc.font !== undefined ? !!pc.font : true
     },
     ttFontSize: num(r.ttFontSize, d.ttFontSize, 8, 24),
     ttLineHeight: num(r.ttLineHeight, d.ttLineHeight, 1, 3)
@@ -4715,7 +4800,7 @@ function renderAdminPanel(){
   renderLessonLibrary(); populateLessonSelects();
   renderAdminShop();
   renderAdminTimetable();
-  renderSunPanel(); renderPwdPanel(); renderEyePanel();
+  renderSunPanel(); renderPwdPanel(); renderEyePanel(); renderFontPanel();
   applyAdminPanelStates(); syncLastInputFields();
 }
 function renderEyePanel(){
@@ -4814,6 +4899,69 @@ $('adminTtFontSaveBtn').addEventListener('click', () => {
   renderTimetable();
   renderAdminTimetable();
   toast('✅ 已保存课程表显示设置');
+});
+
+/* ★ 字体设置面板（家长端） */
+function renderFontPanel(){
+  const wrap = $('adminFontRows');
+  if(!wrap) return;
+  const fs = (state.settings && state.settings.fonts) || DEFAULT_SETTINGS.fonts;
+  wrap.innerHTML = '';
+  FONT_CATEGORIES.forEach(c => {
+    const row = document.createElement('div');
+    row.className = 'admin-add-row inline-row';
+    row.innerHTML = '<span class="aa-unit" style="min-width:52px">' + c.label + '</span>';
+    const sel = document.createElement('select');
+    sel.className = 'aa-text';
+    sel.id = 'adminFontSel_' + c.key;
+    sel.style.flex = '1';
+    Object.entries(FONT_OPTIONS).forEach(([k, o]) => {
+      const op = document.createElement('option');
+      op.value = k; op.textContent = o.label;
+      sel.appendChild(op);
+    });
+    sel.value = fs[c.key] || DEFAULT_SETTINGS.fonts[c.key];
+    row.appendChild(sel);
+    wrap.appendChild(row);
+  });
+  const hint = $('adminFontHint');
+  if(hint){
+    hint.className = 'aa-hint';
+    hint.textContent = '当前：标题「' + FONT_OPTIONS[fs.title].label + '」 · 正文「' + FONT_OPTIONS[fs.body].label
+      + '」 · 田字格「' + FONT_OPTIONS[fs.mizi].label + '」 · 拼音「' + FONT_OPTIONS[fs.pinyin].label + '」';
+  }
+  previewFonts();
+}
+function previewFonts(){
+  FONT_CATEGORIES.forEach(c => {
+    const sel = $('adminFontSel_' + c.key);
+    if(!sel) return;
+    const opt = FONT_OPTIONS[sel.value] || FONT_OPTIONS[DEFAULT_SETTINGS.fonts[c.key]];
+    document.documentElement.style.setProperty(c.varName, opt.css);
+  });
+}
+$('adminFontRows').addEventListener('change', e => {
+  if(e.target.tagName === 'SELECT') previewFonts();
+});
+$('adminFontSaveBtn').addEventListener('click', () => {
+  if(!state.settings) state.settings = {};
+  if(!state.settings.fonts) state.settings.fonts = {};
+  FONT_CATEGORIES.forEach(c => {
+    const sel = $('adminFontSel_' + c.key);
+    if(sel) state.settings.fonts[c.key] = sel.value;
+  });
+  saveLocalState(); uploadToCloud();
+  applyFontSettings();
+  renderFontPanel();
+  toast('✅ 字体设置已保存，学生端已生效');
+});
+$('adminFontResetBtn').addEventListener('click', () => {
+  if(!confirm('确定恢复默认楷体吗？')) return;
+  state.settings.fonts = JSON.parse(JSON.stringify(DEFAULT_SETTINGS.fonts));
+  saveLocalState(); uploadToCloud();
+  applyFontSettings();
+  renderFontPanel();
+  toast('✅ 已恢复默认楷体');
 });
 
 function renderPwdPanel(){
@@ -5092,7 +5240,7 @@ function applyAdminPanelStates(){
     adminPanelProgress: pc.progress, adminPanelSun: pc.sun, adminPanelDate: pc.date,
     adminPanelLibrary: pc.library, adminPanelSync: pc.sync, adminPanelPassword: pc.password,
     adminPanelEye: pc.eye, adminPanelMath: pc.math, adminPanelEnglish: pc.english,
-    adminPanelShop: pc.shop, adminPanelTimetable: pc.timetable
+    adminPanelShop: pc.shop, adminPanelTimetable: pc.timetable, adminPanelFont: pc.font
   };
   Object.entries(map).forEach(([id,collapsed]) => {
     const el=$(id); if(el) el.classList.toggle('collapsed', !!collapsed);
@@ -5104,7 +5252,7 @@ function setupAdminPanelToggles(){
     adminPanelMath:'math', adminPanelEnglish:'english',
     adminPanelLibrary:'library', adminPanelSync:'sync',
     adminPanelPassword:'password', adminPanelEye:'eye', adminPanelShop:'shop',
-    adminPanelTimetable:'timetable'
+    adminPanelTimetable:'timetable', adminPanelFont:'font'
   };
   Object.entries(map).forEach(([id,key]) => {
     const panel=$(id); if(!panel) return;
@@ -5865,13 +6013,18 @@ function openDictFor(char){
   dictCurrentChar = char;
   dictCurCharEl.textContent = char;
   dictModal.classList.add('show');
+  dictAutoLoadPdf(0); dictAutoLoadPdf(1);
   const saved = (state.charPages && state.charPages[char]) || 0;
   if(dictPageEntries.length && saved >= 1 && saved <= dictPageEntries.length){
     setTimeout(() => dictScrollToPage(saved, false), 60);
   }
   highlightDictMarkedPage();
 }
-function closeDictModal(){ dictModal.classList.remove('show'); }
+function closeDictModal(){
+  dictModal.classList.remove('show');
+  /* 允许下次打开时重新尝试自动载入（例如刚把 PDF 放进根目录） */
+  dictAutoTried = [false, false];
+}
 $('dictCloseBtn').addEventListener('click', closeDictModal);
 dictModal.addEventListener('click', e => { if(e.target === dictModal) closeDictModal(); });
 
@@ -5881,19 +6034,40 @@ document.addEventListener('click', e => {
   if(el) openDictFor(el.dataset.dictChar);
 });
 
-/* ---------- 载入两个汉字表 PDF ---------- */
+/* ---------- 载入汉字表 PDF（根目录自动加载，上传仅备用） ---------- */
+const DICT_PDF_NAMES = [
+  ['汉字表1.pdf', '汉字表1.PDF', '汉字表一.pdf', '../汉字表1.pdf', '../识字表.pdf'],
+  ['汉字表2.pdf', '汉字表2.PDF', '汉字表二.pdf', '../汉字表2.pdf', '../写字表.pdf']
+];
+let dictAutoTried = [false, false];
+
 async function dictLoadPdf(idx, file){
   try{
     const buf = await file.arrayBuffer();
-    const task = pdfjsLib.getDocument({ data: buf });
-    const pdf = await task.promise;
-    dictPdfs[idx] = { pdf, name: file.name };
+    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
+    dictPdfs[idx] = { pdf, name: file.name || DICT_PDF_NAMES[idx][0] };
     dictRebuildPages();
-    toast('已载入《' + file.name + '》，共 ' + pdf.numPages + ' 页', 2200);
   }catch(err){
     console.error(err);
     toast('PDF 载入失败：' + err.message);
   }
+}
+async function dictAutoLoadPdf(idx){
+  if(dictPdfs[idx] || dictAutoTried[idx]) return;
+  dictAutoTried[idx] = true;
+  for(const name of DICT_PDF_NAMES[idx]){
+    try{
+      const res = await fetch(name, { cache:'no-store' });
+      if(!res.ok) continue;
+      const buf = await res.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
+      dictPdfs[idx] = { pdf, name: name };
+      dictRebuildPages();
+      toast('已自动载入《' + name + '》，共 ' + pdf.numPages + ' 页', 2200);
+      return;
+    }catch(err){ /* 尝试下一个候选文件名 */ }
+  }
+  dictUpdateFileStatus();
 }
 $('dictFile1').addEventListener('change', e => { const f = e.target.files[0]; if(f) dictLoadPdf(0, f); });
 $('dictFile2').addEventListener('change', e => { const f = e.target.files[0]; if(f) dictLoadPdf(1, f); });
@@ -5902,12 +6076,14 @@ function dictUpdateFileStatus(){
   const n1 = dictPdfs[0] ? dictPdfs[0].pdf.numPages : 0;
   const n2 = dictPdfs[1] ? dictPdfs[1].pdf.numPages : 0;
   if(!n1 && !n2){
-    dictFileStatus.textContent = '提示：双击 PDF 页面即可标记该生字的页码';
+    dictFileStatus.innerHTML = dictAutoTried[0] || dictAutoTried[1]
+      ? '⚠️ 未在根目录找到《汉字表1.pdf / 汉字表2.pdf》，可点上方按钮手动上传'
+      : '提示：双击 PDF 页面即可标记该生字的页码';
     dictEmptyEl.style.display = 'flex';
   }else{
     dictFileStatus.innerHTML =
       '<span class="dict-loaded">✅ 汉字表1：' + n1 + ' 页</span>' +
-      (n2 ? ('　<span class="dict-loaded">✅ 汉字表2：' + n2 + ' 页</span>') : '　⏳ 汉字表2 未上传（363-664 页暂缺）') +
+      (n2 ? ('　<span class="dict-loaded">✅ 汉字表2：' + n2 + ' 页</span>') : '　⚠️ 汉字表2 未找到（363-664 页暂缺）') +
       '　合计 ' + (n1 + n2) + ' 页';
     dictEmptyEl.style.display = 'none';
   }
@@ -6174,6 +6350,7 @@ dictBuildIndex();
 ============================================================ */
 state = attachSubjectsProxy(loadLocalState());
 state.date = todayStr();
+applyFontSettings();
 if(!state.days[state.date]) state.days[state.date] = makeDay();
 lastSoundSeq = Number(state.live.soundSeq) || 0;
 dateTextEl.textContent = dateLabel(state.date);
