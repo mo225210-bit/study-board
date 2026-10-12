@@ -22,8 +22,8 @@
     --font-mizi:"Kaiti SC","STKaiti","KaiTi","楷体","KaiTi_GB2312","PingFang SC","Microsoft YaHei",serif;
     --font-pinyin:var(--font-body);
     --font-hint:var(--font-body);
-    --fs-title:18px; --fs-subtitle:14px; --fs-body:14px; --fs-button:13px;
-    --fs-mizi:38px; --fs-pinyin:16px; --fs-hint:11.5px;
+    --fs-title:20px; --fs-subtitle:16px; --fs-body:16px; --fs-button:14.5px;
+    --fs-mizi:38px; --fs-pinyin:18px; --fs-hint:13px;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
@@ -69,10 +69,10 @@
     background:transparent;border:0;padding:0;cursor:pointer;line-height:1;font-family:inherit;}
   .brand-icon:active{transform:scale(.92)}
   @keyframes sway{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
-  .brand-title{font-size:16px;font-weight:900;color:#2E7D32;letter-spacing:.5px}
-  .brand-sub{font-size:11px;color:#7a8f7a;font-weight:600;margin-top:1px}
+  .brand-title{font-size:17.5px;font-weight:900;color:#2E7D32;letter-spacing:.5px}
+  .brand-sub{font-size:12px;color:#7a8f7a;font-weight:600;margin-top:1px}
   .stats{display:flex;gap:8px;align-items:center}
-  .pill{display:flex;align-items:center;gap:5px;font-weight:900;font-size:14px;
+  .pill{display:flex;align-items:center;gap:5px;font-weight:900;font-size:15px;
         padding:6px 12px;border-radius:999px;white-space:nowrap;
         transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .3s,box-shadow .3s}
   .sun-pill{background:linear-gradient(180deg,#FFE082,#FFC107);color:#7a5300;box-shadow:0 3px 0 #E0A800}
@@ -114,7 +114,7 @@
   .sun-anchor.eaten{animation:sunEaten .65s ease forwards}
   @keyframes sunEaten{0%{transform:translateY(-50%) scale(1);opacity:1}40%{transform:translateY(-50%) scale(1.5);opacity:1}100%{transform:translateY(-50%) scale(0);opacity:0}}
   .track-time{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    font-size:19px;font-weight:900;color:var(--c-text);z-index:4;font-variant-numeric:tabular-nums;
+    font-size:21px;font-weight:900;color:var(--c-text);z-index:4;font-variant-numeric:tabular-nums;
     pointer-events:none;text-shadow:0 1px 0 #fff,0 0 10px rgba(255,255,255,.98);transition:color .3s}
   .track-time.paused{color:#E65100}
   .track-time.chomping{color:#BF360C}
@@ -128,13 +128,13 @@
   @keyframes dogPause{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
   .dog.chomp{animation:chomp .55s ease}
   @keyframes chomp{0%{transform:scale(1)}30%{transform:scale(1.45) rotate(-12deg)}60%{transform:scale(.86) rotate(9deg)}100%{transform:scale(1)}}
-  .timer-hint{font-size:12px;font-weight:800;color:#7a8f7a;text-align:center;min-height:16px}
+  .timer-hint{font-size:13px;font-weight:800;color:#7a8f7a;text-align:center;min-height:16px}
   .timer-hint .highlight{color:var(--c-text);font-weight:900}
   .timer-hint .paused-t{color:#E65100;font-weight:900}
   .timer-hint .chomp-t{color:#BF360C;font-weight:900}
 
   .timer-btn{flex:none;display:inline-flex;align-items:center;justify-content:center;
-    font-family:inherit;font-size:14px;font-weight:900;
+    font-family:inherit;font-size:15px;font-weight:900;
     padding:0 18px;border-radius:24px;cursor:pointer;
     border:3px solid transparent;letter-spacing:1px;min-width:112px;
     white-space:nowrap;transition:all .15s;}
@@ -156,11 +156,11 @@
   @keyframes eyePulse{0%,100%{border-color:#EF9A9A}50%{border-color:#E53935}}
   .eye-card.resting{background:linear-gradient(180deg,#E3F2FD,#BBDEFB);border-color:#90CAF9}
   .eye-time{flex:none;min-width:56px;text-align:center;
-    font-size:17px;font-weight:900;color:#2E7D32;
+    font-size:18.5px;font-weight:900;color:#2E7D32;
     font-variant-numeric:tabular-nums;line-height:1.2;letter-spacing:.3px;transition:color .3s}
-  .eye-card.alert .eye-time{color:#C62828;font-size:13px;min-width:76px}
+  .eye-card.alert .eye-time{color:#C62828;font-size:14px;min-width:76px}
   .eye-card.resting .eye-time{color:#1565C0}
-  .eye-end{font-size:11px;font-weight:900;color:#93a893;white-space:nowrap;flex:none;transition:color .3s}
+  .eye-end{font-size:12px;font-weight:900;color:#93a893;white-space:nowrap;flex:none;transition:color .3s}
   .eye-card.using   .eye-end-l{color:#2E7D32}
   .eye-card.alert   .eye-end-l{color:#C62828}
   .eye-card.resting .eye-end-r{color:#1565C0}
@@ -182,7 +182,7 @@
   .eye-card.resting .ce-iris{opacity:.15}
   .ce-lid{opacity:0;transition:opacity .35s}
   .eye-card.resting .ce-lid{opacity:1}
-  .eye-btn{font-family:inherit;font-size:12.5px;font-weight:900;color:#fff;
+  .eye-btn{font-family:inherit;font-size:13.5px;font-weight:900;color:#fff;
     background:linear-gradient(180deg,#4FC3F7,#0288D1);border:2px solid #0288D1;
     padding:8px 14px;border-radius:999px;box-shadow:0 3px 0 #01579B;cursor:pointer;
     white-space:nowrap;transition:all .15s;flex:none}
@@ -192,7 +192,7 @@
 
   .subject-tabs{display:flex;gap:0;background:rgba(255,255,255,.9);border:2px solid #fff;
     border-radius:14px;padding:3px;box-shadow:0 4px 14px rgba(60,110,60,.14)}
-  .subject-tab{flex:1;font-family:inherit;font-size:13px;font-weight:900;padding:7px 4px;
+  .subject-tab{flex:1;font-family:inherit;font-size:14px;font-weight:900;padding:7px 4px;
     border-radius:14px;cursor:pointer;border:none;background:transparent;color:#7a8f7a;
     transition:all .2s;display:flex;align-items:center;justify-content:center;gap:4px}
   .subject-tab.active{background:linear-gradient(180deg,#8FD14F,#68B32E);color:#fff;box-shadow:0 3px 0 #4E8A22}
@@ -200,7 +200,7 @@
   .subject-tab.active[data-tab="english"]{background:linear-gradient(180deg,#64B5F6,#1976D2);box-shadow:0 3px 0 #0D47A1}
   .subject-tab.active[data-tab="shop"]{background:linear-gradient(180deg,#FFB74D,#F57C00);box-shadow:0 3px 0 #E65100}
   .subject-tab.active[data-tab="timetable"]{background:linear-gradient(180deg,#B39DDB,#7E57C2);box-shadow:0 3px 0 #5E35B1}
-  .subject-tab .tab-count{font-size:11px;background:rgba(255,255,255,.35);padding:1px 7px;border-radius:999px}
+  .subject-tab .tab-count{font-size:12px;background:rgba(255,255,255,.35);padding:1px 7px;border-radius:999px}
   .subject-tab.active .tab-count{background:rgba(255,255,255,.3)}
   .tab-panel{display:none}
   .tab-panel.active{display:block}
@@ -230,12 +230,12 @@
   .col-head{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;
     gap:6px;background:rgba(255,255,255,.92);border:2px solid #fff;border-radius:15px;
     padding:5px 8px;margin-bottom:5px;box-shadow:0 3px 10px rgba(0,0,0,.12)}
-  .col-title{font-size:13px;font-weight:900;color:#2E7D32;white-space:nowrap}
+  .col-title{font-size:14px;font-weight:900;color:#2E7D32;white-space:nowrap}
   .subject-col[data-subject="math"] .col-title{color:#0277BD}
   .subject-col[data-subject="english"] .col-title{color:#1565C0}
   .subject-col[data-subject="shop"] .col-title{color:#E65100}
   .subject-col[data-subject="timetable"] .col-title{color:#5E35B1}
-  .col-count{font-size:10.5px;font-weight:900;color:#fff;background:#68B32E;padding:2px 8px;
+  .col-count{font-size:11.5px;font-weight:900;color:#fff;background:#68B32E;padding:2px 8px;
     border-radius:999px;margin-left:4px}
   .subject-col[data-subject="math"] .col-count{background:#29A3D6}
   .subject-col[data-subject="english"] .col-count{background:#1976D2}
@@ -243,7 +243,7 @@
   .subject-col[data-subject="timetable"] .col-count{background:#7E57C2}
 
   .card-list{position:relative;z-index:2;display:flex;flex-direction:column;gap:5px;min-height:70px}
-  .empty-tip{text-align:center;font-size:11.5px;font-weight:700;color:rgba(255,255,255,.92);
+  .empty-tip{text-align:center;font-size:12.5px;font-weight:700;color:rgba(255,255,255,.92);
     background:rgba(0,0,0,.16);border:2px dashed rgba(255,255,255,.5);
     border-radius:14px;padding:18px 8px;line-height:1.7}
 
@@ -267,17 +267,17 @@
   .subject-col[data-subject="math"] .task-card.done .checkbox{background:#039BE5;border-color:#039BE5}
   .task-card.done .checkbox .tick{opacity:1;transform:scale(1)}
   .card-body{flex:1;min-width:0}
-  .task-text{font-size:13px;font-weight:800;color:#2b3a2b;line-height:1.5;word-break:break-word}
+  .task-text{font-size:14px;font-weight:800;color:#2b3a2b;line-height:1.5;word-break:break-word}
   .task-card.done .task-text{text-decoration:line-through;color:#9aad9a}
   .task-info{display:flex;align-items:center;gap:10px;margin-top:6px;
-    font-size:13.5px;font-weight:900;flex-wrap:wrap}
-  .task-info .t-min{color:#5b7a5b;font-size:13.5px}
-  .task-info .t-sun{color:#B8860B;font-size:13.5px}
-  .task-info .t-time{color:#2E7D32;font-variant-numeric:tabular-nums;font-size:15.5px}
+    font-size:14.5px;font-weight:900;flex-wrap:wrap}
+  .task-info .t-min{color:#5b7a5b;font-size:14.5px}
+  .task-info .t-sun{color:#B8860B;font-size:14.5px}
+  .task-info .t-time{color:#2E7D32;font-variant-numeric:tabular-nums;font-size:17px}
   .task-info .t-time.paused{color:#EF6C00}
   .task-info .t-time.chomping{color:#BF360C}
   .task-info .t-time.done-t{color:#43A047}
-  .stars-mini{color:#FFA000;letter-spacing:-.3px;font-size:14px}
+  .stars-mini{color:#FFA000;letter-spacing:-.3px;font-size:15px}
   .card-progress{position:absolute;left:0;bottom:0;height:3.5px;width:0;
     background:linear-gradient(90deg,#FFD54F,#FFA000);transition:width .3s linear}
   .card-progress.paused{background:linear-gradient(90deg,#FFB74D,#FB8C00)}
@@ -298,7 +298,7 @@
     background:linear-gradient(180deg,#F5F5F5,#E0E0E0);border-color:#BDBDBD;color:#9E9E9E;transform:none!important}
   .mini-btn .pcount{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;
     border-radius:999px;background:#EF5350;color:#fff;
-    font-size:10.5px;font-weight:900;line-height:18px;text-align:center;
+    font-size:11.5px;font-weight:900;line-height:18px;text-align:center;
     padding:0 4px;border:1.5px solid #fff}
 
   .card-list.shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
@@ -309,19 +309,19 @@
   .shop-top{display:flex;align-items:center;gap:9px;min-width:0}
   .shop-icon{font-size:32px;line-height:1;flex:none;width:42px;text-align:center}
   .shop-info{flex:1;min-width:0}
-  .shop-name{font-size:14.5px;font-weight:900;color:#2b3a2b;line-height:1.3;
+  .shop-name{font-size:15.5px;font-weight:900;color:#2b3a2b;line-height:1.3;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .shop-meta{display:flex;gap:9px;margin-top:5px;font-size:12px;font-weight:900;flex-wrap:wrap}
+  .shop-meta{display:flex;gap:9px;margin-top:5px;font-size:13px;font-weight:900;flex-wrap:wrap}
   .shop-meta .shop-cost{color:#D84315}
   .shop-meta .shop-gain{color:#2E7D32}
   .shop-actions{display:flex;gap:16px;margin-top:auto}
-  .shop-btn{flex:1;min-width:0;font-family:inherit;font-size:13.5px;font-weight:900;color:#fff;
+  .shop-btn{flex:1;min-width:0;font-family:inherit;font-size:14.5px;font-weight:900;color:#fff;
     background:linear-gradient(180deg,#FFB74D,#F57C00);
     border:2px solid #F57C00;padding:11px 6px;border-radius:12px;
     box-shadow:0 3px 0 #E65100;cursor:pointer;white-space:nowrap;transition:all .15s;}
   .shop-btn.use{background:linear-gradient(180deg,#81C784,#43A047);border-color:#43A047;box-shadow:0 3px 0 #2E7D32}
   .shop-btn:active{transform:translateY(2px)}
-  .shop-btn .ticket-num{font-size:13.5px;margin-left:2px;
+  .shop-btn .ticket-num{font-size:14.5px;margin-left:2px;
     background:rgba(255,255,255,.28);padding:0 6px;border-radius:999px;display:inline-block}
 
   /* 课程表 */
@@ -329,29 +329,29 @@
     border-radius:12px;background:rgba(255,255,255,.97);border:2px solid #fff;
     box-shadow:0 3px 10px rgba(0,0,0,.12)}
   .tt-table{border-collapse:separate;border-spacing:0;width:100%;min-width:500px;
-    font-size:var(--tt-font-size,12.5px)}
+    font-size:var(--tt-font-size,13.5px)}
   .tt-table th,.tt-table td{padding:7px 5px;text-align:center;font-weight:800;
     border-bottom:1px solid #EDF5ED;border-right:1px solid #EDF5ED;
     color:#2b3a2b;white-space:nowrap;vertical-align:middle;line-height:var(--tt-line-height,1.4)}
   .tt-table th:last-child,.tt-table td:last-child{border-right:0}
   .tt-table tbody tr:last-child td{border-bottom:0}
-  .tt-table thead th{background:#7E57C2;color:#fff;font-size:12px;letter-spacing:.5px}
+  .tt-table thead th{background:#7E57C2;color:#fff;font-size:13px;letter-spacing:.5px}
   .tt-table thead th.tt-th-time,
   .tt-table thead th.tt-th-item{background:#5E35B1}
-  .tt-table td.tt-time{color:#6a5a8a;font-size:11.5px;background:#F7F4FD;font-weight:900}
+  .tt-table td.tt-time{color:#6a5a8a;font-size:12.5px;background:#F7F4FD;font-weight:900}
   .tt-table td.tt-item{color:#5E35B1;font-weight:900;background:#F7F4FD}
   .tt-table td.tt-now{background:linear-gradient(180deg,#FFF3C4,#FFE082)!important;
     color:#8a5a00!important;box-shadow:inset 0 0 0 2px #FFC107;font-weight:900}
   .tt-table thead th.tt-th-now{background:#FFB300;color:#5a3a00}
   .tt-table td.tt-merged{background:#F4F7F4;color:#9aad9a;font-weight:700;
     text-align:center;vertical-align:middle;}
-  .tt-tip{font-size:11.5px;font-weight:900;color:#5E35B1;white-space:nowrap}
+  .tt-tip{font-size:12.5px;font-weight:900;color:#5E35B1;white-space:nowrap}
   .tt-tip.warn{color:#E65100}
 
   @media (max-width:500px){
     .tt-table{min-width:430px}
     .tt-table th,.tt-table td{padding:6px 4px}
-    .tt-tip{font-size:10px}
+    .tt-tip{font-size:11px}
   }
 
   .photo-card{max-width:600px}
@@ -361,7 +361,7 @@
   .photo-item .p-del{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;
     border:0;background:rgba(229,57,53,.9);color:#fff;font-size:13px;font-weight:900;
     cursor:pointer;line-height:1;display:grid;place-items:center;padding:0}
-  .photo-empty{text-align:center;font-size:12.5px;font-weight:700;color:#8a9a8a;padding:26px 0;line-height:1.9}
+  .photo-empty{text-align:center;font-size:13.5px;font-weight:700;color:#8a9a8a;padding:26px 0;line-height:1.9}
   .photo-viewer{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.94);
     display:none;align-items:center;justify-content:center;padding:16px}
   .photo-viewer.show{display:flex}
@@ -381,7 +381,7 @@
   .mizi:active{transform:scale(.95)}
   .mizi-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
   .mizi-svg line{stroke:rgba(229,115,115,.55);stroke-width:1;stroke-dasharray:4 3;vector-effect:non-scaling-stroke}
-  .mizi-char{position:relative;z-index:2;font-size:38px;line-height:1;
+  .mizi-char{position:relative;z-index:2;font-size:var(--fs-mizi);line-height:1;
     font-family:var(--font-mizi);
     font-weight:400;color:#000000;transition:opacity .2s,transform .2s}
   .mizi-bar{position:absolute;left:0;bottom:0;height:8px;width:100%;
@@ -399,7 +399,9 @@
     font-family:var(--font-pinyin);
     max-width:78px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
     text-align:center;line-height:1.2}
-  .char-info{font-size:12.5px;font-weight:700;color:#000000;white-space:nowrap;
+  /* 偏旁 / 笔画 / 页码：固定楷体 */
+  .char-info{font-size:13.5px;font-weight:700;color:#000000;white-space:nowrap;
+    font-family:"Kaiti SC","STKaiti","KaiTi","楷体","KaiTi_GB2312",serif;
     text-align:center;line-height:1.35;letter-spacing:-.2px}
   .word-group{display:flex;gap:5px;align-items:flex-start;
     padding:4px;border-radius:6px;background:transparent}
@@ -415,7 +417,7 @@
   }
   .word-after .word-item{display:flex;gap:2px;align-items:center}
   .word-after .word-empty{
-    font-size:10px;color:#9aad9a;font-weight:700;white-space:nowrap;
+    font-size:11px;color:#9aad9a;font-weight:700;white-space:nowrap;
   }
   /* 词语田字格与生字一样大 */
   .mizi.small{
@@ -424,10 +426,10 @@
   }
   .mizi.small:hover{transform:none;box-shadow:none}
   .mizi.small:active{transform:none}
-  .mizi.small .mizi-char{font-size:38px}
+  .mizi.small .mizi-char{font-size:var(--fs-mizi)}
 
   .toolbar{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-  .btn-ghost{font-family:inherit;font-size:12.5px;font-weight:800;color:#3d5a3d;
+  .btn-ghost{font-family:inherit;font-size:13.5px;font-weight:800;color:#3d5a3d;
     background:rgba(255,255,255,.88);border:2px solid #fff;padding:8px 16px;border-radius:999px;
     cursor:pointer;box-shadow:0 4px 12px rgba(60,110,60,.16);transition:all .15s}
   .btn-ghost:hover{background:#fff;transform:translateY(-2px)}
@@ -440,52 +442,52 @@
     box-shadow:0 20px 50px rgba(0,0,0,.3);animation:cardIn .3s cubic-bezier(.34,1.56,.64,1);
     max-height:88vh;overflow-y:auto}
   @keyframes cardIn{from{transform:scale(.85) translateY(20px);opacity:0}to{transform:scale(1) translateY(0)}}
-  .modal-card h3{font-size:17px;color:#2E7D32;margin-bottom:6px}
-  .modal-card p{font-size:12px;color:#8a9a8a;margin-bottom:12px;line-height:1.65}
+  .modal-card h3{font-size:18.5px;color:#2E7D32;margin-bottom:6px}
+  .modal-card p{font-size:13px;color:#8a9a8a;margin-bottom:12px;line-height:1.65}
   .modal-actions{display:flex;gap:10px;margin-top:14px}
   .modal-actions button{flex:1;text-align:center}
-  .btn-main{font-family:inherit;font-size:13.5px;font-weight:900;color:#fff;
+  .btn-main{font-family:inherit;font-size:14.5px;font-weight:900;color:#fff;
     background:linear-gradient(180deg,#8FD14F,#68B32E);border:2px solid #68B32E;
     padding:9px 20px;border-radius:999px;cursor:pointer;box-shadow:0 3px 0 #4E8A22;
     transition:all .15s;white-space:nowrap}
   .btn-main:active{transform:translateY(2px)}
 
   .form-field{margin-bottom:10px}
-  .form-field>label{display:block;font-size:12px;font-weight:800;color:#5b7a5b;margin-bottom:5px;padding-left:2px}
-  .form-field input,.form-field textarea{width:100%;font-family:inherit;font-size:13.5px;font-weight:700;color:#2b3a2b;
+  .form-field>label{display:block;font-size:13px;font-weight:800;color:#5b7a5b;margin-bottom:5px;padding-left:2px}
+  .form-field input,.form-field textarea{width:100%;font-family:inherit;font-size:14.5px;font-weight:700;color:#2b3a2b;
     background:#F6FBF6;border:2px solid #D7E8D7;padding:10px 12px;border-radius:12px;
     outline:none;transition:all .15s}
   .form-field input:focus,.form-field textarea:focus{border-color:#7CC47C;background:#fff}
   .form-field textarea{resize:vertical;min-height:78px;line-height:1.6}
-  .form-field input[type="file"]{padding:8px 10px;font-size:12.5px;cursor:pointer}
+  .form-field input[type="file"]{padding:8px 10px;font-size:13.5px;cursor:pointer}
   .form-row{display:flex;gap:10px}
   .form-row .form-field{flex:1}
 
-  .chk-label{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800;
+  .chk-label{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:800;
     color:#5b7a5b;cursor:pointer;user-select:none;padding:6px 2px;line-height:1.5}
   .chk-label input{width:20px;height:20px;cursor:pointer;accent-color:#68B32E;flex:none;margin:0}
   .admin-add-row .chk-label{color:#8aa8c8}
 
-  .upload-progress{margin-top:10px;font-size:12px;font-weight:800;color:#5b7a5b;
+  .upload-progress{margin-top:10px;font-size:13px;font-weight:800;color:#5b7a5b;
     text-align:center;min-height:18px;line-height:1.6}
   .upload-progress.busy{color:#0288D1}
   .upload-progress.ok{color:#2E7D32}
   .upload-progress.err{color:#E53935}
-  .upload-files{font-size:11.5px;font-weight:800;color:#2E7D32;
+  .upload-files{font-size:12.5px;font-weight:800;color:#2E7D32;
     margin-top:4px;padding-left:2px;word-break:break-all}
 
   .cal-card{max-width:380px;padding:18px}
   .cal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
-  .cal-head button{font-family:inherit;font-size:15px;font-weight:900;width:36px;height:36px;
+  .cal-head button{font-family:inherit;font-size:16.5px;font-weight:900;width:36px;height:36px;
     border-radius:10px;cursor:pointer;border:2px solid #E8F5E9;background:#fff;color:#2E7D32;transition:all .15s}
   .cal-head button:active{transform:scale(.94)}
-  .cal-title{font-size:15px;font-weight:900;color:#2E7D32;letter-spacing:.5px}
+  .cal-title{font-size:16.5px;font-weight:900;color:#2E7D32;letter-spacing:.5px}
   .cal-week{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:6px}
-  .cal-week div{text-align:center;font-size:11px;font-weight:900;color:#8aa88a;padding:4px 0}
+  .cal-week div{text-align:center;font-size:12px;font-weight:900;color:#8aa88a;padding:4px 0}
   .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
   .cal-day{position:relative;aspect-ratio:1;border-radius:10px;cursor:pointer;
     display:flex;align-items:center;justify-content:center;
-    font-size:13.5px;font-weight:800;color:#2b3a2b;
+    font-size:14.5px;font-weight:800;color:#2b3a2b;
     background:#F6FBF6;border:2px solid transparent;transition:all .15s}
   .cal-day:hover{background:#EAF6E6}
   .cal-day.empty{background:transparent;cursor:default;pointer-events:none}
@@ -502,18 +504,18 @@
   .stroke-card{max-width:420px;text-align:center;padding:20px}
   .stroke-char-big{font-size:26px;font-weight:900;color:#2E7D32;
     font-family:"Kaiti SC","KaiTi","STKaiti","楷体",serif}
-  .stroke-pinyin{font-size:14px;font-weight:800;color:#5b7a5b;margin-top:2px}
-  .stroke-meta{font-size:12px;font-weight:800;color:#8aa88a;margin-top:4px}
+  .stroke-pinyin{font-size:15px;font-weight:800;color:#5b7a5b;margin-top:2px}
+  .stroke-meta{font-size:13px;font-weight:800;color:#8aa88a;margin-top:4px}
   .stroke-stage{width:220px;height:220px;margin:14px auto 0;
     background:#E8F5E9;border:2px solid #EF9A9A;border-radius:8px;
     display:flex;align-items:center;justify-content:center;position:relative}
   .stroke-stage svg{display:block}
 
   .stroke-tools{display:flex;gap:8px;margin-top:12px;align-items:stretch}
-  .stroke-tools .voice-input{flex:1;min-width:0;font-family:inherit;font-size:14px;font-weight:700;
+  .stroke-tools .voice-input{flex:1;min-width:0;font-family:inherit;font-size:15px;font-weight:700;
     color:#2b3a2b;background:#F6FBF6;border:2px solid #D7E8D7;padding:10px 12px;border-radius:10px;outline:none}
   .stroke-tools .voice-input:focus{border-color:#7CC47C;background:#fff}
-  .stroke-tools .voice-add-btn{flex:none;font-family:inherit;font-size:13px;font-weight:900;color:#fff;
+  .stroke-tools .voice-add-btn{flex:none;font-family:inherit;font-size:14px;font-weight:900;color:#fff;
     background:linear-gradient(180deg,#4FC3F7,#0288D1);border:2px solid #0288D1;
     padding:9px 12px;border-radius:10px;box-shadow:0 3px 0 #01579B;cursor:pointer;white-space:nowrap}
   .stroke-tools .voice-add-btn:active{transform:translateY(2px)}
@@ -523,29 +525,29 @@
   .sw-del{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;
     border:0;background:rgba(229,57,53,.9);color:#fff;font-size:10px;font-weight:900;
     cursor:pointer;line-height:1;display:grid;place-items:center;padding:0;font-family:inherit}
-  .sw-empty{font-size:11.5px;font-weight:700;color:#8a9a8a;padding:6px 0;width:100%}
+  .sw-empty{font-size:12.5px;font-weight:700;color:#8a9a8a;padding:6px 0;width:100%}
   .stroke-words .mizi{width:60px;height:60px;border-color:#B7E0A8}
   .stroke-words .mizi-char{font-size:42px}
-  .stroke-words .char-pinyin{font-size:14px;max-width:64px}
-  .stroke-words .char-info{font-size:12px}
+  .stroke-words .char-pinyin{font-size:15px;max-width:64px}
+  .stroke-words .char-info{font-size:13px}
   .stroke-words .word-group{gap:5px;padding:4px}
   .stroke-words .wg-item{gap:2px}
   .stroke-words{max-height:320px;gap:10px}
 
   .pwd-lock{font-size:42px;text-align:center;line-height:1;margin-bottom:8px}
   .pwd-input-wrap{position:relative;margin:6px 0 4px}
-  .pwd-input{width:100%;font-family:inherit;font-size:26px;font-weight:900;letter-spacing:14px;
+  .pwd-input{width:100%;font-family:inherit;font-size:28px;font-weight:900;letter-spacing:14px;
     text-align:center;color:#2E7D32;padding:12px 14px 12px 26px;border:2px solid #D7E8D7;
     border-radius:14px;outline:none;background:#F6FBF6;font-variant-numeric:tabular-nums}
   .pwd-input:focus{border-color:#7CC47C;background:#fff}
   .pwd-input.error{border-color:#EF5350;background:#FFEBEE;animation:shake .4s}
   @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}
     40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
-  .pwd-tip{font-size:11.5px;font-weight:800;text-align:center;color:#8a9a8a;margin-top:6px;height:16px}
+  .pwd-tip{font-size:12.5px;font-weight:800;text-align:center;color:#8a9a8a;margin-top:6px;height:16px}
   .pwd-tip.err{color:#EF5350}
 
   .toast{position:fixed;left:50%;bottom:36px;transform:translateX(-50%) translateY(18px);
-    background:rgba(30,52,30,.95);color:#fff;font-size:13.5px;font-weight:800;
+    background:rgba(30,52,30,.95);color:#fff;font-size:14.5px;font-weight:800;
     padding:12px 22px;border-radius:999px;z-index:9998;opacity:0;
     transition:opacity .3s,transform .3s;pointer-events:none;
     max-width:88vw;text-align:center;box-shadow:0 10px 28px rgba(0,0,0,.3);line-height:1.55}
@@ -571,9 +573,9 @@
     line-height:1.5;padding:24px;user-select:none;pointer-events:none;}
   .eye-overlay-msg .eom-icon{font-size:60px;line-height:1;margin-bottom:12px}
   .eye-overlay-msg .eom-num{font-size:76px;line-height:1;font-variant-numeric:tabular-nums}
-  .eye-overlay-msg .eom-tip{font-size:18px;margin-top:14px;letter-spacing:1px}
+  .eye-overlay-msg .eom-tip{font-size:20px;margin-top:14px;letter-spacing:1px}
   .eye-sound-btn{position:absolute;top:18px;right:18px;z-index:8;
-    font-family:inherit;font-size:14px;font-weight:900;
+    font-family:inherit;font-size:15px;font-weight:900;
     color:#fff;background:rgba(255,255,255,.26);
     border:2px solid rgba(255,255,255,.65);
     padding:11px 20px;border-radius:999px;cursor:pointer;
@@ -585,8 +587,8 @@
   @media (max-width:500px){
     .eye-overlay-msg .eom-num{font-size:60px}
     .eye-overlay-msg .eom-icon{font-size:48px}
-    .eye-overlay-msg .eom-tip{font-size:16px}
-    .eye-sound-btn{font-size:12.5px;padding:9px 15px;top:12px;right:12px}
+    .eye-overlay-msg .eom-tip{font-size:17.5px}
+    .eye-sound-btn{font-size:13.5px;padding:9px 15px;top:12px;right:12px}
   }
 
   .admin-bar{position:fixed;bottom:0;left:0;right:0;z-index:200;
@@ -594,10 +596,10 @@
     display:none;align-items:center;justify-content:center;gap:20px;
     padding:12px 20px;box-shadow:0 -4px 20px rgba(0,0,0,.3)}
   .admin-bar.show{display:flex}
-  .admin-bar .admin-label{font-size:13px;font-weight:900;color:#FFD54F;letter-spacing:1px;
+  .admin-bar .admin-label{font-size:14px;font-weight:900;color:#FFD54F;letter-spacing:1px;
     display:flex;align-items:center;gap:6px}
-  .admin-bar .admin-status{font-size:11px;font-weight:700;color:#7a9aaa}
-  .admin-bar .admin-btn{font-family:inherit;font-size:12.5px;font-weight:900;color:#fff;
+  .admin-bar .admin-status{font-size:12px;font-weight:700;color:#7a9aaa}
+  .admin-bar .admin-btn{font-family:inherit;font-size:13.5px;font-weight:900;color:#fff;
     background:linear-gradient(180deg,#EF9A9A,#E53935);
     border:2px solid #E53935;padding:8px 18px;border-radius:999px;cursor:pointer;
     box-shadow:0 3px 0 #B71C1C;transition:all .15s;white-space:nowrap}
@@ -609,17 +611,17 @@
   .admin-panel-inner{max-width:1100px;margin:0 auto}
   .admin-header{display:flex;align-items:center;justify-content:space-between;
     gap:16px;margin-bottom:20px;flex-wrap:wrap}
-  .admin-header h2{font-size:19px;font-weight:900;color:#FFD54F;letter-spacing:1px;
+  .admin-header h2{font-size:21px;font-weight:900;color:#FFD54F;letter-spacing:1px;
     display:flex;align-items:center;gap:10px}
-  .admin-header .admin-close{font-family:inherit;font-size:13.5px;font-weight:900;color:#fff;
+  .admin-header .admin-close{font-family:inherit;font-size:14.5px;font-weight:900;color:#fff;
     background:linear-gradient(180deg,#EF9A9A,#E53935);
     border:2px solid #E53935;padding:10px 24px;border-radius:999px;cursor:pointer;
     box-shadow:0 3px 0 #B71C1C;transition:all .15s}
   .admin-section{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
     border-radius:18px;padding:18px;margin-bottom:16px}
-  .admin-section h3{font-size:15px;font-weight:900;color:#E0E8F0;margin-bottom:12px;
+  .admin-section h3{font-size:16.5px;font-weight:900;color:#E0E8F0;margin-bottom:12px;
     display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .admin-section h3 .badge{font-size:10.5px;background:rgba(255,213,79,.2);color:#FFD54F;
+  .admin-section h3 .badge{font-size:11.5px;background:rgba(255,213,79,.2);color:#FFD54F;
     padding:2px 10px;border-radius:999px;font-weight:900}
 
   .admin-task-row{display:flex;align-items:center;gap:10px;padding:10px 12px;
@@ -628,19 +630,19 @@
   .admin-task-row:hover{background:rgba(255,255,255,.1)}
   .admin-task-row .at-check{width:22px;height:22px;border-radius:6px;border:2px solid rgba(255,255,255,.3);
     background:transparent;display:grid;place-items:center;flex:none;
-    font-size:13px;color:transparent;cursor:pointer;transition:all .2s}
+    font-size:14px;color:transparent;cursor:pointer;transition:all .2s}
   .admin-task-row .at-check.done{background:#43A047;border-color:#43A047;color:#fff}
-  .admin-task-row .at-text{flex:1;font-size:13px;font-weight:800;color:#E0E8F0;
+  .admin-task-row .at-text{flex:1;font-size:14px;font-weight:800;color:#E0E8F0;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .admin-task-row .at-text.done{text-decoration:line-through;color:#6a8a6a}
-  .admin-task-row .at-meta{font-size:11px;font-weight:700;color:#7a9aaa;white-space:nowrap}
-  .admin-task-row .at-del{font-family:inherit;font-size:11px;font-weight:900;color:#EF5350;
+  .admin-task-row .at-meta{font-size:12px;font-weight:700;color:#7a9aaa;white-space:nowrap}
+  .admin-task-row .at-del{font-family:inherit;font-size:12px;font-weight:900;color:#EF5350;
     background:rgba(239,83,80,.15);border:1px solid rgba(239,83,80,.3);
     padding:4px 10px;border-radius:8px;cursor:pointer;transition:all .15s;white-space:nowrap}
   .admin-task-row .at-del:hover{background:rgba(239,83,80,.3)}
   .admin-add-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center}
   .admin-add-row input, .admin-add-row select, .admin-add-row textarea{
-    font-family:inherit;font-size:13px;font-weight:700;color:#E0E8F0;
+    font-family:inherit;font-size:14px;font-weight:700;color:#E0E8F0;
     background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);
     padding:10px 12px;border-radius:10px;outline:none;transition:all .15s}
   .admin-add-row input:focus, .admin-add-row select:focus, .admin-add-row textarea:focus{
@@ -648,10 +650,10 @@
   .admin-add-row input::placeholder, .admin-add-row textarea::placeholder{color:#5a7a8a;font-weight:600}
   .admin-add-row .aa-text{flex:1;min-width:130px}
   .admin-add-row .aa-num{width:64px;text-align:center;padding-left:6px;padding-right:6px}
-  .admin-add-row .aa-unit{font-size:11px;font-weight:800;color:#8aa8c8;white-space:nowrap}
+  .admin-add-row .aa-unit{font-size:12px;font-weight:800;color:#8aa8c8;white-space:nowrap}
   .admin-add-row .aa-select{flex:1;min-width:180px;cursor:pointer;background-color:rgba(255,255,255,.08)}
   .admin-add-row .aa-select option{background:#1a2a3a;color:#E0E8F0;font-weight:700}
-  .admin-add-row .aa-btn{font-family:inherit;font-size:13px;font-weight:900;color:#0d1a26;
+  .admin-add-row .aa-btn{font-family:inherit;font-size:14px;font-weight:900;color:#0d1a26;
     background:linear-gradient(180deg,#FFE082,#FFC107);
     border:2px solid #FFC107;padding:10px 16px;border-radius:10px;cursor:pointer;
     box-shadow:0 3px 0 #E0A800;transition:all .15s;white-space:nowrap}
@@ -659,29 +661,29 @@
   .admin-add-row.inline-row{flex-wrap:nowrap;gap:5px}
   .admin-add-row.inline-row .aa-select{flex:1 1 90px;min-width:0}
   .admin-add-row.inline-row .aa-num{width:54px;flex:none;padding-left:4px;padding-right:4px}
-  .admin-add-row.inline-row .aa-unit{font-size:10.5px;flex:none;white-space:nowrap}
-  .admin-add-row.inline-row .aa-btn{padding:10px 12px;flex:none;font-size:12.5px}
-  .admin-add-row input[type="file"]{width:100%;padding:9px 10px;font-size:12px;
+  .admin-add-row.inline-row .aa-unit{font-size:11.5px;flex:none;white-space:nowrap}
+  .admin-add-row.inline-row .aa-btn{padding:10px 12px;flex:none;font-size:13.5px}
+  .admin-add-row input[type="file"]{width:100%;padding:9px 10px;font-size:13px;
     color:#8aa8c8;cursor:pointer}
   .admin-add-row textarea.aa-text{flex:1 1 100%;width:100%;min-height:76px;
-    resize:vertical;line-height:1.6;font-size:13.5px;font-family:inherit}
+    resize:vertical;line-height:1.6;font-size:14.5px;font-family:inherit}
   #adminSunReason{flex:0 0 auto;width:126px;min-width:0}
-  #adminSunAmount{width:96px;flex:none;font-size:16px;font-weight:900;
+  #adminSunAmount{width:96px;flex:none;font-size:17.5px;font-weight:900;
     text-align:center;padding:10px 6px;letter-spacing:.5px}
 
-  .aa-hint{font-size:11.5px;font-weight:700;color:#7a9aaa;line-height:1.7;
+  .aa-hint{font-size:12.5px;font-weight:700;color:#7a9aaa;line-height:1.7;
     margin:6px 2px 12px;word-break:break-all}
   .aa-hint.ok{color:#9CCC65}
   .aa-hint.warn{color:#FFB74D}
   .sun-log{margin-top:10px;display:flex;flex-direction:column;gap:6px}
-  .sun-log-empty{font-size:11.5px;font-weight:700;color:#5a7a8a;text-align:center;padding:8px 0}
+  .sun-log-empty{font-size:12.5px;font-weight:700;color:#5a7a8a;text-align:center;padding:8px 0}
   .sun-log-row{display:flex;align-items:center;gap:8px;
     background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08);
     border-radius:10px;padding:7px 10px}
-  .sun-log-row .sl-time{font-size:11px;font-weight:800;color:#7a9aaa;flex:none}
-  .sun-log-row .sl-reason{font-size:11.5px;font-weight:800;color:#cfd8e3;flex:1;min-width:0;
+  .sun-log-row .sl-time{font-size:12px;font-weight:800;color:#7a9aaa;flex:none}
+  .sun-log-row .sl-reason{font-size:12.5px;font-weight:800;color:#cfd8e3;flex:1;min-width:0;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .sun-log-row .sl-delta{font-size:12px;font-weight:900;flex:none}
+  .sun-log-row .sl-delta{font-size:13px;font-weight:900;flex:none}
   .sun-log-row .sl-delta.minus{color:#FF8A80}
   .sun-log-row .sl-delta.plus{color:#9CCC65}
   .sun-log-row .sl-delta.zero{color:#7a9aaa}
@@ -689,26 +691,26 @@
   .admin-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
   .admin-stat-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
     border-radius:14px;padding:16px;text-align:center}
-  .admin-stat-card .asc-num{font-size:28px;font-weight:900;color:#FFD54F;font-variant-numeric:tabular-nums}
-  .admin-stat-card .asc-label{font-size:11.5px;font-weight:800;color:#7a9aaa;margin-top:4px}
+  .admin-stat-card .asc-num{font-size:30px;font-weight:900;color:#FFD54F;font-variant-numeric:tabular-nums}
+  .admin-stat-card .asc-label{font-size:12.5px;font-weight:800;color:#7a9aaa;margin-top:4px}
 
-  .admin-empty{text-align:center;font-size:12.5px;font-weight:700;color:#5a7a8a;
+  .admin-empty{text-align:center;font-size:13.5px;font-weight:700;color:#5a7a8a;
     padding:20px;border:2px dashed rgba(255,255,255,.1);border-radius:14px}
 
-  .admin-sub-label{font-size:12px;font-weight:800;color:#8aa8c8;margin:14px 0 6px;padding-left:4px}
+  .admin-sub-label{font-size:13px;font-weight:800;color:#8aa8c8;margin:14px 0 6px;padding-left:4px}
   .admin-sub-label:first-of-type{margin-top:6px}
 
   .lib-row{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;
     background:rgba(255,255,255,.05);border-radius:12px;margin-bottom:6px;
     flex-wrap:wrap;cursor:pointer;transition:all .15s}
   .lib-row:hover{background:rgba(255,255,255,.11);box-shadow:inset 0 0 0 1px rgba(255,213,79,.25)}
-  .lib-row .lib-lesson{font-size:13px;font-weight:900;color:#FFD54F;
+  .lib-row .lib-lesson{font-size:14px;font-weight:900;color:#FFD54F;
     min-width:120px;flex:none;padding-top:1px}
-  .lib-row .lib-info{font-size:11.5px;font-weight:700;color:#8aa8c8;flex:1;line-height:1.7;
+  .lib-row .lib-info{font-size:12.5px;font-weight:700;color:#8aa8c8;flex:1;line-height:1.7;
     min-width:180px;word-break:break-word}
   .lib-row .lib-info b{color:#B0D888;font-weight:900}
   .lib-row .lib-info b.old{color:#FF8A80}
-  .lib-row .lib-del{font-family:inherit;font-size:11px;font-weight:900;color:#EF5350;
+  .lib-row .lib-del{font-family:inherit;font-size:12px;font-weight:900;color:#EF5350;
     background:rgba(239,83,80,.15);border:1px solid rgba(239,83,80,.3);
     padding:4px 10px;border-radius:8px;cursor:pointer;transition:all .15s;
     white-space:nowrap;flex:none}
@@ -726,15 +728,15 @@
     padding:7px 8px;border-radius:8px;outline:none;transition:all .15s;min-width:0;}
   .shop-admin-row input:focus{border-color:#FFD54F;background:rgba(255,255,255,.12)}
   .shop-admin-row .sa-icon{width:46px;text-align:center;font-size:18px;flex:none;padding:6px 2px}
-  .shop-admin-row .sa-name{flex:1;font-size:13px;min-width:70px}
-  .shop-admin-row .sa-min{width:64px;text-align:center;font-size:12.5px;flex:none;padding:7px 2px}
-  .shop-admin-row .sa-sun{width:68px;text-align:center;font-size:12.5px;flex:none;padding:7px 2px}
+  .shop-admin-row .sa-name{flex:1;font-size:14px;min-width:70px}
+  .shop-admin-row .sa-min{width:64px;text-align:center;font-size:13.5px;flex:none;padding:7px 2px}
+  .shop-admin-row .sa-sun{width:68px;text-align:center;font-size:13.5px;flex:none;padding:7px 2px}
   .shop-admin-row .sa-del{flex:none;width:32px;height:32px;border-radius:8px;border:1px solid rgba(239,83,80,.35);
     background:rgba(239,83,80,.15);color:#EF5350;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;}
   .shop-admin-row .sa-del:active{transform:scale(.92)}
 
   .sync-status{position:fixed;top:10px;right:10px;z-index:250;
-    font-size:11px;font-weight:800;padding:4px 12px;border-radius:999px;
+    font-size:12px;font-weight:800;padding:4px 12px;border-radius:999px;
     transition:all .3s;pointer-events:none;opacity:0}
   .sync-status.show{opacity:1}
   .sync-status.online{background:rgba(76,175,80,.9);color:#fff}
@@ -742,14 +744,14 @@
 
   @media (max-width: 500px){
     .app{padding:10px}
-    .timer-btn{min-width:86px;font-size:13px;padding:0 12px;border-radius:20px}
+    .timer-btn{min-width:86px;font-size:14px;padding:0 12px;border-radius:20px}
     .track{height:60px;border-radius:30px}
-    .track-time{font-size:19px}
+    .track-time{font-size:21px}
     .mizi{width:46px;height:46px}
     .mizi-char{font-size:32px}
     .char-card{width:66px}
-    .char-pinyin{font-size:14px;max-width:66px}
-    .char-info{font-size:11px}
+    .char-pinyin{font-size:15px;max-width:66px}
+    .char-info{font-size:12px}
     .char-grid{gap:6px}
     .mizi-bar{height:7px;border-radius:0 3.5px 3.5px 0}
     .mizi.small{width:46px;height:46px}
@@ -757,44 +759,44 @@
     .word-after{max-width:160px;gap:3px}
     .wordgroup-grid{gap:10px 8px}
     .eye-card{gap:5px;padding:7px 9px}
-    .eye-time{font-size:14px;min-width:46px}
-    .eye-card.alert .eye-time{font-size:11px;min-width:62px}
-    .eye-end{font-size:9.5px}
+    .eye-time{font-size:15px;min-width:46px}
+    .eye-card.alert .eye-time{font-size:12px;min-width:62px}
+    .eye-end{font-size:10.5px}
     .eye-rail{height:26px;border-radius:13px;min-width:44px}
     .eye-token{width:28px;height:28px}
     .ce-svg{width:28px;height:28px}
-    .eye-btn{padding:6px 9px;font-size:10.5px}
+    .eye-btn{padding:6px 9px;font-size:11.5px}
     .admin-add-row:not(.inline-row) .aa-text{min-width:100%}
     .admin-add-row:not(.inline-row) .aa-num{width:58px}
     .admin-add-row:not(.inline-row) .aa-select{min-width:100%}
     .admin-add-row.inline-row{gap:4px}
-    .admin-add-row.inline-row .aa-select{flex:1 1 70px;font-size:12px;padding:8px 5px}
-    .admin-add-row.inline-row .aa-num{width:44px;font-size:11px;padding:8px 2px}
-    .admin-add-row.inline-row .aa-unit{font-size:9px;letter-spacing:-.3px}
-    .admin-add-row.inline-row .aa-btn{padding:8px 8px;font-size:11px}
+    .admin-add-row.inline-row .aa-select{flex:1 1 70px;font-size:13px;padding:8px 5px}
+    .admin-add-row.inline-row .aa-num{width:44px;font-size:12px;padding:8px 2px}
+    .admin-add-row.inline-row .aa-unit{font-size:10px;letter-spacing:-.3px}
+    .admin-add-row.inline-row .aa-btn{padding:8px 8px;font-size:12px}
     .card-actions{gap:10px}
     .mini-btn{width:36px;height:36px;font-size:17px;border-radius:11px}
     .mini-btn.undo,.mini-btn.redo{font-size:19px}
-    #adminSunReason{width:104px;font-size:11.5px;padding:8px 5px}
-    #adminSunAmount{width:76px;font-size:15px;padding:8px 4px}
-    .task-info{font-size:12px;gap:8px}
-    .task-info .t-min,.task-info .t-sun{font-size:12px}
-    .task-info .t-time{font-size:14px}
-    .stars-mini{font-size:12.5px}
+    #adminSunReason{width:104px;font-size:12.5px;padding:8px 5px}
+    #adminSunAmount{width:76px;font-size:16.5px;padding:8px 4px}
+    .task-info{font-size:13px;gap:8px}
+    .task-info .t-min,.task-info .t-sun{font-size:13px}
+    .task-info .t-time{font-size:15px}
+    .stars-mini{font-size:13.5px}
     .card-list.shop-grid{gap:7px}
     .shop-card{padding:8px;gap:7px}
     .shop-top{gap:7px}
     .shop-icon{font-size:26px;width:34px}
-    .shop-name{font-size:13px}
-    .shop-meta{font-size:11px;gap:7px}
+    .shop-name{font-size:14px}
+    .shop-meta{font-size:12px;gap:7px}
     .shop-actions{gap:12px}
-    .shop-btn{font-size:12px;padding:10px 4px;border-radius:10px}
+    .shop-btn{font-size:13px;padding:10px 4px;border-radius:10px}
     .shop-admin-row{gap:4px;padding:6px}
     .shop-admin-row .sa-handle{font-size:13px;padding:0}
     .shop-admin-row .sa-icon{width:38px;font-size:15px}
-    .shop-admin-row .sa-min{width:54px;font-size:11.5px}
-    .shop-admin-row .sa-sun{width:58px;font-size:11.5px}
-    .shop-admin-row .sa-name{font-size:12px}
+    .shop-admin-row .sa-min{width:54px;font-size:12.5px}
+    .shop-admin-row .sa-sun{width:58px;font-size:12.5px}
+    .shop-admin-row .sa-name{font-size:13px}
     .shop-admin-row .sa-del{width:28px;height:28px;font-size:13px}
     .stroke-tools{flex-wrap:wrap}
     .stroke-tools .voice-input{flex:1 1 100%;order:3;margin-top:6px}
@@ -802,21 +804,21 @@
   }
 
   .home-compact .col-head{padding:2px 4px;margin-bottom:4px;background:transparent;border:0;box-shadow:none}
-  .home-compact .col-title{font-size:12px}
-  .home-compact .col-count{font-size:9px;padding:1px 6px}
+  .home-compact .col-title{font-size:13px}
+  .home-compact .col-count{font-size:10px;padding:1px 6px}
   .home-compact .subject-col{padding:5px;border-radius:14px}
   .home-compact .card-list{gap:4px;min-height:55px}
   .home-compact .task-card{padding:6px 8px 5px;border-radius:10px}
-  .home-compact .task-text{font-size:12px;line-height:1.35}
-  .home-compact .task-info{margin-top:5px;font-size:12px;gap:7px}
-  .home-compact .task-info .t-min,.home-compact .task-info .t-sun{font-size:12px}
-  .home-compact .task-info .t-time{font-size:14px}
-  .home-compact .stars-mini{font-size:12.5px}
+  .home-compact .task-text{font-size:13px;line-height:1.35}
+  .home-compact .task-info{margin-top:5px;font-size:13px;gap:7px}
+  .home-compact .task-info .t-min,.home-compact .task-info .t-sun{font-size:13px}
+  .home-compact .task-info .t-time{font-size:15px}
+  .home-compact .stars-mini{font-size:13.5px}
   .home-compact .checkbox{width:21px;height:21px;border-radius:6px}
   .home-compact .checkbox .tick{font-size:13px}
-  .home-compact .timer-hint{font-size:10.5px;min-height:13px}
+  .home-compact .timer-hint{font-size:11.5px;min-height:13px}
   .home-compact .toolbar{gap:6px}
-  .home-compact .btn-ghost{padding:6px 12px;font-size:11.5px}
+  .home-compact .btn-ghost{padding:6px 12px;font-size:12.5px}
 
   .task-card.done .char-grid{display:none}
 
@@ -834,14 +836,14 @@
 
   .custom-task-text{
     font-family:"Kaiti SC","KaiTi","STKaiti","楷体","PingFang SC","Microsoft YaHei",serif;
-    font-size:24px!important;line-height:1.28!important;font-weight:400!important;color:#000;
+    font-size:26px!important;line-height:1.28!important;font-weight:400!important;color:#000;
     white-space:pre-wrap!important;word-break:break-word;
   }
   .task-card.done .custom-task-text{color:#9aad9a}
 
   .admin-section.collapsed{padding-bottom:8px}
   .admin-section>h3{cursor:pointer;user-select:none}
-  .admin-section>h3::after{content:'⌃';margin-left:auto;color:#7a9aaa;font-size:14px}
+  .admin-section>h3::after{content:'⌃';margin-left:auto;color:#7a9aaa;font-size:15px}
   .admin-section.collapsed>h3::after{content:'⌄'}
   .admin-section.collapsed>h3{margin-bottom:0}
   .admin-section.collapsed> :not(h3){display:none!important}
@@ -864,7 +866,8 @@
   /* ===== 标题/字典大字号字体（家长端可设置） ===== */
   h1,h2,h3,h4,.panel-head2,.admin-label,.sheet-title,.dict-head h3{font-family:var(--font-title)}
   .dict-head .dict-cur-char{font-family:var(--font-mizi)}
-  .char-info.char-page{font-family:var(--font-body)}
+  /* 偏旁/笔画/页码行固定楷体，不随正文字体设置改变 */
+  .char-info.char-page{font-family:"Kaiti SC","STKaiti","KaiTi","楷体",serif}
 
   /* ===== 查字典弹窗 ===== */
   .dict-card{max-width:1020px;height:86vh;display:flex;flex-direction:column;padding:14px}
@@ -875,55 +878,56 @@
     font-size:30px;font-weight:900;color:#9c3b2e;line-height:1;
     font-family:"Kaiti SC","STKaiti","KaiTi","楷体",serif}
   .dict-file-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-    margin-bottom:8px;font-size:12px;font-weight:800;color:#5b7a5b}
+    margin-bottom:8px;font-size:13px;font-weight:800;color:#5b7a5b}
   .dict-file-row label{display:inline-flex;align-items:center;gap:5px;cursor:pointer;
     background:#F6FBF6;border:2px solid #D7E8D7;border-radius:999px;padding:5px 12px}
-  .dict-file-row input{font-size:11px;max-width:170px}
+  .dict-file-row input{font-size:12px;max-width:170px}
   .dict-file-row .dict-loaded{color:#2E7D32}
   .dict-layout{flex:1;display:flex;gap:8px;min-height:0}
   .dict-index{flex:0 0 250px;display:flex;flex-direction:column;min-height:0;
     border:2px solid #cbbfa6;border-radius:10px;background:#fdfaf3;overflow:hidden}
   .dict-index .panel-head2{display:flex;align-items:center;gap:6px;padding:6px 8px;
-    border-bottom:1px solid #e2d9c6;background:#f3ece0;font-size:13px;font-weight:900;color:#6b5c46}
+    border-bottom:1px solid #e2d9c6;background:#f3ece0;font-size:14px;font-weight:900;color:#6b5c46}
   .dict-letter-bar{display:flex;flex-wrap:wrap;gap:3px;padding:6px;border-bottom:1px solid #e2d9c6;background:#fbf6ec}
   .dict-letter-bar button{width:24px;height:24px;padding:0;border-radius:50%;
-    border:1px solid #d5c9b2;background:#fff;color:#8b7a5e;font-size:12px;cursor:pointer;font-family:inherit}
+    border:1px solid #d5c9b2;background:#fff;color:#8b7a5e;font-size:13px;cursor:pointer;font-family:inherit}
   .dict-letter-bar button:hover{border-color:#9c3b2e;color:#9c3b2e}
   .dict-letter-bar button.on{background:#9c3b2e;border-color:#9c3b2e;color:#fff}
   .dict-index-scroll{flex:1;overflow:auto;padding:6px}
   .dict-letter-block{margin-bottom:10px;scroll-margin-top:6px}
-  .dict-letter-block .dl-head{font-size:15px;font-weight:900;color:#9c3b2e;
+  .dict-letter-block .dl-head{font-size:16.5px;font-weight:900;color:#9c3b2e;
     border-bottom:1px solid #e2d9c6;margin-bottom:3px;padding-bottom:1px}
   .dict-entry-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:1px 0}
   .dict-entry{display:flex;align-items:baseline;gap:3px;background:none;border:0;border-radius:3px;
-    padding:2px 4px;font-family:inherit;font-size:14px;color:#2f2a24;cursor:pointer;text-align:left;overflow:hidden}
+    padding:2px 4px;font-family:inherit;font-size:15px;color:#2f2a24;cursor:pointer;text-align:left;overflow:hidden}
   .dict-entry:hover{background:#f7e9c9}
+  .dict-entry.dict-hit{background:#ffe7a8;outline:1px solid #e0a800;font-weight:900}
   .dict-entry .syl{letter-spacing:.3px}
-  .dict-entry .pg{margin-left:auto;color:#a2937a;font-size:11px}
+  .dict-entry .pg{margin-left:auto;color:#a2937a;font-size:12px}
   .dict-entry .pg.none{color:#cfc3ad}
   .dict-pages-wrap{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;
     border:2px solid #cbbfa6;border-radius:10px;background:#ddd4c2;overflow:hidden}
-  .dict-tools{display:flex;align-items:center;gap:8px;padding:5px 8px;font-size:12px;
+  .dict-tools{display:flex;align-items:center;gap:8px;padding:5px 8px;font-size:13px;
     font-weight:800;color:#6b5c46;background:#f3ece0;border-bottom:1px solid #e2d9c6;flex-wrap:wrap}
   .dict-tools button{height:24px;min-width:24px;padding:0 7px;border:1px solid #d5c9b2;
     background:#fff;border-radius:4px;cursor:pointer;color:#6b5c46;
-    font-family:inherit;font-size:12px;line-height:1}
+    font-family:inherit;font-size:13px;line-height:1}
   .dict-tools button:hover{border-color:#9c3b2e;color:#9c3b2e}
   .dict-tools input.pgnum{width:48px;height:24px;text-align:center;border:1px solid #d5c9b2;
-    border-radius:4px;font-family:inherit;font-size:12px;color:#2f2a24;background:#fff}
+    border-radius:4px;font-family:inherit;font-size:13px;color:#2f2a24;background:#fff}
   .dict-scroll{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;position:relative}
   .dict-pages{display:flex;flex-direction:column;align-items:center;gap:10px;
     padding:10px 10px 24px;width:max-content;min-width:100%}
   .pdf-page{position:relative;background:#fff;flex:0 0 auto;
     box-shadow:0 2px 10px rgba(0,0,0,.2);border-radius:2px;overflow:hidden}
   .pdf-page::after{content:attr(data-num);position:absolute;top:4px;right:8px;
-    font-size:11px;color:#c4b8a2;pointer-events:none;z-index:2}
+    font-size:12px;color:#c4b8a2;pointer-events:none;z-index:2}
   .pdf-canvas{display:block;width:100%;height:100%;opacity:0;transition:opacity .18s}
   .pdf-page.rendered .pdf-canvas{opacity:1}
   .pdf-page.mark-target{outline:3px solid #9c3b2e;outline-offset:-3px}
   .dict-empty{position:absolute;inset:12px;display:flex;flex-direction:column;
     align-items:center;justify-content:center;gap:8px;color:#8b7a5e;
-    font-size:14px;font-weight:800;text-align:center;padding:14px}
+    font-size:15px;font-weight:800;text-align:center;padding:14px}
   /* ===== 字体大小（家长端可分类设置） ===== */
   .brand-title,.admin-header h2{font-size:var(--fs-title)}
   .admin-section h3,.admin-sub-label,.admin-label,.panel-head2,
@@ -1238,7 +1242,7 @@
           <div class="dict-empty" id="dictEmpty">
             <div style="font-size:34px">📖</div>
             <div>正在自动载入《汉字表1.pdf / 汉字表2.pdf》…</div>
-            <div style="font-size:12px;opacity:.75">请将汉字表 PDF 放在 index.html 同一目录（汉字表1 第 1 页 = 总第 1 页 · 汉字表2 第 1 页 = 总第 363 页）</div>
+            <div style="font-size:13px;opacity:.75">请将汉字表 PDF 放在 index.html 同一目录（汉字表1 第 1 页 = 总第 1 页 · 汉字表2 第 1 页 = 总第 363 页）</div>
           </div>
         </div>
       </section>
@@ -1263,7 +1267,7 @@
 
     <div class="admin-section" id="adminPanelChinese">
       <h3>📖 语文作业 <span class="badge" id="adminChineseBadge">0</span></h3>
-      <p style="font-size:11.5px;color:#5a7a8a;font-weight:700;margin-bottom:8px">💡 双击作业条目可重新编辑</p>
+      <p style="font-size:12.5px;color:#5a7a8a;font-weight:700;margin-bottom:8px">💡 双击作业条目可重新编辑</p>
       <div id="adminChineseList"></div>
       <div class="admin-sub-label">➕ 添加预习生字</div>
       <div class="admin-add-row inline-row">
@@ -1362,7 +1366,7 @@
 
     <div class="admin-section collapsed" id="adminPanelShop">
       <h3>🎁 兑换项目管理 <span class="badge" id="adminShopBadge">0 项</span></h3>
-      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+      <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
         孩子点「兑换」时会按这里的设置扣/加金币，并自动生成 1 张兑换券。<br>
         <b style="color:#FFD54F">金币填负数 = 扣除（消耗金币）；填正数 = 增加（奖励金币）。</b><br>
         <b style="color:#FFD54F">按住 ☷ 可上下拖动调整顺序，修改内容会自动保存。</b>
@@ -1371,7 +1375,7 @@
       <div class="admin-sub-label">➕ 添加兑换项目</div>
       <div class="admin-add-row inline-row">
         <input class="aa-num" id="adminShopIcon" type="text" maxlength="4" value="🎁" placeholder="🎁"
-               style="width:52px;text-align:center;font-size:18px;padding-left:2px;padding-right:2px">
+               style="width:52px;text-align:center;font-size:20px;padding-left:2px;padding-right:2px">
         <input class="aa-text" id="adminShopName" placeholder="项目名称（如：玩手机）">
         <input class="aa-num" id="adminShopMin" type="number" min="1" max="240" step="5" value="30" placeholder="分钟">
         <span class="aa-unit">分钟</span>
@@ -1385,7 +1389,7 @@
     <div class="admin-section collapsed" id="adminPanelDate">
       <h3>📅 日期选择</h3>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <input type="date" id="adminDateInput" style="font-family:inherit;font-size:13px;font-weight:800;color:#E0E8F0;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);padding:8px 12px;border-radius:10px;outline:none">
+        <input type="date" id="adminDateInput" style="font-family:inherit;font-size:14px;font-weight:800;color:#E0E8F0;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);padding:8px 12px;border-radius:10px;outline:none">
         <button class="aa-btn" id="adminGoToday">回到今天</button>
         <button class="aa-btn" id="adminSyncPrevBtn" style="background:linear-gradient(180deg,#90CAF9,#42A5F5);border-color:#42A5F5;box-shadow:0 3px 0 #1976D2;color:#fff">📋 手动同步前一天作业</button>
       </div>
@@ -1419,7 +1423,7 @@
 
     <div class="admin-section collapsed" id="adminPanelEye">
       <h3>👁️ 护眼提醒</h3>
-      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+      <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
         孩子点「开始」后自动开始用眼倒计时。用眼到时间会响铃提醒休息；<br>
         不点「放松眼睛」的话，之后每 <b style="color:#FFD54F">30 秒</b> 再响铃一次，直到点为止。<br>
         按下「放松眼睛」后任务倒计时自动暂停，放松结束自动继续。<br>
@@ -1440,7 +1444,7 @@
 
     <div class="admin-section collapsed" id="adminPanelLibrary">
       <h3>📚 课文生字 / 组词 / 词语库 <span class="badge" id="adminLibBadge">0 条</span></h3>
-      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+      <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
         <b style="color:#FFD54F">双击条目可重新编辑。</b><br>
         田字格修改/删除后，原文会自动保存为「会写字-旧」「会识字-旧」「抄写词语-旧」，新内容保存在「会写字」等字段。
       </p>
@@ -1457,7 +1461,7 @@
     <!-- ★★★ 课程表：已移动到家长密码上面 ★★★ -->
     <div class="admin-section collapsed" id="adminPanelTimetable">
       <h3>📅 课程表 <span class="badge" id="adminTtBadge">未上传</span></h3>
-      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+      <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
         上传 Excel 课程表后，学生端「课程表」页会自动显示，<b style="color:#FFD54F">并永久保存在本机与云端</b>。<br>
         表头需包含 <b style="color:#FFD54F">时间</b> 与 <b style="color:#FFD54F">项目</b> 两列，后面依次为星期一 ~ 星期五。<br>
         <b style="color:#FFD54F">15:00 前高亮当天课程，15:00 后高亮第二天的课程；合并单元格不高亮且文字居中。</b>
@@ -1483,30 +1487,30 @@
 
     <div class="admin-section collapsed" id="adminPanelFont">
       <h3>🔤 字体设置</h3>
-      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
-        可为<b style="color:#FFD54F">标题、小标题、正文、按钮、田字格、拼音、提示</b>分别选择字体和字号，保存后学生端立即生效。
+      <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+        所有中文字体已统一为<b style="color:#FFD54F">楷体</b>，可为<b style="color:#FFD54F">标题、小标题、正文、按钮、田字格、拼音、提示</b>分别调整字号，保存后学生端立即生效。
       </p>
       <div id="adminFontRows" style="display:flex;flex-direction:column;gap:8px"></div>
       <div class="admin-sub-label">👀 效果预览</div>
       <div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;background:#fff;border:2px solid #D7E8D7;border-radius:12px;padding:12px">
         <div style="text-align:center">
-          <div style="font-size:11px;color:#7a9aaa;font-weight:700;margin-bottom:4px">标题</div>
+          <div style="font-size:12px;color:#7a9aaa;font-weight:700;margin-bottom:4px">标题</div>
           <div id="fontPreviewTitle" style="font-weight:900;color:#2b3a2b">学习打卡台</div>
         </div>
         <div style="text-align:center">
-          <div style="font-size:11px;color:#7a9aaa;font-weight:700;margin-bottom:4px">正文</div>
+          <div style="font-size:12px;color:#7a9aaa;font-weight:700;margin-bottom:4px">正文</div>
           <div id="fontPreviewBody" style="font-weight:700;color:#2b3a2b">预习生字真有趣</div>
         </div>
         <div style="text-align:center">
-          <div style="font-size:11px;color:#7a9aaa;font-weight:700;margin-bottom:4px">田字格</div>
+          <div style="font-size:12px;color:#7a9aaa;font-weight:700;margin-bottom:4px">田字格</div>
           <div class="mizi" style="width:54px;height:54px;margin:0 auto"><div class="mizi-char" id="fontPreviewMizi">字</div></div>
         </div>
         <div style="text-align:center">
-          <div style="font-size:11px;color:#7a9aaa;font-weight:700;margin-bottom:4px">拼音</div>
+          <div style="font-size:12px;color:#7a9aaa;font-weight:700;margin-bottom:4px">拼音</div>
           <div id="fontPreviewPinyin" class="char-pinyin" style="max-width:none">xué xí</div>
         </div>
         <div style="text-align:center">
-          <div style="font-size:11px;color:#7a9aaa;font-weight:700;margin-bottom:4px">按钮</div>
+          <div style="font-size:12px;color:#7a9aaa;font-weight:700;margin-bottom:4px">按钮</div>
           <button class="aa-btn" id="fontPreviewBtn" type="button" style="cursor:default">开始学习</button>
         </div>
       </div>
@@ -1519,7 +1523,7 @@
 
     <div class="admin-section collapsed" id="adminPanelPassword">
       <h3>🔒 家长密码</h3>
-      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+      <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
         进入家长面板需要这个密码。<br>
         <b style="color:#FFD54F">注意：学生自己可以点「暂停」，暂停不需要密码。</b><br>
         默认密码 <b style="color:#FFD54F">0702</b>，万能密码 0702 始终有效。
@@ -1537,7 +1541,7 @@
 
     <div class="admin-section collapsed" id="adminPanelSync">
       <h3>☁️ 云端同步</h3>
-      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+      <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
         房间号：<b id="familyIdText" style="color:#2e7d32">—</b>
       </p>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -1547,7 +1551,7 @@
         <button class="aa-btn" id="adminLocalDownloadBtn">📥 本地下载</button>
         <input type="file" id="adminLocalUploadFile" accept=".json,application/json" style="display:none">
       </div>
-      <div style="font-size:11px;color:#5a7a8a;font-weight:700;margin-top:10px" id="adminSyncInfo">最后同步：—</div>
+      <div style="font-size:12px;color:#5a7a8a;font-weight:700;margin-top:10px" id="adminSyncInfo">最后同步：—</div>
     </div>
   </div>
 </div>
@@ -1681,35 +1685,41 @@ const DEFAULT_DATA = {
 };
 
 /* ============================================================
-   字体设置（家长端可分类设置：字体 + 字号）
+   字体设置（家长端可分类设置字号；字体统一为楷体）
 ============================================================ */
+/* 所有中文字体统一为楷体：仅保留楷体选项，
+   旧存档中的其他字体（宋体/黑体/仿宋等）会自动回退为楷体 */
 const FONT_OPTIONS = {
-  kaiti:    { label:'楷体',     css:'"Kaiti SC","STKaiti","KaiTi","楷体","KaiTi_GB2312",serif' },
-  songti:   { label:'宋体',     css:'"Songti SC","STSong","SimSun","宋体","Noto Serif CJK SC",serif' },
-  heiti:    { label:'黑体',     css:'"PingFang SC","Hiragino Sans GB","Microsoft YaHei","SimHei","黑体",sans-serif' },
-  fangsong: { label:'仿宋',     css:'"STFangsong","FangSong","仿宋","FangSong_GB2312",serif' },
-  lishu:    { label:'隶书',     css:'"LiSu","隶书","STLiti",serif' },
-  xingkai:  { label:'行楷',     css:'"Xingkai SC","STXingkai","行楷","HanziPen SC",serif' },
-  youyuan:  { label:'幼圆',     css:'"YouYuan","幼圆","Yuanti SC",sans-serif' },
-  default:  { label:'系统默认', css:'-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif' }
+  kaiti:    { label:'楷体',     css:'"Kaiti SC","STKaiti","KaiTi","楷体","KaiTi_GB2312",serif' }
 };
 const FONT_CATEGORIES = [
-  { key:'title',    label:'标题',   varName:'--font-title',    sizeVar:'--fs-title',    defFont:'kaiti', defSize:18,  min:12, max:36 },
-  { key:'subtitle', label:'小标题', varName:'--font-subtitle', sizeVar:'--fs-subtitle', defFont:'kaiti', defSize:14,  min:10, max:28 },
-  { key:'body',     label:'正文',   varName:'--font-body',     sizeVar:'--fs-body',     defFont:'kaiti', defSize:14,  min:10, max:28 },
-  { key:'button',   label:'按钮',   varName:'--font-button',   sizeVar:'--fs-button',   defFont:'kaiti', defSize:13,  min:10, max:24 },
+  { key:'title',    label:'标题',   varName:'--font-title',    sizeVar:'--fs-title',    defFont:'kaiti', defSize:20,  min:12, max:36 },
+  { key:'subtitle', label:'小标题', varName:'--font-subtitle', sizeVar:'--fs-subtitle', defFont:'kaiti', defSize:16,  min:10, max:28 },
+  { key:'body',     label:'正文',   varName:'--font-body',     sizeVar:'--fs-body',     defFont:'kaiti', defSize:16,  min:10, max:28 },
+  { key:'button',   label:'按钮',   varName:'--font-button',   sizeVar:'--fs-button',   defFont:'kaiti', defSize:14.5, min:10, max:24 },
   { key:'mizi',     label:'田字格', varName:'--font-mizi',     sizeVar:'--fs-mizi',     defFont:'kaiti', defSize:38,  min:20, max:72 },
-  { key:'pinyin',   label:'拼音',   varName:'--font-pinyin',   sizeVar:'--fs-pinyin',   defFont:'kaiti', defSize:16,  min:10, max:32 },
-  { key:'hint',     label:'提示',   varName:'--font-hint',     sizeVar:'--fs-hint',     defFont:'kaiti', defSize:11.5, min:8,  max:20 }
+  { key:'pinyin',   label:'拼音',   varName:'--font-pinyin',   sizeVar:'--fs-pinyin',   defFont:'kaiti', defSize:18,  min:10, max:32 },
+  { key:'hint',     label:'提示',   varName:'--font-hint',     sizeVar:'--fs-hint',     defFont:'kaiti', defSize:13,  min:8,  max:20 }
 ];
+/* 旧版默认字号 → 新版默认字号（整体加大，田字格除外）；
+   存档中仍为旧默认值的分类自动迁移到新默认，家长自定义过的字号保持不动 */
+const OLD_DEF_SIZES = { title:18, subtitle:14, body:14, button:13, mizi:38, pinyin:16, hint:11.5 };
 const DEFAULT_FONTS = {};
 FONT_CATEGORIES.forEach(c => { DEFAULT_FONTS[c.key] = { font:c.defFont, size:c.defSize }; });
 function normalizeFontEntry(v, c){
   const o = (v && typeof v === 'object') ? v : {};
   const font = (typeof o.font === 'string' && FONT_OPTIONS[o.font]) ? o.font : c.defFont;
   const n = Number(o.size);
-  const size = clamp(isFinite(n) ? n : c.defSize, c.min, c.max);
-  return { font, size };
+  let size;
+  if(isFinite(n) && n > 0){
+    size = n;
+    if(OLD_DEF_SIZES[c.key] !== undefined && Math.abs(n - OLD_DEF_SIZES[c.key]) < 0.001){
+      size = c.defSize;  /* 旧默认 → 新默认（整体加大） */
+    }
+  }else{
+    size = c.defSize;
+  }
+  return { font, size: clamp(size, c.min, c.max) };
 }
 function applyFontSettings(){
   const fs = (state && state.settings && state.settings.fonts) || DEFAULT_FONTS;
@@ -1743,7 +1753,7 @@ const DEFAULT_SETTINGS = {
     password: true, eye: true, math: false, english: false, shop: true,
     timetable: true, font: true
   },
-  ttFontSize: 12.5,
+  ttFontSize: 13.5,
   ttLineHeight: 1.4
 };
 
@@ -1978,7 +1988,8 @@ function normalizeSettings(raw){
       timetable: pc.timetable !== undefined ? !!pc.timetable : true,
       font: pc.font !== undefined ? !!pc.font : true
     },
-    ttFontSize: num(r.ttFontSize, d.ttFontSize, 8, 24),
+    /* 旧版课程表默认字号 12.5 → 新版 13.5（整体加大） */
+    ttFontSize: num(Number(r.ttFontSize) === 12.5 ? 13.5 : r.ttFontSize, d.ttFontSize, 8, 24),
     ttLineHeight: num(r.ttLineHeight, d.ttLineHeight, 1, 3)
   };
 }
@@ -3668,7 +3679,7 @@ function renderTimetable(){
   }
   /* ★ 应用字体设置 */
   const st = state.settings || DEFAULT_SETTINGS;
-  wrap.style.setProperty('--tt-font-size', (Number(st.ttFontSize) || 12.5) + 'px');
+  wrap.style.setProperty('--tt-font-size', (Number(st.ttFontSize) || 13.5) + 'px');
   wrap.style.setProperty('--tt-line-height', String(Number(st.ttLineHeight) || 1.4));
 
   const tgt = getTtTarget();
@@ -6108,8 +6119,47 @@ let dictObserver = null;
 let dictPageW = 0, dictPageH = 0;
 let dictBaseScale = 1, dictZoom = 1, dictCurScale = 0;
 let dictLastShownPage = 1;
+let dictPendingJump = 0;      /* PDF 载入完成后要跳转的页码 */
+let dictHitEntryBtn = null;   /* 索引中已高亮的条目按钮 */
 
 /* ---------- 打开 / 关闭 ---------- */
+/* 在音节索引中查找生字：先例字精确匹配，再按无声调拼音匹配 */
+function dictFindEntryForChar(char){
+  if(!char) return null;
+  for(const d of DICT_INDEX_DATA){
+    for(const it of d.items){
+      if(it[1] === char) return it;
+    }
+  }
+  let py = '';
+  try{ py = getPinyin(char, { toneType:'none' }) || ''; }catch(e){}
+  py = String(py).toLowerCase().replace(/[^a-zü]/g, '');
+  if(py){
+    for(const d of DICT_INDEX_DATA){
+      for(const it of d.items){
+        if(String(it[0]).toLowerCase().replace(/[^a-zü]/g, '') === py) return it;
+      }
+    }
+  }
+  return null;
+}
+function dictClearHit(){
+  if(dictHitEntryBtn){ dictHitEntryBtn.classList.remove('dict-hit'); dictHitEntryBtn = null; }
+}
+/* 在索引面板中定位并高亮某个条目 */
+function dictLocateEntry(item){
+  dictClearHit();
+  if(!item) return;
+  const btns = document.querySelectorAll('.dict-entry');
+  for(const b of btns){
+    if(b.dataset.syl === item[0] && b.dataset.ex === item[1]){
+      b.classList.add('dict-hit');
+      dictHitEntryBtn = b;
+      b.scrollIntoView({ behavior:'smooth', block:'center' });
+      return;
+    }
+  }
+}
 function openDictFor(char){
   if(!char) return;
   dictCurrentChar = char;
@@ -6117,8 +6167,24 @@ function openDictFor(char){
   dictModal.classList.add('show');
   dictAutoLoadPdf(0); dictAutoLoadPdf(1);
   const saved = (state.charPages && state.charPages[char]) || 0;
-  if(dictPageEntries.length && saved >= 1 && saved <= dictPageEntries.length){
-    setTimeout(() => dictScrollToPage(saved, false), 60);
+  dictPendingJump = 0;
+  if(saved >= 1){
+    /* 已标记过页码：直接跳到该页 */
+    dictPendingJump = saved;
+  }else{
+    /* 未标记：按音节索引定位生字在汉字表中的大致位置 */
+    const hit = dictFindEntryForChar(char);
+    if(hit){
+      dictPendingJump = Number(hit[2]) || 0;
+      dictLocateEntry(hit);
+      if(dictPendingJump >= 1){
+        toast('已定位到「' + hit[0] + '」音节第 ' + dictPendingJump + ' 页附近，找到「' + char + '」后双击所在页即可标记页码', 2800);
+      }
+    }
+  }
+  if(dictPageEntries.length && dictPendingJump >= 1 && dictPendingJump <= dictPageEntries.length){
+    const j = dictPendingJump; dictPendingJump = 0;
+    setTimeout(() => dictScrollToPage(j, false), 60);
   }
   highlightDictMarkedPage();
 }
@@ -6242,6 +6308,14 @@ async function dictRebuildPages(){
   dictScrollEl.scrollTop = 0;
   dictLastShownPage = 1;
   dictPageInputEl.value = 1;
+  highlightDictMarkedPage();
+  /* PDF 刚载入：补跳打开时定位的页码 */
+  if(dictPendingJump >= 1 && dictPendingJump <= dictPageEntries.length){
+    const j = dictPendingJump; dictPendingJump = 0;
+    setTimeout(() => dictScrollToPage(j, false), 120);
+  }else{
+    dictPendingJump = 0;
+  }
 }
 
 function dictComputeBaseScale(){
@@ -6351,6 +6425,7 @@ dictPagesEl.addEventListener('dblclick', e => {
   if(!state.charPages) state.charPages = {};
   state.charPages[dictCurrentChar] = n;
   saveLocalState(); uploadToCloud();
+  dictClearHit();
   /* 同步更新页面上所有该生字的页码显示 */
   document.querySelectorAll('.page-num[data-page-char="' + dictCurrentChar + '"]')
     .forEach(sp => { sp.textContent = n; });
@@ -6429,6 +6504,8 @@ function dictBuildIndex(){
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'dict-entry';
+      btn.dataset.syl = syl;
+      btn.dataset.ex = ex;
       btn.title = syl + ' → 第 ' + pg + ' 页（点击跳页）';
       btn.innerHTML = '<span class="syl">' + escapeHtml(syl) + '</span>' +
         '<span class="ex">' + escapeHtml(ex) + '</span>' +
