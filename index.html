@@ -10,8 +10,8 @@
 <title>学习打卡台</title>
 <link rel="manifest" href="manifest.json">
 <script src="hanzi-data.js"></script>
-<script src="hanzi-writer.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/hanzi-writer@3.5.0/dist/hanzi-writer.min.js';document.head.appendChild(s);"></script>
-<script src="pinyin-pro.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/pinyin-pro@3.26.0/dist/index.js';document.head.appendChild(s);"></script>
+<script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5.0/dist/hanzi-writer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.26.0/dist/index.js"></script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
@@ -814,65 +814,6 @@
   .drag-handle{font-size:15px;color:#7a9aaa;flex:none}
 
   .word-group.no-char-info .char-info{display:none}
-
-  .char-card .char-page{cursor:pointer;color:#1565C0;text-decoration:underline dotted}
-  .char-card .char-stroke{color:#2E7D32}
-  .mizi.mini{width:34px;height:34px;border-radius:3px;border-width:1.2px;cursor:default}
-  .mizi.mini .mizi-char{font-size:22px}
-  .mizi.mini .mizi-bar{height:4px}
-  .mizi.mini:hover{transform:none;box-shadow:none}
-  .wg-word{display:flex;align-items:center;gap:2px;position:relative;padding:1px 2px;flex:none}
-  .wg-word-del{position:absolute;top:-7px;right:-7px;width:17px;height:17px;border-radius:50%;
-    border:0;background:rgba(229,57,53,.9);color:#fff;font-size:10px;font-weight:900;
-    line-height:1;display:grid;place-items:center;padding:0;font-family:inherit;cursor:pointer}
-  .wg-word-del:active{transform:scale(.9)}
-  .quiz-stage{width:230px;height:230px;margin:12px auto 0;
-    background:#E8F5E9;border:2px solid #EF9A9A;border-radius:8px;
-    display:flex;align-items:center;justify-content:center;position:relative;touch-action:none;}
-  .quiz-result{text-align:center;font-size:14px;font-weight:900;color:#2E7D32;
-    margin-top:10px;min-height:22px;line-height:1.5}
-  .dict-modal-card{width:96vw;max-width:1040px;height:92vh;display:flex;flex-direction:column;
-    background:#fdfaf3;border-radius:16px;overflow:hidden;
-    box-shadow:0 20px 50px rgba(0,0,0,.4)}
-  .dict-head{flex:none;display:flex;align-items:center;gap:8px;padding:9px 14px;
-    background:linear-gradient(180deg,#a8422f,#8f3327);color:#fdf6e8}
-  .dict-head .dict-title{font-weight:900;font-size:14px;white-space:nowrap}
-  .dict-head .dict-title b{color:#FFD54F;font-size:18px;margin-left:4px;
-    font-family:"Kaiti SC","KaiTi",serif}
-  .dict-head .spacer{flex:1}
-  .dict-head-btn{font-family:inherit;font-size:12px;font-weight:900;color:#8f3327;
-    background:#fdf6e8;border:0;padding:7px 13px;border-radius:999px;
-    cursor:pointer;white-space:nowrap}
-  .dict-body{flex:1;position:relative;overflow:auto;background:#ddd4c2;min-height:0;
-    -webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;overscroll-behavior:contain}
-  .dict-pages{display:flex;flex-direction:column;align-items:center;gap:10px;
-    padding:12px 12px 24px;width:max-content;min-width:100%}
-  .dict-page{position:relative;background:#fff;flex:none;border-radius:2px;
-    box-shadow:0 2px 8px rgba(0,0,0,.22);overflow:hidden}
-  .dict-page canvas{display:block;width:100%;height:100%;opacity:0;transition:opacity .2s}
-  .dict-page.rendered canvas{opacity:1}
-  .dict-page.marked{outline:3px solid #FFC107;outline-offset:-3px}
-  .dict-page::after{content:attr(data-num);position:absolute;top:5px;right:8px;
-    font-size:11px;color:#c4b8a2;pointer-events:none}
-  .dict-dropzone{position:absolute;inset:12px;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;gap:12px;
-    border:2px dashed #c0b49c;border-radius:10px;background:rgba(255,255,255,.6);
-    color:#8b7a5e;font-size:14px;font-weight:700;text-align:center;padding:14px}
-  .dict-dropzone.hide{display:none}
-  .dict-foot{flex:none;display:flex;align-items:center;gap:10px;padding:8px 14px;
-    background:#fbf6ec;border-top:1px solid #e2d9c6;
-    font-size:12.5px;font-weight:800;color:#6b5c46;flex-wrap:wrap}
-  .dict-foot input{width:64px;font-family:inherit;font-size:12.5px;font-weight:800;
-    text-align:center;border:1px solid #d5c9b2;border-radius:6px;padding:5px;
-    color:#2f2a24;background:#fff;outline:none}
-  .dict-foot .spacer{flex:1}
-  .dict-foot #dictHint{color:#a2937a;font-size:11.5px}
-  @media (max-width:500px){
-    .quiz-stage{width:200px;height:200px}
-    .mizi.mini{width:28px;height:28px}
-    .mizi.mini .mizi-char{font-size:18px}
-    .dict-modal-card{width:100vw;height:100vh;max-width:none;border-radius:0}
-  }
 </style>
 </head>
 <body>
@@ -1019,55 +960,6 @@
     <div class="modal-actions">
       <button class="btn-ghost" id="strokeReplay">🔄 重播</button>
       <button class="btn-main" id="strokeClose">关闭</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal" id="quizModal">
-  <div class="modal-card" style="max-width:360px;text-align:center">
-    <h3 id="quizTitle">✍️ 手写确认</h3>
-    <p style="text-align:center">请在田字格中按笔顺书写，写对后会显示笔画数</p>
-    <div class="quiz-stage" id="quizStage"></div>
-    <div class="quiz-result" id="quizResult"></div>
-    <div class="modal-actions">
-      <button class="btn-ghost" id="quizRetry">🔄 重写</button>
-      <button class="btn-main" id="quizClose">关闭</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal" id="addWordModal">
-  <div class="modal-card" style="max-width:340px">
-    <h3 id="addWordTitle">➕ 添加词语</h3>
-    <p id="addWordSub">请输入包含当前字的词语</p>
-    <div class="form-field"><input type="text" id="addWordInput" maxlength="8" placeholder="如：蝌蚪"></div>
-    <div class="modal-actions">
-      <button class="btn-ghost" id="addWordCancel">取消</button>
-      <button class="btn-main" id="addWordSave">添加</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal" id="dictModal">
-  <div class="dict-modal-card">
-    <div class="dict-head">
-      <span class="dict-title">📖 查字典 ·<b id="dictTargetName">—</b></span>
-      <span class="spacer"></span>
-      <button class="dict-head-btn" id="dictCloseBtn">✕ 关闭</button>
-    </div>
-    <div class="dict-body" id="dictBody">
-      <div class="dict-pages" id="dictPages"></div>
-      <div class="dict-dropzone" id="dictDropzone">
-        <div style="font-size:36px">📖</div>
-        <div>正在加载汉字表…</div>
-        <div style="font-size:12px;opacity:.75">需将 汉字表1.pdf 和 汉字表3.pdf 放到网站目录</div>
-      </div>
-    </div>
-    <div class="dict-foot">
-      <span>跳至 <input type="number" id="dictPageInput" min="1" value="1"> 页</span>
-      <span id="dictTotalPages">/ 0 页</span>
-      <span class="spacer"></span>
-      <span id="dictHint">双击页面，标记当前字的页码</span>
     </div>
   </div>
 </div>
@@ -1392,6 +1284,7 @@
       <div class="admin-add-row"><button class="aa-btn" id="adminLibAddBtn" style="flex:1">💾 保存到课文库</button></div>
     </div>
 
+    <!-- ★★★ 课程表：已移动到家长密码上面 ★★★ -->
     <div class="admin-section collapsed" id="adminPanelTimetable">
       <h3>📅 课程表 <span class="badge" id="adminTtBadge">未上传</span></h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
@@ -1520,41 +1413,19 @@ const MASTER_PASSWORD = '0702';
 let firebaseApp = null, db = null, dataRef = null;
 let fbSet = null, fbGet = null, fbOnValue = null, fbRef = null, historyRef = null;
 
-async function initFirebase() {
-  try{
-    const appMod = await import('https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js');
-    const dbMod  = await import('https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js');
-    firebaseApp = appMod.initializeApp(FIREBASE_CONFIG);
-    db          = dbMod.getDatabase(firebaseApp);
-    fbRef       = dbMod.ref;
-    dataRef     = dbMod.ref(db, 'families/' + FAMILY_ID + '/data');
-    historyRef  = dbMod.ref(db, 'families/' + FAMILY_ID + '/history');
-    fbSet       = dbMod.set;
-    fbGet       = dbMod.get;
-    fbOnValue   = dbMod.onValue;
-
-    const result = await readCloudOnce();
-    if(result.state === 'has-data' && result.data && result.data.days && Object.keys(result.data.days).length){
-      applyRemoteState(result.data);
-      console.log('✅ 已从云端加载数据');
-    } else if(result.state === 'empty'){
-      console.log('☁️ 云端确认为空，用本地数据初始化并上传');
-      await uploadToCloud(true);
-    } else {
-      console.warn('⚠️ 读取云端失败');
-      showSyncStatus('⚠️ 云端读取失败，稍后重试', 'offline');
-    }
-    freshBoot = false;
-    startCloudSync();
-    updateSyncInfo();
-    if(nameMigrated && result.state !== 'error'){
-      try{ await uploadToCloud(true); }catch(e){ console.warn('改名回写云端失败', e); }
-    }
-  }catch(e){
-    console.warn('Firebase 加载/初始化失败，将使用纯本地模式', e);
-    updateSyncInfo('未连接（纯本地模式）');
-    showSyncStatus('📴 纯本地模式', 'offline');
-  }
+try{
+  const appMod = await import('https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js');
+  const dbMod  = await import('https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js');
+  firebaseApp = appMod.initializeApp(FIREBASE_CONFIG);
+  db          = dbMod.getDatabase(firebaseApp);
+  fbRef       = dbMod.ref;
+  dataRef     = dbMod.ref(db, 'families/' + FAMILY_ID + '/data');
+  historyRef  = dbMod.ref(db, 'families/' + FAMILY_ID + '/history');
+  fbSet       = dbMod.set;
+  fbGet       = dbMod.get;
+  fbOnValue   = dbMod.onValue;
+}catch(e){
+  console.warn('Firebase 加载/初始化失败，将使用纯本地模式', e);
 }
 
 /* ============================================================
@@ -1575,23 +1446,6 @@ const PHOTO_MAX_SIZE = 800;
 const PHOTO_QUALITY = 0.55;
 
 const TT_SWITCH_HOUR = 15;
-
-const HANZI_STROKE_DIR = 'hanzi-writer-data/';
-const HANZI_STROKE_CDN = 'https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0.1/';
-const DICT_PDF_1 = '汉字表1.pdf';
-const DICT_PDF_2 = '汉字表3.pdf';
-
-function loadHanziStrokeData(char, onComplete, onError){
-  fetch(HANZI_STROKE_DIR + char + '.json', { cache: 'force-cache' })
-    .then(r => { if(!r.ok) throw new Error('local miss'); return r.json(); })
-    .then(onComplete)
-    .catch(() => {
-      fetch(HANZI_STROKE_CDN + char + '.json')
-        .then(r => { if(!r.ok) throw new Error('no data'); return r.json(); })
-        .then(onComplete)
-        .catch(err => { if(onError) onError(err); });
-    });
-}
 
 const DEFAULT_LIVE = {
   activeId:'', status:'idle', startedAt:0, leftAtStart:0, totalMs:0, unitMs:0,
@@ -1669,8 +1523,7 @@ const DEFAULT_LESSON_LIBRARY = {
 const HZ_STRUCT_NAME = {'1':'左右','2':'上下','3':'独体','4':'半包围','5':'全包围','6':'上中下','7':'左中右'};
 const HZ_INFO = (function(){
   const map = {};
-  const rawData = (typeof HZ_RAW !== 'undefined' && HZ_RAW) ? HZ_RAW : '';
-  const segs = String(rawData).split(';');
+  const segs = String(HZ_RAW || '').split(';');
   for(let i = 0; i < segs.length; i++){
     const seg = segs[i];
     if(seg.length < 3) continue;
@@ -1744,22 +1597,6 @@ function normalizeWordBank(raw){
       .filter(w => /^[\u4e00-\u9fa5]{1,8}$/.test(w) && w.indexOf(ch) >= 0);
     const uniq = [...new Set(list)].slice(0, 12);
     if(uniq.length) out[ch] = uniq;
-  });
-  return out;
-}
-function normalizeCharMeta(raw){
-  const out = {};
-  if(!raw || typeof raw !== 'object') return out;
-  Object.keys(raw).forEach(k => {
-    const ch = String(k).slice(0, 4);
-    if(!ch || !/[\u4e00-\u9fa5]/.test(ch)) return;
-    const m = raw[k];
-    if(!m || typeof m !== 'object') return;
-    const item = {};
-    if(Number(m.strokes) > 0) item.strokes = Math.round(Number(m.strokes));
-    if(Number(m.page) > 0) item.page = Math.round(Number(m.page));
-    if(m.verified) item.verified = true;
-    if(Object.keys(item).length) out[ch] = item;
   });
   return out;
 }
@@ -2015,7 +1852,7 @@ function loadLocalState(){
       settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
       lessonLibrary: JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY)),
       shop: JSON.parse(JSON.stringify(DEFAULT_SHOP)),
-      wordBank: {}, charMeta: {}, timetable: null,
+      wordBank: {}, timetable: null,
       parentPassword: MASTER_PASSWORD,
       lastNightReset: '', eyeSoundOffDate: '',
       live: JSON.parse(JSON.stringify(DEFAULT_LIVE))
@@ -2039,7 +1876,6 @@ function loadLocalState(){
   if(shopNorm === null) s.shop = JSON.parse(JSON.stringify(DEFAULT_SHOP));
   else s.shop = shopNorm;
   s.wordBank = normalizeWordBank(s.wordBank);
-  if(!s.charMeta || typeof s.charMeta !== 'object') s.charMeta = {};
   s.timetable = normalizeTimetable(s.timetable);
   if(!s.live || typeof s.live !== 'object'){
     s.live = JSON.parse(JSON.stringify(DEFAULT_LIVE));
@@ -2377,7 +2213,6 @@ function saveMiziEdit(){
 
 function bindMiziClicks(container, task){
   container.querySelectorAll('.mizi[data-char]').forEach(el => {
-    if(el.classList.contains('mini')) return;
     let clickTimer = null;
     let lpTimer = null, lpX = 0, lpY = 0;
     el.__lpFired = false;
@@ -2416,23 +2251,14 @@ function bindMiziClicks(container, task){
       e.stopPropagation();
       if(el.__lpFired){ el.__lpFired = false; return; }
       clearTimeout(clickTimer);
-      clickTimer = setTimeout(() => {
-        if(!task) return;
-        if(task.type === 'preview'){
-          openStrokeQuiz(el.dataset.char, task);
-        } else if(task.type === 'wordgroup'){
-          openAddWordModal(el.dataset.char, task);
-        } else {
-          showStroke(el.dataset.char);
-        }
-      }, 260);
+      clickTimer = setTimeout(() => { showStroke(el.dataset.char); }, 260);
     });
     el.addEventListener('dblclick', e => {
       e.preventDefault(); e.stopPropagation();
       if(el.__lpFired){ el.__lpFired = false; return; }
       clearTimeout(clickTimer);
       const group = el.closest('.word-group');
-      const targets = group ? Array.from(group.querySelectorAll('.mizi[data-char]:not(.mini)')) : [el];
+      const targets = group ? Array.from(group.querySelectorAll('.mizi[data-char]')) : [el];
       const willCheck = !el.classList.contains('checked');
       targets.forEach(x => {
         x.classList.toggle('checked', willCheck);
@@ -2495,371 +2321,6 @@ function removeCharWord(char, index){
   saveLocalState(); uploadToCloud();
   renderStrokeWords(char);
 }
-
-/* ★ 抄写并组词条目：生字大格 + 组词小格 */
-function renderWordgroupEntry(char, task){
-  const chars = [...String(char)].filter(c => /[\u4e00-\u9fa5]/.test(c));
-  if(!chars.length) return '';
-  const mainChar = chars[0];
-  const bank = (state.wordBank && state.wordBank[mainChar]) || [];
-
-  let html = '<div class="word-group" data-word-group="1" data-main-char="' + escapeAttr(mainChar) + '">';
-
-  chars.forEach(c => {
-    const py = getPinyin(c);
-    const checked = !!(task && Array.isArray(task.checkedChars) && task.checkedChars.indexOf(c) >= 0);
-    html += '<div class="wg-item">' +
-      '<div class="char-pinyin">' + (py ? escapeHtml(py) : '&nbsp;') + '</div>' +
-      '<div class="mizi' + (checked ? ' checked' : '') + '" data-char="' + escapeAttr(c) + '" title="单击添加词语 · 双击打勾 · 长按修改/删除">' +
-        miziSvg() + '<span class="mizi-char">' + escapeHtml(c) + '</span>' +
-      '</div></div>';
-  });
-
-  if(chars.length === 1){
-    bank.forEach((w, wi) => {
-      const wc = [...w].filter(c => /[\u4e00-\u9fa5]/.test(c));
-      if(!wc.length) return;
-      html += '<div class="wg-word" data-word-idx="' + wi + '">' +
-        wc.map(c => '<div class="mizi mini">' + miziSvg() +
-          '<span class="mizi-char">' + escapeHtml(c) + '</span></div>').join('') +
-        '<button type="button" class="wg-word-del" data-del-char="' + escapeAttr(mainChar) +
-          '" data-del-idx="' + wi + '" title="删除词语">✕</button>' +
-      '</div>';
-    });
-  }
-  html += '</div>';
-  return html;
-}
-function bindWordDelClicks(grid){
-  grid.querySelectorAll('.wg-word-del').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation(); e.preventDefault();
-      const ch = btn.dataset.delChar;
-      const idx = Number(btn.dataset.delIdx);
-      const arr = (state.wordBank && state.wordBank[ch]) || [];
-      const w = arr[idx] || '';
-      if(!w) return;
-      if(!confirm('确定删除词语「' + w + '」吗？')) return;
-      const a = state.wordBank && state.wordBank[ch];
-      if(Array.isArray(a)){
-        a.splice(idx, 1);
-        if(!a.length) delete state.wordBank[ch];
-        saveLocalState(); uploadToCloud();
-      }
-      renderBoard(); refreshAllCards();
-    });
-  });
-}
-
-/* ★ 手写确认笔画 */
-let quizWriter = null;
-let quizChar = '';
-function openStrokeQuiz(char, task){
-  if(!char) return;
-  quizChar = char;
-  const modal = $('quizModal');
-  const titleEl = $('quizTitle');
-  const result = $('quizResult');
-  const stage = $('quizStage');
-  if(titleEl) titleEl.textContent = '✍️ 手写确认：' + char;
-  if(result){ result.textContent = '请在田字格中按笔顺书写'; result.className = 'quiz-result'; }
-  if(stage) stage.innerHTML = '';
-  modal.classList.add('show');
-  setTimeout(() => startStrokeQuiz(char), 100);
-}
-function startStrokeQuiz(char){
-  const stage = $('quizStage');
-  if(!stage) return;
-  stage.innerHTML = '';
-  if(!window.HanziWriter){
-    stage.innerHTML = '<div style="font-size:110px;line-height:1;color:#2E7D32;font-family:\'Kaiti SC\',\'KaiTi\',serif">' + escapeHtml(char) + '</div>';
-    return;
-  }
-  try{
-    quizWriter = HanziWriter.create(stage, char, {
-      width: 220, height: 220, padding: 6,
-      showOutline: true, showCharacter: false,
-      strokeColor: '#2E7D32', outlineColor: '#A5D6A7', radicalColor: '#1B5E20',
-      drawingColor: '#1565C0', drawingWidth: 22,
-      showHintAfterMisses: 2,
-      highlightOnComplete: true,
-      charDataLoader: (c, onComplete, onError) => { loadHanziStrokeData(c, onComplete, onError); },
-      onComplete: () => { verifyStroke(char); }
-    });
-    quizWriter.quiz();
-  }catch(e){ console.warn('手写确认渲染失败', e); }
-}
-async function verifyStroke(char){
-  let n = 0;
-  try{
-    const res = await fetch(HANZI_STROKE_DIR + char + '.json', { cache: 'force-cache' })
-      .then(r => { if(!r.ok) throw new Error('local miss'); return r; })
-      .catch(() => fetch(HANZI_STROKE_CDN + char + '.json'));
-    const data = await res.json();
-    n = (data.strokes || []).length;
-  }catch(e){}
-  if(!state.charMeta) state.charMeta = {};
-  if(!state.charMeta[char]) state.charMeta[char] = {};
-  state.charMeta[char].strokes = n || 0;
-  state.charMeta[char].verified = true;
-  saveLocalState(); uploadToCloud();
-  const res = $('quizResult');
-  if(res){ res.textContent = '🎉 笔顺正确！共 ' + (n || '?') + ' 画'; res.className = 'quiz-result'; }
-  renderBoard(); refreshAllCards();
-  try{ playSound('win'); }catch(e){}
-  toast('✅ 已确认「' + char + '」的笔画：' + (n || '?'));
-}
-
-/* ★ 添加词语 */
-let addWordCtx = null;
-function openAddWordModal(char, task){
-  if(!char) return;
-  addWordCtx = { char, taskId: task ? task.id : '' };
-  const titleEl = $('addWordTitle');
-  const subEl = $('addWordSub');
-  const input = $('addWordInput');
-  if(titleEl) titleEl.textContent = '➕ 给「' + char + '」添加词语';
-  if(subEl) subEl.textContent = '请输入包含「' + char + '」的词语（1-8 个汉字）';
-  if(input){ input.value = ''; input.maxLength = 8; }
-  const modal = $('addWordModal');
-  if(modal) modal.classList.add('show');
-  setTimeout(() => { if(input) input.focus(); }, 120);
-}
-function closeAddWordModal(){
-  const modal = $('addWordModal');
-  if(modal) modal.classList.remove('show');
-  addWordCtx = null;
-}
-function saveAddWord(){
-  const ctx = addWordCtx;
-  if(!ctx){ closeAddWordModal(); return; }
-  const input = $('addWordInput');
-  const v = String((input && input.value) || '').trim();
-  if(!v){ toast('请输入词语'); return; }
-  const char = ctx.char;
-  if(v.indexOf(char) < 0){ toast('词语里要包含「' + escapeHtml(char) + '」哦'); return; }
-  if(!/^[\u4e00-\u9fa5]{1,8}$/.test(v)){ toast('请输入 1-8 个汉字'); return; }
-  if(!state.wordBank) state.wordBank = {};
-  if(!Array.isArray(state.wordBank[char])) state.wordBank[char] = [];
-  if(state.wordBank[char].indexOf(v) >= 0){ toast('已经记录过「' + escapeHtml(v) + '」了'); return; }
-  if(state.wordBank[char].length >= 12){ toast('每个字最多记 12 个词'); return; }
-  state.wordBank[char].push(v);
-  saveLocalState(); uploadToCloud();
-  closeAddWordModal();
-  renderBoard(); refreshAllCards();
-  toast('✅ 已添加词语：' + escapeHtml(v));
-}
-(function bindAddWordEvents(){
-  if($('addWordCancel')) $('addWordCancel').addEventListener('click', closeAddWordModal);
-  const modal = $('addWordModal');
-  if(modal) modal.addEventListener('click', e => { if(e.target === modal) closeAddWordModal(); });
-  if($('addWordSave')) $('addWordSave').addEventListener('click', saveAddWord);
-  const inp = $('addWordInput');
-  if(inp) inp.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); saveAddWord(); } });
-})();
-(function bindQuizEvents(){
-  const modal = $('quizModal');
-  if($('quizRetry')) $('quizRetry').addEventListener('click', () => {
-    const res = $('quizResult');
-    if(res){ res.textContent = '请在田字格中按笔顺书写'; res.className = 'quiz-result'; }
-    startStrokeQuiz(quizChar);
-  });
-  if($('quizClose')) $('quizClose').addEventListener('click', () => { modal.classList.remove('show'); quizWriter = null; });
-  if(modal) modal.addEventListener('click', e => { if(e.target === modal){ modal.classList.remove('show'); quizWriter = null; } });
-})();
-
-/* ★ 查字典 */
-let dictPdf1 = null, dictPdf2 = null;
-let dictCount1 = 0, dictCount2 = 0, dictTotal = 0;
-let dictAllEntries = [];
-let dictObserver = null;
-let dictBaseScale = 1;
-let dictTargetChar = '';
-let dictCurPage = 1;
-let dictLoading = false;
-
-async function loadDictPdfs(){
-  if(dictPdf1 && dictPdf2) return true;
-  if(dictLoading) return false;
-  dictLoading = true;
-  try{
-    const lib = await loadPdfJs();
-    const [p1, p2] = await Promise.all([
-      lib.getDocument({ url: DICT_PDF_1 }).promise,
-      lib.getDocument({ url: DICT_PDF_2 }).promise
-    ]);
-    dictPdf1 = p1; dictPdf2 = p2;
-    dictCount1 = p1.numPages; dictCount2 = p2.numPages;
-    dictTotal = dictCount1 + dictCount2;
-    dictLoading = false;
-    return true;
-  }catch(e){ console.warn('加载汉字表失败', e); dictLoading = false; return false; }
-}
-function createDictPageEl(num, w, h){
-  const el = document.createElement('div');
-  el.className = 'dict-page';
-  el.dataset.num = num;
-  el.style.width = w + 'px';
-  el.style.height = h + 'px';
-  const cvs = document.createElement('canvas');
-  cvs.width = 1; cvs.height = 1;
-  el.appendChild(cvs);
-  return el;
-}
-async function buildDictPages(){
-  const wrap = $('dictPages'), body = $('dictBody');
-  if(!wrap || !body) return;
-  if(dictObserver){ dictObserver.disconnect(); dictObserver = null; }
-  wrap.innerHTML = ''; dictAllEntries = [];
-  const p1 = await dictPdf1.getPage(1);
-  const vp = p1.getViewport({ scale: 1 });
-  const pw = vp.width, ph = vp.height;
-  const availW = Math.max(120, body.clientWidth - 30);
-  const availH = Math.max(120, body.clientHeight - 30);
-  dictBaseScale = Math.min(availW / pw, availH / ph);
-  const w = Math.round(pw * dictBaseScale), h = Math.round(ph * dictBaseScale);
-  const frag = document.createDocumentFragment();
-  for(let i = 1; i <= dictCount1; i++){
-    const el = createDictPageEl(i, w, h);
-    frag.appendChild(el);
-    dictAllEntries.push({ num:i, el, canvas: el.querySelector('canvas'), pdf:1, pageNum:i, pageObj:null, busy:false, rendered:false, visible:false });
-  }
-  for(let i = 1; i <= dictCount2; i++){
-    const globalNum = dictCount1 + i;
-    const el = createDictPageEl(globalNum, w, h);
-    frag.appendChild(el);
-    dictAllEntries.push({ num:globalNum, el, canvas: el.querySelector('canvas'), pdf:2, pageNum:i, pageObj:null, busy:false, rendered:false, visible:false });
-  }
-  wrap.appendChild(frag);
-  setupDictObserver();
-  const tot = $('dictTotalPages');
-  if(tot) tot.textContent = '/ ' + dictTotal + ' 页';
-}
-function setupDictObserver(){
-  const body = $('dictBody'); if(!body) return;
-  dictObserver = new IntersectionObserver(entries => {
-    entries.forEach(en => {
-      const entry = dictAllEntries[Number(en.target.dataset.num) - 1];
-      if(!entry) return;
-      if(en.isIntersecting){ entry.visible = true; renderDictPage(entry); }
-      else entry.visible = false;
-    });
-  }, { root: body, rootMargin: '800px 0px' });
-  dictAllEntries.forEach(e => dictObserver.observe(e.el));
-}
-async function renderDictPage(entry){
-  if(entry.busy || entry.rendered) return;
-  const pdf = entry.pdf === 1 ? dictPdf1 : dictPdf2;
-  if(!pdf) return;
-  entry.busy = true;
-  try{
-    if(!entry.pageObj) entry.pageObj = await pdf.getPage(entry.pageNum);
-    const dpr = window.devicePixelRatio || 1;
-    const ratio = Math.min(Math.max(dpr * 1.4, 1.4), 2.4);
-    const vp = entry.pageObj.getViewport({ scale: dictBaseScale * ratio });
-    entry.canvas.width = Math.max(1, Math.round(vp.width));
-    entry.canvas.height = Math.max(1, Math.round(vp.height));
-    const ctx = entry.canvas.getContext('2d', { alpha: false });
-    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, entry.canvas.width, entry.canvas.height);
-    await entry.pageObj.render({ canvasContext: ctx, viewport: vp }).promise;
-    entry.el.classList.add('rendered');
-    entry.rendered = true;
-  }catch(err){ if(!err || err.name !== 'RenderingCancelledException') console.warn(err); }
-  finally{ entry.busy = false; }
-}
-function scrollToDictPage(num){
-  const entry = dictAllEntries[num - 1], body = $('dictBody');
-  if(!entry || !body) return;
-  renderDictPage(entry);
-  const top = entry.el.offsetTop - 12;
-  try{ body.scrollTo({ top: Math.max(0, top), behavior: 'smooth' }); }
-  catch(e){ body.scrollTop = Math.max(0, top); }
-}
-function markDictPage(num){
-  if(!dictTargetChar || !num) return;
-  if(!state.charMeta) state.charMeta = {};
-  if(!state.charMeta[dictTargetChar]) state.charMeta[dictTargetChar] = {};
-  state.charMeta[dictTargetChar].page = num;
-  saveLocalState(); uploadToCloud();
-  dictAllEntries.forEach(e => e.el.classList.toggle('marked', e.num === num));
-  renderBoard(); refreshAllCards();
-  toast('✅ 已标记「' + escapeHtml(dictTargetChar) + '」在第 ' + num + ' 页');
-}
-async function openDictFor(char){
-  dictTargetChar = char || '';
-  const modal = $('dictModal');
-  const nameEl = $('dictTargetName');
-  const dropzone = $('dictDropzone');
-  if(nameEl) nameEl.textContent = dictTargetChar || '—';
-  const hint = $('dictHint');
-  if(hint) hint.textContent = dictTargetChar ? ('双击页面，标记「' + dictTargetChar + '」的页码') : '双击页面，标记当前字的页码';
-  modal.classList.add('show');
-  if(!dictPdf1 || !dictPdf2){
-    if(dropzone) dropzone.classList.remove('hide');
-    const ok = await loadDictPdfs();
-    if(!ok){
-      if(dropzone) dropzone.innerHTML = '<div style="font-size:36px">⚠️</div><div>未找到汉字表 PDF</div><div style="font-size:12px;opacity:.75">请确认 汉字表1.pdf 和 汉字表3.pdf 在网站目录中</div>';
-      toast('⚠️ 未找到汉字表 PDF，请确认文件在网站目录中');
-      return;
-    }
-    if(dropzone) dropzone.classList.add('hide');
-    await buildDictPages();
-  }
-  if(state.charMeta && state.charMeta[dictTargetChar] && state.charMeta[dictTargetChar].page){
-    const p = state.charMeta[dictTargetChar].page;
-    dictAllEntries.forEach(e => e.el.classList.toggle('marked', e.num === p));
-    setTimeout(() => scrollToDictPage(p), 150);
-  } else {
-    dictAllEntries.forEach(e => e.el.classList.remove('marked'));
-  }
-}
-let dictTapCount = 0, dictTapTimer = null;
-(function bindDictEvents(){
-  const pages = $('dictPages'), body = $('dictBody');
-  if(pages){
-    pages.addEventListener('click', e => {
-      const pageEl = e.target.closest('.dict-page');
-      if(!pageEl) return;
-      dictTapCount++;
-      if(dictTapCount === 1){ dictTapTimer = setTimeout(() => { dictTapCount = 0; }, 330); }
-      else { clearTimeout(dictTapTimer); dictTapCount = 0; markDictPage(Number(pageEl.dataset.num)); }
-    });
-  }
-  if(body){
-    body.addEventListener('scroll', () => {
-      if(!dictAllEntries.length) return;
-      const st = body.scrollTop + 20;
-      let lo = 0, hi = dictAllEntries.length - 1;
-      while(lo < hi){
-        const mid = (lo + hi + 1) >> 1;
-        if(dictAllEntries[mid].el.offsetTop <= st) lo = mid;
-        else hi = mid - 1;
-      }
-      const n = dictAllEntries[lo].num;
-      if(n !== dictCurPage){
-        dictCurPage = n;
-        const pi = $('dictPageInput');
-        if(pi && document.activeElement !== pi) pi.value = n;
-      }
-    }, { passive: true });
-  }
-  const pi = $('dictPageInput');
-  if(pi) pi.addEventListener('keydown', e => {
-    if(e.key !== 'Enter') return;
-    const n = parseInt(pi.value, 10);
-    if(n >= 1 && n <= dictAllEntries.length) scrollToDictPage(n);
-    pi.blur();
-  });
-  const closeBtn = $('dictCloseBtn'), modal = $('dictModal');
-  if(closeBtn) closeBtn.addEventListener('click', () => modal.classList.remove('show'));
-  if(modal) modal.addEventListener('click', e => { if(e.target === modal) modal.classList.remove('show'); });
-})();
-document.addEventListener('click', e => {
-  const pageEl = e.target.closest('.char-page[data-page-char]');
-  if(!pageEl) return;
-  e.stopPropagation();
-  openDictFor(pageEl.dataset.pageChar);
-});
 
 /* ============================================================
    Live 状态
@@ -2982,7 +2443,7 @@ async function uploadToCloud(force){
     sun: state.sun, checkins: state.checkins,
     sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
     lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword,
-    shop: state.shop, wordBank: state.wordBank, charMeta: state.charMeta || {}, timetable: state.timetable,
+    shop: state.shop, wordBank: state.wordBank, timetable: state.timetable,
     lastNightReset: state.lastNightReset || '',
     eyeSoundOffDate: state.eyeSoundOffDate || '',
     live: state.live, updatedAt: Date.now()
@@ -3004,8 +2465,7 @@ function getEditableStateForCompare(){
     days: state.days, date: state.date, settings: state.settings,
     sun: state.sun, checkins: state.checkins, sunLog: state.sunLog,
     lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword,
-    shop: state.shop, wordBank: state.wordBank, charMeta: state.charMeta || {},
-    timetable: state.timetable,
+    shop: state.shop, wordBank: state.wordBank, timetable: state.timetable,
     lastNightReset: state.lastNightReset || '', eyeSoundOffDate: state.eyeSoundOffDate || ''
   });
 }
@@ -3020,7 +2480,6 @@ function makeHistorySnapshot(reason){
       lessonLibrary: JSON.parse(JSON.stringify(state.lessonLibrary || {})),
       parentPassword: state.parentPassword, shop: JSON.parse(JSON.stringify(state.shop || [])),
       wordBank: JSON.parse(JSON.stringify(state.wordBank || {})),
-      charMeta: JSON.parse(JSON.stringify(state.charMeta || {})),
       timetable: JSON.parse(JSON.stringify(state.timetable || null)),
       lastNightReset: state.lastNightReset || '', eyeSoundOffDate: state.eyeSoundOffDate || '',
       live: JSON.parse(JSON.stringify(state.live || {})), updatedAt: Date.now()
@@ -3068,7 +2527,6 @@ function applyRemoteState(remote){
   if(Array.isArray(remote.sunLog)) state.sunLog = remote.sunLog.slice(0, 60);
   if(remote.lessonLibrary) state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary);
   if(remote.wordBank) state.wordBank = normalizeWordBank(remote.wordBank);
-  if(remote.charMeta && typeof remote.charMeta === 'object') state.charMeta = remote.charMeta;
   if('timetable' in remote) state.timetable = normalizeTimetable(remote.timetable);
   if(typeof remote.parentPassword === 'string' && /^\d{4}$/.test(remote.parentPassword)) state.parentPassword = remote.parentPassword;
   if(typeof remote.lastNightReset === 'string') state.lastNightReset = remote.lastNightReset;
@@ -3331,18 +2789,14 @@ function renderCharCard(char, task){
   const info = HZ_INFO[char] || ['—','—'];
   const py = getPinyin(char);
   const checked = !!(task && Array.isArray(task.checkedChars) && task.checkedChars.indexOf(char) >= 0);
-  const meta = (state.charMeta && state.charMeta[char]) || {};
-  const strokeTxt = meta.strokes ? String(meta.strokes) : '—';
-  const pageTxt = meta.page ? String(meta.page) : '—';
   return `<div class="char-card">
     <div class="char-pinyin">${py ? escapeHtml(py) : '&nbsp;'}</div>
-    <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(char)}" title="单击手写确认笔画 · 双击打勾 · 长按修改/删除">
+    <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(char)}" title="单击看笔顺 · 双击打勾 · 长按修改/删除">
       ${miziSvg()}
       <span class="mizi-char">${escapeHtml(char)}</span>
     </div>
     <div class="char-info">偏旁：${escapeHtml(info[0])}</div>
-    <div class="char-info char-stroke">笔画：${strokeTxt}</div>
-    <div class="char-info char-page" data-page-char="${escapeAttr(char)}" title="点击查字典">页码：${pageTxt}</div>
+    <div class="char-info">结构：${escapeHtml(info[1])}</div>
   </div>`;
 }
 function renderWordGroup(word, showInfo, task){
@@ -3574,6 +3028,7 @@ function renderSubjectCards(subject, listEl){
 
     const actions = document.createElement('div'); actions.className = 'card-actions';
 
+    /* ★ 撤销/恢复按钮（仅田字格任务显示，在相机左侧） */
     if(task.type === 'preview' || task.type === 'wordgroup' || task.type === 'copy'){
       const undoBtn = document.createElement('button');
       undoBtn.type = 'button'; undoBtn.className = 'mini-btn undo'; undoBtn.textContent = '↶'; undoBtn.title = '撤销';
@@ -3609,14 +3064,7 @@ function renderSubjectCards(subject, listEl){
       grid.innerHTML = task.chars.map(c => renderCharCard(c, task)).join('');
       card.appendChild(grid);
       bindMiziClicks(grid, task);
-    } else if(task.type === 'wordgroup' && Array.isArray(task.words) && task.words.length){
-      const grid = document.createElement('div');
-      grid.className = 'char-grid';
-      grid.innerHTML = task.words.map(w => renderWordgroupEntry(w, task)).join('');
-      card.appendChild(grid);
-      bindMiziClicks(grid, task);
-      bindWordDelClicks(grid);
-    } else if(task.type === 'copy' && Array.isArray(task.words) && task.words.length){
+    } else if((task.type === 'wordgroup' || task.type === 'copy') && Array.isArray(task.words) && task.words.length){
       const grid = document.createElement('div');
       grid.className = 'char-grid';
       grid.innerHTML = task.words.map(w => renderWordGroup(w, false, task)).join('');
@@ -3879,6 +3327,7 @@ function renderTimetable(){
     lastTtKey = 'empty';
     return;
   }
+  /* ★ 应用字体设置 */
   const st = state.settings || DEFAULT_SETTINGS;
   wrap.style.setProperty('--tt-font-size', (Number(st.ttFontSize) || 12.5) + 'px');
   wrap.style.setProperty('--tt-line-height', String(Number(st.ttLineHeight) || 1.4));
@@ -3936,7 +3385,7 @@ setInterval(() => {
 }, 30000);
 
 /* ============================================================
-   田字格倒计时
+   田字格倒计时（旧版：总时长固定）
 ============================================================ */
 function charBarEnsure(mizi){
   let bar = mizi.querySelector('.mizi-bar');
@@ -3973,7 +3422,7 @@ function buildCharUnits(task, grid){
     });
   } else {
     grid.querySelectorAll('.word-group').forEach(g => {
-      const mizis = Array.from(g.querySelectorAll('.mizi')).filter(m => !m.classList.contains('mini'));
+      const mizis = Array.from(g.querySelectorAll('.mizi'));
       if(mizis.length) units.push({ mizis, bars:[], totalMs: unitMs });
     });
   }
@@ -4002,8 +3451,7 @@ function rebindCharTimer(){
     });
   } else {
     grid.querySelectorAll('.word-group').forEach(g => {
-      const ms = Array.from(g.querySelectorAll('.mizi')).filter(m => !m.classList.contains('mini'));
-      if(ms.length) groups.push(ms);
+      const ms = Array.from(g.querySelectorAll('.mizi')); if(ms.length) groups.push(ms);
     });
   }
   if(groups.length !== charTimer.units.length){ clearCharTimer(); return; }
@@ -4429,7 +3877,7 @@ function stopTick(){
 }
 
 /* ============================================================
-   任务操作
+   任务操作（旧版：总时长固定）
 ============================================================ */
 function liveStartTask(taskId){
   const info = findTask(taskId);
@@ -4834,10 +4282,13 @@ function playStroke(char){
       strokeColor: '#2E7D32', outlineColor: '#A5D6A7', radicalColor: '#1B5E20',
       strokeAnimationSpeed: 1, delayBetweenStrokes: 220,
       charDataLoader: (c, onComplete, onError) => {
-        loadHanziStrokeData(c, onComplete, err => {
-          strokeStage.innerHTML = `<div style="font-size:130px;line-height:1;color:#2E7D32;font-family:'Kaiti SC','KaiTi','STKaiti','楷体',serif">${escapeHtml(c)}</div>`;
-          if(onError) onError(err);
-        });
+        fetch(`https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0.1/${c}.json`)
+          .then(r => { if(!r.ok) throw new Error('no data'); return r.json(); })
+          .then(onComplete)
+          .catch(err => {
+            strokeStage.innerHTML = `<div style="font-size:130px;line-height:1;color:#2E7D32;font-family:'Kaiti SC','KaiTi','STKaiti','楷体',serif">${escapeHtml(c)}</div>`;
+            if(onError) onError(err);
+          });
       }
     });
     currentWriter.animateCharacter();
@@ -4858,7 +4309,6 @@ strokeModal.addEventListener('click', e => {
     const v = (input && input.value || '').trim();
     if(!v){ toast('请输入词语'); return; }
     if(addCharWord(lastStrokeChar, v) && input) input.value = '';
-    renderBoard(); refreshAllCards();
   });
   if(input) input.addEventListener('keydown', e => {
     if(e.key === 'Enter'){ e.preventDefault(); if(addBtn) addBtn.click(); }
@@ -4968,6 +4418,7 @@ $('adminEyeSaveBtn').addEventListener('click', () => {
   renderEyePanel();
   toast('✅ 护眼提醒设置已保存');
 });
+/* ★ 课程表管理面板 */
 function renderAdminTimetable(){
   const badge = $('adminTtBadge');
   const hint  = $('adminTtHint');
@@ -5220,6 +4671,7 @@ $('adminShopAddBtn').addEventListener('click', () => {
   renderAdminShop(); renderShop();
   toast('✅ 已添加兑换项目：' + escapeHtml(name));
 });
+
 function renderAdminTaskList(subject, listId, badgeId){
   const list = document.getElementById(listId);
   const badge = document.getElementById(badgeId);
@@ -5890,7 +5342,7 @@ $('adminLocalDownloadBtn').addEventListener('click', () => {
     saveLocalState();
     const backup = JSON.parse(JSON.stringify(state));
     backup.__backupType = 'study_board_local_backup';
-    backup.__backupVersion = 4;
+    backup.__backupVersion = 3;
     backup.__backupTime = new Date().toISOString();
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -5920,7 +5372,6 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
     state.settings = normalizeSettings(imported.settings);
     state.lessonLibrary = normalizeLessonLibrary(imported.lessonLibrary);
     state.wordBank = normalizeWordBank(imported.wordBank);
-    if(imported.charMeta && typeof imported.charMeta === 'object') state.charMeta = imported.charMeta;
     state.timetable = normalizeTimetable(imported.timetable);
     const shopNorm = normalizeShop(imported.shop);
     if(shopNorm !== null) state.shop = shopNorm;
@@ -6087,7 +5538,30 @@ updateEyeSoundBtn();
 const familyIdEl = document.getElementById('familyIdText');
 if(familyIdEl) familyIdEl.textContent = FAMILY_ID;
 
-initFirebase();
+if(dataRef && fbSet && fbGet && fbOnValue){
+  (async () => {
+    const result = await readCloudOnce();
+    if(result.state === 'has-data' && result.data && result.data.days && Object.keys(result.data.days).length){
+      applyRemoteState(result.data);
+      console.log('✅ 已从云端加载数据');
+    } else if(result.state === 'empty'){
+      console.log('☁️ 云端确认为空，用本地数据初始化并上传');
+      await uploadToCloud(true);
+    } else {
+      console.warn('⚠️ 读取云端失败');
+      showSyncStatus('⚠️ 云端读取失败，稍后重试', 'offline');
+    }
+    freshBoot = false;
+    startCloudSync();
+    updateSyncInfo();
+    if(nameMigrated && result.state !== 'error'){
+      try{ await uploadToCloud(true); }catch(e){ console.warn('改名回写云端失败', e); }
+    }
+  })();
+} else {
+  updateSyncInfo('未连接（纯本地模式）');
+  showSyncStatus('📴 纯本地模式', 'offline');
+}
 </script>
 </body>
 </html>
