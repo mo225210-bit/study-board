@@ -1236,13 +1236,19 @@
           <span id="dictZoomLabel">100%</span>
           <button id="dictZoomIn" type="button">+</button>
           <button id="dictZoomFit" type="button">适配</button>
+          <button id="dictReloadBtn" type="button" title="重新从 index.html 所在目录载入汉字表 PDF">🔄 重载</button>
         </div>
         <div class="dict-scroll" id="dictScroll">
           <div class="dict-pages" id="dictPages"></div>
+          <div class="dict-empty" id="dictLoading" style="display:none">
+            <div style="font-size:34px">⏳</div>
+            <div>正在载入汉字表 PDF…</div>
+            <div style="font-size:13px;opacity:.75">仅首次需要等待，载入完成后再次打开查字典不再等待</div>
+          </div>
           <div class="dict-empty" id="dictEmpty">
             <div style="font-size:34px">📖</div>
-            <div>正在自动载入《汉字表1.pdf / 汉字表2.pdf》…</div>
-            <div style="font-size:13px;opacity:.75">请将汉字表 PDF 放在 index.html 同一目录（汉字表1 第 1 页 = 总第 1 页 · 汉字表2 第 1 页 = 总第 363 页）</div>
+            <div>未找到汉字表 PDF</div>
+            <div style="font-size:13px;opacity:.75">请将《汉字表1.pdf》（1-362页）和《汉字表2.pdf》（363-664页）放在 index.html 同一目录（汉字表1 第 1 页 = 总第 1 页 · 汉字表2 第 1 页 = 总第 363 页），也可点上方按钮手动上传，然后点「🔄 重载」</div>
           </div>
         </div>
       </section>
@@ -6108,6 +6114,7 @@ const dictFileStatus = $('dictFileStatus');
 const dictScrollEl = $('dictScroll');
 const dictPagesEl = $('dictPages');
 const dictEmptyEl = $('dictEmpty');
+const dictLoadingEl = $('dictLoading');
 const dictPageInputEl = $('dictPageInput');
 const dictTotalPagesEl = $('dictTotalPages');
 const dictZoomLabelEl = $('dictZoomLabel');
@@ -6166,6 +6173,15 @@ function openDictFor(char){
   dictCurCharEl.textContent = char;
   dictModal.classList.add('show');
   dictAutoLoadPdf(0); dictAutoLoadPdf(1);
+  dictUpdateFileStatus();
+  if(dictPageEntries.length){
+    /* 后台预载入时弹窗隐藏、算不出尺寸，这里按当前尺寸校准缩放 */
+    dictEnsureScaled();
+    /* 每页的提示文字更新为当前生字 */
+    for(const e of dictPageEntries){
+      e.el.title = '双击标记「' + char + '」的页码为第 ' + e.num + ' 页';
+    }
+  }
   const saved = (state.charPages && state.charPages[char]) || 0;
   dictPendingJump = 0;
   if(saved >= 1){
@@ -6190,8 +6206,7 @@ function openDictFor(char){
 }
 function closeDictModal(){
   dictModal.classList.remove('show');
-  /* 允许下次打开时重新尝试自动载入（例如刚把 PDF 放进根目录） */
-  dictAutoTried = [false, false];
+  /* PDF 载入后常驻内存，不再重复载入；如刚把 PDF 放进根目录，点工具栏「🔄 重载」即可 */
 }
 $('dictCloseBtn').addEventListener('click', closeDictModal);
 dictModal.addEventListener('click', e => { if(e.target === dictModal) closeDictModal(); });
@@ -6208,6 +6223,7 @@ const DICT_PDF_NAMES = [
   ['汉字表2.pdf', '汉字表2.PDF', '汉字表二.pdf', '../汉字表2.pdf', '../写字表.pdf']
 ];
 let dictAutoTried = [false, false];
+let dictAutoLoading = [false, false];  /* 是否正在后台载入中 */
 
 async function dictLoadPdf(idx, file){
   try{
@@ -6221,39 +6237,63 @@ async function dictLoadPdf(idx, file){
   }
 }
 async function dictAutoLoadPdf(idx){
-  if(dictPdfs[idx] || dictAutoTried[idx]) return;
+  if(dictPdfs[idx] || dictAutoTried[idx] || dictAutoLoading[idx]) return;
   dictAutoTried[idx] = true;
-  for(const name of DICT_PDF_NAMES[idx]){
-    try{
-      const res = await fetch(name, { cache:'no-store' });
-      if(!res.ok) continue;
-      const buf = await res.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
-      dictPdfs[idx] = { pdf, name: name };
-      dictRebuildPages();
-      toast('已自动载入《' + name + '》，共 ' + pdf.numPages + ' 页', 2200);
-      return;
-    }catch(err){ /* 尝试下一个候选文件名 */ }
-  }
+  dictAutoLoading[idx] = true;
   dictUpdateFileStatus();
+  try{
+    for(const name of DICT_PDF_NAMES[idx]){
+      try{
+        const res = await fetch(name);
+        if(!res.ok) continue;
+        const buf = await res.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
+        dictPdfs[idx] = { pdf, name: name };
+        dictRebuildPages();
+        if(dictModal.classList.contains('show')){
+          toast('已自动载入《' + name + '》，共 ' + pdf.numPages + ' 页', 2200);
+        }
+        return;
+      }catch(err){ /* 尝试下一个候选文件名 */ }
+    }
+  }finally{
+    dictAutoLoading[idx] = false;
+    dictUpdateFileStatus();
+  }
 }
+/* 手动重新载入（刚把 PDF 放进根目录时用） */
+$('dictReloadBtn').addEventListener('click', () => {
+  dictAutoTried = [false, false];
+  dictAutoLoadPdf(0); dictAutoLoadPdf(1);
+  toast('正在重新载入汉字表 PDF…', 1800);
+});
 $('dictFile1').addEventListener('change', e => { const f = e.target.files[0]; if(f) dictLoadPdf(0, f); });
 $('dictFile2').addEventListener('change', e => { const f = e.target.files[0]; if(f) dictLoadPdf(1, f); });
 
 function dictUpdateFileStatus(){
   const n1 = dictPdfs[0] ? dictPdfs[0].pdf.numPages : 0;
   const n2 = dictPdfs[1] ? dictPdfs[1].pdf.numPages : 0;
-  if(!n1 && !n2){
-    dictFileStatus.innerHTML = dictAutoTried[0] || dictAutoTried[1]
-      ? '⚠️ 未在根目录找到《汉字表1.pdf / 汉字表2.pdf》，可点上方按钮手动上传'
-      : '提示：双击 PDF 页面即可标记该生字的页码';
-    dictEmptyEl.style.display = 'flex';
-  }else{
-    dictFileStatus.innerHTML =
-      '<span class="dict-loaded">✅ 汉字表1：' + n1 + ' 页</span>' +
-      (n2 ? ('　<span class="dict-loaded">✅ 汉字表2：' + n2 + ' 页</span>') : '　⚠️ 汉字表2 未找到（363-664 页暂缺）') +
-      '　合计 ' + (n1 + n2) + ' 页';
+  const loading = dictAutoLoading[0] || dictAutoLoading[1];
+  if(n1 || n2){
+    /* 已载入：隐藏空态和“载入中”提示 */
+    dictLoadingEl.style.display = 'none';
     dictEmptyEl.style.display = 'none';
+    const s2 = n2
+      ? '　<span class="dict-loaded">✅ 汉字表2：' + n2 + ' 页</span>'
+      : (dictAutoLoading[1] ? '　⏳ 汉字表2 载入中…' : '　⚠️ 汉字表2 未找到（363-664 页暂缺）');
+    dictFileStatus.innerHTML =
+      '<span class="dict-loaded">✅ 汉字表1：' + n1 + ' 页</span>' + s2 +
+      '　合计 ' + (n1 + n2) + ' 页';
+  }else if(loading){
+    dictLoadingEl.style.display = 'flex';
+    dictEmptyEl.style.display = 'none';
+    dictFileStatus.innerHTML = '⏳ 正在自动载入汉字表 PDF…';
+  }else{
+    dictLoadingEl.style.display = 'none';
+    dictEmptyEl.style.display = 'flex';
+    dictFileStatus.innerHTML = (dictAutoTried[0] || dictAutoTried[1])
+      ? '⚠️ 未在根目录找到《汉字表1.pdf / 汉字表2.pdf》，可点上方按钮手动上传，或点「🔄 重载」重试'
+      : '提示：双击 PDF 页面即可标记该生字的页码';
   }
 }
 
@@ -6323,6 +6363,18 @@ function dictComputeBaseScale(){
   const availW = dictScrollEl.clientWidth - 24;
   if(availH <= 20 || availW <= 20 || !dictPageH) return;
   dictBaseScale = Math.min(availH / dictPageH, availW / dictPageW);
+}
+/* 弹窗每次打开时按当前可见尺寸校准缩放（后台预载入时弹窗隐藏，算不出尺寸） */
+function dictEnsureScaled(){
+  if(!dictPageEntries.length) return;
+  const availH = dictScrollEl.clientHeight - 24;
+  const availW = dictScrollEl.clientWidth - 24;
+  if(availH <= 20 || availW <= 20 || !dictPageH) return;
+  const want = Math.min(availH / dictPageH, availW / dictPageW);
+  if(Math.abs(want - dictBaseScale) > 0.0005 || dictCurScale === 0){
+    dictBaseScale = want;
+    dictApplyScale();
+  }
 }
 
 function dictApplyScale(){
@@ -6522,6 +6574,8 @@ function dictBuildIndex(){
   scroll.appendChild(frag);
 }
 dictBuildIndex();
+/* 后台预载入汉字表 PDF：等用户点「页码：」时早已就绪，无需等待 */
+dictAutoLoadPdf(0); dictAutoLoadPdf(1);
 
 
 /* ============================================================
