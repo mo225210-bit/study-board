@@ -43,6 +43,11 @@
     --c-main:#64B5F6;--c-dark:#42A5F5;--c-deep:#1976D2;--c-border:#1565C0;
     --c-btn:#1E88E5;--c-btn-shade:#0D47A1;--c-light:#E3F2FD;--c-soft:#EAF4FE;--c-text:#0D47A1;
   }
+  /* ★ 课程表主题（紫色） */
+  .app.theme-timetable{
+    --c-main:#B39DDB;--c-dark:#9575CD;--c-deep:#7E57C2;--c-border:#5E35B1;
+    --c-btn:#7E57C2;--c-btn-shade:#5E35B1;--c-light:#EDE7F6;--c-soft:#F3EFFB;--c-text:#5E35B1;
+  }
 
   .topbar{
     display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
@@ -214,6 +219,8 @@
   .subject-tab.active[data-tab="math"]{background:linear-gradient(180deg,#6FC3E8,#29A3D6);box-shadow:0 3px 0 #1B7FA8}
   .subject-tab.active[data-tab="english"]{background:linear-gradient(180deg,#64B5F6,#1976D2);box-shadow:0 3px 0 #0D47A1}
   .subject-tab.active[data-tab="shop"]{background:linear-gradient(180deg,#FFB74D,#F57C00);box-shadow:0 3px 0 #E65100}
+  /* ★ 课程表标签激活样式 */
+  .subject-tab.active[data-tab="timetable"]{background:linear-gradient(180deg,#B39DDB,#7E57C2);box-shadow:0 3px 0 #5E35B1}
   .subject-tab .tab-count{font-size:11px;background:rgba(255,255,255,.35);padding:1px 7px;border-radius:999px}
   .subject-tab.active .tab-count{background:rgba(255,255,255,.3)}
   .tab-panel{display:none}
@@ -237,6 +244,11 @@
     background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 24px,transparent 24px 48px),
       linear-gradient(180deg,#FFCC80 0%,#FFA726 55%,#F57C00 100%);
     border-color:#E65100;box-shadow:inset 0 -8px 18px rgba(0,0,0,.10),0 8px 22px rgba(160,90,10,.24)}
+  /* ★ 课程表科目配色 */
+  .subject-col[data-subject="timetable"]{
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 24px,transparent 24px 48px),
+      linear-gradient(180deg,#B39DDB 0%,#9575CD 55%,#7E57C2 100%);
+    border-color:#5E35B1;box-shadow:inset 0 -8px 18px rgba(0,0,0,.10),0 8px 22px rgba(70,45,120,.24)}
   .col-head{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;
     gap:6px;background:rgba(255,255,255,.92);border:2px solid #fff;border-radius:15px;
     padding:5px 8px;margin-bottom:5px;box-shadow:0 3px 10px rgba(0,0,0,.12)}
@@ -244,11 +256,13 @@
   .subject-col[data-subject="math"] .col-title{color:#0277BD}
   .subject-col[data-subject="english"] .col-title{color:#1565C0}
   .subject-col[data-subject="shop"] .col-title{color:#E65100}
+  .subject-col[data-subject="timetable"] .col-title{color:#5E35B1}
   .col-count{font-size:10.5px;font-weight:900;color:#fff;background:#68B32E;padding:2px 8px;
     border-radius:999px;margin-left:4px}
   .subject-col[data-subject="math"] .col-count{background:#29A3D6}
   .subject-col[data-subject="english"] .col-count{background:#1976D2}
   .subject-col[data-subject="shop"] .col-count{background:#F57C00}
+  .subject-col[data-subject="timetable"] .col-count{background:#7E57C2}
 
   .card-list{position:relative;z-index:2;display:flex;flex-direction:column;gap:5px;min-height:70px}
   .empty-tip{text-align:center;font-size:11.5px;font-weight:700;color:rgba(255,255,255,.92);
@@ -334,6 +348,34 @@
   .shop-btn:active{transform:translateY(2px)}
   .shop-btn .ticket-num{font-size:13.5px;margin-left:2px;
     background:rgba(255,255,255,.28);padding:0 6px;border-radius:999px;display:inline-block}
+
+  /* ★★★ 课程表 ★★★ */
+  .tt-scroll{position:relative;z-index:2;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    border-radius:12px;background:rgba(255,255,255,.97);border:2px solid #fff;
+    box-shadow:0 3px 10px rgba(0,0,0,.12)}
+  .tt-table{border-collapse:separate;border-spacing:0;width:100%;min-width:500px;font-size:12.5px}
+  .tt-table th,.tt-table td{padding:7px 5px;text-align:center;font-weight:800;
+    border-bottom:1px solid #EDF5ED;border-right:1px solid #EDF5ED;
+    color:#2b3a2b;white-space:nowrap}
+  .tt-table th:last-child,.tt-table td:last-child{border-right:0}
+  .tt-table tbody tr:last-child td{border-bottom:0}
+  .tt-table thead th{background:#7E57C2;color:#fff;font-size:12px;letter-spacing:.5px}
+  .tt-table thead th.tt-th-time,
+  .tt-table thead th.tt-th-item{background:#5E35B1}
+  .tt-table td.tt-time{color:#6a5a8a;font-size:11.5px;background:#F7F4FD;font-weight:900}
+  .tt-table td.tt-item{color:#5E35B1;font-weight:900;background:#F7F4FD}
+  .tt-table td.tt-now{background:linear-gradient(180deg,#FFF3C4,#FFE082)!important;
+    color:#8a5a00!important;box-shadow:inset 0 0 0 2px #FFC107;font-weight:900}
+  .tt-table thead th.tt-th-now{background:#FFB300;color:#5a3a00}
+  .tt-table td.tt-merged{background:#F4F7F4;color:#9aad9a;font-weight:700}
+  .tt-tip{font-size:11.5px;font-weight:900;color:#5E35B1;white-space:nowrap}
+  .tt-tip.warn{color:#E65100}
+
+  @media (max-width:500px){
+    .tt-table{font-size:11.5px;min-width:430px}
+    .tt-table th,.tt-table td{padding:6px 4px}
+    .tt-tip{font-size:10px}
+  }
 
   .photo-card{max-width:600px}
   .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:10px}
@@ -633,6 +675,9 @@
   .admin-add-row.inline-row .aa-num{width:54px;flex:none;padding-left:4px;padding-right:4px}
   .admin-add-row.inline-row .aa-unit{font-size:10.5px;flex:none;white-space:nowrap}
   .admin-add-row.inline-row .aa-btn{padding:10px 12px;flex:none;font-size:12.5px}
+  /* ★ 课程表上传文件框 */
+  .admin-add-row input[type="file"]{width:100%;padding:9px 10px;font-size:12px;
+    color:#8aa8c8;cursor:pointer}
 
   .admin-add-row textarea.aa-text{flex:1 1 100%;width:100%;min-height:76px;
     resize:vertical;line-height:1.6;font-size:13.5px;font-family:inherit}
@@ -912,7 +957,8 @@
   <div class="subject-tabs">
     <button class="subject-tab active" data-tab="chinese">📖 语文 <span class="tab-count" id="chineseTabCount">0</span></button>
     <button class="subject-tab" data-tab="math">🔢 数学 <span class="tab-count" id="mathTabCount">0</span></button>
-    <button class="subject-tab" data-tab="english">🔤 英语 <span class="tab-count" id="englishTabCount">0</span></button>
+    <!-- ★ 英语页已替换为课程表页 -->
+    <button class="subject-tab" data-tab="timetable">📅 课程表</button>
     <button class="subject-tab" data-tab="shop">🎁 兑换</button>
   </div>
 
@@ -928,6 +974,17 @@
       <div class="card-list" id="mathList"></div>
     </section>
   </div>
+  <!-- ★★★ 课程表面板 ★★★ -->
+  <div class="tab-panel" id="panel-timetable">
+    <section class="subject-col" data-subject="timetable">
+      <div class="col-head">
+        <div><span class="col-title">📅 课程表</span><span class="col-count" id="timetableCount">0</span></div>
+        <div class="tt-tip" id="ttTip"></div>
+      </div>
+      <div id="timetableWrap"></div>
+    </section>
+  </div>
+
   <div class="tab-panel" id="panel-english">
     <section class="subject-col" data-subject="english">
       <div class="col-head"><div><span class="col-title">🔤 英语</span><span class="col-count" id="englishCount">0</span></div></div>
@@ -1179,6 +1236,24 @@
       </div>
     </div>
 
+    <!-- ★★★ 课程表管理 ★★★ -->
+    <div class="admin-section collapsed" id="adminPanelTimetable">
+      <h3>📅 课程表 <span class="badge" id="adminTtBadge">未上传</span></h3>
+      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+        上传 Excel 课程表后，学生端「课程表」页会自动显示。<br>
+        表头需包含 <b style="color:#FFD54F">时间</b> 与 <b style="color:#FFD54F">项目</b> 两列，后面依次为星期一 ~ 星期五。<br>
+        <b style="color:#FFD54F">15:00 前高亮当天课程，15:00 后高亮第二天的课程；合并单元格不高亮。</b>
+      </p>
+      <div class="admin-add-row">
+        <input type="file" id="adminTtFile" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
+      </div>
+      <div class="admin-add-row">
+        <button class="aa-btn" id="adminTtUploadBtn" style="flex:1">📤 上传并解析课程表</button>
+        <button class="aa-btn" id="adminTtClearBtn" style="background:linear-gradient(180deg,#FF8A80,#EF5350);border-color:#EF5350;box-shadow:0 3px 0 #C62828;color:#fff">🗑 清除</button>
+      </div>
+      <div class="aa-hint" id="adminTtHint">支持 .xlsx / .xls / .csv 格式</div>
+    </div>
+
     <div class="admin-section collapsed" id="adminPanelShop">
       <h3>🎁 兑换项目管理 <span class="badge" id="adminShopBadge">0 项</span></h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
@@ -1364,6 +1439,9 @@ const MAX_PHOTOS_PER_TASK = 3;
 const PHOTO_MAX_SIZE = 800;
 const PHOTO_QUALITY = 0.55;
 
+/* ★ 课程表：15 点后高亮第二天课程 */
+const TT_SWITCH_HOUR = 15;
+
 const DEFAULT_LIVE = {
   activeId: '',
   status: 'idle',
@@ -1424,7 +1502,8 @@ const DEFAULT_SETTINGS = {
   },
   panelCollapsed: {
     progress: true, sun: true, date: true, library: true, sync: true,
-    password: true, eye: true, math: false, english: false, shop: true
+    password: true, eye: true, math: false, english: false, shop: true,
+    timetable: true
   }
 };
 
@@ -1536,6 +1615,33 @@ function normalizeWordBank(raw){
 }
 
 /* ============================================================
+   ★ 课程表数据规范化
+============================================================ */
+const TT_DOW_MAP = { '一':1, '二':2, '三':3, '四':4, '五':5, '六':6, '日':0, '天':0 };
+function normalizeTimetable(raw){
+  if(!raw || typeof raw !== 'object') return null;
+  const rows = Array.isArray(raw.rows) ? raw.rows : [];
+  if(!rows.length) return null;
+  const headers = Array.isArray(raw.headers) ? raw.headers : [];
+  return {
+    headers: headers.slice(0, 8).map(h => ({
+      label: String((h && h.label) || '').slice(0, 20),
+      dow: Number((h && h.dow) || 0)
+    })),
+    rows: rows.slice(0, 40).map(r => ({
+      time: String((r && r.time) || '').slice(0, 30),
+      item: String((r && r.item) || '').slice(0, 30),
+      cells: (Array.isArray(r && r.cells) ? r.cells : []).slice(0, 8).map(c => ({
+        text: String((c && c.text) || '').slice(0, 30),
+        merged: !!(c && c.merged)
+      }))
+    })),
+    uploadedAt: Number((raw && raw.uploadedAt) || 0),
+    fileName: String((raw && raw.fileName) || '').slice(0, 80)
+  };
+}
+
+/* ============================================================
    状态
 ============================================================ */
 let state = null;
@@ -1609,7 +1715,8 @@ function normalizeSettings(raw){
       eye: pc.eye !== undefined ? !!pc.eye : true,
       math: pc.math !== undefined ? !!pc.math : false,
       english: pc.english !== undefined ? !!pc.english : false,
-      shop: pc.shop !== undefined ? !!pc.shop : true
+      shop: pc.shop !== undefined ? !!pc.shop : true,
+      timetable: pc.timetable !== undefined ? !!pc.timetable : true
     }
   };
 }
@@ -1744,6 +1851,7 @@ function loadLocalState(){
       lessonLibrary: JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY)),
       shop: JSON.parse(JSON.stringify(DEFAULT_SHOP)),
       wordBank: {},
+      timetable: null,
       parentPassword: MASTER_PASSWORD,
       lastNightReset: '',
       eyeSoundOffDate: '',
@@ -1769,6 +1877,8 @@ function loadLocalState(){
   else s.shop = shopNorm;
   /* ★ 组词词库 */
   s.wordBank = normalizeWordBank(s.wordBank);
+  /* ★ 课程表 */
+  s.timetable = normalizeTimetable(s.timetable);
   if(!s.live || typeof s.live !== 'object'){
     s.live = JSON.parse(JSON.stringify(DEFAULT_LIVE));
   } else {
@@ -2139,6 +2249,7 @@ async function uploadToCloud(force){
     lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword,
     shop: state.shop,
     wordBank: state.wordBank,
+    timetable: state.timetable,            /* ★ 课程表 */
     lastNightReset: state.lastNightReset || '',
     eyeSoundOffDate: state.eyeSoundOffDate || '',
     live: state.live, updatedAt: Date.now()
@@ -2164,7 +2275,7 @@ function getEditableStateForCompare(){
     days: state.days, date: state.date, settings: state.settings,
     sun: state.sun, checkins: state.checkins, sunLog: state.sunLog,
     lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword,
-    shop: state.shop, wordBank: state.wordBank,
+    shop: state.shop, wordBank: state.wordBank, timetable: state.timetable,
     lastNightReset: state.lastNightReset || '', eyeSoundOffDate: state.eyeSoundOffDate || ''
   });
 }
@@ -2179,6 +2290,7 @@ function makeHistorySnapshot(reason){
       lessonLibrary: JSON.parse(JSON.stringify(state.lessonLibrary || {})),
       parentPassword: state.parentPassword, shop: JSON.parse(JSON.stringify(state.shop || [])),
       wordBank: JSON.parse(JSON.stringify(state.wordBank || {})),
+      timetable: JSON.parse(JSON.stringify(state.timetable || null)),
       lastNightReset: state.lastNightReset || '', eyeSoundOffDate: state.eyeSoundOffDate || '',
       live: JSON.parse(JSON.stringify(state.live || {})), updatedAt: Date.now()
     }
@@ -2227,6 +2339,8 @@ function applyRemoteState(remote){
   if(Array.isArray(remote.sunLog)) state.sunLog = remote.sunLog.slice(0, 60);
   if(remote.lessonLibrary) state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary);
   if(remote.wordBank) state.wordBank = normalizeWordBank(remote.wordBank);
+  /* ★ 课程表 */
+  if('timetable' in remote) state.timetable = normalizeTimetable(remote.timetable);
   if(typeof remote.parentPassword === 'string' && /^\d{4}$/.test(remote.parentPassword)) state.parentPassword = remote.parentPassword;
   if(typeof remote.lastNightReset === 'string') state.lastNightReset = remote.lastNightReset;
   if(typeof remote.eyeSoundOffDate === 'string') state.eyeSoundOffDate = remote.eyeSoundOffDate;
@@ -2252,6 +2366,7 @@ function applyRemoteState(remote){
   updateDogBar(); updateMainBtn(); updateDateText(); updateEyeUI();
   applyTabFromLive();
   if(currentSubject === 'shop') renderShop();
+  if(currentSubject === 'timetable') renderTimetable();
   if(charTimer.active) paintCharBarsFromLive();
   if(isAdminMode) renderAdminPanel();
   isRemoteUpdate = false;
@@ -2689,15 +2804,15 @@ $('photoViewer').addEventListener('click', e => { if(e.target === $('photoViewer
 ============================================================ */
 function renderBoard(){
   cardRefs = {};
-  renderSubjectCards('chinese', chineseListEl);
-  renderSubjectCards('math', mathListEl);
-  renderSubjectCards('english', englishListEl);
-  chineseCountEl.textContent = state.subjects.chinese.length;
-  mathCountEl.textContent    = state.subjects.math.length;
-  englishCountEl.textContent = state.subjects.english.length;
-  chineseTabCountEl.textContent = state.subjects.chinese.filter(t=>!t.done).length;
-  mathTabCountEl.textContent    = state.subjects.math.filter(t=>!t.done).length;
-  englishTabCountEl.textContent = state.subjects.english.filter(t=>!t.done).length;
+  if(chineseListEl) renderSubjectCards('chinese', chineseListEl);
+  if(mathListEl)    renderSubjectCards('math', mathListEl);
+  if(englishListEl) renderSubjectCards('english', englishListEl);
+  if(chineseCountEl) chineseCountEl.textContent = state.subjects.chinese.length;
+  if(mathCountEl)    mathCountEl.textContent    = state.subjects.math.length;
+  if(englishCountEl) englishCountEl.textContent = state.subjects.english.length;
+  if(chineseTabCountEl) chineseTabCountEl.textContent = state.subjects.chinese.filter(t=>!t.done).length;
+  if(mathTabCountEl)    mathTabCountEl.textContent    = state.subjects.math.filter(t=>!t.done).length;
+  if(englishTabCountEl) englishTabCountEl.textContent = state.subjects.english.filter(t=>!t.done).length;
   rebindCharTimer();
 }
 function renderSubjectCards(subject, listEl){
@@ -2922,6 +3037,208 @@ function doUseTicket(id){
   try{ ensureAudio(); playSound('plant'); }catch(e){}
   toast('✅ 已使用 1 张「' + escapeHtml(item.name) + '」兑换券<br>剩余 ' + item.tickets + ' 张', 2800);
 }
+
+/* ============================================================
+   ★★★ 课程表：解析 / 渲染 / 高亮 ★★★
+============================================================ */
+let xlsxLoading = null;
+function loadXLSX(){
+  if(window.XLSX) return Promise.resolve(window.XLSX);
+  if(xlsxLoading) return xlsxLoading;
+  xlsxLoading = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+    s.onload = () => {
+      if(window.XLSX) resolve(window.XLSX);
+      else reject(new Error('表格解析组件未就绪'));
+    };
+    s.onerror = () => reject(new Error('表格解析组件加载失败，请检查网络'));
+    document.head.appendChild(s);
+  });
+  return xlsxLoading;
+}
+
+/**
+ * 解析一个工作表为课程表结构。
+ * 规则：
+ *  - 表头行必须同时含「时间」和「项目」
+ *  - 表头中「星期一 ~ 星期日/天」「周一~周日」作为日期列
+ *  - 合并单元格会被标记 merged=true，渲染时不参与高亮
+ */
+function parseTimetableSheet(ws){
+  if(!ws || !ws['!ref']) return null;
+  const range = XLSX.utils.decode_range(ws['!ref']);
+
+  /* 取出整块二维数组（按偏移下标） */
+  const grid = [];
+  for(let r = range.s.r; r <= range.e.r; r++){
+    const arr = [];
+    for(let c = range.s.c; c <= range.e.c; c++){
+      const cell = ws[XLSX.utils.encode_cell({ r, c })];
+      arr.push(cell && cell.v != null ? String(cell.v).trim() : '');
+    }
+    grid.push(arr);
+  }
+
+  /* 合并区域（绝对坐标） */
+  const merges = (ws['!merges'] || []).map(m => ({
+    r1: m.s.r, r2: m.e.r, c1: m.s.c, c2: m.e.c
+  }));
+  const inMergeAbs = (rAbs, cAbs) => merges.some(m =>
+    rAbs >= m.r1 && rAbs <= m.r2 && cAbs >= m.c1 && cAbs <= m.c2
+  );
+
+  /* 找表头行 */
+  let headRow = -1;
+  for(let r = 0; r < grid.length; r++){
+    const joined = grid[r].join('|');
+    if(joined.indexOf('时间') >= 0 && joined.indexOf('项目') >= 0){ headRow = r; break; }
+  }
+  if(headRow < 0) return null;
+
+  const head = grid[headRow];
+  let timeCol = -1, itemCol = -1;
+  for(let c = 0; c < head.length; c++){
+    if(timeCol < 0 && head[c].indexOf('时间') >= 0) timeCol = c;
+    if(itemCol < 0 && head[c].indexOf('项目') >= 0) itemCol = c;
+  }
+  if(timeCol < 0) timeCol = 0;
+  if(itemCol < 0) itemCol = 1;
+
+  /* 识别星期列 */
+  const dayCols = [];
+  for(let c = 0; c < head.length; c++){
+    if(c === timeCol || c === itemCol) continue;
+    const v = head[c];
+    if(!v) continue;
+    const m = v.match(/(?:星期|周)\s*([一二三四五六日天])/);
+    if(m){
+      const dow = TT_DOW_MAP[m[1]];
+      dayCols.push({ col: c, dow: (dow === undefined ? dayCols.length + 1 : dow), label: v });
+    }
+  }
+  if(!dayCols.length){
+    for(let c = Math.max(timeCol, itemCol) + 1; c < head.length; c++){
+      dayCols.push({ col: c, dow: dayCols.length + 1, label: head[c] || ('第' + (dayCols.length + 1) + '天') });
+    }
+  }
+  if(!dayCols.length) return null;
+
+  /* 数据行 */
+  const outRows = [];
+  for(let r = headRow + 1; r < grid.length; r++){
+    const arr = grid[r] || [];
+    const time = String(arr[timeCol] || '').trim();
+    const item = String(arr[itemCol] || '').trim();
+    let anyText = false;
+    const cells = dayCols.map(dc => {
+      const raw = String(arr[dc.col] || '').trim();
+      if(raw) anyText = true;
+      return {
+        text: raw,
+        merged: inMergeAbs(range.s.r + r, range.s.c + dc.col)
+      };
+    });
+    if(!time && !item && !anyText) continue;
+    outRows.push({ time, item, cells });
+  }
+  if(!outRows.length) return null;
+
+  return {
+    headers: dayCols.map(d => ({ label: d.label, dow: d.dow })),
+    rows: outRows,
+    uploadedAt: Date.now(),
+    fileName: ''
+  };
+}
+
+/* 目标高亮日：15:00 前 = 今天，15:00 后 = 明天 */
+function getTtTarget(){
+  const now = new Date();
+  const t = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const isNext = now.getHours() >= TT_SWITCH_HOUR;
+  if(isNext) t.setDate(t.getDate() + 1);
+  const jsDow = t.getDay();                 // 0=周日 ... 6=周六
+  const isWeekend = (jsDow === 0 || jsDow === 6);
+  return { date: t, dow: jsDow, isNext, isWeekend };
+}
+
+let lastTtKey = '';
+function renderTimetable(){
+  const wrap = $('timetableWrap');
+  const tipEl = $('ttTip');
+  const cntEl = $('timetableCount');
+  if(!wrap) return;
+
+  const tt = state.timetable;
+  if(!tt || !tt.rows || !tt.rows.length){
+    wrap.innerHTML = '<div class="empty-tip" style="border-radius:12px">还没有课程表<br>请家长点左上角 🌻 上传 Excel 课程表</div>';
+    if(tipEl){ tipEl.textContent = ''; tipEl.className = 'tt-tip'; }
+    if(cntEl) cntEl.textContent = '0';
+    lastTtKey = 'empty';
+    return;
+  }
+
+  const tgt = getTtTarget();
+  const targetDow = tgt.isWeekend ? -1 : tgt.dow;
+
+  /* 找到目标星期对应的列 */
+  let hlCol = -1;
+  tt.headers.forEach((h, i) => {
+    if(Number(h.dow) === targetDow) hlCol = i;
+  });
+
+  let html = '<div class="tt-scroll"><table class="tt-table"><thead><tr>';
+  html += '<th class="tt-th-time">时间</th><th class="tt-th-item">项目</th>';
+  tt.headers.forEach((h, i) => {
+    html += '<th' + (i === hlCol ? ' class="tt-th-now"' : '') + '>' + escapeHtml(h.label || '') + '</th>';
+  });
+  html += '</tr></thead><tbody>';
+
+  tt.rows.forEach(r => {
+    html += '<tr>';
+    html += '<td class="tt-time">' + escapeHtml(r.time || '') + '</td>';
+    html += '<td class="tt-item">' + escapeHtml(r.item || '') + '</td>';
+    (r.cells || []).forEach((c, i) => {
+      const cls = [];
+      /* ★ 合并单元格不高亮 */
+      if(c.merged) cls.push('tt-merged');
+      if(i === hlCol && c.text && !c.merged) cls.push('tt-now');
+      html += '<td' + (cls.length ? ' class="' + cls.join(' ') + '"' : '') + '>' +
+              escapeHtml(c.text || '') + '</td>';
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+  wrap.innerHTML = html;
+
+  if(cntEl) cntEl.textContent = tt.rows.length;
+
+  if(tipEl){
+    if(tgt.isWeekend){
+      tipEl.className = 'tt-tip warn';
+      tipEl.textContent = tgt.isNext ? '🎉 明天周末，好好休息' : '🎉 今天周末，好好休息';
+    } else if(hlCol < 0){
+      tipEl.className = 'tt-tip warn';
+      tipEl.textContent = '（课程表里没有这一天）';
+    } else {
+      const label = tt.headers[hlCol].label || '';
+      tipEl.className = 'tt-tip';
+      tipEl.textContent = (tgt.isNext ? '🌟 明天：' : '🌟 今天：') + label;
+    }
+  }
+
+  lastTtKey = fmtDate(tgt.date) + '|' + (tgt.isNext ? '1' : '0');
+}
+
+/* 定时检查是否跨过 15:00，跨过则自动重画 */
+setInterval(() => {
+  if(currentSubject !== 'timetable') return;
+  const tgt = getTtTarget();
+  const k = fmtDate(tgt.date) + '|' + (tgt.isNext ? '1' : '0');
+  if(k !== lastTtKey) renderTimetable();
+}, 30000);
 
 /* ============================================================
    田字格倒计时
@@ -3548,7 +3865,8 @@ function liveStartTask(taskId){
   L.taskPausedByRest = false;
   L.soundSeq = (L.soundSeq || 0) + 1;
   L.soundKind = 'start';
-  L.tab = currentSubject === 'shop' ? 'chinese' : currentSubject;
+  /* ★ 课程表不是作业页，切回语文 */
+  L.tab = (currentSubject === 'shop' || currentSubject === 'timetable') ? 'chinese' : currentSubject;
   if(L.eyeActive && L.eyeMode === 'use' && L.eyePaused){
     L.eyeStageStart = Date.now() - (L.eyeTotalMs - L.eyePausedLeftMs);
     L.eyePaused = false;
@@ -3831,7 +4149,9 @@ function switchSubject(subject, fromRemote){
   document.querySelectorAll('.tab-panel').forEach(p => { p.classList.toggle('active', p.id === 'panel-' + subject); });
   appRootEl.classList.toggle('theme-math', subject === 'math');
   appRootEl.classList.toggle('theme-english', subject === 'english');
+  appRootEl.classList.toggle('theme-timetable', subject === 'timetable');   /* ★ */
   if(subject === 'shop') renderShop();
+  if(subject === 'timetable') renderTimetable();                            /* ★ */
   if(!fromRemote && state && state.live){
     if(state.live.tab !== subject){
       state.live.tab = subject;
@@ -3849,6 +4169,7 @@ function switchDate(dateStr){
   updateDateText(); renderBoard(); renderStats();
   refreshAllCards(); updateDogBar(); updateMainBtn();
   if(currentSubject === 'shop') renderShop();
+  if(currentSubject === 'timetable') renderTimetable();
   if(isAdminMode) renderAdminPanel();
   const isToday = dateStr === todayStr();
   toast(isToday ? '📅 已切换到今天' : '📅 已切换到 ' + dateLabel(dateStr).replace('今天 · ','').replace('昨天 · ',''), 2200);
@@ -4101,6 +4422,7 @@ function renderAdminPanel(){
   renderAdminTaskList('english', 'adminEnglishList', 'adminEnglishBadge');
   renderLessonLibrary(); populateLessonSelects();
   renderAdminShop();
+  renderAdminTimetable();           /* ★ */
   renderSunPanel(); renderPwdPanel(); renderEyePanel();
   applyAdminPanelStates(); syncLastInputFields();
 }
@@ -4127,6 +4449,62 @@ $('adminEyeSaveBtn').addEventListener('click', () => {
   renderEyePanel();
   toast('✅ 护眼提醒设置已保存');
 });
+
+/* ★ 课程表管理面板渲染 */
+function renderAdminTimetable(){
+  const badge = $('adminTtBadge');
+  const hint  = $('adminTtHint');
+  const tt = state.timetable;
+  const has = !!(tt && tt.rows && tt.rows.length);
+  if(badge) badge.textContent = has ? (tt.rows.length + ' 行') : '未上传';
+  if(hint && has){
+    hint.className = 'aa-hint ok';
+    hint.textContent = '当前课程表：' + (tt.fileName || '已上传') +
+      '（' + tt.rows.length + ' 行 · ' + tt.headers.length + ' 天）';
+  } else if(hint && !has){
+    hint.className = 'aa-hint';
+    hint.textContent = '支持 .xlsx / .xls / .csv 格式';
+  }
+}
+$('adminTtUploadBtn').addEventListener('click', async () => {
+  const fileInput = $('adminTtFile');
+  const hint = $('adminTtHint');
+  const file = fileInput && fileInput.files && fileInput.files[0];
+  if(!file){ hint.className = 'aa-hint warn'; hint.textContent = '请先选择一个 Excel 文件'; return; }
+  hint.className = 'aa-hint'; hint.textContent = '正在解析课程表…';
+  try{
+    const XLSX = await loadXLSX();
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(new Uint8Array(buf), { type: 'array' });
+    let parsed = null;
+    for(const name of (wb.SheetNames || [])){
+      const ws = wb.Sheets[name];
+      const p = parseTimetableSheet(ws);
+      if(p){ parsed = p; break; }
+    }
+    if(!parsed) throw new Error('未找到课程表结构（需要含「时间」「项目」表头）');
+    parsed.fileName = String(file.name || '').slice(0, 80);
+    state.timetable = normalizeTimetable(parsed);
+    saveLocalState(); uploadToCloud();
+    renderTimetable();
+    renderAdminTimetable();
+    if(fileInput) fileInput.value = '';
+    toast('✅ 课程表已更新');
+  }catch(err){
+    console.error(err);
+    hint.className = 'aa-hint warn';
+    hint.textContent = '⚠️ 解析失败：' + (err && err.message ? err.message : '未知错误');
+  }
+});
+$('adminTtClearBtn').addEventListener('click', () => {
+  if(!state.timetable) { toast('当前没有课程表'); return; }
+  if(!confirm('确定要清除课程表吗？')) return;
+  state.timetable = null;
+  saveLocalState(); uploadToCloud();
+  renderTimetable(); renderAdminTimetable();
+  toast('已清除课程表');
+});
+
 function renderPwdPanel(){
   const hint = $('adminPwdHint'); if(!hint) return;
   const cur = currentParentPassword();
@@ -4439,7 +4817,7 @@ function applyAdminPanelStates(){
     adminPanelProgress: pc.progress, adminPanelSun: pc.sun, adminPanelDate: pc.date,
     adminPanelLibrary: pc.library, adminPanelSync: pc.sync, adminPanelPassword: pc.password,
     adminPanelEye: pc.eye, adminPanelMath: pc.math, adminPanelEnglish: pc.english,
-    adminPanelShop: pc.shop
+    adminPanelShop: pc.shop, adminPanelTimetable: pc.timetable
   };
   Object.entries(map).forEach(([id,collapsed]) => {
     const el=$(id); if(el) el.classList.toggle('collapsed', !!collapsed);
@@ -4450,7 +4828,8 @@ function setupAdminPanelToggles(){
     adminPanelProgress:'progress', adminPanelSun:'sun', adminPanelDate:'date',
     adminPanelMath:'math', adminPanelEnglish:'english',
     adminPanelLibrary:'library', adminPanelSync:'sync',
-    adminPanelPassword:'password', adminPanelEye:'eye', adminPanelShop:'shop'
+    adminPanelPassword:'password', adminPanelEye:'eye', adminPanelShop:'shop',
+    adminPanelTimetable:'timetable'
   };
   Object.entries(map).forEach(([id,key]) => {
     const panel=$(id); if(!panel) return;
@@ -5054,6 +5433,7 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
     state.settings = normalizeSettings(imported.settings);
     state.lessonLibrary = normalizeLessonLibrary(imported.lessonLibrary);
     state.wordBank = normalizeWordBank(imported.wordBank);
+    state.timetable = normalizeTimetable(imported.timetable);       /* ★ */
     const shopNorm = normalizeShop(imported.shop);
     if(shopNorm !== null) state.shop = shopNorm;
     state.parentPassword = (typeof imported.parentPassword === 'string' && /^\d{4}$/.test(imported.parentPassword)) ? imported.parentPassword : MASTER_PASSWORD;
@@ -5067,6 +5447,7 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
     syncLegacyFromLive(); syncRuntimeFromLive();
     updateDogBar(); updateMainBtn(); updateEyeUI();
     if(currentSubject === 'shop') renderShop();
+    if(currentSubject === 'timetable') renderTimetable();
     if(isAdminMode) renderAdminPanel();
     populateLessonSelects();
     let synced = false;
@@ -5148,8 +5529,12 @@ dateTextEl.textContent = dateLabel(state.date);
 updateDateText();
 saveLocalState();
 renderStats(); renderBoard();
-switchSubject(state.live.tab && ['chinese','math','english','shop'].indexOf(state.live.tab) >= 0 ? state.live.tab : 'chinese', true);
+/* ★ 初始化标签页：英语已下线，改为课程表 */
+const initTab = (state.live.tab && ['chinese','math','timetable','shop'].indexOf(state.live.tab) >= 0)
+  ? state.live.tab : 'chinese';
+switchSubject(initTab, true);
 refreshAllCards();
+renderTimetable();
 
 requestAnimationFrame(() => { updateEyeUI(); updateDogBar(); updateMainBtn(); });
 
