@@ -392,6 +392,26 @@
     padding:4px;border-radius:6px;background:transparent}
   .wg-item{display:flex;flex-direction:column;align-items:center;gap:1px;flex:none}
 
+  /* ===== 抄写并组词：生字后面的小田字格词语 ===== */
+  .wordgroup-grid{gap:12px 10px}
+  .wordgroup-card{width:auto;min-width:78px;align-items:center}
+  .word-after{
+    display:flex;flex-wrap:wrap;gap:4px;align-items:center;justify-content:center;
+    margin-top:3px;padding:2px 3px;max-width:150px;min-height:18px;
+    border-top:1px dashed #DCEED4;
+  }
+  .word-after .word-item{display:flex;gap:1px;align-items:center}
+  .word-after .word-empty{
+    font-size:10px;color:#9aad9a;font-weight:700;white-space:nowrap;
+  }
+  .mizi.small{
+    width:30px;height:30px;border-radius:3px;
+    background:#F1F8E9;border-color:#C5E1A5;cursor:default;
+  }
+  .mizi.small:hover{transform:none;box-shadow:none}
+  .mizi.small:active{transform:none}
+  .mizi.small .mizi-char{font-size:20px}
+
   .toolbar{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
   .btn-ghost{font-family:inherit;font-size:12.5px;font-weight:800;color:#3d5a3d;
     background:rgba(255,255,255,.88);border:2px solid #fff;padding:8px 16px;border-radius:999px;
@@ -718,6 +738,10 @@
     .char-info{font-size:11px}
     .char-grid{gap:6px}
     .mizi-bar{height:7px;border-radius:0 3.5px 3.5px 0}
+    .mizi.small{width:26px;height:26px}
+    .mizi.small .mizi-char{font-size:17px}
+    .word-after{max-width:120px;gap:3px}
+    .wordgroup-grid{gap:10px 8px}
     .eye-card{gap:5px;padding:7px 9px}
     .eye-time{font-size:14px;min-width:46px}
     .eye-card.alert .eye-time{font-size:11px;min-width:62px}
@@ -925,7 +949,7 @@
     </section>
   </div>
 
-  <div class="timer-hint" style="margin-top:-3px">自定义作业可直接勾选完成 · 📷 其他作业需先拍照再勾选 · 🖼️ 查看作业照片 · ✋ 长按田字格可修改/删除 · ↶↷ 撤销恢复</div>
+  <div class="timer-hint" style="margin-top:-3px">自定义作业可直接勾选完成 · 📷 其他作业需先拍照再勾选 · 🖼️ 查看作业照片 · ✋ 抄写并组词长按田字格可修改/删除 · ↶↷ 撤销恢复</div>
 </div>
 
 <div class="modal" id="calModal">
@@ -1350,7 +1374,7 @@
 /* ============================================================
    ★★★ 版本号：每次修改界面/功能后请把这里 +1
 ============================================================ */
-const APP_VERSION = '2026.10.12.2';
+const APP_VERSION = '2026.10.13.1';
 
 /* ============================================================
    🔄 自动更新
@@ -1828,6 +1852,7 @@ function normalizeDay(day){
       if(type === 'preview' && Array.isArray(t.chars)) item.chars = t.chars.slice(0,60);
       if((type === 'wordgroup' || type === 'copy') && Array.isArray(t.words)) item.words = t.words.slice(0,60);
       if(Array.isArray(t.checkedChars)) item.checkedChars = t.checkedChars.slice(0,300).map(String);
+      if(t.strokeCounts && typeof t.strokeCounts === 'object') item.strokeCounts = t.strokeCounts;
       const photos = normalizePhotos(t.photos);
       if(photos.length) item.photos = photos;
       return item;
@@ -2076,7 +2101,7 @@ function recalcTaskUnits(task){
   if(count <= 0) return;
   task.minutes = clamp(Math.round(count * cfg.min * 2) / 2, 0.5, 120);
   task.sun = clamp(Math.round(count * cfg.sun), 1, 500);
-  const unitLabel = (type === 'copy') ? '组' : '字';
+  const unitLabel = (type === 'copy' || type === 'wordgroup') ? '字' : '字';
   task.text = String(task.text).replace(/[（(]\s*\d+\s*[字组]\s*[）)]/, '（' + count + unitLabel + '）');
 }
 
@@ -2091,7 +2116,16 @@ function getMiziUnitCtx(el, task){
     if(index < 0) return null;
     return { taskId: task.id, kind:'char', index };
   }
-  if(task.type === 'wordgroup' || task.type === 'copy'){
+  if(task.type === 'wordgroup'){
+    const grid = el.closest('.char-grid');
+    const card = el.closest('.char-card');
+    if(!grid || !card) return null;
+    const cards = Array.from(grid.querySelectorAll('.char-card'));
+    const index = cards.indexOf(card);
+    if(index < 0) return null;
+    return { taskId: task.id, kind:'word', index };
+  }
+  if(task.type === 'copy'){
     const grid = el.closest('.char-grid');
     const group = el.closest('.word-group');
     if(!grid || !group) return null;
@@ -2121,7 +2155,7 @@ function openMiziActionModal(ctx){
   miziActionCtx = ctx;
   const titleEl = $('miziActionTitle');
   const subEl = $('miziActionSub');
-  if(titleEl) titleEl.textContent = (ctx.kind === 'char' ? '生字：' : '词语：') + value;
+  if(titleEl) titleEl.textContent = (ctx.kind === 'char' ? '生字：' : '生字：') + value;
   if(subEl) subEl.textContent = '删除会同步减少任务时间与金币奖励，并保存到课文库';
   const modal = $('miziActionModal');
   if(modal) modal.classList.add('show');
@@ -2140,8 +2174,9 @@ function deleteMiziUnit(ctx){
     recordHistoryBefore(ctx.taskId);
     const removed = task.chars.splice(ctx.index, 1)[0];
     if(Array.isArray(task.checkedChars)) task.checkedChars = task.checkedChars.filter(c => c !== removed);
+    if(task.strokeCounts && task.strokeCounts[removed]) delete task.strokeCounts[removed];
   } else {
-    if((task.words || []).length <= 1){ toast('至少要保留一个词语哦'); return; }
+    if((task.words || []).length <= 1){ toast('至少要保留一个字哦'); return; }
     recordHistoryBefore(ctx.taskId);
     task.words.splice(ctx.index, 1);
     const remainStr = (task.words || []).join('');
@@ -2163,9 +2198,10 @@ function openMiziEditModal(ctx){
   const titleEl = $('miziEditTitle');
   const subEl = $('miziEditSub');
   const input = $('miziEditInput');
-  if(titleEl) titleEl.textContent = (ctx.kind === 'char') ? '✏️ 修改生字' : '✏️ 修改词语';
-  if(subEl) subEl.textContent = (ctx.kind === 'char') ? '请输入 1 个汉字，修改后替换原字并保存到课文库' : '请输入 1-8 个汉字，修改后替换原词并保存到课文库';
-  if(input){ input.value = oldVal; input.maxLength = (ctx.kind === 'char') ? 1 : 8; }
+  const isSingle = (task.type === 'preview' || task.type === 'wordgroup');
+  if(titleEl) titleEl.textContent = (task.type === 'preview') ? '✏️ 修改生字' : '✏️ 修改生字';
+  if(subEl) subEl.textContent = isSingle ? '请输入 1 个汉字，修改后替换原字并保存到课文库' : '请输入 1-8 个汉字，修改后替换原词并保存到课文库';
+  if(input){ input.value = oldVal; input.maxLength = isSingle ? 1 : 8; }
   const modal = $('miziEditModal');
   if(modal) modal.classList.add('show');
   setTimeout(() => { if(input){ input.focus(); try{ input.select(); }catch(e){} } }, 120);
@@ -2185,8 +2221,9 @@ function saveMiziEdit(){
   const v = String((input && input.value) || '').trim();
   if(!v){ toast('内容不能为空'); return; }
   if(!/^[\u4e00-\u9fa5]+$/.test(v)){ toast('请输入汉字'); return; }
-  if(ctx.kind === 'char' && v.length !== 1){ toast('生字只能是 1 个汉字'); return; }
-  if(ctx.kind === 'word' && (v.length < 1 || v.length > 8)){ toast('词语需要 1-8 个汉字'); return; }
+  const isSingle = (task.type === 'preview' || task.type === 'wordgroup');
+  if(isSingle && v.length !== 1){ toast('只能是 1 个汉字'); return; }
+  if(!isSingle && (v.length < 1 || v.length > 8)){ toast('词语需要 1-8 个汉字'); return; }
 
   recordHistoryBefore(ctx.taskId);
   if(ctx.kind === 'char'){
@@ -2197,6 +2234,7 @@ function saveMiziEdit(){
       const i = task.checkedChars.indexOf(oldVal);
       if(i >= 0) task.checkedChars.splice(i, 1);
     }
+    if(task.strokeCounts && task.strokeCounts[oldVal]){ delete task.strokeCounts[oldVal]; }
   } else {
     const oldVal = task.words[ctx.index];
     if(v === oldVal){ closeMiziEditModal(); return; }
@@ -2218,7 +2256,8 @@ function bindMiziClicks(container, task){
     el.__lpFired = false;
     const cancelLp = () => { if(lpTimer){ clearTimeout(lpTimer); lpTimer = null; } };
     const startLp = (ev) => {
-      if(!task) return;
+      /* 只对「抄写并组词」启用长按修改/删除 */
+      if(!task || task.type !== 'wordgroup') return;
       const p = ev.touches ? ev.touches[0] : ev;
       if(!p) return;
       lpX = p.clientX; lpY = p.clientY;
@@ -2251,7 +2290,12 @@ function bindMiziClicks(container, task){
       e.stopPropagation();
       if(el.__lpFired){ el.__lpFired = false; return; }
       clearTimeout(clickTimer);
-      clickTimer = setTimeout(() => { showStroke(el.dataset.char); }, 260);
+      clickTimer = setTimeout(() => {
+        if(!task) { showStroke(el.dataset.char, null, 'plain'); return; }
+        if(task.type === 'preview'){ showStrokeQuiz(el.dataset.char, task); }
+        else if(task.type === 'wordgroup'){ showStroke(el.dataset.char, task, 'wordgroup'); }
+        else { showStroke(el.dataset.char, task, 'copy'); }
+      }, 260);
     });
     el.addEventListener('dblclick', e => {
       e.preventDefault(); e.stopPropagation();
@@ -2310,6 +2354,7 @@ function addCharWord(char, word){
   arr.push(w);
   saveLocalState(); uploadToCloud();
   renderStrokeWords(char);
+  refreshWordBankInCards(char);
   toast('✅ 已添加词语：' + escapeHtml(w));
   return true;
 }
@@ -2320,6 +2365,17 @@ function removeCharWord(char, index){
   if(!arr.length) delete state.wordBank[char];
   saveLocalState(); uploadToCloud();
   renderStrokeWords(char);
+  refreshWordBankInCards(char);
+}
+
+/* 刷新卡片上该生字后面显示的词语 */
+function refreshWordBankInCards(char){
+  document.querySelectorAll('[data-word-after="' + char + '"]').forEach(el => {
+    const words = (state.wordBank && state.wordBank[char]) ? state.wordBank[char] : [];
+    el.innerHTML = words.length
+      ? words.map(w => renderSmallWord(w)).join('')
+      : '<span class="word-empty">点击田字格组词</span>';
+  });
 }
 
 /* ============================================================
@@ -2785,18 +2841,20 @@ function miziSvg(){
     <line x1="100" y1="0" x2="0" y2="100"/>
   </svg>`;
 }
+/* 预习生字卡片：偏旁 + 笔画（手写确认后显示） */
 function renderCharCard(char, task){
   const info = HZ_INFO[char] || ['—','—'];
   const py = getPinyin(char);
   const checked = !!(task && Array.isArray(task.checkedChars) && task.checkedChars.indexOf(char) >= 0);
+  const strokeCount = (task && task.strokeCounts && task.strokeCounts[char]) ? task.strokeCounts[char] : '';
   return `<div class="char-card">
     <div class="char-pinyin">${py ? escapeHtml(py) : '&nbsp;'}</div>
-    <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(char)}" title="单击看笔顺 · 双击打勾 · 长按修改/删除">
+    <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(char)}" title="单击手写确认笔画 · 双击打勾">
       ${miziSvg()}
       <span class="mizi-char">${escapeHtml(char)}</span>
     </div>
     <div class="char-info">偏旁：${escapeHtml(info[0])}</div>
-    <div class="char-info">结构：${escapeHtml(info[1])}</div>
+    <div class="char-info">笔画：<span class="stroke-count" data-char="${escapeAttr(char)}">${strokeCount || '—'}</span></div>
   </div>`;
 }
 function renderWordGroup(word, showInfo, task){
@@ -2809,12 +2867,36 @@ function renderWordGroup(word, showInfo, task){
     const checked = !!(task && Array.isArray(task.checkedChars) && task.checkedChars.indexOf(c) >= 0);
     return `<div class="wg-item">
       <div class="char-pinyin">${py ? escapeHtml(py) : '&nbsp;'}</div>
-      <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(c)}" title="单击看笔顺 · 双击打勾 · 长按修改/删除">
+      <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(c)}" title="单击看笔顺 · 双击打勾">
         ${miziSvg()}
         <span class="mizi-char">${escapeHtml(c)}</span>
       </div>
     </div>`;
   }).join('')}</div>`;
+}
+/* 小号词语田字格（显示在生字后面） */
+function renderSmallWord(word){
+  const chars = [...word].filter(c => /[\u4e00-\u9fa5]/.test(c));
+  return '<span class="word-item">' + chars.map(c =>
+    '<span class="mizi small">' + miziSvg() + '<span class="mizi-char">' + escapeHtml(c) + '</span></span>'
+  ).join('') + '</span>';
+}
+/* 抄写并组词卡片：生字 + 后面跟已组词语 */
+function renderWordGroupWithWords(char, task){
+  const py = getPinyin(char);
+  const checked = !!(task && Array.isArray(task.checkedChars) && task.checkedChars.indexOf(char) >= 0);
+  const words = (state.wordBank && state.wordBank[char]) ? state.wordBank[char] : [];
+  const wordsHtml = words.length
+    ? words.map(w => renderSmallWord(w)).join('')
+    : '<span class="word-empty">点击田字格组词</span>';
+  return `<div class="char-card wordgroup-card" data-char="${escapeAttr(char)}">
+    <div class="char-pinyin">${py ? escapeHtml(py) : '&nbsp;'}</div>
+    <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(char)}" title="单击组词 · 双击打勾 · 长按修改/删除">
+      ${miziSvg()}
+      <span class="mizi-char">${escapeHtml(char)}</span>
+    </div>
+    <div class="word-after" data-word-after="${escapeAttr(char)}">${wordsHtml}</div>
+  </div>`;
 }
 function setCharChecked(task, char, on){
   if(!task) return;
@@ -3028,8 +3110,8 @@ function renderSubjectCards(subject, listEl){
 
     const actions = document.createElement('div'); actions.className = 'card-actions';
 
-    /* ★ 撤销/恢复按钮（仅田字格任务显示，在相机左侧） */
-    if(task.type === 'preview' || task.type === 'wordgroup' || task.type === 'copy'){
+    /* ★ 撤销/恢复按钮（仅「抄写并组词」显示） */
+    if(task.type === 'wordgroup'){
       const undoBtn = document.createElement('button');
       undoBtn.type = 'button'; undoBtn.className = 'mini-btn undo'; undoBtn.textContent = '↶'; undoBtn.title = '撤销';
       undoBtn.disabled = !canUndoMizi(task.id);
@@ -3061,12 +3143,27 @@ function renderSubjectCards(subject, listEl){
     if(task.type === 'preview' && Array.isArray(task.chars) && task.chars.length){
       const grid = document.createElement('div');
       grid.className = 'char-grid';
+      grid.dataset.taskId = task.id;
       grid.innerHTML = task.chars.map(c => renderCharCard(c, task)).join('');
       card.appendChild(grid);
       bindMiziClicks(grid, task);
-    } else if((task.type === 'wordgroup' || task.type === 'copy') && Array.isArray(task.words) && task.words.length){
+    } else if(task.type === 'wordgroup' && Array.isArray(task.words) && task.words.length){
+      const grid = document.createElement('div');
+      grid.className = 'char-grid wordgroup-grid';
+      grid.dataset.taskId = task.id;
+      const chars = [];
+      task.words.forEach(w => {
+        [...String(w)].forEach(c => {
+          if(/[\u4e00-\u9fa5]/.test(c) && !chars.includes(c)) chars.push(c);
+        });
+      });
+      grid.innerHTML = chars.map(c => renderWordGroupWithWords(c, task)).join('');
+      card.appendChild(grid);
+      bindMiziClicks(grid, task);
+    } else if(task.type === 'copy' && Array.isArray(task.words) && task.words.length){
       const grid = document.createElement('div');
       grid.className = 'char-grid';
+      grid.dataset.taskId = task.id;
       grid.innerHTML = task.words.map(w => renderWordGroup(w, false, task)).join('');
       card.appendChild(grid);
       bindMiziClicks(grid, task);
@@ -3411,11 +3508,11 @@ function buildCharUnits(task, grid){
   let mode = 'per-char';
   let cfg;
   if(task.type === 'preview'){ cfg = getUnitCfg('preview'); }
-  else if(task.type === 'wordgroup'){ mode = 'per-word'; cfg = getUnitCfg('wordgroup'); }
+  else if(task.type === 'wordgroup'){ mode = 'per-char'; cfg = getUnitCfg('wordgroup'); }
   else if(task.type === 'copy'){ mode = 'per-word'; cfg = getUnitCfg('copy'); }
   else { return { units: [], mode }; }
   const unitMs = cfg.min * 60000;
-  if(task.type === 'preview'){
+  if(task.type === 'preview' || task.type === 'wordgroup'){
     grid.querySelectorAll('.char-card').forEach(card => {
       const mizi = card.querySelector('.mizi');
       if(mizi) units.push({ mizis:[mizi], bars:[], totalMs: unitMs });
@@ -4253,21 +4350,123 @@ const strokeCharBig = $('strokeCharBig');
 const strokePinyinEl = $('strokePinyinEl');
 const strokeMetaEl = $('strokeMetaEl');
 let lastStrokeChar = '';
-function showStroke(char){
+let currentStrokeTask = null;
+let currentStrokeMode = 'wordgroup';
+
+function setStrokeToolsVisible(visible){
+  const tools = document.querySelector('.stroke-tools');
+  const wordsBox = $('strokeWords');
+  if(tools) tools.style.display = visible ? '' : 'none';
+  if(wordsBox) wordsBox.style.display = visible ? '' : 'none';
+}
+
+/* 本地优先的笔顺数据加载 */
+function loadHanziData(char, onComplete, onError){
+  fetch('hanzi-writer-data/' + char + '.json')
+    .then(r => { if(!r.ok) throw new Error('no local data'); return r.json(); })
+    .then(onComplete)
+    .catch(() => {
+      fetch('https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0.1/' + char + '.json')
+        .then(r => { if(!r.ok) throw new Error('no data'); return r.json(); })
+        .then(onComplete)
+        .catch(err => {
+          strokeStage.innerHTML = `<div style="font-size:130px;line-height:1;color:#2E7D32;font-family:'Kaiti SC','KaiTi','STKaiti','楷体',serif">${escapeHtml(char)}</div>`;
+          if(onError) onError(err);
+        });
+    });
+}
+
+/* 普通笔顺展示（抄写词语 / 抄写并组词） */
+function showStroke(char, task, mode){
   if(!char || !/[\u4e00-\u9fa5]/.test(char)) return;
   lastStrokeChar = char;
+  currentStrokeTask = task || null;
+  currentStrokeMode = mode || 'plain';
+
   strokeCharBig.textContent = char;
   const py = getPinyin(char);
   strokePinyinEl.textContent = py || '';
   const info = HZ_INFO[char] || ['—','—'];
-  strokeMetaEl.textContent = `偏旁：${info[0]} · 结构：${info[1]}`;
+  strokeMetaEl.textContent = '偏旁：' + info[0];
   strokeStage.innerHTML = '';
-  renderStrokeWords(char);
+
+  if(currentStrokeMode === 'wordgroup'){
+    setStrokeToolsVisible(true);
+    renderStrokeWords(char);
+  } else {
+    setStrokeToolsVisible(false);
+  }
+
   const wordInput = $('strokeVoiceInput');
   if(wordInput) wordInput.value = '';
+
   strokeModal.classList.add('show');
   setTimeout(() => playStroke(char), 60);
 }
+
+/* 预习生字：手写确认笔画 */
+function showStrokeQuiz(char, task){
+  if(!char || !/[\u4e00-\u9fa5]/.test(char)) return;
+  lastStrokeChar = char;
+  currentStrokeTask = task || null;
+  currentStrokeMode = 'preview';
+
+  strokeCharBig.textContent = char;
+  const py = getPinyin(char);
+  strokePinyinEl.textContent = py || '';
+  const info = HZ_INFO[char] || ['—','—'];
+  strokeMetaEl.textContent = '偏旁：' + info[0] + ' · 请按笔顺手写这个字';
+  strokeStage.innerHTML = '';
+
+  setStrokeToolsVisible(false);
+
+  strokeModal.classList.add('show');
+  setTimeout(() => startStrokeQuiz(char, task), 80);
+}
+
+function startStrokeQuiz(char, task){
+  strokeStage.innerHTML = '';
+  if(!window.HanziWriter){
+    strokeStage.innerHTML = `<div style="font-size:120px;line-height:1;color:#2E7D32;font-family:'Kaiti SC','KaiTi','STKaiti','楷体',serif">${escapeHtml(char)}</div>`;
+    return;
+  }
+  let charDataCache = null;
+  const size = Math.min(200, strokeStage.clientWidth || 200);
+  try{
+    const writer = HanziWriter.create(strokeStage, char, {
+      width: size, height: size, padding: 6,
+      showOutline: true, showCharacter: false,
+      strokeColor: '#2E7D32', outlineColor: '#A5D6A7', radicalColor: '#1B5E20',
+      charDataLoader: (c, onComplete, onError) => {
+        loadHanziData(c, (data) => { charDataCache = data; onComplete(data); }, onError);
+      }
+    });
+    writer.quiz({
+      showHintAfterMisses: 2,
+      onComplete: () => {
+        const count = (charDataCache && charDataCache.strokes) ? charDataCache.strokes.length : 0;
+        if(task && count){
+          if(!task.strokeCounts) task.strokeCounts = {};
+          task.strokeCounts[char] = count;
+          saveLocalState();
+          uploadToCloud();
+          const grid = document.querySelector('.char-grid[data-task-id="' + task.id + '"]');
+          if(grid){
+            grid.querySelectorAll('.stroke-count[data-char="' + char + '"]').forEach(el => {
+              el.textContent = count;
+            });
+          }
+          strokeMetaEl.textContent = '偏旁：' + ((HZ_INFO[char] || ['—'])[0]) + ' · 笔画：' + count + ' 画';
+          toast('✅ 笔画正确！共 ' + count + ' 画', 2200);
+        }
+      }
+    });
+  }catch(e){
+    console.warn('手写渲染失败', e);
+    strokeStage.innerHTML = `<div style="font-size:120px;line-height:1;color:#2E7D32;font-family:'Kaiti SC','KaiTi','STKaiti','楷体',serif">${escapeHtml(char)}</div>`;
+  }
+}
+
 function playStroke(char){
   strokeStage.innerHTML = '';
   if(!window.HanziWriter){
@@ -4281,15 +4480,7 @@ function playStroke(char){
       showOutline: true, showCharacter: false,
       strokeColor: '#2E7D32', outlineColor: '#A5D6A7', radicalColor: '#1B5E20',
       strokeAnimationSpeed: 1, delayBetweenStrokes: 220,
-      charDataLoader: (c, onComplete, onError) => {
-        fetch(`https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0.1/${c}.json`)
-          .then(r => { if(!r.ok) throw new Error('no data'); return r.json(); })
-          .then(onComplete)
-          .catch(err => {
-            strokeStage.innerHTML = `<div style="font-size:130px;line-height:1;color:#2E7D32;font-family:'Kaiti SC','KaiTi','STKaiti','楷体',serif">${escapeHtml(c)}</div>`;
-            if(onError) onError(err);
-          });
-      }
+      charDataLoader: loadHanziData
     });
     currentWriter.animateCharacter();
   }catch(e){
@@ -4297,10 +4488,24 @@ function playStroke(char){
     strokeStage.innerHTML = `<div style="font-size:130px;line-height:1.2;color:#2E7D32;font-family:'Kaiti SC','KaiTi','STKaiti','楷体',serif">${escapeHtml(char)}</div>`;
   }
 }
-$('strokeReplay').addEventListener('click', () => { if(lastStrokeChar) playStroke(lastStrokeChar); });
-$('strokeClose').addEventListener('click', () => { strokeModal.classList.remove('show'); strokeStage.innerHTML = ''; currentWriter = null; });
+
+function closeStrokeModal(){
+  strokeModal.classList.remove('show');
+  strokeStage.innerHTML = '';
+  currentWriter = null;
+  setStrokeToolsVisible(true);
+}
+$('strokeReplay').addEventListener('click', () => {
+  if(!lastStrokeChar) return;
+  if(currentStrokeMode === 'preview' && currentStrokeTask){
+    showStrokeQuiz(lastStrokeChar, currentStrokeTask);
+  } else {
+    playStroke(lastStrokeChar);
+  }
+});
+$('strokeClose').addEventListener('click', closeStrokeModal);
 strokeModal.addEventListener('click', e => {
-  if(e.target === strokeModal){ strokeModal.classList.remove('show'); strokeStage.innerHTML = ''; currentWriter = null; }
+  if(e.target === strokeModal){ closeStrokeModal(); }
 });
 (function bindManualWordInput(){
   const addBtn = $('strokeVoiceAddBtn');
