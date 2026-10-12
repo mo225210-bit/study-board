@@ -402,7 +402,8 @@
   .mizi{position:relative;width:54px;height:54px;flex:none;
     display:grid;place-items:center;background:#E8F5E9;
     border:1.5px solid #EF9A9A;border-radius:3px;
-    cursor:pointer;transition:transform .15s,box-shadow .15s;overflow:hidden}
+    cursor:pointer;transition:transform .15s,box-shadow .15s;overflow:hidden;
+    -webkit-touch-callout:none;touch-action:manipulation}
   .mizi:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.14)}
   .mizi:active{transform:scale(.95)}
   .mizi-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
@@ -459,10 +460,11 @@
 
   .form-field{margin-bottom:10px}
   .form-field>label{display:block;font-size:12px;font-weight:800;color:#5b7a5b;margin-bottom:5px;padding-left:2px}
-  .form-field input{width:100%;font-family:inherit;font-size:13.5px;font-weight:700;color:#2b3a2b;
+  .form-field input,.form-field textarea{width:100%;font-family:inherit;font-size:13.5px;font-weight:700;color:#2b3a2b;
     background:#F6FBF6;border:2px solid #D7E8D7;padding:10px 12px;border-radius:12px;
     outline:none;transition:all .15s}
-  .form-field input:focus{border-color:#7CC47C;background:#fff}
+  .form-field input:focus,.form-field textarea:focus{border-color:#7CC47C;background:#fff}
+  .form-field textarea{resize:vertical;min-height:78px;line-height:1.6}
   .form-field input[type="file"]{padding:8px 10px;font-size:12.5px;cursor:pointer}
   .form-row{display:flex;gap:10px}
   .form-row .form-field{flex:1}
@@ -531,7 +533,6 @@
     border:0;background:rgba(229,57,53,.9);color:#fff;font-size:10px;font-weight:900;
     cursor:pointer;line-height:1;display:grid;place-items:center;padding:0;font-family:inherit}
   .sw-empty{font-size:11.5px;font-weight:700;color:#8a9a8a;padding:6px 0;width:100%}
-  /* 手动组词生成的田字格加大，方便孩子看清和书写 */
   .stroke-words .mizi{width:60px;height:60px;border-color:#B7E0A8}
   .stroke-words .mizi-char{font-size:42px}
   .stroke-words .char-pinyin{font-size:14px;max-width:64px}
@@ -872,6 +873,7 @@
   .custom-task-text{
     font-family:"Kaiti SC","KaiTi","STKaiti","楷体","PingFang SC","Microsoft YaHei",serif;
     font-size:24px!important;line-height:1.28!important;font-weight:400!important;color:#000;
+    white-space:pre-wrap!important;word-break:break-word;
   }
   .task-card.done .custom-task-text{color:#9aad9a}
 
@@ -1001,7 +1003,7 @@
     </section>
   </div>
 
-  <div class="timer-hint" style="margin-top:-3px">自定义作业可直接勾选完成 · 📷 其他作业需先拍照再勾选 · 🖼️ 查看作业照片</div>
+  <div class="timer-hint" style="margin-top:-3px">自定义作业可直接勾选完成 · 📷 其他作业需先拍照再勾选 · 🖼️ 查看作业照片 · ✋ 长按田字格可修改/删除</div>
 </div>
 
 <div class="modal" id="calModal">
@@ -1040,6 +1042,35 @@
   </div>
 </div>
 
+<!-- ★ 田字格长按操作菜单 -->
+<div class="modal" id="miziActionModal">
+  <div class="modal-card" style="max-width:340px">
+    <h3 id="miziActionTitle">田字格</h3>
+    <p id="miziActionSub">删除会同步减少任务时间与金币奖励</p>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="miziActionEdit">✏️ 修改</button>
+      <button class="btn-main" id="miziActionDel"
+        style="background:linear-gradient(180deg,#FF8A80,#EF5350);border-color:#EF5350;box-shadow:0 3px 0 #C62828">🗑 删除</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="miziActionCancel" style="flex:1">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- ★ 田字格内容编辑 -->
+<div class="modal" id="miziEditModal">
+  <div class="modal-card" style="max-width:340px">
+    <h3 id="miziEditTitle">✏️ 修改</h3>
+    <p id="miziEditSub">修改后会替换原内容</p>
+    <div class="form-field"><input type="text" id="miziEditInput" maxlength="8" autocomplete="off"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="miziEditCancel">取消</button>
+      <button class="btn-main" id="miziEditSave">保存</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="pwdModal">
   <div class="modal-card">
     <div class="pwd-lock">🔒</div>
@@ -1074,8 +1105,8 @@
 <div class="modal" id="taskEditModal">
   <div class="modal-card">
     <h3>✏️ 编辑作业</h3>
-    <p>双击作业条目可随时修改内容、时长与金币</p>
-    <div class="form-field"><label>作业内容</label><input type="text" id="taskEditText" maxlength="200"></div>
+    <p>双击作业条目可随时修改内容、时长与金币（支持换行）</p>
+    <div class="form-field"><label>作业内容（可换行）</label><textarea id="taskEditText" rows="3" maxlength="200"></textarea></div>
     <div class="form-field" id="taskEditExtraWrap">
       <label id="taskEditExtraLabel">生字（空格分隔）</label>
       <input type="text" id="taskEditExtra" maxlength="600">
@@ -1191,9 +1222,9 @@
         <span class="aa-unit">金币</span>
         <button class="aa-btn" id="quickAddRopeBtn">添加</button>
       </div>
-      <div class="admin-sub-label">➕ 添加自定义作业</div>
+      <div class="admin-sub-label">➕ 添加自定义作业（支持换行）</div>
       <div class="admin-add-row">
-        <textarea class="aa-text" id="adminAddChineseText" rows="3" placeholder="作业内容"></textarea>
+        <textarea class="aa-text" id="adminAddChineseText" rows="3" placeholder="作业内容（可换行）"></textarea>
         <input class="aa-num" id="adminAddChineseMin" type="number" value="10" min="1" max="120">
         <span class="aa-unit">分钟</span>
         <input class="aa-num" id="adminAddChineseSun" type="number" value="10" min="1" max="500">
@@ -1208,9 +1239,9 @@
     <div class="admin-section" id="adminPanelMath">
       <h3>🔢 数学作业 <span class="badge" id="adminMathBadge">0</span></h3>
       <div id="adminMathList"></div>
-      <div class="admin-sub-label">➕ 添加数学作业</div>
+      <div class="admin-sub-label">➕ 添加数学作业（支持换行）</div>
       <div class="admin-add-row">
-        <textarea class="aa-text" id="adminAddMathText" rows="3" placeholder="作业内容"></textarea>
+        <textarea class="aa-text" id="adminAddMathText" rows="3" placeholder="作业内容（可换行）"></textarea>
         <input class="aa-num" id="adminAddMathMin" type="number" value="10" min="1" max="120">
         <span class="aa-unit">分钟</span>
         <input class="aa-num" id="adminAddMathSun" type="number" value="10" min="1" max="500">
@@ -1225,9 +1256,9 @@
     <div class="admin-section" id="adminPanelEnglish">
       <h3>🔤 英语作业 <span class="badge" id="adminEnglishBadge">0</span></h3>
       <div id="adminEnglishList"></div>
-      <div class="admin-sub-label">➕ 添加英语作业</div>
+      <div class="admin-sub-label">➕ 添加英语作业（支持换行）</div>
       <div class="admin-add-row">
-        <textarea class="aa-text" id="adminAddEnglishText" rows="3" placeholder="作业内容"></textarea>
+        <textarea class="aa-text" id="adminAddEnglishText" rows="3" placeholder="作业内容（可换行）"></textarea>
         <input class="aa-num" id="adminAddEnglishMin" type="number" value="10" min="1" max="120">
         <span class="aa-unit">分钟</span>
         <input class="aa-num" id="adminAddEnglishSun" type="number" value="10" min="1" max="500">
@@ -1243,7 +1274,7 @@
     <div class="admin-section collapsed" id="adminPanelTimetable">
       <h3>📅 课程表 <span class="badge" id="adminTtBadge">未上传</span></h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
-        上传 Excel 课程表后，学生端「课程表」页会自动显示。<br>
+        上传 Excel 课程表后，学生端「课程表」页会自动显示，<b style="color:#FFD54F">并永久保存在本机与云端</b>。<br>
         表头需包含 <b style="color:#FFD54F">时间</b> 与 <b style="color:#FFD54F">项目</b> 两列，后面依次为星期一 ~ 星期五。<br>
         <b style="color:#FFD54F">15:00 前高亮当天课程，15:00 后高亮第二天的课程；合并单元格不高亮且文字居中。</b>
       </p>
@@ -1251,7 +1282,7 @@
         <input type="file" id="adminTtFile" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
       </div>
       <div class="admin-add-row">
-        <button class="aa-btn" id="adminTtUploadBtn" style="flex:1">📤 上传并解析课程表</button>
+        <button class="aa-btn" id="adminTtUploadBtn" style="flex:1">📤 上传并保存课程表</button>
         <button class="aa-btn" id="adminTtClearBtn" style="background:linear-gradient(180deg,#FF8A80,#EF5350);border-color:#EF5350;box-shadow:0 3px 0 #C62828;color:#fff">🗑 清除</button>
       </div>
       <div class="aa-hint" id="adminTtHint">支持 .xlsx / .xls / .csv 格式</div>
@@ -1387,6 +1418,56 @@
 
 <script type="module">
 /* ============================================================
+   ★★★ 版本号：每次修改界面/功能后请把这里 +1
+   —— 页面会自动对比版本，必要时清缓存并刷新，无需手动清缓存
+============================================================ */
+const APP_VERSION = '2026.10.12.1';
+
+/* ============================================================
+   🔄 自动更新（解决「缓存导致界面不更新」）
+============================================================ */
+(function versionGuard(){
+  try{
+    const KEY = 'study_board_app_version';
+    const prev = localStorage.getItem(KEY);
+    if(prev === APP_VERSION) return;
+    localStorage.setItem(KEY, APP_VERSION);
+    if(!prev) return;                       // 首次访问，无需刷新
+    const done = () => { try{ location.reload(); }catch(e){} };
+    if(window.caches && caches.keys){
+      caches.keys()
+        .then(keys => Promise.all(keys.map(k => caches.delete(k))))
+        .then(done).catch(done);
+    } else { done(); }
+  }catch(e){}
+})();
+
+/* 在线比对远端版本，若远端更新则清缓存并刷新 */
+(function remoteVersionCheck(){
+  try{
+    if(location.protocol !== 'http:' && location.protocol !== 'https:') return;
+    const KEY = 'study_board_ver_checked';
+    if(sessionStorage.getItem(KEY) === APP_VERSION) return;
+    sessionStorage.setItem(KEY, APP_VERSION);
+    fetch(location.pathname + '?_v=' + Date.now(), { cache: 'no-store' })
+      .then(r => r.ok ? r.text() : '')
+      .then(txt => {
+        if(!txt) return;
+        const m = txt.match(/APP_VERSION\s*=\s*'([^']+)'/);
+        if(!m || !m[1] || m[1] === APP_VERSION) return;
+        localStorage.setItem('study_board_app_version', m[1]);
+        if(window.caches && caches.keys){
+          caches.keys()
+            .then(keys => Promise.all(keys.map(k => caches.delete(k))))
+            .then(() => location.reload())
+            .catch(() => location.reload());
+        } else { location.reload(); }
+      })
+      .catch(() => {});
+  }catch(e){}
+})();
+
+/* ============================================================
    🔥 Firebase 配置
 ============================================================ */
 const FIREBASE_CONFIG = {
@@ -1435,7 +1516,7 @@ const REST_HOLIDAYS = new Set([
   // 示例：'2026-10-01','2026-10-02','2026-10-03',
 ]);
 const MAKEUP_WORKDAYS = new Set([
-  '2026-10-10' // 国庆节调休上班日：周六按上课日处理，不自动同步休息日作业
+  '2026-10-10' // 国庆节调休上班日
 ]);
 
 const MAX_PHOTOS_PER_TASK = 3;
@@ -1600,7 +1681,7 @@ function parseWords(str){
     .map(s => s.replace(/[^\u4e00-\u9fa5]/g,'')).filter(Boolean).slice(0, 40);
 }
 
-/* ★ 新增：组词词库规范化 */
+/* ★ 组词词库规范化 */
 function normalizeWordBank(raw){
   const out = {};
   if(!raw || typeof raw !== 'object') return out;
@@ -1884,9 +1965,8 @@ function loadLocalState(){
   const shopNorm = normalizeShop(s.shop);
   if(shopNorm === null) s.shop = JSON.parse(JSON.stringify(DEFAULT_SHOP));
   else s.shop = shopNorm;
-  /* ★ 组词词库 */
   s.wordBank = normalizeWordBank(s.wordBank);
-  /* ★ 课程表 */
+  /* ★ 课程表读取 */
   s.timetable = normalizeTimetable(s.timetable);
   if(!s.live || typeof s.live !== 'object'){
     s.live = JSON.parse(JSON.stringify(DEFAULT_LIVE));
@@ -1941,7 +2021,6 @@ function cloneTaskForNewDay(t, syncKey){
   const nt = JSON.parse(JSON.stringify(t));
   nt.id = newId();
   nt.syncKey = syncKey || t.syncKey || t.id;
-  // 首次手动同步时保留前一天的完成状态；之后通过 syncKey 维持跨日期关联。
   nt.done = !!t.done;
   delete nt.photos;
   return nt;
@@ -1958,7 +2037,6 @@ function syncFromPreviousDay(targetDate, opts){
   let count = 0;
   ['chinese','math','english'].forEach(k => {
     out[k] = (src[k] || []).map(t => {
-      // 原任务和今天的副本共用 syncKey，后续任意一天打勾/取消都会同步到整组。
       if(!t.syncKey) t.syncKey = t.id;
       count++;
       return cloneTaskForNewDay(t, t.syncKey);
@@ -1984,83 +2062,228 @@ function getLinkedTasks(task){
   });
   return found.length ? found : [task];
 }
-/* ============================================================
-   ★ 剩余字数 → 收紧总倒计时
-============================================================ */
-function countRemainingUnits(taskId){
-  const ref = cardRefs[taskId];
-  const info = findTask(taskId);
-  if(!ref || !ref.el || !info) return null;
-  const type = info.task.type;
-  if(type !== 'preview' && type !== 'wordgroup' && type !== 'copy') return null;
-  const grid = ref.el.querySelector('.char-grid');
-  if(!grid) return null;
 
-  let total = 0, remaining = 0;
-  if(type === 'preview'){
-    grid.querySelectorAll('.char-card').forEach(card => {
-      const m = card.querySelector('.mizi');
-      if(!m) return;
-      total++;
-      if(!m.classList.contains('checked')) remaining++;
-    });
-  } else {
-    grid.querySelectorAll('.word-group').forEach(g => {
-      const mizis = g.querySelectorAll('.mizi');
-      if(!mizis.length) return;
-      total++;
-      let allDone = true;
-      mizis.forEach(m => { if(!m.classList.contains('checked')) allDone = false; });
-      if(!allDone) remaining++;
-    });
-  }
-  return { total, remaining };
+/* ============================================================
+   ★★★ 田字格长按：修改 / 删除（旧版倒计时保持总时长不变） ★★★
+============================================================ */
+let miziActionCtx = null;      // { taskId, kind:'char'|'word', index }
+let miziEditCtx = null;
+
+/** 重新计算任务的分钟数与金币（按剩余单元数 × 单位配置） */
+function recalcTaskUnits(task){
+  const type = task.type;
+  if(type !== 'preview' && type !== 'wordgroup' && type !== 'copy') return;
+  const cfg = getUnitCfg(type);
+  const count = (type === 'preview') ? (task.chars || []).length : (task.words || []).length;
+  if(count <= 0) return;
+  /* 分钟按 0.5 取整，金币取整 */
+  task.minutes = clamp(Math.round(count * cfg.min * 2) / 2, 0.5, 120);
+  task.sun = clamp(Math.round(count * cfg.sun), 1, 500);
+  /* 同步标题里的数量 */
+  const unitLabel = (type === 'copy') ? '组' : '字';
+  task.text = String(task.text).replace(/[（(]\s*\d+\s*[字组]\s*[）)]/, '（' + count + unitLabel + '）');
 }
 
-/* 打勾后：总倒计时 = min(当前总倒计时, 剩余数量 × 单位分钟) */
-function applyCheckedDurationCap(taskId){
-  const info = findTask(taskId);
+/** 从点击的田字格反推：是第几个「字」还是第几个「词语」 */
+function getMiziUnitCtx(el, task){
+  if(!task) return null;
+  if(task.type === 'preview'){
+    const grid = el.closest('.char-grid');
+    const card = el.closest('.char-card');
+    if(!grid || !card) return null;
+    const cards = Array.from(grid.querySelectorAll('.char-card'));
+    const index = cards.indexOf(card);
+    if(index < 0) return null;
+    return { taskId: task.id, kind:'char', index };
+  }
+  if(task.type === 'wordgroup' || task.type === 'copy'){
+    const grid = el.closest('.char-grid');
+    const group = el.closest('.word-group');
+    if(!grid || !group) return null;
+    const groups = Array.from(grid.querySelectorAll('.word-group'));
+    const index = groups.indexOf(group);
+    if(index < 0) return null;
+    return { taskId: task.id, kind:'word', index };
+  }
+  return null;
+}
+
+/** 修改 / 删除后：保存 + 重新渲染 + 同步正在运行的田字格进度条 */
+function commitMiziChange(taskId){
+  saveLocalState(); uploadToCloud();
+  renderBoard(); refreshAllCards();
+  if(activeId === taskId){
+    initCharTimer(taskId);
+    paintCharBarsFromLive();
+    updateDogBar(); updateCardVisual(taskId);
+  }
+  if(isAdminMode) renderAdminPanel();
+}
+
+function openMiziActionModal(ctx){
+  const info = findTask(ctx.taskId);
   if(!info) return;
   const task = info.task;
-  if(task.type !== 'preview' && task.type !== 'wordgroup' && task.type !== 'copy') return;
+  let value = '';
+  if(ctx.kind === 'char') value = (task.chars || [])[ctx.index] || '';
+  else value = (task.words || [])[ctx.index] || '';
+  if(!value) return;
+  miziActionCtx = ctx;
+  const titleEl = $('miziActionTitle');
+  const subEl = $('miziActionSub');
+  if(titleEl) titleEl.textContent = (ctx.kind === 'char' ? '生字：' : '词语：') + value;
+  if(subEl) subEl.textContent = '删除会同步减少任务时间与金币奖励';
+  const modal = $('miziActionModal');
+  if(modal) modal.classList.add('show');
+}
+function closeMiziActionModal(){
+  const modal = $('miziActionModal');
+  if(modal) modal.classList.remove('show');
+  miziActionCtx = null;
+}
 
-  const counts = countRemainingUnits(taskId);
-  if(!counts || counts.remaining <= 0) return;
-  if(counts.remaining >= counts.total) return;  /* 还没打勾，不收紧 */
-
-  const cfg = getUnitCfg(task.type);
-  const capMs = Math.round(counts.remaining * cfg.min * 60000);
-  if(capMs <= 0) return;
-
-  const L = state.live;
-  if(L && L.activeId === taskId){
-    if(L.overdue || L.status === 'timeup') return;     /* 超时中不调整 */
-    if(L.totalMs <= capMs) return;                     /* 已经更短 → 不变 */
-
-    const left = liveLeftMs(L);
-    const newLeft = Math.min(left, capMs);
-    L.totalMs = capMs;
-    L.unitMs = cfg.min * 60000;
-    L.leftAtStart = newLeft;
-    L.startedAt = Date.now();
-    pushLive();
-    refreshAllCards();
-    updateDogBar();
+function deleteMiziUnit(ctx){
+  const info = findTask(ctx.taskId);
+  if(!info) return;
+  const task = info.task;
+  if(task.type === 'preview'){
+    if((task.chars || []).length <= 1){ toast('至少要保留一个字哦'); return; }
+    const removed = task.chars.splice(ctx.index, 1)[0];
+    if(Array.isArray(task.checkedChars)) task.checkedChars = task.checkedChars.filter(c => c !== removed);
   } else {
-    const rt = runtimeMap[taskId];
-    if(rt && rt.totalMs > capMs){
-      rt.totalMs = capMs;
-      if(rt.leftMs > capMs) rt.leftMs = capMs;
-      updateCardVisual(taskId);
-    }
+    if((task.words || []).length <= 1){ toast('至少要保留一个词语哦'); return; }
+    task.words.splice(ctx.index, 1);
+    const remainStr = (task.words || []).join('');
+    if(Array.isArray(task.checkedChars)) task.checkedChars = task.checkedChars.filter(c => remainStr.indexOf(c) >= 0);
   }
-  paintCharBarsFromLive();
+  recalcTaskUnits(task);
+  commitMiziChange(task.id);
+  toast('🗑 已删除，任务时长与金币已同步调整');
+}
+
+function openMiziEditModal(ctx){
+  const info = findTask(ctx.taskId);
+  if(!info) return;
+  const task = info.task;
+  const oldVal = (ctx.kind === 'char') ? (task.chars || [])[ctx.index] : (task.words || [])[ctx.index];
+  if(!oldVal) return;
+  miziEditCtx = ctx;
+  const titleEl = $('miziEditTitle');
+  const subEl = $('miziEditSub');
+  const input = $('miziEditInput');
+  if(titleEl) titleEl.textContent = (ctx.kind === 'char') ? '✏️ 修改生字' : '✏️ 修改词语';
+  if(subEl) subEl.textContent = (ctx.kind === 'char') ? '请输入 1 个汉字，修改后替换原字' : '请输入 1-8 个汉字，修改后替换原词';
+  if(input){
+    input.value = oldVal;
+    input.maxLength = (ctx.kind === 'char') ? 1 : 8;
+  }
+  const modal = $('miziEditModal');
+  if(modal) modal.classList.add('show');
+  setTimeout(() => { if(input){ input.focus(); try{ input.select(); }catch(e){} } }, 120);
+}
+function closeMiziEditModal(){
+  const modal = $('miziEditModal');
+  if(modal) modal.classList.remove('show');
+  miziEditCtx = null;
+}
+function saveMiziEdit(){
+  const ctx = miziEditCtx;
+  if(!ctx){ closeMiziEditModal(); return; }
+  const info = findTask(ctx.taskId);
+  if(!info){ closeMiziEditModal(); return; }
+  const task = info.task;
+  const input = $('miziEditInput');
+  const v = String((input && input.value) || '').trim();
+  if(!v){ toast('内容不能为空'); return; }
+  if(!/^[\u4e00-\u9fa5]+$/.test(v)){ toast('请输入汉字'); return; }
+  if(ctx.kind === 'char' && v.length !== 1){ toast('生字只能是 1 个汉字'); return; }
+  if(ctx.kind === 'word' && (v.length < 1 || v.length > 8)){ toast('词语需要 1-8 个汉字'); return; }
+
+  if(ctx.kind === 'char'){
+    const oldVal = task.chars[ctx.index];
+    if(v === oldVal){ closeMiziEditModal(); return; }
+    task.chars[ctx.index] = v;
+    if(Array.isArray(task.checkedChars)){
+      const i = task.checkedChars.indexOf(oldVal);
+      if(i >= 0) task.checkedChars.splice(i, 1);
+    }
+  } else {
+    const oldVal = task.words[ctx.index];
+    if(v === oldVal){ closeMiziEditModal(); return; }
+    task.words[ctx.index] = v;
+    const remainStr = (task.words || []).join('');
+    if(Array.isArray(task.checkedChars)) task.checkedChars = task.checkedChars.filter(c => remainStr.indexOf(c) >= 0);
+  }
+  closeMiziEditModal();
+  commitMiziChange(task.id);
+  toast('✅ 已修改，任务时长与金币保持不变');
+}
+
+/* 绑定田字格长按 + 单击 / 双击 */
+function bindMiziClicks(container, task){
+  container.querySelectorAll('.mizi[data-char]').forEach(el => {
+    let clickTimer = null;
+    let lpTimer = null, lpX = 0, lpY = 0;
+    el.__lpFired = false;
+
+    const cancelLp = () => { if(lpTimer){ clearTimeout(lpTimer); lpTimer = null; } };
+    const startLp = (ev) => {
+      if(!task) return;
+      const p = ev.touches ? ev.touches[0] : ev;
+      if(!p) return;
+      lpX = p.clientX; lpY = p.clientY;
+      cancelLp();
+      lpTimer = setTimeout(() => {
+        lpTimer = null;
+        el.__lpFired = true;
+        clearTimeout(clickTimer);
+        const ctx = getMiziUnitCtx(el, task);
+        if(ctx) openMiziActionModal(ctx);
+      }, 550);
+    };
+    const moveLp = (ev) => {
+      if(!lpTimer) return;
+      const p = ev.touches ? ev.touches[0] : ev;
+      if(!p) return;
+      if(Math.abs(p.clientX - lpX) > 12 || Math.abs(p.clientY - lpY) > 12) cancelLp();
+    };
+
+    el.addEventListener('touchstart', startLp, { passive:true });
+    el.addEventListener('touchmove', moveLp, { passive:true });
+    el.addEventListener('touchend', cancelLp);
+    el.addEventListener('touchcancel', cancelLp);
+    el.addEventListener('mousedown', startLp);
+    el.addEventListener('mousemove', moveLp);
+    el.addEventListener('mouseup', cancelLp);
+    el.addEventListener('mouseleave', cancelLp);
+    el.addEventListener('contextmenu', e => e.preventDefault());
+
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      if(el.__lpFired){ el.__lpFired = false; return; }
+      clearTimeout(clickTimer);
+      clickTimer = setTimeout(() => { showStroke(el.dataset.char); }, 260);
+    });
+    el.addEventListener('dblclick', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      if(el.__lpFired){ el.__lpFired = false; return; }
+      clearTimeout(clickTimer);
+      const group = el.closest('.word-group');
+      const targets = group ? Array.from(group.querySelectorAll('.mizi[data-char]')) : [el];
+      const willCheck = !el.classList.contains('checked');
+      targets.forEach(x => {
+        x.classList.toggle('checked', willCheck);
+        if(task) setCharChecked(task, x.dataset.char, willCheck);
+      });
+      if(task) scheduleCheckSave();
+    });
+  });
 }
 
 /* ============================================================
    ★ 手动组词
 ============================================================ */
-
 function renderWordMizi(word){
   const chars = [...word].filter(c => /[\u4e00-\u9fa5]/.test(c));
   return '<div class="word-group">' + chars.map(c =>
@@ -2258,7 +2481,7 @@ async function uploadToCloud(force){
     lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword,
     shop: state.shop,
     wordBank: state.wordBank,
-    timetable: state.timetable,            /* ★ 课程表 */
+    timetable: state.timetable,            /* ★ 课程表保存到云端 */
     lastNightReset: state.lastNightReset || '',
     eyeSoundOffDate: state.eyeSoundOffDate || '',
     live: state.live, updatedAt: Date.now()
@@ -2275,8 +2498,7 @@ async function uploadToCloud(force){
   }
 }
 /* ============================================================
-   🗂️ 数据历史文档：最新状态排第一，之后按时间从新到旧排列
-   家长端仅在关闭管理面板且确有修改时保存；学生端每次勾选/取消完成时保存。
+   🗂️ 数据历史文档
 ============================================================ */
 let adminEntrySnapshot = null;
 function getEditableStateForCompare(){
@@ -2312,7 +2534,6 @@ async function saveHistorySnapshot(reason){
       const snap = await fbGet(historyRef);
       let entries = snap.exists() ? snap.val() : [];
       if(!Array.isArray(entries)) entries = Array.isArray(entries && entries.entries) ? entries.entries : [];
-      // Keep the newest record at index 0; all previous backups move down.
       entries.unshift(entry);
       await fbSet(historyRef, entries);
     } else {
@@ -2628,7 +2849,7 @@ function renderCharCard(char, task){
   const checked = !!(task && Array.isArray(task.checkedChars) && task.checkedChars.indexOf(char) >= 0);
   return `<div class="char-card">
     <div class="char-pinyin">${py ? escapeHtml(py) : '&nbsp;'}</div>
-    <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(char)}" title="单击查看笔顺，双击标记完成">
+    <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(char)}" title="单击看笔顺 · 双击打勾 · 长按修改/删除">
       ${miziSvg()}
       <span class="mizi-char">${escapeHtml(char)}</span>
     </div>
@@ -2646,7 +2867,7 @@ function renderWordGroup(word, showInfo, task){
     const checked = !!(task && Array.isArray(task.checkedChars) && task.checkedChars.indexOf(c) >= 0);
     return `<div class="wg-item">
       <div class="char-pinyin">${py ? escapeHtml(py) : '&nbsp;'}</div>
-      <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(c)}" title="单击查看笔顺，双击标记完成">
+      <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(c)}" title="单击看笔顺 · 双击打勾 · 长按修改/删除">
         ${miziSvg()}
         <span class="mizi-char">${escapeHtml(c)}</span>
       </div>
@@ -2665,33 +2886,6 @@ let checkSaveTimer = null;
 function scheduleCheckSave(){
   clearTimeout(checkSaveTimer);
   checkSaveTimer = setTimeout(() => { saveLocalState(); uploadToCloud(); }, 600);
-}
-function bindMiziClicks(container, task){
-  container.querySelectorAll('.mizi[data-char]').forEach(el => {
-    let clickTimer = null;
-    el.addEventListener('click', e => {
-      e.stopPropagation();
-      clearTimeout(clickTimer);
-      clickTimer = setTimeout(() => { showStroke(el.dataset.char); }, 260);
-    });
-    el.addEventListener('dblclick', e => {
-      e.preventDefault();
-      e.stopPropagation();
-      clearTimeout(clickTimer);
-      const group = el.closest('.word-group');
-      const targets = group ? Array.from(group.querySelectorAll('.mizi[data-char]')) : [el];
-      const willCheck = !el.classList.contains('checked');
-      targets.forEach(x => {
-        x.classList.toggle('checked', willCheck);
-        if(task) setCharChecked(task, x.dataset.char, willCheck);
-      });
-      if(task){
-        scheduleCheckSave();
-        /* ★ 打勾后收紧总倒计时 */
-        applyCheckedDurationCap(task.id);
-      }
-    });
-  });
 }
 
 /* ============================================================
@@ -2808,6 +3002,42 @@ $('photoModalCam').addEventListener('click', () => { if(photoViewTaskId) openCam
 $('photoViewerClose').addEventListener('click', () => $('photoViewer').classList.remove('show'));
 $('photoViewer').addEventListener('click', e => { if(e.target === $('photoViewer')) $('photoViewer').classList.remove('show'); });
 
+/* ★ 田字格长按弹窗事件 */
+(function bindMiziActionEvents(){
+  const actionModal = $('miziActionModal');
+  const editModal = $('miziEditModal');
+  const editInput = $('miziEditInput');
+
+  if($('miziActionCancel')) $('miziActionCancel').addEventListener('click', closeMiziActionModal);
+  if(actionModal) actionModal.addEventListener('click', e => { if(e.target === actionModal) closeMiziActionModal(); });
+
+  if($('miziActionDel')) $('miziActionDel').addEventListener('click', () => {
+    const ctx = miziActionCtx;
+    closeMiziActionModal();
+    if(!ctx) return;
+    const info = findTask(ctx.taskId);
+    if(!info) return;
+    const task = info.task;
+    const val = (ctx.kind === 'char') ? (task.chars || [])[ctx.index] : (task.words || [])[ctx.index];
+    if(!val) return;
+    if(!confirm('确定删除「' + val + '」吗？\n删除后任务时长与金币奖励会同步减少。')) return;
+    setTimeout(() => deleteMiziUnit(ctx), 60);
+  });
+  if($('miziActionEdit')) $('miziActionEdit').addEventListener('click', () => {
+    const ctx = miziActionCtx;
+    closeMiziActionModal();
+    if(!ctx) return;
+    setTimeout(() => openMiziEditModal(ctx), 60);
+  });
+
+  if($('miziEditCancel')) $('miziEditCancel').addEventListener('click', closeMiziEditModal);
+  if(editModal) editModal.addEventListener('click', e => { if(e.target === editModal) closeMiziEditModal(); });
+  if($('miziEditSave')) $('miziEditSave').addEventListener('click', saveMiziEdit);
+  if(editInput) editInput.addEventListener('keydown', e => {
+    if(e.key === 'Enter'){ e.preventDefault(); saveMiziEdit(); }
+  });
+})();
+
 /* ============================================================
    作业板
 ============================================================ */
@@ -2848,7 +3078,7 @@ function renderSubjectCards(subject, listEl){
     const body = document.createElement('div'); body.className = 'card-body';
     const textEl = document.createElement('div');
     textEl.className = 'task-text' + (task.type === 'custom' ? ' custom-task-text' : '');
-    textEl.textContent = task.text;
+    textEl.textContent = task.text;   /* ★ 换行由 CSS white-space:pre-wrap 保留 */
 
     const info = document.createElement('div'); info.className = 'task-info';
     const stars = document.createElement('span'); stars.className = 'stars-mini';
@@ -3048,7 +3278,7 @@ function doUseTicket(id){
 }
 
 /* ============================================================
-   ★★★ 课程表：解析 / 渲染 / 高亮 ★★★
+   ★★★ 课程表：解析 / 渲染 / 高亮 / 保存 ★★★
 ============================================================ */
 let xlsxLoading = null;
 function loadXLSX(){
@@ -3067,18 +3297,10 @@ function loadXLSX(){
   return xlsxLoading;
 }
 
-/**
- * 解析一个工作表为课程表结构。
- * 规则：
- *  - 表头行必须同时含「时间」和「项目」
- *  - 表头中「星期一 ~ 星期日/天」「周一~周日」作为日期列
- *  - 合并单元格会被识别，输出 colspan / rowspan，渲染时跨列居中显示，且不参与高亮
- */
 function parseTimetableSheet(ws){
   if(!ws || !ws['!ref']) return null;
   const range = XLSX.utils.decode_range(ws['!ref']);
 
-  /* 取出整块二维数组（按偏移下标） */
   const grid = [];
   for(let r = range.s.r; r <= range.e.r; r++){
     const arr = [];
@@ -3089,12 +3311,10 @@ function parseTimetableSheet(ws){
     grid.push(arr);
   }
 
-  /* 合并区域（绝对坐标） */
   const merges = (ws['!merges'] || []).map(m => ({
     r1: m.s.r, r2: m.e.r, c1: m.s.c, c2: m.e.c
   }));
 
-  /* 找表头行 */
   let headRow = -1;
   for(let r = 0; r < grid.length; r++){
     const joined = grid[r].join('|');
@@ -3111,7 +3331,6 @@ function parseTimetableSheet(ws){
   if(timeCol < 0) timeCol = 0;
   if(itemCol < 0) itemCol = 1;
 
-  /* 识别星期列 */
   const dayCols = [];
   for(let c = 0; c < head.length; c++){
     if(c === timeCol || c === itemCol) continue;
@@ -3130,7 +3349,6 @@ function parseTimetableSheet(ws){
   }
   if(!dayCols.length) return null;
 
-  /* 数据行 */
   const outRows = [];
   for(let r = headRow + 1; r < grid.length; r++){
     const arr = grid[r] || [];
@@ -3144,17 +3362,14 @@ function parseTimetableSheet(ws){
       const cAbs = range.s.c + dc.col;
       const m = merges.find(mm => rAbs >= mm.r1 && rAbs <= mm.r2 && cAbs >= mm.c1 && cAbs <= mm.c2);
       if(m){
-        // 合并区域在 dayCols 中实际覆盖到的列
         const coveredCols = dayCols.filter(d => {
           const cc = range.s.c + d.col;
           return cc >= m.c1 && cc <= m.c2;
         });
-        // 只在覆盖到的第一列输出内容，其余列跳过（避免错位）
         if(!coveredCols.length || coveredCols[0].col !== dc.col){
           cells.push({ skip: true, merged: true });
           return;
         }
-        // 读取合并区域左上角单元格的文字
         const srcCell = ws[XLSX.utils.encode_cell({ r: m.r1, c: m.c1 })];
         const raw = (srcCell && srcCell.v != null) ? String(srcCell.v).trim() : '';
         if(raw) anyText = true;
@@ -3184,13 +3399,12 @@ function parseTimetableSheet(ws){
   };
 }
 
-/* 目标高亮日：15:00 前 = 今天，15:00 后 = 明天 */
 function getTtTarget(){
   const now = new Date();
   const t = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const isNext = now.getHours() >= TT_SWITCH_HOUR;
   if(isNext) t.setDate(t.getDate() + 1);
-  const jsDow = t.getDay();                 // 0=周日 ... 6=周六
+  const jsDow = t.getDay();
   const isWeekend = (jsDow === 0 || jsDow === 6);
   return { date: t, dow: jsDow, isNext, isWeekend };
 }
@@ -3214,7 +3428,6 @@ function renderTimetable(){
   const tgt = getTtTarget();
   const targetDow = tgt.isWeekend ? -1 : tgt.dow;
 
-  /* 找到目标星期对应的列 */
   let hlCol = -1;
   tt.headers.forEach((h, i) => {
     if(Number(h.dow) === targetDow) hlCol = i;
@@ -3232,9 +3445,8 @@ function renderTimetable(){
     html += '<td class="tt-time">' + escapeHtml(r.time || '') + '</td>';
     html += '<td class="tt-item">' + escapeHtml(r.item || '') + '</td>';
     (r.cells || []).forEach((c, i) => {
-      if(c.skip) return;   // 被合并区域覆盖，跳过该列
+      if(c.skip) return;
       const cls = [];
-      /* ★ 合并单元格不高亮，但文字居中 */
       if(c.merged) cls.push('tt-merged');
       if(i === hlCol && c.text && !c.merged) cls.push('tt-now');
       let span = '';
@@ -3268,7 +3480,6 @@ function renderTimetable(){
   lastTtKey = fmtDate(tgt.date) + '|' + (tgt.isNext ? '1' : '0');
 }
 
-/* 定时检查是否跨过 15:00，跨过则自动重画 */
 setInterval(() => {
   if(currentSubject !== 'timetable') return;
   const tgt = getTtTarget();
@@ -3277,7 +3488,7 @@ setInterval(() => {
 }, 30000);
 
 /* ============================================================
-   田字格倒计时
+   田字格倒计时（★ 保持旧版：总时长固定，格子按单位时间依次推进）
 ============================================================ */
 function charBarEnsure(mizi){
   let bar = mizi.querySelector('.mizi-bar');
@@ -3863,25 +4074,13 @@ function stopTick(){
 }
 
 /* ============================================================
-   任务操作
+   任务操作（★ 旧版：总时长固定，打勾不会收紧倒计时）
 ============================================================ */
 function liveStartTask(taskId){
   const info = findTask(taskId);
   if(!info || info.task.done) return;
   const L = state.live;
-  /* ★ 开始任务时按剩余单元数收紧总时长 */
-  let totalMs = clamp(Number(info.task.minutes)||10, 0.5, 120) * 60000;
-  {
-    const counts = countRemainingUnits(taskId);
-    if(counts && counts.remaining > 0 && counts.remaining < counts.total){
-      const t = info.task.type;
-      if(t === 'preview' || t === 'wordgroup' || t === 'copy'){
-        const cfg = getUnitCfg(t);
-        const ms = Math.round(counts.remaining * cfg.min * 60000);
-        if(ms > 0) totalMs = Math.min(totalMs, ms);
-      }
-    }
-  }
+  const totalMs = clamp(Number(info.task.minutes)||10, 0.5, 120) * 60000;
   let unitMs = totalMs;
   const type = info.task.type;
   if(type === 'preview' || type === 'wordgroup' || type === 'copy'){
@@ -3901,7 +4100,6 @@ function liveStartTask(taskId){
   L.taskPausedByRest = false;
   L.soundSeq = (L.soundSeq || 0) + 1;
   L.soundKind = 'start';
-  /* ★ 课程表不是作业页，切回语文 */
   L.tab = (currentSubject === 'shop' || currentSubject === 'timetable') ? 'chinese' : currentSubject;
   if(L.eyeActive && L.eyeMode === 'use' && L.eyePaused){
     L.eyeStageStart = Date.now() - (L.eyeTotalMs - L.eyePausedLeftMs);
@@ -4135,7 +4333,6 @@ function completeTask(id){
   if(!info || info.task.done) return;
   const task = info.task;
   const linked = getLinkedTasks(task);
-  // 若关联日期中已有一份完成记录，不重复发放奖励，只同步勾选状态。
   if(linked.some(t => t.done)){
     linked.forEach(t => { t.done = true; });
     saveLocalState(); uploadToCloud(); renderBoard(); refreshAllCards();
@@ -4185,9 +4382,9 @@ function switchSubject(subject, fromRemote){
   document.querySelectorAll('.tab-panel').forEach(p => { p.classList.toggle('active', p.id === 'panel-' + subject); });
   appRootEl.classList.toggle('theme-math', subject === 'math');
   appRootEl.classList.toggle('theme-english', subject === 'english');
-  appRootEl.classList.toggle('theme-timetable', subject === 'timetable');   /* ★ */
+  appRootEl.classList.toggle('theme-timetable', subject === 'timetable');
   if(subject === 'shop') renderShop();
-  if(subject === 'timetable') renderTimetable();                            /* ★ */
+  if(subject === 'timetable') renderTimetable();
   if(!fromRemote && state && state.live){
     if(state.live.tab !== subject){
       state.live.tab = subject;
@@ -4322,7 +4519,6 @@ function showStroke(char){
   const info = HZ_INFO[char] || ['—','—'];
   strokeMetaEl.textContent = `偏旁：${info[0]} · 结构：${info[1]}`;
   strokeStage.innerHTML = '';
-  /* 渲染已保存组词，并清空手动输入框 */
   renderStrokeWords(char);
   const wordInput = $('strokeVoiceInput');
   if(wordInput) wordInput.value = '';
@@ -4458,7 +4654,7 @@ function renderAdminPanel(){
   renderAdminTaskList('english', 'adminEnglishList', 'adminEnglishBadge');
   renderLessonLibrary(); populateLessonSelects();
   renderAdminShop();
-  renderAdminTimetable();           /* ★ */
+  renderAdminTimetable();
   renderSunPanel(); renderPwdPanel(); renderEyePanel();
   applyAdminPanelStates(); syncLastInputFields();
 }
@@ -4495,8 +4691,8 @@ function renderAdminTimetable(){
   if(badge) badge.textContent = has ? (tt.rows.length + ' 行') : '未上传';
   if(hint && has){
     hint.className = 'aa-hint ok';
-    hint.textContent = '当前课程表：' + (tt.fileName || '已上传') +
-      '（' + tt.rows.length + ' 行 · ' + tt.headers.length + ' 天）';
+    hint.textContent = '✅ 当前课程表：' + (tt.fileName || '已上传') +
+      '（' + tt.rows.length + ' 行 · ' + tt.headers.length + ' 天）已保存，重启/刷新后依然有效';
   } else if(hint && !has){
     hint.className = 'aa-hint';
     hint.textContent = '支持 .xlsx / .xls / .csv 格式';
@@ -4525,7 +4721,7 @@ $('adminTtUploadBtn').addEventListener('click', async () => {
     renderTimetable();
     renderAdminTimetable();
     if(fileInput) fileInput.value = '';
-    toast('✅ 课程表已更新');
+    toast('✅ 课程表已保存');
   }catch(err){
     console.error(err);
     hint.className = 'aa-hint warn';
@@ -4764,7 +4960,7 @@ function renderAdminTaskList(subject, listId, badgeId){
     <div class="admin-task-row" data-id="${escapeAttr(t.id)}" data-subject="${subject}" draggable="true" title="拖动调整顺序，双击编辑">
       <span class="drag-handle">☷</span>
       <div class="at-check ${t.done?'done':''}" data-toggle="${escapeAttr(t.id)}">✓</div>
-      <div class="at-text ${t.done?'done':''}">${escapeHtml(t.text)}</div>
+      <div class="at-text ${t.done?'done':''}">${escapeHtml(String(t.text).replace(/\n/g, ' ⏎ '))}</div>
       <div class="at-meta">⏱${t.minutes}分钟 · 💰${t.sun}个</div>
       <button class="at-del" data-del="${escapeAttr(t.id)}" data-subject="${subject}">删除</button>
     </div>
@@ -4917,7 +5113,7 @@ UNIT_FIELDS.forEach(([t, minId, sunId]) => {
   });
 });
 
-/* ★ 分钟 / 金币 同步：金币默认跟随分钟变化（用户手动改过金币后不再跟随） */
+/* ★ 分钟 / 金币 同步 */
 function setupMinSunSync(minId, sunId){
   const minEl = $(minId);
   const sunEl = $(sunId);
@@ -5218,7 +5414,7 @@ function openTaskEdit(id){
   const info = findTask(id); if(!info) return;
   editingTaskId = id;
   const t = info.task;
-  $('taskEditText').value = t.text;
+  $('taskEditText').value = t.text;                 /* ★ textarea，保留换行 */
   $('taskEditMin').value = t.minutes;
   $('taskEditSun').value = t.sun;
   const wrap = $('taskEditExtraWrap');
@@ -5378,7 +5574,7 @@ $('adminAddChineseBtn').addEventListener('click', () => {
   if(penEl) penEl.checked = false;
   resetMinSunSync('adminAddChineseSun');
   renderBoard(); refreshAllCards(); renderAdminPanel();
-  toast('✅ 已添加任务：「'+escapeHtml(text)+'」');
+  toast('✅ 已添加任务：「'+escapeHtml(text.split('\n')[0])+'」');
 });
 $('adminAddMathBtn').addEventListener('click', () => {
   const textEl = $('adminAddMathText');
@@ -5397,7 +5593,7 @@ $('adminAddMathBtn').addEventListener('click', () => {
   if(penEl) penEl.checked = false;
   resetMinSunSync('adminAddMathSun');
   renderBoard(); refreshAllCards(); renderAdminPanel();
-  toast('✅ 已添加任务：「'+escapeHtml(text)+'」');
+  toast('✅ 已添加任务：「'+escapeHtml(text.split('\n')[0])+'」');
 });
 $('adminAddEnglishBtn').addEventListener('click', () => {
   const textEl = $('adminAddEnglishText');
@@ -5416,7 +5612,7 @@ $('adminAddEnglishBtn').addEventListener('click', () => {
   if(penEl) penEl.checked = false;
   resetMinSunSync('adminAddEnglishSun');
   renderBoard(); refreshAllCards(); renderAdminPanel();
-  toast('✅ 已添加英语作业：「'+escapeHtml(text)+'」');
+  toast('✅ 已添加英语作业：「'+escapeHtml(text.split('\n')[0])+'」');
 });
 $('adminDateInput').addEventListener('change', e => { const v = e.target.value; if(v) switchDate(v); });
 $('adminGoToday').addEventListener('click', () => switchDate(todayStr()));
@@ -5469,7 +5665,7 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
     state.settings = normalizeSettings(imported.settings);
     state.lessonLibrary = normalizeLessonLibrary(imported.lessonLibrary);
     state.wordBank = normalizeWordBank(imported.wordBank);
-    state.timetable = normalizeTimetable(imported.timetable);       /* ★ */
+    state.timetable = normalizeTimetable(imported.timetable);
     const shopNorm = normalizeShop(imported.shop);
     if(shopNorm !== null) state.shop = shopNorm;
     state.parentPassword = (typeof imported.parentPassword === 'string' && /^\d{4}$/.test(imported.parentPassword)) ? imported.parentPassword : MASTER_PASSWORD;
@@ -5541,9 +5737,45 @@ window.addEventListener('pageshow', () => {
   if(charTimer.active) paintCharBarsFromLive();
   renderAllLiveUI();
 });
+
+/* ★★★ Service Worker 自动更新（不再需要手动清缓存） ★★★ */
+let autoReloading = false;
+function scheduleAutoReload(){
+  if(autoReloading) return;
+  autoReloading = true;
+  toast('🔄 检测到新版本，正在自动更新…', 2600);
+  let tries = 0;
+  const tryReload = () => {
+    tries++;
+    const busy = state && state.live && state.live.activeId && state.live.status === 'running';
+    if(!busy || tries > 120){ try{ location.reload(); }catch(e){} return; }
+    setTimeout(tryReload, 5000);
+  };
+  setTimeout(tryReload, 1200);
+}
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').then(reg => console.log('SW 注册成功:', reg.scope)).catch(err => console.log('SW 注册失败:', err));
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+      .then(reg => {
+        console.log('SW 注册成功:', reg.scope);
+        try{ reg.update(); }catch(e){}
+        reg.addEventListener('updatefound', () => {
+          const nw = reg.installing;
+          if(!nw) return;
+          nw.addEventListener('statechange', () => {
+            if(nw.state === 'installed' && navigator.serviceWorker.controller){
+              try{ nw.postMessage({ type:'SKIP_WAITING' }); }catch(e){}
+              scheduleAutoReload();
+            }
+          });
+        });
+        setInterval(() => { try{ reg.update(); }catch(e){} }, 30 * 60 * 1000);
+      })
+      .catch(err => console.log('SW 注册失败:', err));
+  });
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if(!navigator.serviceWorker.controller) return;
+    scheduleAutoReload();
   });
 }
 window.addEventListener('beforeunload', () => {
@@ -5565,7 +5797,6 @@ dateTextEl.textContent = dateLabel(state.date);
 updateDateText();
 saveLocalState();
 renderStats(); renderBoard();
-/* ★ 初始化标签页：英语已下线，改为课程表 */
 const initTab = (state.live.tab && ['chinese','math','timetable','shop'].indexOf(state.live.tab) >= 0)
   ? state.live.tab : 'chinese';
 switchSubject(initTab, true);
