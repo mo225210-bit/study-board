@@ -1520,19 +1520,41 @@ const MASTER_PASSWORD = '0702';
 let firebaseApp = null, db = null, dataRef = null;
 let fbSet = null, fbGet = null, fbOnValue = null, fbRef = null, historyRef = null;
 
-try{
-  const appMod = await import('https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js');
-  const dbMod  = await import('https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js');
-  firebaseApp = appMod.initializeApp(FIREBASE_CONFIG);
-  db          = dbMod.getDatabase(firebaseApp);
-  fbRef       = dbMod.ref;
-  dataRef     = dbMod.ref(db, 'families/' + FAMILY_ID + '/data');
-  historyRef  = dbMod.ref(db, 'families/' + FAMILY_ID + '/history');
-  fbSet       = dbMod.set;
-  fbGet       = dbMod.get;
-  fbOnValue   = dbMod.onValue;
-}catch(e){
-  console.warn('Firebase 加载/初始化失败，将使用纯本地模式', e);
+async function initFirebase() {
+  try{
+    const appMod = await import('https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js');
+    const dbMod  = await import('https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js');
+    firebaseApp = appMod.initializeApp(FIREBASE_CONFIG);
+    db          = dbMod.getDatabase(firebaseApp);
+    fbRef       = dbMod.ref;
+    dataRef     = dbMod.ref(db, 'families/' + FAMILY_ID + '/data');
+    historyRef  = dbMod.ref(db, 'families/' + FAMILY_ID + '/history');
+    fbSet       = dbMod.set;
+    fbGet       = dbMod.get;
+    fbOnValue   = dbMod.onValue;
+
+    const result = await readCloudOnce();
+    if(result.state === 'has-data' && result.data && result.data.days && Object.keys(result.data.days).length){
+      applyRemoteState(result.data);
+      console.log('✅ 已从云端加载数据');
+    } else if(result.state === 'empty'){
+      console.log('☁️ 云端确认为空，用本地数据初始化并上传');
+      await uploadToCloud(true);
+    } else {
+      console.warn('⚠️ 读取云端失败');
+      showSyncStatus('⚠️ 云端读取失败，稍后重试', 'offline');
+    }
+    freshBoot = false;
+    startCloudSync();
+    updateSyncInfo();
+    if(nameMigrated && result.state !== 'error'){
+      try{ await uploadToCloud(true); }catch(e){ console.warn('改名回写云端失败', e); }
+    }
+  }catch(e){
+    console.warn('Firebase 加载/初始化失败，将使用纯本地模式', e);
+    updateSyncInfo('未连接（纯本地模式）');
+    showSyncStatus('📴 纯本地模式', 'offline');
+  }
 }
 
 /* ============================================================
@@ -1647,7 +1669,8 @@ const DEFAULT_LESSON_LIBRARY = {
 const HZ_STRUCT_NAME = {'1':'左右','2':'上下','3':'独体','4':'半包围','5':'全包围','6':'上中下','7':'左中右'};
 const HZ_INFO = (function(){
   const map = {};
-  const segs = String(HZ_RAW || '').split(';');
+  const rawData = (typeof HZ_RAW !== 'undefined' && HZ_RAW) ? HZ_RAW : '';
+  const segs = String(rawData).split(';');
   for(let i = 0; i < segs.length; i++){
     const seg = segs[i];
     if(seg.length < 3) continue;
@@ -6064,30 +6087,7 @@ updateEyeSoundBtn();
 const familyIdEl = document.getElementById('familyIdText');
 if(familyIdEl) familyIdEl.textContent = FAMILY_ID;
 
-if(dataRef && fbSet && fbGet && fbOnValue){
-  (async () => {
-    const result = await readCloudOnce();
-    if(result.state === 'has-data' && result.data && result.data.days && Object.keys(result.data.days).length){
-      applyRemoteState(result.data);
-      console.log('✅ 已从云端加载数据');
-    } else if(result.state === 'empty'){
-      console.log('☁️ 云端确认为空，用本地数据初始化并上传');
-      await uploadToCloud(true);
-    } else {
-      console.warn('⚠️ 读取云端失败');
-      showSyncStatus('⚠️ 云端读取失败，稍后重试', 'offline');
-    }
-    freshBoot = false;
-    startCloudSync();
-    updateSyncInfo();
-    if(nameMigrated && result.state !== 'error'){
-      try{ await uploadToCloud(true); }catch(e){ console.warn('改名回写云端失败', e); }
-    }
-  })();
-} else {
-  updateSyncInfo('未连接（纯本地模式）');
-  showSyncStatus('📴 纯本地模式', 'offline');
-}
+initFirebase();
 </script>
 </body>
 </html>
