@@ -43,24 +43,18 @@
     --c-main:#64B5F6;--c-dark:#42A5F5;--c-deep:#1976D2;--c-border:#1565C0;
     --c-btn:#1E88E5;--c-btn-shade:#0D47A1;--c-light:#E3F2FD;--c-soft:#EAF4FE;--c-text:#0D47A1;
   }
-  /* ★ 课程表主题（紫色） */
   .app.theme-timetable{
     --c-main:#B39DDB;--c-dark:#9575CD;--c-deep:#7E57C2;--c-border:#5E35B1;
     --c-btn:#7E57C2;--c-btn-shade:#5E35B1;--c-light:#EDE7F6;--c-soft:#F3EFFB;--c-text:#5E35B1;
   }
 
-  .topbar{
-    display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
     background:rgba(255,255,255,.86);backdrop-filter:blur(12px);
     border:2px solid rgba(255,255,255,.95);border-radius:15px;padding:6px 10px;
-    box-shadow:0 6px 20px rgba(60,110,60,.18);
-  }
+    box-shadow:0 6px 20px rgba(60,110,60,.18);}
   .brand{display:flex;align-items:center;gap:10px}
-  .brand-icon{
-    font-size:28px;animation:sway 3s ease-in-out infinite;
-    background:transparent;border:0;padding:0;cursor:pointer;
-    line-height:1;font-family:inherit;
-  }
+  .brand-icon{font-size:28px;animation:sway 3s ease-in-out infinite;
+    background:transparent;border:0;padding:0;cursor:pointer;line-height:1;font-family:inherit;}
   .brand-icon:active{transform:scale(.92)}
   @keyframes sway{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
   .brand-title{font-size:16px;font-weight:900;color:#2E7D32;letter-spacing:.5px}
@@ -74,30 +68,17 @@
   .streak-pill{background:linear-gradient(180deg,#FFAB91,#FF7043);color:#fff;box-shadow:0 3px 0 #D84315}
   .pill.bump{transform:scale(1.22)}
 
-  .cal-btn{
-    font-family:inherit;font-size:16px;line-height:1;
+  .cal-btn{font-family:inherit;font-size:16px;line-height:1;
     width:40px;height:40px;border-radius:14px;cursor:pointer;
     background:linear-gradient(180deg,#fff,#EAF6E6);
     border:2px solid #fff;color:#2E7D32;
     display:inline-flex;align-items:center;justify-content:center;
-    box-shadow:0 4px 12px rgba(60,110,60,.18);
-    transition:all .18s;position:relative;
-  }
+    box-shadow:0 4px 12px rgba(60,110,60,.18);transition:all .18s;position:relative;}
   .cal-btn:active{transform:translateY(2px)}
-  .cal-btn.has-other{
-    background:linear-gradient(180deg,#FFE082,#FFC107);
-    border-color:#FFC107;
-  }
-  .cal-btn .cal-dot{
-    position:absolute;top:4px;right:4px;width:9px;height:9px;border-radius:50%;
-    background:#FF5252;border:2px solid #fff;display:none;
-  }
+  .cal-btn.has-other{background:linear-gradient(180deg,#FFE082,#FFC107);border-color:#FFC107;}
+  .cal-btn .cal-dot{position:absolute;top:4px;right:4px;width:9px;height:9px;border-radius:50%;
+    background:#FF5252;border:2px solid #fff;display:none;}
   .cal-btn.has-other .cal-dot{display:block}
-
-  .section-label{display:flex;align-items:center;gap:8px;
-    font-size:13px;font-weight:900;color:#2E7D32;letter-spacing:.5px;padding-left:4px}
-  .section-label::after{content:'';flex:1;height:2px;border-radius:2px;
-    background:linear-gradient(90deg,rgba(46,125,50,.35),transparent)}
 
   .timer-card{
     background:repeating-linear-gradient(90deg,rgba(255,255,255,.08) 0 24px,transparent 24px 48px),
@@ -117,8 +98,7 @@
     background:linear-gradient(90deg,rgba(255,183,77,.18),rgba(255,152,0,.42));
     pointer-events:none;transition:none}
   .sun-anchor{position:absolute;right:8px;top:50%;transform:translateY(-50%);
-    font-size:28px;line-height:1;z-index:2;
-    text-shadow:0 0 9px rgba(255,200,0,.9)}
+    font-size:28px;line-height:1;z-index:2;text-shadow:0 0 9px rgba(255,200,0,.9)}
   .sun-anchor.eaten{animation:sunEaten .65s ease forwards}
   @keyframes sunEaten{0%{transform:translateY(-50%) scale(1);opacity:1}40%{transform:translateY(-50%) scale(1.5);opacity:1}100%{transform:translateY(-50%) scale(0);opacity:0}}
   .track-time{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
@@ -128,8 +108,7 @@
   .track-time.chomping{color:#BF360C}
   .dog-wrap{position:absolute;top:0;left:0;height:100%;width:42px;
     display:flex;align-items:center;justify-content:center;will-change:transform;z-index:3}
-  .dog-flip{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-    transform:scaleX(-1)}
+  .dog-flip{width:100%;height:100%;display:flex;align-items:center;justify-content:center;transform:scaleX(-1)}
   .dog{font-size:32px;line-height:1;transform-origin:50% 100%}
   .dog.running{animation:dogRun .34s ease-in-out infinite}
   .dog.paused{animation:dogPause 2.2s ease-in-out infinite}
@@ -142,13 +121,11 @@
   .timer-hint .paused-t{color:#E65100;font-weight:900}
   .timer-hint .chomp-t{color:#BF360C;font-weight:900}
 
-  .timer-btn{
-    flex:none;display:inline-flex;align-items:center;justify-content:center;
+  .timer-btn{flex:none;display:inline-flex;align-items:center;justify-content:center;
     font-family:inherit;font-size:14px;font-weight:900;
     padding:0 18px;border-radius:24px;cursor:pointer;
     border:3px solid transparent;letter-spacing:1px;min-width:112px;
-    white-space:nowrap;transition:all .15s;
-  }
+    white-space:nowrap;transition:all .15s;}
   .timer-btn:active{transform:translateY(2px)}
   .timer-btn.start{background:linear-gradient(180deg,var(--c-main),var(--c-btn));color:#fff;
     border-color:var(--c-btn);box-shadow:0 4px 0 var(--c-btn-shade);transition:all .3s}
@@ -157,43 +134,35 @@
   .timer-btn:disabled{opacity:.55;cursor:not-allowed;transform:none!important;
     background:linear-gradient(180deg,#BDBDBD,#9E9E9E);border-color:#9E9E9E;box-shadow:0 4px 0 #757575;color:#fff}
 
-  .eye-card{
-    display:flex;align-items:center;gap:8px;flex-wrap:nowrap;
+  .eye-card{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;
     background:rgba(255,255,255,.92);border:2px solid #fff;border-radius:16px;
     padding:8px 12px;box-shadow:0 4px 14px rgba(60,110,60,.14);
-    transition:background .3s,border-color .3s,opacity .3s;
-  }
+    transition:background .3s,border-color .3s,opacity .3s;}
   .eye-card.idle{opacity:.68}
   .eye-card.using{background:linear-gradient(180deg,#E8F5E9,#C8E6C9);border-color:#A5D6A7}
   .eye-card.alert{background:linear-gradient(180deg,#FFEBEE,#FFCDD2);border-color:#EF9A9A;animation:eyePulse 1s ease-in-out infinite}
   @keyframes eyePulse{0%,100%{border-color:#EF9A9A}50%{border-color:#E53935}}
   .eye-card.resting{background:linear-gradient(180deg,#E3F2FD,#BBDEFB);border-color:#90CAF9}
-
   .eye-time{flex:none;min-width:56px;text-align:center;
     font-size:17px;font-weight:900;color:#2E7D32;
     font-variant-numeric:tabular-nums;line-height:1.2;letter-spacing:.3px;transition:color .3s}
   .eye-card.alert .eye-time{color:#C62828;font-size:13px;min-width:76px}
   .eye-card.resting .eye-time{color:#1565C0}
-
   .eye-end{font-size:11px;font-weight:900;color:#93a893;white-space:nowrap;flex:none;transition:color .3s}
   .eye-card.using   .eye-end-l{color:#2E7D32}
   .eye-card.alert   .eye-end-l{color:#C62828}
   .eye-card.resting .eye-end-r{color:#1565C0}
-
   .eye-rail{position:relative;flex:1;min-width:56px;height:30px;border-radius:15px;
     background:linear-gradient(180deg,#EEF7EE,#DFEEDF);border:2px solid #CBE4CB;
     box-shadow:inset 0 2px 6px rgba(40,90,30,.10);transition:background .3s,border-color .3s}
   .eye-card.resting .eye-rail{background:linear-gradient(180deg,#EAF4FE,#D6E9FA);border-color:#B3D9F5}
   .eye-card.alert   .eye-rail{background:linear-gradient(180deg,#FFF1F1,#FFD9D9);border-color:#F3B7B7}
-
   .eye-rail-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:15px;
     background:linear-gradient(90deg,rgba(143,209,79,.30),rgba(104,179,46,.44));pointer-events:none}
   .eye-card.resting .eye-rail-fill{background:linear-gradient(90deg,rgba(79,195,247,.26),rgba(41,163,214,.42))}
   .eye-card.alert   .eye-rail-fill{background:linear-gradient(90deg,rgba(239,83,80,.24),rgba(229,57,53,.42))}
-
   .eye-token{position:absolute;top:50%;left:0;width:34px;height:34px;
-    transform:translate(0,-50%);
-    display:grid;place-items:center;z-index:2;pointer-events:none}
+    transform:translate(0,-50%);display:grid;place-items:center;z-index:2;pointer-events:none}
   .ce-svg{width:34px;height:34px;display:block}
   .ce-eye{transform-box:view-box;transform-origin:24px 26px;animation:ceBlink 4.8s ease-in-out infinite}
   @keyframes ceBlink{0%,89%,100%{transform:scaleY(1)}93%{transform:scaleY(.14)}}
@@ -201,7 +170,6 @@
   .eye-card.resting .ce-iris{opacity:.15}
   .ce-lid{opacity:0;transition:opacity .35s}
   .eye-card.resting .ce-lid{opacity:1}
-
   .eye-btn{font-family:inherit;font-size:12.5px;font-weight:900;color:#fff;
     background:linear-gradient(180deg,#4FC3F7,#0288D1);border:2px solid #0288D1;
     padding:8px 14px;border-radius:999px;box-shadow:0 3px 0 #01579B;cursor:pointer;
@@ -219,7 +187,6 @@
   .subject-tab.active[data-tab="math"]{background:linear-gradient(180deg,#6FC3E8,#29A3D6);box-shadow:0 3px 0 #1B7FA8}
   .subject-tab.active[data-tab="english"]{background:linear-gradient(180deg,#64B5F6,#1976D2);box-shadow:0 3px 0 #0D47A1}
   .subject-tab.active[data-tab="shop"]{background:linear-gradient(180deg,#FFB74D,#F57C00);box-shadow:0 3px 0 #E65100}
-  /* ★ 课程表标签激活样式 */
   .subject-tab.active[data-tab="timetable"]{background:linear-gradient(180deg,#B39DDB,#7E57C2);box-shadow:0 3px 0 #5E35B1}
   .subject-tab .tab-count{font-size:11px;background:rgba(255,255,255,.35);padding:1px 7px;border-radius:999px}
   .subject-tab.active .tab-count{background:rgba(255,255,255,.3)}
@@ -244,7 +211,6 @@
     background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 24px,transparent 24px 48px),
       linear-gradient(180deg,#FFCC80 0%,#FFA726 55%,#F57C00 100%);
     border-color:#E65100;box-shadow:inset 0 -8px 18px rgba(0,0,0,.10),0 8px 22px rgba(160,90,10,.24)}
-  /* ★ 课程表科目配色 */
   .subject-col[data-subject="timetable"]{
     background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 24px,transparent 24px 48px),
       linear-gradient(180deg,#B39DDB 0%,#9575CD 55%,#7E57C2 100%);
@@ -315,18 +281,19 @@
     transition:transform .15s,background .15s;position:relative}
   .mini-btn:active{transform:scale(.9)}
   .mini-btn.view{background:linear-gradient(180deg,#FFF8E1,#FFE082);border-color:#FFD54F}
+  .mini-btn.undo,.mini-btn.redo{background:linear-gradient(180deg,#E3F2FD,#BBDEFB);border-color:#90CAF9;color:#1565C0;font-size:22px;font-weight:900;line-height:1}
+  .mini-btn.undo:disabled,.mini-btn.redo:disabled{opacity:.35;cursor:not-allowed;
+    background:linear-gradient(180deg,#F5F5F5,#E0E0E0);border-color:#BDBDBD;color:#9E9E9E;transform:none!important}
   .mini-btn .pcount{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;
     border-radius:999px;background:#EF5350;color:#fff;
     font-size:10.5px;font-weight:900;line-height:18px;text-align:center;
     padding:0 4px;border:1.5px solid #fff}
 
   .card-list.shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
-  .shop-card{
-    position:relative;overflow:hidden;background:rgba(255,255,255,.97);
+  .shop-card{position:relative;overflow:hidden;background:rgba(255,255,255,.97);
     border:2px solid #fff;border-radius:12px;padding:10px;
     display:flex;flex-direction:column;gap:9px;
-    box-shadow:0 3px 9px rgba(0,0,0,.13);transition:all .16s;
-  }
+    box-shadow:0 3px 9px rgba(0,0,0,.13);transition:all .16s;}
   .shop-top{display:flex;align-items:center;gap:9px;min-width:0}
   .shop-icon{font-size:32px;line-height:1;flex:none;width:42px;text-align:center}
   .shop-info{flex:1;min-width:0}
@@ -336,27 +303,24 @@
   .shop-meta .shop-cost{color:#D84315}
   .shop-meta .shop-gain{color:#2E7D32}
   .shop-actions{display:flex;gap:16px;margin-top:auto}
-  .shop-btn{
-    flex:1;min-width:0;font-family:inherit;font-size:13.5px;font-weight:900;color:#fff;
+  .shop-btn{flex:1;min-width:0;font-family:inherit;font-size:13.5px;font-weight:900;color:#fff;
     background:linear-gradient(180deg,#FFB74D,#F57C00);
     border:2px solid #F57C00;padding:11px 6px;border-radius:12px;
-    box-shadow:0 3px 0 #E65100;cursor:pointer;white-space:nowrap;
-    transition:all .15s;
-  }
-  .shop-btn.use{background:linear-gradient(180deg,#81C784,#43A047);
-    border-color:#43A047;box-shadow:0 3px 0 #2E7D32}
+    box-shadow:0 3px 0 #E65100;cursor:pointer;white-space:nowrap;transition:all .15s;}
+  .shop-btn.use{background:linear-gradient(180deg,#81C784,#43A047);border-color:#43A047;box-shadow:0 3px 0 #2E7D32}
   .shop-btn:active{transform:translateY(2px)}
   .shop-btn .ticket-num{font-size:13.5px;margin-left:2px;
     background:rgba(255,255,255,.28);padding:0 6px;border-radius:999px;display:inline-block}
 
-  /* ★★★ 课程表 ★★★ */
+  /* 课程表 */
   .tt-scroll{position:relative;z-index:2;overflow-x:auto;-webkit-overflow-scrolling:touch;
     border-radius:12px;background:rgba(255,255,255,.97);border:2px solid #fff;
     box-shadow:0 3px 10px rgba(0,0,0,.12)}
-  .tt-table{border-collapse:separate;border-spacing:0;width:100%;min-width:500px;font-size:12.5px}
+  .tt-table{border-collapse:separate;border-spacing:0;width:100%;min-width:500px;
+    font-size:var(--tt-font-size,12.5px)}
   .tt-table th,.tt-table td{padding:7px 5px;text-align:center;font-weight:800;
     border-bottom:1px solid #EDF5ED;border-right:1px solid #EDF5ED;
-    color:#2b3a2b;white-space:nowrap;vertical-align:middle}
+    color:#2b3a2b;white-space:nowrap;vertical-align:middle;line-height:var(--tt-line-height,1.4)}
   .tt-table th:last-child,.tt-table td:last-child{border-right:0}
   .tt-table tbody tr:last-child td{border-bottom:0}
   .tt-table thead th{background:#7E57C2;color:#fff;font-size:12px;letter-spacing:.5px}
@@ -367,16 +331,13 @@
   .tt-table td.tt-now{background:linear-gradient(180deg,#FFF3C4,#FFE082)!important;
     color:#8a5a00!important;box-shadow:inset 0 0 0 2px #FFC107;font-weight:900}
   .tt-table thead th.tt-th-now{background:#FFB300;color:#5a3a00}
-  /* ★ 合并单元格：文字居中显示 */
-  .tt-table td.tt-merged{
-    background:#F4F7F4;color:#9aad9a;font-weight:700;
-    text-align:center;vertical-align:middle;
-  }
+  .tt-table td.tt-merged{background:#F4F7F4;color:#9aad9a;font-weight:700;
+    text-align:center;vertical-align:middle;}
   .tt-tip{font-size:11.5px;font-weight:900;color:#5E35B1;white-space:nowrap}
   .tt-tip.warn{color:#E65100}
 
   @media (max-width:500px){
-    .tt-table{font-size:11.5px;min-width:430px}
+    .tt-table{min-width:430px}
     .tt-table th,.tt-table td{padding:6px 4px}
     .tt-tip{font-size:10px}
   }
@@ -411,16 +372,13 @@
   .mizi-char{position:relative;z-index:2;font-size:38px;line-height:1;
     font-family:"Kaiti SC","KaiTi","STKaiti","楷体","PingFang SC","Microsoft YaHei",serif;
     font-weight:400;color:#000000;transition:opacity .2s,transform .2s}
-
   .mizi-bar{position:absolute;left:0;bottom:0;height:8px;width:100%;
     border-radius:0 4px 4px 0;
     background:linear-gradient(90deg,#FFD54F,#FFA000);
     z-index:3;pointer-events:none;
-    transform:scaleX(0);transform-origin:left center;
-    will-change:transform}
+    transform:scaleX(0);transform-origin:left center;will-change:transform}
   .mizi-bar.paused{background:linear-gradient(90deg,#FFB74D,#FB8C00)}
   .task-card.done .mizi-bar{display:none}
-
   .task-card.done .mizi{background:#F1F8E9;border-color:#C5E1A5}
   .task-card.done .mizi-char{color:#9aad9a}
   .task-card.done .char-pinyin,
@@ -517,7 +475,6 @@
     display:flex;align-items:center;justify-content:center;position:relative}
   .stroke-stage svg{display:block}
 
-  /* ===== 手动组词 ===== */
   .stroke-tools{display:flex;gap:8px;margin-top:12px;align-items:stretch}
   .stroke-tools .voice-input{flex:1;min-width:0;font-family:inherit;font-size:14px;font-weight:700;
     color:#2b3a2b;background:#F6FBF6;border:2px solid #D7E8D7;padding:10px 12px;border-radius:10px;outline:none}
@@ -569,38 +526,28 @@
   .confetti{position:fixed;top:-44px;z-index:10000;pointer-events:none;animation:fall 2.6s linear forwards}
   @keyframes fall{to{transform:translateY(108vh) rotate(720deg);opacity:0}}
 
-  .eye-overlay{
-    position:fixed;inset:0;z-index:450;
-    background:rgba(255,90,90,.34);
-    opacity:0;pointer-events:none;
+  .eye-overlay{position:fixed;inset:0;z-index:450;
+    background:rgba(255,90,90,.34);opacity:0;pointer-events:none;
     transition:opacity 2.4s ease,background .7s ease;
-    display:flex;align-items:center;justify-content:center;
-    backdrop-filter:blur(1.5px);
-  }
+    display:flex;align-items:center;justify-content:center;backdrop-filter:blur(1.5px);}
   .eye-overlay.show{opacity:1;pointer-events:auto}
   .eye-overlay.resting{background:rgba(70,165,255,.26)}
-  .eye-overlay-msg{
-    color:#fff;text-align:center;font-weight:900;
+  .eye-overlay-msg{color:#fff;text-align:center;font-weight:900;
     text-shadow:0 3px 16px rgba(0,0,0,.5),0 0 30px rgba(255,255,255,.45);
-    line-height:1.5;padding:24px;user-select:none;pointer-events:none;
-  }
+    line-height:1.5;padding:24px;user-select:none;pointer-events:none;}
   .eye-overlay-msg .eom-icon{font-size:60px;line-height:1;margin-bottom:12px}
   .eye-overlay-msg .eom-num{font-size:76px;line-height:1;font-variant-numeric:tabular-nums}
   .eye-overlay-msg .eom-tip{font-size:18px;margin-top:14px;letter-spacing:1px}
-
-  .eye-sound-btn{
-    position:absolute;top:18px;right:18px;z-index:8;
+  .eye-sound-btn{position:absolute;top:18px;right:18px;z-index:8;
     font-family:inherit;font-size:14px;font-weight:900;
     color:#fff;background:rgba(255,255,255,.26);
     border:2px solid rgba(255,255,255,.65);
     padding:11px 20px;border-radius:999px;cursor:pointer;
     backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
     box-shadow:0 6px 18px rgba(0,0,0,.28);
-    transition:all .18s;white-space:nowrap;letter-spacing:.5px;
-  }
+    transition:all .18s;white-space:nowrap;letter-spacing:.5px;}
   .eye-sound-btn:active{transform:scale(.94)}
   .eye-sound-btn.off{background:rgba(0,0,0,.42);border-color:rgba(255,255,255,.32);opacity:.85}
-
   @media (max-width:500px){
     .eye-overlay-msg .eom-num{font-size:60px}
     .eye-overlay-msg .eom-icon{font-size:48px}
@@ -680,10 +627,8 @@
   .admin-add-row.inline-row .aa-num{width:54px;flex:none;padding-left:4px;padding-right:4px}
   .admin-add-row.inline-row .aa-unit{font-size:10.5px;flex:none;white-space:nowrap}
   .admin-add-row.inline-row .aa-btn{padding:10px 12px;flex:none;font-size:12.5px}
-  /* ★ 课程表上传文件框 */
   .admin-add-row input[type="file"]{width:100%;padding:9px 10px;font-size:12px;
     color:#8aa8c8;cursor:pointer}
-
   .admin-add-row textarea.aa-text{flex:1 1 100%;width:100%;min-height:76px;
     resize:vertical;line-height:1.6;font-size:13.5px;font-family:inherit}
   #adminSunReason{flex:0 0 auto;width:126px;min-width:0}
@@ -728,36 +673,30 @@
   .lib-row .lib-info{font-size:11.5px;font-weight:700;color:#8aa8c8;flex:1;line-height:1.7;
     min-width:180px;word-break:break-word}
   .lib-row .lib-info b{color:#B0D888;font-weight:900}
+  .lib-row .lib-info b.old{color:#FF8A80}
   .lib-row .lib-del{font-family:inherit;font-size:11px;font-weight:900;color:#EF5350;
     background:rgba(239,83,80,.15);border:1px solid rgba(239,83,80,.3);
     padding:4px 10px;border-radius:8px;cursor:pointer;transition:all .15s;
     white-space:nowrap;flex:none}
   .lib-row .lib-del:hover{background:rgba(239,83,80,.3)}
 
-  .shop-admin-row{
-    display:flex;align-items:center;gap:6px;padding:8px;
+  .shop-admin-row{display:flex;align-items:center;gap:6px;padding:8px;
     background:rgba(255,255,255,.05);border-radius:10px;margin-bottom:6px;
-    cursor:grab;transition:all .15s;
-  }
+    cursor:grab;transition:all .15s;}
   .shop-admin-row:active{cursor:grabbing}
   .shop-admin-row.dragging{opacity:.45;transform:scale(.99)}
   .shop-admin-row.drag-over{outline:2px dashed #FFD54F;background:rgba(255,213,79,.12)}
   .shop-admin-row .sa-handle{font-size:15px;color:#7a9aaa;flex:none;padding:0 2px}
-  .shop-admin-row input{
-    font-family:inherit;font-weight:800;color:#E0E8F0;
+  .shop-admin-row input{font-family:inherit;font-weight:800;color:#E0E8F0;
     background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);
-    padding:7px 8px;border-radius:8px;outline:none;transition:all .15s;min-width:0;
-  }
+    padding:7px 8px;border-radius:8px;outline:none;transition:all .15s;min-width:0;}
   .shop-admin-row input:focus{border-color:#FFD54F;background:rgba(255,255,255,.12)}
   .shop-admin-row .sa-icon{width:46px;text-align:center;font-size:18px;flex:none;padding:6px 2px}
   .shop-admin-row .sa-name{flex:1;font-size:13px;min-width:70px}
   .shop-admin-row .sa-min{width:64px;text-align:center;font-size:12.5px;flex:none;padding:7px 2px}
   .shop-admin-row .sa-sun{width:68px;text-align:center;font-size:12.5px;flex:none;padding:7px 2px}
-  .shop-admin-row .sa-del{
-    flex:none;width:32px;height:32px;border-radius:8px;border:1px solid rgba(239,83,80,.35);
-    background:rgba(239,83,80,.15);color:#EF5350;font-size:14px;font-weight:900;cursor:pointer;
-    font-family:inherit;
-  }
+  .shop-admin-row .sa-del{flex:none;width:32px;height:32px;border-radius:8px;border:1px solid rgba(239,83,80,.35);
+    background:rgba(239,83,80,.15);color:#EF5350;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;}
   .shop-admin-row .sa-del:active{transform:scale(.92)}
 
   .sync-status{position:fixed;top:10px;right:10px;z-index:250;
@@ -797,6 +736,7 @@
     .admin-add-row.inline-row .aa-btn{padding:8px 8px;font-size:11px}
     .card-actions{gap:10px}
     .mini-btn{width:36px;height:36px;font-size:17px;border-radius:11px}
+    .mini-btn.undo,.mini-btn.redo{font-size:19px}
     #adminSunReason{width:104px;font-size:11.5px;padding:8px 5px}
     #adminSunAmount{width:76px;font-size:15px;padding:8px 4px}
     .task-info{font-size:12px;gap:8px}
@@ -818,7 +758,6 @@
     .shop-admin-row .sa-sun{width:58px;font-size:11.5px}
     .shop-admin-row .sa-name{font-size:12px}
     .shop-admin-row .sa-del{width:28px;height:28px;font-size:13px}
-    /* 语音组词小屏 */
     .stroke-tools{flex-wrap:wrap}
     .stroke-tools .voice-input{flex:1 1 100%;order:3;margin-top:6px}
     .stroke-tools .voice-btn,.stroke-tools .voice-add-btn{flex:1}
@@ -843,28 +782,13 @@
 
   .task-card.done .char-grid{display:none}
 
-  .mizi.checked{
-    background:#E8F5E9;
-    border-color:#66BB6A;
-  }
-  .mizi.checked .mizi-bar{
-    display:none;
-  }
-  .mizi.checked::after{
-    content:'✓';
-    position:absolute;
-    right:2px;
-    top:50%;
-    transform:translateY(-50%);
-    font-size:26px;
-    font-weight:900;
-    line-height:1;
-    color:#43A047;
-    z-index:6;
+  .mizi.checked{background:#E8F5E9;border-color:#66BB6A;}
+  .mizi.checked .mizi-bar{display:none;}
+  .mizi.checked::after{content:'✓';position:absolute;right:2px;top:50%;
+    transform:translateY(-50%);font-size:26px;font-weight:900;line-height:1;
+    color:#43A047;z-index:6;
     text-shadow:0 0 4px #fff,0 0 8px rgba(255,255,255,.98),0 1px 2px rgba(0,0,0,.15);
-    animation:checkPop .28s cubic-bezier(.34,1.56,.64,1);
-    pointer-events:none;
-  }
+    animation:checkPop .28s cubic-bezier(.34,1.56,.64,1);pointer-events:none;}
   @keyframes checkPop{from{transform:translateY(-50%) scale(.3);opacity:0}to{transform:translateY(-50%) scale(1);opacity:1}}
   @media (max-width: 500px){
     .mizi.checked::after{font-size:22px;right:1px}
@@ -979,7 +903,6 @@
       <div class="card-list" id="mathList"></div>
     </section>
   </div>
-  <!-- ★★★ 课程表面板 ★★★ -->
   <div class="tab-panel" id="panel-timetable">
     <section class="subject-col" data-subject="timetable">
       <div class="col-head">
@@ -989,7 +912,6 @@
       <div id="timetableWrap"></div>
     </section>
   </div>
-
   <div class="tab-panel" id="panel-english">
     <section class="subject-col" data-subject="english">
       <div class="col-head"><div><span class="col-title">🔤 英语</span><span class="col-count" id="englishCount">0</span></div></div>
@@ -1003,7 +925,7 @@
     </section>
   </div>
 
-  <div class="timer-hint" style="margin-top:-3px">自定义作业可直接勾选完成 · 📷 其他作业需先拍照再勾选 · 🖼️ 查看作业照片 · ✋ 长按田字格可修改/删除</div>
+  <div class="timer-hint" style="margin-top:-3px">自定义作业可直接勾选完成 · 📷 其他作业需先拍照再勾选 · 🖼️ 查看作业照片 · ✋ 长按田字格可修改/删除 · ↶↷ 撤销恢复</div>
 </div>
 
 <div class="modal" id="calModal">
@@ -1042,11 +964,10 @@
   </div>
 </div>
 
-<!-- ★ 田字格长按操作菜单 -->
 <div class="modal" id="miziActionModal">
   <div class="modal-card" style="max-width:340px">
     <h3 id="miziActionTitle">田字格</h3>
-    <p id="miziActionSub">删除会同步减少任务时间与金币奖励</p>
+    <p id="miziActionSub">删除会同步减少任务时间与金币奖励，并保存到课文库</p>
     <div class="modal-actions">
       <button class="btn-ghost" id="miziActionEdit">✏️ 修改</button>
       <button class="btn-main" id="miziActionDel"
@@ -1058,11 +979,10 @@
   </div>
 </div>
 
-<!-- ★ 田字格内容编辑 -->
 <div class="modal" id="miziEditModal">
   <div class="modal-card" style="max-width:340px">
     <h3 id="miziEditTitle">✏️ 修改</h3>
-    <p id="miziEditSub">修改后会替换原内容</p>
+    <p id="miziEditSub">修改后会替换原内容，并保存到课文库</p>
     <div class="form-field"><input type="text" id="miziEditInput" maxlength="8" autocomplete="off"></div>
     <div class="modal-actions">
       <button class="btn-ghost" id="miziEditCancel">取消</button>
@@ -1270,24 +1190,6 @@
       </div>
     </div>
 
-    <!-- ★★★ 课程表管理 ★★★ -->
-    <div class="admin-section collapsed" id="adminPanelTimetable">
-      <h3>📅 课程表 <span class="badge" id="adminTtBadge">未上传</span></h3>
-      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
-        上传 Excel 课程表后，学生端「课程表」页会自动显示，<b style="color:#FFD54F">并永久保存在本机与云端</b>。<br>
-        表头需包含 <b style="color:#FFD54F">时间</b> 与 <b style="color:#FFD54F">项目</b> 两列，后面依次为星期一 ~ 星期五。<br>
-        <b style="color:#FFD54F">15:00 前高亮当天课程，15:00 后高亮第二天的课程；合并单元格不高亮且文字居中。</b>
-      </p>
-      <div class="admin-add-row">
-        <input type="file" id="adminTtFile" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
-      </div>
-      <div class="admin-add-row">
-        <button class="aa-btn" id="adminTtUploadBtn" style="flex:1">📤 上传并保存课程表</button>
-        <button class="aa-btn" id="adminTtClearBtn" style="background:linear-gradient(180deg,#FF8A80,#EF5350);border-color:#EF5350;box-shadow:0 3px 0 #C62828;color:#fff">🗑 清除</button>
-      </div>
-      <div class="aa-hint" id="adminTtHint">支持 .xlsx / .xls / .csv 格式</div>
-    </div>
-
     <div class="admin-section collapsed" id="adminPanelShop">
       <h3>🎁 兑换项目管理 <span class="badge" id="adminShopBadge">0 项</span></h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
@@ -1369,7 +1271,8 @@
     <div class="admin-section collapsed" id="adminPanelLibrary">
       <h3>📚 课文生字 / 组词 / 词语库 <span class="badge" id="adminLibBadge">0 条</span></h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
-        <b style="color:#FFD54F">双击条目可重新编辑。</b>
+        <b style="color:#FFD54F">双击条目可重新编辑。</b><br>
+        田字格修改/删除后，原文会自动保存为「会写字-旧」「会识字-旧」「抄写词语-旧」，新内容保存在「会写字」等字段。
       </p>
       <div class="admin-add-row"><button class="aa-btn" id="adminLibSyncBtn">📤 上传写字表 / 识字表</button></div>
       <div id="adminLibList"></div>
@@ -1379,6 +1282,33 @@
       <div class="admin-add-row"><input class="aa-text" id="adminLibWordgroups" placeholder="会识字，空格分隔"></div>
       <div class="admin-add-row"><input class="aa-text" id="adminLibWords" placeholder="抄写词语，空格分隔"></div>
       <div class="admin-add-row"><button class="aa-btn" id="adminLibAddBtn" style="flex:1">💾 保存到课文库</button></div>
+    </div>
+
+    <!-- ★★★ 课程表：已移动到家长密码上面 ★★★ -->
+    <div class="admin-section collapsed" id="adminPanelTimetable">
+      <h3>📅 课程表 <span class="badge" id="adminTtBadge">未上传</span></h3>
+      <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+        上传 Excel 课程表后，学生端「课程表」页会自动显示，<b style="color:#FFD54F">并永久保存在本机与云端</b>。<br>
+        表头需包含 <b style="color:#FFD54F">时间</b> 与 <b style="color:#FFD54F">项目</b> 两列，后面依次为星期一 ~ 星期五。<br>
+        <b style="color:#FFD54F">15:00 前高亮当天课程，15:00 后高亮第二天的课程；合并单元格不高亮且文字居中。</b>
+      </p>
+      <div class="admin-add-row">
+        <input type="file" id="adminTtFile" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
+      </div>
+      <div class="admin-add-row">
+        <button class="aa-btn" id="adminTtUploadBtn" style="flex:1">📤 上传并保存课程表</button>
+        <button class="aa-btn" id="adminTtClearBtn" style="background:linear-gradient(180deg,#FF8A80,#EF5350);border-color:#EF5350;box-shadow:0 3px 0 #C62828;color:#fff">🗑 清除</button>
+      </div>
+      <div class="aa-hint" id="adminTtHint">支持 .xlsx / .xls / .csv 格式</div>
+      <div class="admin-sub-label">🔤 显示设置（字体大小 / 行高）</div>
+      <div class="admin-add-row inline-row">
+        <input class="aa-num" id="adminTtFontSize" type="number" min="8" max="24" step="0.5" value="12.5" style="width:70px">
+        <span class="aa-unit">px 字号</span>
+        <input class="aa-num" id="adminTtLineHeight" type="number" min="1" max="3" step="0.1" value="1.4" style="width:70px">
+        <span class="aa-unit">行高</span>
+        <button class="aa-btn" id="adminTtFontSaveBtn">保存</button>
+      </div>
+      <div class="aa-hint" id="adminTtFontHint"></div>
     </div>
 
     <div class="admin-section collapsed" id="adminPanelPassword">
@@ -1419,12 +1349,11 @@
 <script type="module">
 /* ============================================================
    ★★★ 版本号：每次修改界面/功能后请把这里 +1
-   —— 页面会自动对比版本，必要时清缓存并刷新，无需手动清缓存
 ============================================================ */
-const APP_VERSION = '2026.10.12.1';
+const APP_VERSION = '2026.10.12.2';
 
 /* ============================================================
-   🔄 自动更新（解决「缓存导致界面不更新」）
+   🔄 自动更新
 ============================================================ */
 (function versionGuard(){
   try{
@@ -1432,7 +1361,7 @@ const APP_VERSION = '2026.10.12.1';
     const prev = localStorage.getItem(KEY);
     if(prev === APP_VERSION) return;
     localStorage.setItem(KEY, APP_VERSION);
-    if(!prev) return;                       // 首次访问，无需刷新
+    if(!prev) return;
     const done = () => { try{ location.reload(); }catch(e){} };
     if(window.caches && caches.keys){
       caches.keys()
@@ -1441,8 +1370,6 @@ const APP_VERSION = '2026.10.12.1';
     } else { done(); }
   }catch(e){}
 })();
-
-/* 在线比对远端版本，若远端更新则清缓存并刷新 */
 (function remoteVersionCheck(){
   try{
     if(location.protocol !== 'http:' && location.protocol !== 'https:') return;
@@ -1511,45 +1438,22 @@ const OVERDUE_MINUTE_MS = 60000;
 const NIGHT_RESET_HOUR = 21;
 const SUBJECTS = { chinese:{key:'chinese',name:'语文'}, math:{key:'math',name:'数学'}, english:{key:'english',name:'英语'} };
 
-/* ★ 法定休息日与调休上班日覆盖：调休上班日优先级最高 */
-const REST_HOLIDAYS = new Set([
-  // 示例：'2026-10-01','2026-10-02','2026-10-03',
-]);
-const MAKEUP_WORKDAYS = new Set([
-  '2026-10-10' // 国庆节调休上班日
-]);
+const REST_HOLIDAYS = new Set([]);
+const MAKEUP_WORKDAYS = new Set(['2026-10-10']);
 
 const MAX_PHOTOS_PER_TASK = 3;
 const PHOTO_MAX_SIZE = 800;
 const PHOTO_QUALITY = 0.55;
 
-/* ★ 课程表：15 点后高亮第二天课程 */
 const TT_SWITCH_HOUR = 15;
 
 const DEFAULT_LIVE = {
-  activeId: '',
-  status: 'idle',
-  startedAt: 0,
-  leftAtStart: 0,
-  totalMs: 0,
-  unitMs: 0,
-  overdue: false,
-  cycleStart: 0,
-  rounds: 0,
-  eyeActive: false,
-  eyeMode: 'idle',
-  eyeStageStart: 0,
-  eyeTotalMs: 0,
-  eyeNagCount: 0,
-  eyePaused: false,
-  eyePausedLeftMs: 0,
-  eyeLastNarrated: -1,
-  soundSeq: 0,
-  soundKind: '',
-  ownerTab: '',
-  taskPausedByRest: false,
-  tab: 'chinese',
-  updatedAt: 0
+  activeId:'', status:'idle', startedAt:0, leftAtStart:0, totalMs:0, unitMs:0,
+  overdue:false, cycleStart:0, rounds:0,
+  eyeActive:false, eyeMode:'idle', eyeStageStart:0, eyeTotalMs:0,
+  eyeNagCount:0, eyePaused:false, eyePausedLeftMs:0, eyeLastNarrated:-1,
+  soundSeq:0, soundKind:'', ownerTab:'', taskPausedByRest:false,
+  tab:'chinese', updatedAt:0
 };
 
 const DEFAULT_DATA = {
@@ -1588,7 +1492,9 @@ const DEFAULT_SETTINGS = {
     progress: true, sun: true, date: true, library: true, sync: true,
     password: true, eye: true, math: false, english: false, shop: true,
     timetable: true
-  }
+  },
+  ttFontSize: 12.5,
+  ttLineHeight: 1.4
 };
 
 const DEFAULT_SHOP = [
@@ -1680,8 +1586,6 @@ function parseWords(str){
   return String(str||'').split(/\s+/).map(s => s.trim()).filter(Boolean)
     .map(s => s.replace(/[^\u4e00-\u9fa5]/g,'')).filter(Boolean).slice(0, 40);
 }
-
-/* ★ 组词词库规范化 */
 function normalizeWordBank(raw){
   const out = {};
   if(!raw || typeof raw !== 'object') return out;
@@ -1689,8 +1593,7 @@ function normalizeWordBank(raw){
     const ch = String(k).slice(0, 4);
     if(!ch || !/[\u4e00-\u9fa5]/.test(ch)) return;
     const arr = Array.isArray(raw[k]) ? raw[k] : [];
-    const list = arr
-      .map(w => String(w).trim())
+    const list = arr.map(w => String(w).trim())
       .filter(w => /^[\u4e00-\u9fa5]{1,8}$/.test(w) && w.indexOf(ch) >= 0);
     const uniq = [...new Set(list)].slice(0, 12);
     if(uniq.length) out[ch] = uniq;
@@ -1699,7 +1602,7 @@ function normalizeWordBank(raw){
 }
 
 /* ============================================================
-   ★ 课程表数据规范化
+   ★ 课程表规范化
 ============================================================ */
 const TT_DOW_MAP = { '一':1, '二':2, '三':3, '四':4, '五':5, '六':6, '日':0, '天':0 };
 function normalizeTimetable(raw){
@@ -1749,6 +1652,12 @@ let currentWriter = null;
 
 const charTimer = { active:false, taskId:null, mode:'per-char', units:[], index:0 };
 let lastCharPaused = null;
+
+/* ★ 田字格撤销/恢复历史（按任务ID维护） */
+const miziHistoryMap = {};
+const MIZI_HISTORY_MAX = 30;
+let miziActionCtx = null;
+let miziEditCtx = null;
 
 /* ============================================================
    设置规范化
@@ -1807,7 +1716,9 @@ function normalizeSettings(raw){
       english: pc.english !== undefined ? !!pc.english : false,
       shop: pc.shop !== undefined ? !!pc.shop : true,
       timetable: pc.timetable !== undefined ? !!pc.timetable : true
-    }
+    },
+    ttFontSize: num(r.ttFontSize, d.ttFontSize, 8, 24),
+    ttLineHeight: num(r.ttLineHeight, d.ttLineHeight, 1, 3)
   };
 }
 function getUnitCfg(type){
@@ -1827,9 +1738,7 @@ function getEyeCfg(){
   };
 }
 function eyeSoundOn(){
-  try{
-    return String((state && state.eyeSoundOffDate) || '') !== todayStr();
-  }catch(e){ return true; }
+  try{ return String((state && state.eyeSoundOffDate) || '') !== todayStr(); }catch(e){ return true; }
 }
 function normalizeLessonLibrary(raw){
   const out = {};
@@ -1840,7 +1749,10 @@ function normalizeLessonLibrary(raw){
     out[name] = {
       chars: String(v.chars || '').slice(0,600),
       wordgroups: String(v.wordgroups || v.wordgroup || v.groups || '').slice(0,600),
-      words: String(v.words || '').slice(0,600)
+      words: String(v.words || '').slice(0,600),
+      oldChars: String(v.oldChars || '').slice(0,600),
+      oldWordgroups: String(v.oldWordgroups || '').slice(0,600),
+      oldWords: String(v.oldWords || '').slice(0,600)
     };
   });
   return out;
@@ -1849,9 +1761,7 @@ function normalizeShop(raw){
   if(!Array.isArray(raw)) return null;
   return raw.map(item => {
     const it = item || {};
-    const m = Number(it.minutes);
-    const s = Number(it.sun);
-    const tk = Number(it.tickets);
+    const m = Number(it.minutes); const s = Number(it.sun); const tk = Number(it.tickets);
     return {
       id: it.id ? String(it.id) : newId(),
       icon: String(it.icon || '🎁').slice(0,4) || '🎁',
@@ -1873,6 +1783,7 @@ function makeTask(text, minutes, sun, extra){
   };
   if(extra && extra.chars) task.chars = extra.chars.slice(0, 60);
   if(extra && extra.words) task.words = extra.words.slice(0, 60);
+  if(extra && extra.lessonName) task.lessonName = String(extra.lessonName).slice(0,60);
   if(task.type === 'custom' && extra && extra.penalty === true) task.penalty = true;
   return task;
 }
@@ -1913,6 +1824,7 @@ function normalizeDay(day){
       };
       if(type === 'custom' && t.penalty === true) item.penalty = true;
       if(typeof t.syncKey === 'string' && t.syncKey) item.syncKey = t.syncKey;
+      if(typeof t.lessonName === 'string' && t.lessonName) item.lessonName = t.lessonName.slice(0,60);
       if(type === 'preview' && Array.isArray(t.chars)) item.chars = t.chars.slice(0,60);
       if((type === 'wordgroup' || type === 'copy') && Array.isArray(t.words)) item.words = t.words.slice(0,60);
       if(Array.isArray(t.checkedChars)) item.checkedChars = t.checkedChars.slice(0,300).map(String);
@@ -1940,11 +1852,9 @@ function loadLocalState(){
       settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
       lessonLibrary: JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY)),
       shop: JSON.parse(JSON.stringify(DEFAULT_SHOP)),
-      wordBank: {},
-      timetable: null,
+      wordBank: {}, timetable: null,
       parentPassword: MASTER_PASSWORD,
-      lastNightReset: '',
-      eyeSoundOffDate: '',
+      lastNightReset: '', eyeSoundOffDate: '',
       live: JSON.parse(JSON.stringify(DEFAULT_LIVE))
     };
     s.days[todayStr()] = normalizeDay(DEFAULT_DATA);
@@ -1966,7 +1876,6 @@ function loadLocalState(){
   if(shopNorm === null) s.shop = JSON.parse(JSON.stringify(DEFAULT_SHOP));
   else s.shop = shopNorm;
   s.wordBank = normalizeWordBank(s.wordBank);
-  /* ★ 课程表读取 */
   s.timetable = normalizeTimetable(s.timetable);
   if(!s.live || typeof s.live !== 'object'){
     s.live = JSON.parse(JSON.stringify(DEFAULT_LIVE));
@@ -2005,12 +1914,10 @@ function findTask(id){
   }
   return null;
 }
-function hasPendingWork(){
-  try{ return allTasks().some(t => !t.done); }catch(e){ return false; }
-}
+function hasPendingWork(){ try{ return allTasks().some(t => !t.done); }catch(e){ return false; } }
 
 /* ============================================================
-   作业同步：仅由家长手动点击按钮触发，不自动同步
+   作业同步：仅手动触发
 ============================================================ */
 function dayHasTasks(dateStr){
   const d = state.days[dateStr];
@@ -2025,13 +1932,11 @@ function cloneTaskForNewDay(t, syncKey){
   delete nt.photos;
   return nt;
 }
-function syncFromPreviousDay(targetDate, opts){
-  opts = opts || {};
+function syncFromPreviousDay(targetDate){
   const d = new Date(targetDate + 'T00:00:00');
   d.setDate(d.getDate() - 1);
   const srcDate = fmtDate(d);
   if(!dayHasTasks(srcDate)) return { ok:false, reason:'no-source', srcDate };
-
   const src = state.days[srcDate];
   const out = makeDay();
   let count = 0;
@@ -2043,7 +1948,6 @@ function syncFromPreviousDay(targetDate, opts){
     });
   });
   state.days[targetDate] = out;
-
   saveLocalState(); uploadToCloud();
   if(state.date === targetDate){
     renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
@@ -2064,27 +1968,118 @@ function getLinkedTasks(task){
 }
 
 /* ============================================================
-   ★★★ 田字格长按：修改 / 删除（旧版倒计时保持总时长不变） ★★★
+   ★★★ 田字格撤销/恢复 + 课文库同步 ★★★
 ============================================================ */
-let miziActionCtx = null;      // { taskId, kind:'char'|'word', index }
-let miziEditCtx = null;
+function getMiziHistory(taskId){
+  if(!miziHistoryMap[taskId]) miziHistoryMap[taskId] = { snapshots: [], index: -1 };
+  return miziHistoryMap[taskId];
+}
+function snapshotTask(task){
+  return {
+    chars: task.chars ? [...task.chars] : null,
+    words: task.words ? [...task.words] : null,
+    checkedChars: task.checkedChars ? [...task.checkedChars] : null,
+    minutes: task.minutes, sun: task.sun, text: task.text
+  };
+}
+function applySnapshot(task, snap){
+  if(snap.chars !== null) task.chars = [...snap.chars]; else delete task.chars;
+  if(snap.words !== null) task.words = [...snap.words]; else delete task.words;
+  if(snap.checkedChars !== null) task.checkedChars = [...snap.checkedChars]; else delete task.checkedChars;
+  task.minutes = snap.minutes; task.sun = snap.sun; task.text = snap.text;
+}
+function recordHistoryBefore(taskId){
+  const info = findTask(taskId);
+  if(!info) return;
+  const h = getMiziHistory(taskId);
+  if(h.snapshots.length === 0){
+    h.snapshots.push(snapshotTask(info.task));
+    h.index = 0;
+  } else if(h.index < h.snapshots.length - 1){
+    h.snapshots = h.snapshots.slice(0, h.index + 1);
+  }
+}
+function recordHistoryAfter(taskId){
+  const info = findTask(taskId);
+  if(!info) return;
+  const h = getMiziHistory(taskId);
+  h.snapshots.push(snapshotTask(info.task));
+  if(h.snapshots.length > MIZI_HISTORY_MAX) h.snapshots.shift();
+  h.index = h.snapshots.length - 1;
+}
+function canUndoMizi(taskId){
+  const h = miziHistoryMap[taskId];
+  return h && h.index > 0;
+}
+function canRedoMizi(taskId){
+  const h = miziHistoryMap[taskId];
+  return h && h.index < h.snapshots.length - 1;
+}
+function undoMizi(taskId){
+  const h = miziHistoryMap[taskId];
+  if(!h || h.index <= 0) return;
+  const info = findTask(taskId);
+  if(!info) return;
+  h.index--;
+  applySnapshot(info.task, h.snapshots[h.index]);
+  syncTaskToLessonLibrary(info.task);
+  saveLocalState(); uploadToCloud();
+  renderBoard(); refreshAllCards();
+  if(activeId === taskId){ initCharTimer(taskId); paintCharBarsFromLive(); updateDogBar(); }
+  if(isAdminMode) renderAdminPanel();
+  toast('↶ 已撤销');
+}
+function redoMizi(taskId){
+  const h = miziHistoryMap[taskId];
+  if(!h || h.index >= h.snapshots.length - 1) return;
+  const info = findTask(taskId);
+  if(!info) return;
+  h.index++;
+  applySnapshot(info.task, h.snapshots[h.index]);
+  syncTaskToLessonLibrary(info.task);
+  saveLocalState(); uploadToCloud();
+  renderBoard(); refreshAllCards();
+  if(activeId === taskId){ initCharTimer(taskId); paintCharBarsFromLive(); updateDogBar(); }
+  if(isAdminMode) renderAdminPanel();
+  toast('↷ 已恢复');
+}
 
-/** 重新计算任务的分钟数与金币（按剩余单元数 × 单位配置） */
+/* 把任务的最新字/词语写回课文库：
+   - 首次写入时，把课文库原字段备份到 oldChars / oldWordgroups / oldWords
+   - 新内容写入 chars / wordgroups / words */
+function syncTaskToLessonLibrary(task){
+  if(!task || !task.lessonName) return;
+  const lib = state.lessonLibrary;
+  if(!lib) return;
+  const entry = lib[task.lessonName];
+  if(!entry) return;
+  if(task.type === 'preview'){
+    if(!entry.oldChars && entry.chars) entry.oldChars = entry.chars;
+    entry.chars = (task.chars || []).join(' ');
+  } else if(task.type === 'wordgroup'){
+    if(!entry.oldWordgroups && entry.wordgroups) entry.oldWordgroups = entry.wordgroups;
+    entry.wordgroups = (task.words || []).join(' ');
+  } else if(task.type === 'copy'){
+    if(!entry.oldWords && entry.words) entry.oldWords = entry.words;
+    entry.words = (task.words || []).join(' ');
+  }
+  saveLocalState(); uploadToCloud();
+  if(isAdminMode) renderLessonLibrary();
+}
+
+/* 重新计算任务分钟数与金币（按剩余数量 × 单位配置） */
 function recalcTaskUnits(task){
   const type = task.type;
   if(type !== 'preview' && type !== 'wordgroup' && type !== 'copy') return;
   const cfg = getUnitCfg(type);
   const count = (type === 'preview') ? (task.chars || []).length : (task.words || []).length;
   if(count <= 0) return;
-  /* 分钟按 0.5 取整，金币取整 */
   task.minutes = clamp(Math.round(count * cfg.min * 2) / 2, 0.5, 120);
   task.sun = clamp(Math.round(count * cfg.sun), 1, 500);
-  /* 同步标题里的数量 */
   const unitLabel = (type === 'copy') ? '组' : '字';
   task.text = String(task.text).replace(/[（(]\s*\d+\s*[字组]\s*[）)]/, '（' + count + unitLabel + '）');
 }
 
-/** 从点击的田字格反推：是第几个「字」还是第几个「词语」 */
 function getMiziUnitCtx(el, task){
   if(!task) return null;
   if(task.type === 'preview'){
@@ -2107,8 +2102,6 @@ function getMiziUnitCtx(el, task){
   }
   return null;
 }
-
-/** 修改 / 删除后：保存 + 重新渲染 + 同步正在运行的田字格进度条 */
 function commitMiziChange(taskId){
   saveLocalState(); uploadToCloud();
   renderBoard(); refreshAllCards();
@@ -2119,20 +2112,17 @@ function commitMiziChange(taskId){
   }
   if(isAdminMode) renderAdminPanel();
 }
-
 function openMiziActionModal(ctx){
   const info = findTask(ctx.taskId);
   if(!info) return;
   const task = info.task;
-  let value = '';
-  if(ctx.kind === 'char') value = (task.chars || [])[ctx.index] || '';
-  else value = (task.words || [])[ctx.index] || '';
+  const value = (ctx.kind === 'char') ? (task.chars || [])[ctx.index] : (task.words || [])[ctx.index];
   if(!value) return;
   miziActionCtx = ctx;
   const titleEl = $('miziActionTitle');
   const subEl = $('miziActionSub');
   if(titleEl) titleEl.textContent = (ctx.kind === 'char' ? '生字：' : '词语：') + value;
-  if(subEl) subEl.textContent = '删除会同步减少任务时间与金币奖励';
+  if(subEl) subEl.textContent = '删除会同步减少任务时间与金币奖励，并保存到课文库';
   const modal = $('miziActionModal');
   if(modal) modal.classList.add('show');
 }
@@ -2141,26 +2131,28 @@ function closeMiziActionModal(){
   if(modal) modal.classList.remove('show');
   miziActionCtx = null;
 }
-
 function deleteMiziUnit(ctx){
   const info = findTask(ctx.taskId);
   if(!info) return;
   const task = info.task;
   if(task.type === 'preview'){
     if((task.chars || []).length <= 1){ toast('至少要保留一个字哦'); return; }
+    recordHistoryBefore(ctx.taskId);
     const removed = task.chars.splice(ctx.index, 1)[0];
     if(Array.isArray(task.checkedChars)) task.checkedChars = task.checkedChars.filter(c => c !== removed);
   } else {
     if((task.words || []).length <= 1){ toast('至少要保留一个词语哦'); return; }
+    recordHistoryBefore(ctx.taskId);
     task.words.splice(ctx.index, 1);
     const remainStr = (task.words || []).join('');
     if(Array.isArray(task.checkedChars)) task.checkedChars = task.checkedChars.filter(c => remainStr.indexOf(c) >= 0);
   }
   recalcTaskUnits(task);
+  syncTaskToLessonLibrary(task);
+  recordHistoryAfter(ctx.taskId);
   commitMiziChange(task.id);
-  toast('🗑 已删除，任务时长与金币已同步调整');
+  toast('🗑 已删除，时长/金币已同步，课文库已更新');
 }
-
 function openMiziEditModal(ctx){
   const info = findTask(ctx.taskId);
   if(!info) return;
@@ -2172,11 +2164,8 @@ function openMiziEditModal(ctx){
   const subEl = $('miziEditSub');
   const input = $('miziEditInput');
   if(titleEl) titleEl.textContent = (ctx.kind === 'char') ? '✏️ 修改生字' : '✏️ 修改词语';
-  if(subEl) subEl.textContent = (ctx.kind === 'char') ? '请输入 1 个汉字，修改后替换原字' : '请输入 1-8 个汉字，修改后替换原词';
-  if(input){
-    input.value = oldVal;
-    input.maxLength = (ctx.kind === 'char') ? 1 : 8;
-  }
+  if(subEl) subEl.textContent = (ctx.kind === 'char') ? '请输入 1 个汉字，修改后替换原字并保存到课文库' : '请输入 1-8 个汉字，修改后替换原词并保存到课文库';
+  if(input){ input.value = oldVal; input.maxLength = (ctx.kind === 'char') ? 1 : 8; }
   const modal = $('miziEditModal');
   if(modal) modal.classList.add('show');
   setTimeout(() => { if(input){ input.focus(); try{ input.select(); }catch(e){} } }, 120);
@@ -2199,6 +2188,7 @@ function saveMiziEdit(){
   if(ctx.kind === 'char' && v.length !== 1){ toast('生字只能是 1 个汉字'); return; }
   if(ctx.kind === 'word' && (v.length < 1 || v.length > 8)){ toast('词语需要 1-8 个汉字'); return; }
 
+  recordHistoryBefore(ctx.taskId);
   if(ctx.kind === 'char'){
     const oldVal = task.chars[ctx.index];
     if(v === oldVal){ closeMiziEditModal(); return; }
@@ -2214,18 +2204,18 @@ function saveMiziEdit(){
     const remainStr = (task.words || []).join('');
     if(Array.isArray(task.checkedChars)) task.checkedChars = task.checkedChars.filter(c => remainStr.indexOf(c) >= 0);
   }
+  syncTaskToLessonLibrary(task);
+  recordHistoryAfter(ctx.taskId);
   closeMiziEditModal();
   commitMiziChange(task.id);
-  toast('✅ 已修改，任务时长与金币保持不变');
+  toast('✅ 已修改，课文库已更新');
 }
 
-/* 绑定田字格长按 + 单击 / 双击 */
 function bindMiziClicks(container, task){
   container.querySelectorAll('.mizi[data-char]').forEach(el => {
     let clickTimer = null;
     let lpTimer = null, lpX = 0, lpY = 0;
     el.__lpFired = false;
-
     const cancelLp = () => { if(lpTimer){ clearTimeout(lpTimer); lpTimer = null; } };
     const startLp = (ev) => {
       if(!task) return;
@@ -2247,7 +2237,6 @@ function bindMiziClicks(container, task){
       if(!p) return;
       if(Math.abs(p.clientX - lpX) > 12 || Math.abs(p.clientY - lpY) > 12) cancelLp();
     };
-
     el.addEventListener('touchstart', startLp, { passive:true });
     el.addEventListener('touchmove', moveLp, { passive:true });
     el.addEventListener('touchend', cancelLp);
@@ -2265,8 +2254,7 @@ function bindMiziClicks(container, task){
       clickTimer = setTimeout(() => { showStroke(el.dataset.char); }, 260);
     });
     el.addEventListener('dblclick', e => {
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault(); e.stopPropagation();
       if(el.__lpFired){ el.__lpFired = false; return; }
       clearTimeout(clickTimer);
       const group = el.closest('.word-group');
@@ -2293,7 +2281,6 @@ function renderWordMizi(word){
     '</div>'
   ).join('') + '</div>';
 }
-
 function renderStrokeWords(char){
   const box = $('strokeWords');
   if(!box) return;
@@ -2303,19 +2290,13 @@ function renderStrokeWords(char){
     return;
   }
   box.innerHTML = list.map((w, i) =>
-    '<div class="sw-item" data-sw-i="' + i + '">' +
-      renderWordMizi(w) +
-      '<button class="sw-del" data-sw-del="' + i + '" title="删除">✕</button>' +
-    '</div>'
+    '<div class="sw-item" data-sw-i="' + i + '">' + renderWordMizi(w) +
+      '<button class="sw-del" data-sw-del="' + i + '" title="删除">✕</button></div>'
   ).join('');
   box.querySelectorAll('[data-sw-del]').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      removeCharWord(char, Number(btn.dataset.swDel));
-    });
+    btn.addEventListener('click', e => { e.stopPropagation(); removeCharWord(char, Number(btn.dataset.swDel)); });
   });
 }
-
 function addCharWord(char, word){
   const w = String(word || '').trim();
   if(!w) return false;
@@ -2342,18 +2323,14 @@ function removeCharWord(char, index){
 }
 
 /* ============================================================
-   ★ Live 状态工具
+   Live 状态
 ============================================================ */
 const TAB_ID = 'tb' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 const LIVE_KEY = 'study_board_live_ping_' + FAMILY_ID;
-
 let liveChannel = null;
 try{ if(typeof BroadcastChannel !== 'undefined'){ liveChannel = new BroadcastChannel('study_board_live_' + FAMILY_ID); } }catch(e){ liveChannel = null; }
-
 let lastSoundSeq = 0;
-
 function isLiveOwner(){ return state && state.live && state.live.ownerTab === TAB_ID; }
-
 function liveLeftMs(L){
   L = L || (state && state.live);
   if(!L || !L.activeId) return 0;
@@ -2375,20 +2352,14 @@ function liveEyeLeftMs(L){
 function syncRuntimeFromLive(){
   const L = state.live;
   if(!L || !L.activeId) return;
-  const rt = runtimeMap[L.activeId] || (runtimeMap[L.activeId] = {
-    totalMs: L.totalMs, leftMs: L.totalMs, rounds: 0, overdue: false
-  });
-  rt.totalMs = L.totalMs;
-  rt.leftMs = liveLeftMs(L);
-  rt.rounds = L.rounds;
-  rt.overdue = !!L.overdue;
+  const rt = runtimeMap[L.activeId] || (runtimeMap[L.activeId] = { totalMs: L.totalMs, leftMs: L.totalMs, rounds: 0, overdue: false });
+  rt.totalMs = L.totalMs; rt.leftMs = liveLeftMs(L); rt.rounds = L.rounds; rt.overdue = !!L.overdue;
 }
 function syncLegacyFromLive(){
   const L = state.live;
   if(!L) return;
   if(L.activeId){
-    activeId = L.activeId;
-    running = (L.status === 'running');
+    activeId = L.activeId; running = (L.status === 'running');
     pauseState.active = (L.status === 'paused' || L.status === 'timeup');
     pauseState.leftMs = L.status === 'paused' ? L.leftAtStart : 0;
   } else {
@@ -2412,11 +2383,8 @@ function checkAndPlaySound(){
 function pushLive(){
   if(!state || !state.live) return;
   state.live.updatedAt = Date.now();
-  syncLegacyFromLive();
-  syncRuntimeFromLive();
-  checkAndPlaySound();
-  saveLocalState();
-  uploadToCloud();
+  syncLegacyFromLive(); syncRuntimeFromLive(); checkAndPlaySound();
+  saveLocalState(); uploadToCloud();
   liveSend({ t:'live', live: state.live });
   ensureTickRunning();
 }
@@ -2440,11 +2408,8 @@ function liveHandle(pack){
     const localAt = Number(state.live && state.live.updatedAt) || 0;
     if(remoteAt > localAt){
       state.live = Object.assign({}, DEFAULT_LIVE, pack.live);
-      syncLegacyFromLive();
-      syncRuntimeFromLive();
-      checkAndPlaySound();
-      applyTabFromLive();
-      renderAllLiveUI();
+      syncLegacyFromLive(); syncRuntimeFromLive(); checkAndPlaySound();
+      applyTabFromLive(); renderAllLiveUI();
       if(state.live.activeId || state.live.eyeActive) ensureTickRunning();
     }
   }
@@ -2452,8 +2417,7 @@ function liveHandle(pack){
 function renderAllLiveUI(){
   updateDogBar();
   if(activeId) updateCardVisual(activeId);
-  updateEyeUI();
-  updateMainBtn();
+  updateEyeUI(); updateMainBtn();
   if(charTimer.active) paintCharBarsFromLive();
 }
 function applyTabFromLive(){
@@ -2479,9 +2443,7 @@ async function uploadToCloud(force){
     sun: state.sun, checkins: state.checkins,
     sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
     lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword,
-    shop: state.shop,
-    wordBank: state.wordBank,
-    timetable: state.timetable,            /* ★ 课程表保存到云端 */
+    shop: state.shop, wordBank: state.wordBank, timetable: state.timetable,
     lastNightReset: state.lastNightReset || '',
     eyeSoundOffDate: state.eyeSoundOffDate || '',
     live: state.live, updatedAt: Date.now()
@@ -2497,9 +2459,6 @@ async function uploadToCloud(force){
     return false;
   }
 }
-/* ============================================================
-   🗂️ 数据历史文档
-============================================================ */
 let adminEntrySnapshot = null;
 function getEditableStateForCompare(){
   return JSON.stringify({
@@ -2551,7 +2510,6 @@ async function saveHistorySnapshot(reason){
     return false;
   }
 }
-
 function applyRemoteState(remote){
   if(!remote || !remote.days) return;
   const rAt = Number(remote.updatedAt) || 0;
@@ -2569,7 +2527,6 @@ function applyRemoteState(remote){
   if(Array.isArray(remote.sunLog)) state.sunLog = remote.sunLog.slice(0, 60);
   if(remote.lessonLibrary) state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary);
   if(remote.wordBank) state.wordBank = normalizeWordBank(remote.wordBank);
-  /* ★ 课程表 */
   if('timetable' in remote) state.timetable = normalizeTimetable(remote.timetable);
   if(typeof remote.parentPassword === 'string' && /^\d{4}$/.test(remote.parentPassword)) state.parentPassword = remote.parentPassword;
   if(typeof remote.lastNightReset === 'string') state.lastNightReset = remote.lastNightReset;
@@ -2645,17 +2602,11 @@ function showSyncStatus(text, cls){
 ============================================================ */
 let audioCtx = null;
 let audioUnlocked = false;
-
 function ensureAudio(){
   if(!audioCtx){
-    try{
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if(AC) audioCtx = new AC();
-    }catch(e){ audioCtx = null; }
+    try{ const AC = window.AudioContext || window.webkitAudioContext; if(AC) audioCtx = new AC(); }catch(e){ audioCtx = null; }
   }
-  if(audioCtx && audioCtx.state === 'suspended'){
-    try{ audioCtx.resume(); }catch(e){}
-  }
+  if(audioCtx && audioCtx.state === 'suspended'){ try{ audioCtx.resume(); }catch(e){} }
   return audioCtx;
 }
 function unlockAudio(){
@@ -2666,8 +2617,7 @@ function unlockAudio(){
     if(!audioUnlocked){
       const buf = ctx.createBuffer(1, 1, 22050);
       const src = ctx.createBufferSource();
-      src.buffer = buf;
-      src.connect(ctx.destination);
+      src.buffer = buf; src.connect(ctx.destination);
       try{ src.start(0); }catch(e){}
       audioUnlocked = true;
     }
@@ -2686,7 +2636,6 @@ window.addEventListener('pageshow', () => {
   const ctx = ensureAudio();
   if(ctx && ctx.state === 'suspended'){ try{ ctx.resume(); }catch(e){} }
 });
-
 function tone(freq,start,dur,type,vol){
   if(!audioCtx) return;
   const o = audioCtx.createOscillator(), g = audioCtx.createGain();
@@ -2707,8 +2656,7 @@ function playSound(kind){
     const o=audioCtx.createOscillator(),g=audioCtx.createGain();
     o.type='square'; o.frequency.setValueAtTime(340,now);
     o.frequency.exponentialRampToValueAtTime(70,now+0.18);
-    g.gain.setValueAtTime(0.10,now);
-    g.gain.exponentialRampToValueAtTime(0.0001,now+0.2);
+    g.gain.setValueAtTime(0.10,now); g.gain.exponentialRampToValueAtTime(0.0001,now+0.2);
     o.connect(g);g.connect(audioCtx.destination);
     o.start(now);o.stop(now+0.22);
   }
@@ -2725,8 +2673,7 @@ function playSound(kind){
 }
 function playEyeAlert(){
   if(!eyeSoundOn()) return;
-  const ctx = ensureAudio();
-  if(!ctx) return;
+  const ctx = ensureAudio(); if(!ctx) return;
   const now = audioCtx.currentTime;
   for(let i = 0; i < 4; i++){
     tone(880, now + i*0.24, 0.18, 'sine', 0.20);
@@ -2735,8 +2682,7 @@ function playEyeAlert(){
   try{ if(navigator.vibrate) navigator.vibrate([180,80,180,80,180]); }catch(e){}
 }
 function playRestDone(){
-  const ctx = ensureAudio();
-  if(!ctx) return;
+  const ctx = ensureAudio(); if(!ctx) return;
   const now = audioCtx.currentTime;
   [659.25, 880, 1046.5].forEach((f,i) => tone(f, now + i*0.11, 0.22, 'triangle', 0.12));
 }
@@ -2748,10 +2694,7 @@ function speakNumber(n){
     setTimeout(() => {
       try{
         const u = new SpeechSynthesisUtterance(String(n));
-        u.lang = 'zh-CN';
-        u.rate = 1.15;
-        u.pitch = 1.05;
-        u.volume = 1;
+        u.lang = 'zh-CN'; u.rate = 1.15; u.pitch = 1.05; u.volume = 1;
         window.speechSynthesis.speak(u);
       }catch(e){}
     }, 60);
@@ -2799,7 +2742,6 @@ const libEditModal = $('libEditModal');
 const taskEditModal = $('taskEditModal');
 const uploadSyncModal = $('uploadSyncModal');
 const photoModal = $('photoModal');
-
 const eyeRailEl   = $('eyeRail');
 const eyeTokenEl  = $('eyeToken');
 const eyeFillEl   = $('eyeRailFill');
@@ -2889,7 +2831,7 @@ function scheduleCheckSave(){
 }
 
 /* ============================================================
-   📷 拍照
+   拍照
 ============================================================ */
 const cameraInput = $('cameraInput');
 let pendingPhotoTaskId = null;
@@ -2912,8 +2854,7 @@ function compressImage(file, maxSize, quality){
           const canvas = document.createElement('canvas');
           canvas.width = w; canvas.height = h;
           const ctx = canvas.getContext('2d');
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, w, h);
+          ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
           ctx.drawImage(img, 0, 0, w, h);
           resolve(canvas.toDataURL('image/jpeg', quality));
         }catch(err){ reject(err); }
@@ -2926,10 +2867,7 @@ function compressImage(file, maxSize, quality){
 function openCameraForTask(taskId){
   const info = findTask(taskId);
   if(!info) return;
-  if(getTaskPhotos(info.task).length >= MAX_PHOTOS_PER_TASK){
-    toast('每项作业最多保存 ' + MAX_PHOTOS_PER_TASK + ' 张照片');
-    return;
-  }
+  if(getTaskPhotos(info.task).length >= MAX_PHOTOS_PER_TASK){ toast('每项作业最多保存 ' + MAX_PHOTOS_PER_TASK + ' 张照片'); return; }
   pendingPhotoTaskId = taskId;
   try{ cameraInput.value = ''; }catch(e){}
   cameraInput.click();
@@ -2975,10 +2913,8 @@ function renderPhotoGrid(taskId){
     return;
   }
   grid.innerHTML = photos.map(p =>
-    '<div class="photo-item">' +
-      '<img src="' + p.data + '" alt="作业照片">' +
-      '<button class="p-del" data-pdel="' + escapeAttr(p.id) + '" title="删除">✕</button>' +
-    '</div>'
+    '<div class="photo-item"><img src="' + p.data + '" alt="作业照片">' +
+      '<button class="p-del" data-pdel="' + escapeAttr(p.id) + '" title="删除">✕</button></div>'
   ).join('');
   grid.querySelectorAll('img').forEach(img => {
     img.addEventListener('click', () => { $('photoViewerImg').src = img.src; $('photoViewer').classList.add('show'); });
@@ -3002,25 +2938,22 @@ $('photoModalCam').addEventListener('click', () => { if(photoViewTaskId) openCam
 $('photoViewerClose').addEventListener('click', () => $('photoViewer').classList.remove('show'));
 $('photoViewer').addEventListener('click', e => { if(e.target === $('photoViewer')) $('photoViewer').classList.remove('show'); });
 
-/* ★ 田字格长按弹窗事件 */
+/* 田字格长按弹窗事件 */
 (function bindMiziActionEvents(){
   const actionModal = $('miziActionModal');
   const editModal = $('miziEditModal');
   const editInput = $('miziEditInput');
-
   if($('miziActionCancel')) $('miziActionCancel').addEventListener('click', closeMiziActionModal);
   if(actionModal) actionModal.addEventListener('click', e => { if(e.target === actionModal) closeMiziActionModal(); });
-
   if($('miziActionDel')) $('miziActionDel').addEventListener('click', () => {
     const ctx = miziActionCtx;
     closeMiziActionModal();
     if(!ctx) return;
-    const info = findTask(ctx.taskId);
-    if(!info) return;
+    const info = findTask(ctx.taskId); if(!info) return;
     const task = info.task;
     const val = (ctx.kind === 'char') ? (task.chars || [])[ctx.index] : (task.words || [])[ctx.index];
     if(!val) return;
-    if(!confirm('确定删除「' + val + '」吗？\n删除后任务时长与金币奖励会同步减少。')) return;
+    if(!confirm('确定删除「' + val + '」吗？\n删除后任务时长与金币奖励会同步减少，并保存到课文库。')) return;
     setTimeout(() => deleteMiziUnit(ctx), 60);
   });
   if($('miziActionEdit')) $('miziActionEdit').addEventListener('click', () => {
@@ -3029,7 +2962,6 @@ $('photoViewer').addEventListener('click', e => { if(e.target === $('photoViewer
     if(!ctx) return;
     setTimeout(() => openMiziEditModal(ctx), 60);
   });
-
   if($('miziEditCancel')) $('miziEditCancel').addEventListener('click', closeMiziEditModal);
   if(editModal) editModal.addEventListener('click', e => { if(e.target === editModal) closeMiziEditModal(); });
   if($('miziEditSave')) $('miziEditSave').addEventListener('click', saveMiziEdit);
@@ -3078,7 +3010,7 @@ function renderSubjectCards(subject, listEl){
     const body = document.createElement('div'); body.className = 'card-body';
     const textEl = document.createElement('div');
     textEl.className = 'task-text' + (task.type === 'custom' ? ' custom-task-text' : '');
-    textEl.textContent = task.text;   /* ★ 换行由 CSS white-space:pre-wrap 保留 */
+    textEl.textContent = task.text;
 
     const info = document.createElement('div'); info.className = 'task-info';
     const stars = document.createElement('span'); stars.className = 'stars-mini';
@@ -3095,6 +3027,22 @@ function renderSubjectCards(subject, listEl){
     top.appendChild(cb); top.appendChild(body);
 
     const actions = document.createElement('div'); actions.className = 'card-actions';
+
+    /* ★ 撤销/恢复按钮（仅田字格任务显示，在相机左侧） */
+    if(task.type === 'preview' || task.type === 'wordgroup' || task.type === 'copy'){
+      const undoBtn = document.createElement('button');
+      undoBtn.type = 'button'; undoBtn.className = 'mini-btn undo'; undoBtn.textContent = '↶'; undoBtn.title = '撤销';
+      undoBtn.disabled = !canUndoMizi(task.id);
+      undoBtn.addEventListener('click', e => { e.stopPropagation(); undoMizi(task.id); });
+      actions.appendChild(undoBtn);
+
+      const redoBtn = document.createElement('button');
+      redoBtn.type = 'button'; redoBtn.className = 'mini-btn redo'; redoBtn.textContent = '↷'; redoBtn.title = '恢复';
+      redoBtn.disabled = !canRedoMizi(task.id);
+      redoBtn.addEventListener('click', e => { e.stopPropagation(); redoMizi(task.id); });
+      actions.appendChild(redoBtn);
+    }
+
     const camBtn = document.createElement('button');
     camBtn.type = 'button'; camBtn.className = 'mini-btn'; camBtn.textContent = '📷'; camBtn.title = '拍照';
     camBtn.addEventListener('click', e => { e.stopPropagation(); openCameraForTask(task.id); });
@@ -3188,7 +3136,7 @@ function updateCardVisual(id){
 function refreshAllCards(){ Object.keys(cardRefs).forEach(id => updateCardVisual(id)); }
 
 /* ============================================================
-   ★ 兑换中心
+   兑换中心
 ============================================================ */
 function renderShop(){
   const listEl = $('shopList');
@@ -3205,9 +3153,7 @@ function renderShop(){
     const tk = Number(item.tickets) || 0;
     const costLabel = cost < 0
       ? '<span class="shop-cost">💰 需要 ' + Math.abs(cost) + ' 个</span>'
-      : (cost > 0
-          ? '<span class="shop-gain">💰 获得 ' + cost + ' 个</span>'
-          : '<span class="shop-cost">💰 免费</span>');
+      : (cost > 0 ? '<span class="shop-gain">💰 获得 ' + cost + ' 个</span>' : '<span class="shop-cost">💰 免费</span>');
     const buyLabel = '兑换' + (tk > 0 ? '<span class="ticket-num">' + tk + '</span>' : '');
     return '<div class="shop-card" data-id="' + escapeAttr(item.id) + '">' +
       '<div class="shop-top">' +
@@ -3220,8 +3166,7 @@ function renderShop(){
       '<div class="shop-actions">' +
         '<button class="shop-btn" data-shop-buy="' + escapeAttr(item.id) + '">' + buyLabel + '</button>' +
         '<button class="shop-btn use" data-shop-use="' + escapeAttr(item.id) + '">使用</button>' +
-      '</div>' +
-    '</div>';
+      '</div></div>';
   }).join('');
   listEl.querySelectorAll('[data-shop-buy]').forEach(btn => {
     btn.addEventListener('click', () => doRedeem(btn.dataset.shopBuy));
@@ -3235,21 +3180,14 @@ function doRedeem(id){
   if(!item) return;
   const cost = Number(item.sun) || 0;
   const now = Math.round(Number(state.sun) || 0);
-  if(cost < 0 && now < Math.abs(cost)){
-    toast('💰 金币不足！还差 ' + (Math.abs(cost) - now) + ' 个', 2800);
-    playSound('fail');
-    return;
-  }
-  const costText = cost < 0
-    ? '消耗 ' + Math.abs(cost) + ' 个金币'
-    : (cost > 0 ? '获得 ' + cost + ' 个金币' : '不消耗金币');
+  if(cost < 0 && now < Math.abs(cost)){ toast('💰 金币不足！还差 ' + (Math.abs(cost) - now) + ' 个', 2800); playSound('fail'); return; }
+  const costText = cost < 0 ? '消耗 ' + Math.abs(cost) + ' 个金币' : (cost > 0 ? '获得 ' + cost + ' 个金币' : '不消耗金币');
   if(!confirm('确定兑换「' + item.name + '」（' + item.minutes + ' 分钟）吗？\n' + costText + '\n兑换后获得 1 张兑换券')) return;
   state.sun = now + cost;
   item.tickets = clamp((Number(item.tickets) || 0) + 1, 0, 9999);
   pushSunLog(cost, '兑换：' + item.name + '（' + item.minutes + '分钟）');
   saveLocalState(); uploadToCloud();
-  renderStats();
-  bumpPill(sunPillEl);
+  renderStats(); bumpPill(sunPillEl);
   if(cost < 0) flySunAway(Math.abs(cost));
   else if(cost > 0) flySun(sunPillEl);
   renderShop();
@@ -3262,11 +3200,7 @@ function doUseTicket(id){
   const item = (state.shop || []).find(x => x.id === id);
   if(!item) return;
   const tk = clamp(Number(item.tickets) || 0, 0, 9999);
-  if(tk <= 0){
-    toast('还没有「' + escapeHtml(item.name) + '」兑换券<br>先点「兑换」获取吧', 2800);
-    playSound('fail');
-    return;
-  }
+  if(tk <= 0){ toast('还没有「' + escapeHtml(item.name) + '」兑换券<br>先点「兑换」获取吧', 2800); playSound('fail'); return; }
   if(!confirm('确定使用 1 张「' + item.name + '」兑换券吗？\n剩余 ' + (tk - 1) + ' 张')) return;
   item.tickets = tk - 1;
   pushSunLog(0, '使用兑换券：' + item.name);
@@ -3278,7 +3212,7 @@ function doUseTicket(id){
 }
 
 /* ============================================================
-   ★★★ 课程表：解析 / 渲染 / 高亮 / 保存 ★★★
+   课程表
 ============================================================ */
 let xlsxLoading = null;
 function loadXLSX(){
@@ -3287,20 +3221,15 @@ function loadXLSX(){
   xlsxLoading = new Promise((resolve, reject) => {
     const s = document.createElement('script');
     s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
-    s.onload = () => {
-      if(window.XLSX) resolve(window.XLSX);
-      else reject(new Error('表格解析组件未就绪'));
-    };
+    s.onload = () => { if(window.XLSX) resolve(window.XLSX); else reject(new Error('表格解析组件未就绪')); };
     s.onerror = () => reject(new Error('表格解析组件加载失败，请检查网络'));
     document.head.appendChild(s);
   });
   return xlsxLoading;
 }
-
 function parseTimetableSheet(ws){
   if(!ws || !ws['!ref']) return null;
   const range = XLSX.utils.decode_range(ws['!ref']);
-
   const grid = [];
   for(let r = range.s.r; r <= range.e.r; r++){
     const arr = [];
@@ -3310,18 +3239,13 @@ function parseTimetableSheet(ws){
     }
     grid.push(arr);
   }
-
-  const merges = (ws['!merges'] || []).map(m => ({
-    r1: m.s.r, r2: m.e.r, c1: m.s.c, c2: m.e.c
-  }));
-
+  const merges = (ws['!merges'] || []).map(m => ({ r1: m.s.r, r2: m.e.r, c1: m.s.c, c2: m.e.c }));
   let headRow = -1;
   for(let r = 0; r < grid.length; r++){
     const joined = grid[r].join('|');
     if(joined.indexOf('时间') >= 0 && joined.indexOf('项目') >= 0){ headRow = r; break; }
   }
   if(headRow < 0) return null;
-
   const head = grid[headRow];
   let timeCol = -1, itemCol = -1;
   for(let c = 0; c < head.length; c++){
@@ -3330,12 +3254,10 @@ function parseTimetableSheet(ws){
   }
   if(timeCol < 0) timeCol = 0;
   if(itemCol < 0) itemCol = 1;
-
   const dayCols = [];
   for(let c = 0; c < head.length; c++){
     if(c === timeCol || c === itemCol) continue;
-    const v = head[c];
-    if(!v) continue;
+    const v = head[c]; if(!v) continue;
     const m = v.match(/(?:星期|周)\s*([一二三四五六日天])/);
     if(m){
       const dow = TT_DOW_MAP[m[1]];
@@ -3348,7 +3270,6 @@ function parseTimetableSheet(ws){
     }
   }
   if(!dayCols.length) return null;
-
   const outRows = [];
   for(let r = headRow + 1; r < grid.length; r++){
     const arr = grid[r] || [];
@@ -3357,7 +3278,6 @@ function parseTimetableSheet(ws){
     const rAbs = range.s.r + r;
     let anyText = false;
     const cells = [];
-
     dayCols.forEach(dc => {
       const cAbs = range.s.c + dc.col;
       const m = merges.find(mm => rAbs >= mm.r1 && rAbs <= mm.r2 && cAbs >= mm.c1 && cAbs <= mm.c2);
@@ -3366,39 +3286,23 @@ function parseTimetableSheet(ws){
           const cc = range.s.c + d.col;
           return cc >= m.c1 && cc <= m.c2;
         });
-        if(!coveredCols.length || coveredCols[0].col !== dc.col){
-          cells.push({ skip: true, merged: true });
-          return;
-        }
+        if(!coveredCols.length || coveredCols[0].col !== dc.col){ cells.push({ skip: true, merged: true }); return; }
         const srcCell = ws[XLSX.utils.encode_cell({ r: m.r1, c: m.c1 })];
         const raw = (srcCell && srcCell.v != null) ? String(srcCell.v).trim() : '';
         if(raw) anyText = true;
-        cells.push({
-          text: raw,
-          merged: true,
-          colspan: Math.max(1, coveredCols.length),
-          rowspan: Math.max(1, m.r2 - m.r1 + 1)
-        });
+        cells.push({ text: raw, merged: true, colspan: Math.max(1, coveredCols.length), rowspan: Math.max(1, m.r2 - m.r1 + 1) });
       } else {
         const raw = String(arr[dc.col] || '').trim();
         if(raw) anyText = true;
         cells.push({ text: raw, merged: false, colspan: 1, rowspan: 1 });
       }
     });
-
     if(!time && !item && !anyText) continue;
     outRows.push({ time, item, cells });
   }
   if(!outRows.length) return null;
-
-  return {
-    headers: dayCols.map(d => ({ label: d.label, dow: d.dow })),
-    rows: outRows,
-    uploadedAt: Date.now(),
-    fileName: ''
-  };
+  return { headers: dayCols.map(d => ({ label: d.label, dow: d.dow })), rows: outRows, uploadedAt: Date.now(), fileName: '' };
 }
-
 function getTtTarget(){
   const now = new Date();
   const t = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -3408,7 +3312,6 @@ function getTtTarget(){
   const isWeekend = (jsDow === 0 || jsDow === 6);
   return { date: t, dow: jsDow, isNext, isWeekend };
 }
-
 let lastTtKey = '';
 function renderTimetable(){
   const wrap = $('timetableWrap');
@@ -3424,14 +3327,15 @@ function renderTimetable(){
     lastTtKey = 'empty';
     return;
   }
+  /* ★ 应用字体设置 */
+  const st = state.settings || DEFAULT_SETTINGS;
+  wrap.style.setProperty('--tt-font-size', (Number(st.ttFontSize) || 12.5) + 'px');
+  wrap.style.setProperty('--tt-line-height', String(Number(st.ttLineHeight) || 1.4));
 
   const tgt = getTtTarget();
   const targetDow = tgt.isWeekend ? -1 : tgt.dow;
-
   let hlCol = -1;
-  tt.headers.forEach((h, i) => {
-    if(Number(h.dow) === targetDow) hlCol = i;
-  });
+  tt.headers.forEach((h, i) => { if(Number(h.dow) === targetDow) hlCol = i; });
 
   let html = '<div class="tt-scroll"><table class="tt-table"><thead><tr>';
   html += '<th class="tt-th-time">时间</th><th class="tt-th-item">项目</th>';
@@ -3439,7 +3343,6 @@ function renderTimetable(){
     html += '<th' + (i === hlCol ? ' class="tt-th-now"' : '') + '>' + escapeHtml(h.label || '') + '</th>';
   });
   html += '</tr></thead><tbody>';
-
   tt.rows.forEach(r => {
     html += '<tr>';
     html += '<td class="tt-time">' + escapeHtml(r.time || '') + '</td>';
@@ -3452,17 +3355,13 @@ function renderTimetable(){
       let span = '';
       if(Number(c.colspan) > 1) span += ' colspan="' + c.colspan + '"';
       if(Number(c.rowspan) > 1) span += ' rowspan="' + c.rowspan + '"';
-      html += '<td' + (cls.length ? ' class="' + cls.join(' ') + '"' : '') + span + '>' +
-              escapeHtml(c.text || '') + '</td>';
+      html += '<td' + (cls.length ? ' class="' + cls.join(' ') + '"' : '') + span + '>' + escapeHtml(c.text || '') + '</td>';
     });
     html += '</tr>';
   });
-
   html += '</tbody></table></div>';
   wrap.innerHTML = html;
-
   if(cntEl) cntEl.textContent = tt.rows.length;
-
   if(tipEl){
     if(tgt.isWeekend){
       tipEl.className = 'tt-tip warn';
@@ -3476,10 +3375,8 @@ function renderTimetable(){
       tipEl.textContent = (tgt.isNext ? '🌟 明天：' : '🌟 今天：') + label;
     }
   }
-
   lastTtKey = fmtDate(tgt.date) + '|' + (tgt.isNext ? '1' : '0');
 }
-
 setInterval(() => {
   if(currentSubject !== 'timetable') return;
   const tgt = getTtTarget();
@@ -3488,7 +3385,7 @@ setInterval(() => {
 }, 30000);
 
 /* ============================================================
-   田字格倒计时（★ 保持旧版：总时长固定，格子按单位时间依次推进）
+   田字格倒计时（旧版：总时长固定）
 ============================================================ */
 function charBarEnsure(mizi){
   let bar = mizi.querySelector('.mizi-bar');
@@ -3539,11 +3436,8 @@ function initCharTimer(taskId){
   const built = buildCharUnits(info.task, grid);
   if(!built.units.length) return;
   attachCharBars(built.units, true);
-  charTimer.active = true;
-  charTimer.taskId = taskId;
-  charTimer.mode = built.mode;
-  charTimer.units = built.units;
-  charTimer.index = 0;
+  charTimer.active = true; charTimer.taskId = taskId;
+  charTimer.mode = built.mode; charTimer.units = built.units; charTimer.index = 0;
   paintCharBarsFromLive();
 }
 function rebindCharTimer(){
@@ -3553,13 +3447,11 @@ function rebindCharTimer(){
   const groups = [];
   if(charTimer.mode === 'per-char'){
     grid.querySelectorAll('.char-card').forEach(c => {
-      const m = c.querySelector('.mizi');
-      if(m) groups.push([m]);
+      const m = c.querySelector('.mizi'); if(m) groups.push([m]);
     });
   } else {
     grid.querySelectorAll('.word-group').forEach(g => {
-      const ms = Array.from(g.querySelectorAll('.mizi'));
-      if(ms.length) groups.push(ms);
+      const ms = Array.from(g.querySelectorAll('.mizi')); if(ms.length) groups.push(ms);
     });
   }
   if(groups.length !== charTimer.units.length){ clearCharTimer(); return; }
@@ -3578,9 +3470,7 @@ function paintCharBarsFromLive(){
   }
   if(L.overdue || L.status === 'timeup'){
     charTimer.units.forEach(u => {
-      u.bars.forEach(b => {
-        if(b.__s !== 1){ b.__s = 1; b.style.transform = 'scaleX(1)'; }
-      });
+      u.bars.forEach(b => { if(b.__s !== 1){ b.__s = 1; b.style.transform = 'scaleX(1)'; } });
     });
     return;
   }
@@ -3589,7 +3479,6 @@ function paintCharBarsFromLive(){
   if(L.status === 'paused') elapsed = totalMs - (L.leftAtStart || 0);
   else elapsed = totalMs - liveLeftMs(L);
   elapsed = clamp(elapsed, 0, totalMs);
-
   let acc = 0;
   charTimer.units.forEach(u => {
     let p;
@@ -3608,7 +3497,7 @@ function setCharPaused(p){
 }
 
 /* ============================================================
-   ★ 护眼 UI + 遮罩
+   护眼 UI
 ============================================================ */
 function moveEyeToken(p){
   if(!eyeTokenEl) return;
@@ -3634,10 +3523,7 @@ function updateEyeUI(){
     if(timeEl) timeEl.textContent = fmtMs(left);
     if(btn){ btn.disabled = false; btn.textContent = '😌 放松眼睛'; }
     p = L.eyeTotalMs > 0 ? 1 - (left / L.eyeTotalMs) : 0;
-    if(L.eyePaused){
-      card.className = 'eye-card idle';
-      if(btn){ btn.disabled = true; btn.textContent = '⏸ 已暂停'; }
-    }
+    if(L.eyePaused){ card.className = 'eye-card idle'; if(btn){ btn.disabled = true; btn.textContent = '⏸ 已暂停'; } }
   } else if(L.eyeMode === 'need-rest'){
     card.className = 'eye-card alert';
     const overdue = liveEyeLeftMs(L);
@@ -3654,7 +3540,6 @@ function updateEyeUI(){
   moveEyeToken(p);
   updateEyeOverlay();
 }
-
 let lastOverlayHtml = '';
 let lastOverlayCls = '';
 function updateEyeOverlay(){
@@ -3676,10 +3561,7 @@ function updateEyeOverlay(){
     }
   }
   if(cls !== lastOverlayCls){ ov.className = cls; lastOverlayCls = cls; }
-  if(msg && html !== lastOverlayHtml){
-    msg.innerHTML = html;
-    lastOverlayHtml = html;
-  }
+  if(msg && html !== lastOverlayHtml){ msg.innerHTML = html; lastOverlayHtml = html; }
   updateEyeSoundBtn();
 }
 (function bindEyeOverlay(){
@@ -3688,16 +3570,11 @@ function updateEyeOverlay(){
   ov.addEventListener('click', () => {
     const L = state.live;
     if(!L || !L.eyeActive) return;
-    if(L.eyeMode === 'need-rest'){
-      unlockAudio();
-      liveStartEyeRest();
-    }
+    if(L.eyeMode === 'need-rest'){ unlockAudio(); liveStartEyeRest(); }
   });
 })();
-
 function updateEyeSoundBtn(){
-  const btn = $('eyeSoundBtn');
-  if(!btn) return;
+  const btn = $('eyeSoundBtn'); if(!btn) return;
   const on = eyeSoundOn();
   btn.classList.toggle('off', !on);
   btn.textContent = on ? '🔔 提示音 开' : '🔕 提示音 关';
@@ -3711,9 +3588,7 @@ function updateEyeSoundBtn(){
     state.eyeSoundOffDate = wasOn ? todayStr() : '';
     saveLocalState(); uploadToCloud();
     updateEyeSoundBtn();
-    if(!wasOn){
-      try{ unlockAudio(); playEyeAlert(); }catch(err){}
-    }
+    if(!wasOn){ try{ unlockAudio(); playEyeAlert(); }catch(err){} }
     toast(wasOn ? '🔕 护眼提示音已关闭（今天有效）' : '🔔 护眼提示音已开启', 2000);
   });
 })();
@@ -3733,7 +3608,6 @@ function cleanupRuntime(){
   for(const id in runtimeMap){ if(!ids.has(id)) delete runtimeMap[id]; }
   if(activeId && !ids.has(activeId)){ activeId = null; }
 }
-
 function setDogProgress(p){
   const trackW = trackEl.clientWidth || 300;
   const dogW = dogWrap.offsetWidth || 42;
@@ -3742,15 +3616,11 @@ function setDogProgress(p){
   const t = clamp(p, 0, 1);
   dogWrap.style.transform = `translateX(${startX + (endX - startX) * t}px)`;
 }
-
 function updateDogBar(){
   if(!activeId){
-    trackEl.className='track';
-    setDogProgress(0);
-    trackFill.className='track-fill';
-    trackFill.style.width='0%';
-    trackTime.className='track-time';
-    trackTime.textContent='--:--';
+    trackEl.className='track'; setDogProgress(0);
+    trackFill.className='track-fill'; trackFill.style.width='0%';
+    trackTime.className='track-time'; trackTime.textContent='--:--';
     timerHint.innerHTML = '点击右侧「<span class="highlight">▶ 开始</span>」启动倒计时';
     return;
   }
@@ -3761,56 +3631,39 @@ function updateDogBar(){
   const L = state.live || {};
 
   if(L.status === 'timeup'){
-    trackEl.className = 'track chomping';
-    setDogProgress(1);
-    trackFill.className = 'track-fill';
-    trackFill.style.width = '100%';
-    trackTime.className = 'track-time chomping';
-    trackTime.textContent = '00:00';
+    trackEl.className = 'track chomping'; setDogProgress(1);
+    trackFill.className = 'track-fill'; trackFill.style.width = '100%';
+    trackTime.className = 'track-time chomping'; trackTime.textContent = '00:00';
     timerHint.innerHTML = '⏰ <span class="chomp-t">时间到</span>：' + escapeHtml(name) + ' · 点打勾完成';
     return;
   }
-
   if(pauseState.active){
     trackEl.className = 'track paused';
     const p = rt.totalMs>0 ? 1-rt.leftMs/rt.totalMs : 0;
     setDogProgress(p);
-    trackFill.className = 'track-fill';
-    trackFill.style.width = (p*100)+'%';
-    trackTime.className = 'track-time paused';
-    trackTime.textContent = fmtMs(rt.leftMs);
+    trackFill.className = 'track-fill'; trackFill.style.width = (p*100)+'%';
+    trackTime.className = 'track-time paused'; trackTime.textContent = fmtMs(rt.leftMs);
     const eyeResting = state.live && state.live.eyeMode === 'rest';
     const eyePaused = state.live && state.live.eyeMode === 'use' && state.live.eyePaused;
-    if(eyeResting){
-      timerHint.innerHTML = '😌 <span class="paused-t">放松眼睛中</span>：'+escapeHtml(name)+' · 放松结束自动继续';
-    } else if(eyePaused){
-      timerHint.innerHTML = '⏸ <span class="paused-t">已暂停</span>：'+escapeHtml(name)+' · 用眼也一起暂停了';
-    } else {
-      timerHint.innerHTML = '⏸ <span class="paused-t">已暂停</span>：'+escapeHtml(name)+' · 点「▶ 继续」恢复';
-    }
+    if(eyeResting){ timerHint.innerHTML = '😌 <span class="paused-t">放松眼睛中</span>：'+escapeHtml(name)+' · 放松结束自动继续'; }
+    else if(eyePaused){ timerHint.innerHTML = '⏸ <span class="paused-t">已暂停</span>：'+escapeHtml(name)+' · 用眼也一起暂停了'; }
+    else { timerHint.innerHTML = '⏸ <span class="paused-t">已暂停</span>：'+escapeHtml(name)+' · 点「▶ 继续」恢复'; }
     return;
   }
-
   if(rt.overdue){
     const left = liveLeftMs(L);
     const frac = clamp(left / OVERDUE_MINUTE_MS, 0, 1);
-    trackEl.className = 'track chomping';
-    setDogProgress(1);
-    trackFill.className = 'track-fill';
-    trackFill.style.width = ((1 - frac) * 100) + '%';
-    trackTime.className = 'track-time chomping';
-    trackTime.textContent = fmtMs(left);
+    trackEl.className = 'track chomping'; setDogProgress(1);
+    trackFill.className = 'track-fill'; trackFill.style.width = ((1 - frac) * 100) + '%';
+    trackTime.className = 'track-time chomping'; trackTime.textContent = fmtMs(left);
     timerHint.innerHTML = '⏰ <span class="chomp-t">已超时</span> · 已扣 '+rt.rounds+' 个金币 · 满 1 分钟再扣 1 个';
     return;
   }
-
   trackEl.className = 'track';
   const p = rt.totalMs>0 ? 1-rt.leftMs/rt.totalMs : 0;
   setDogProgress(p);
-  trackFill.className = 'track-fill';
-  trackFill.style.width = (p*100)+'%';
-  trackTime.className = 'track-time';
-  trackTime.textContent = fmtMs(rt.leftMs);
+  trackFill.className = 'track-fill'; trackFill.style.width = (p*100)+'%';
+  trackTime.className = 'track-time'; trackTime.textContent = fmtMs(rt.leftMs);
   if(running){ timerHint.innerHTML = '⏳ 正在进行：<span class="highlight">'+escapeHtml(name)+'</span>'; }
   else {
     if(rt.leftMs < rt.totalMs && rt.leftMs > 0){
@@ -3831,9 +3684,7 @@ function updateMainBtn(){
   }
   const info = findTask(activeId);
   if(!info || info.task.done){ mainBtn.classList.add('start'); mainBtn.textContent='▶ 开始'; mainBtn.disabled=false; return; }
-  if(L.status === 'timeup'){
-    mainBtn.classList.add('start'); mainBtn.textContent='▶ 下一个'; mainBtn.disabled=false; return;
-  }
+  if(L.status === 'timeup'){ mainBtn.classList.add('start'); mainBtn.textContent='▶ 下一个'; mainBtn.disabled=false; return; }
   if(pauseState.active){ mainBtn.classList.add('resume'); mainBtn.textContent = '▶ 继续'; mainBtn.disabled = false; return; }
   if(running){ mainBtn.classList.add('pause'); mainBtn.textContent='⏸ 暂停'; mainBtn.disabled=false; return; }
   const rt = runtimeMap[activeId];
@@ -3848,8 +3699,7 @@ function bumpPill(el){
 function flySunAway(n){
   const rect = sunPillEl.getBoundingClientRect();
   const el = document.createElement('div');
-  el.className = 'fly-sun-away';
-  el.textContent = '−'+n+'个💰';
+  el.className = 'fly-sun-away'; el.textContent = '−'+n+'个💰';
   el.style.left = (rect.left+rect.width/2-30)+'px';
   el.style.top  = (rect.top+rect.height/2-12)+'px';
   document.body.appendChild(el);
@@ -3866,10 +3716,7 @@ function flySun(fromEl){
   document.body.appendChild(el);
   const dx = (to.left+to.width/2)-(from.left+from.width/2);
   const dy = (to.top+to.height/2)-(from.top+from.height/2);
-  requestAnimationFrame(() => {
-    el.style.transform=`translate(${dx}px, ${dy}px) scale(.45)`;
-    el.style.opacity='0.15';
-  });
+  requestAnimationFrame(() => { el.style.transform=`translate(${dx}px, ${dy}px) scale(.45)`; el.style.opacity='0.15'; });
   setTimeout(() => el.remove(), 950);
 }
 function scrollToCard(id){
@@ -3890,17 +3737,11 @@ function confetti(){
     setTimeout(() => el.remove(), 4200);
   }
 }
-
-/* ============================================================
-   ★ 静默暂停 / 恢复
-============================================================ */
 function silentPauseTask(){
   const L = state.live;
   if(!L || !L.activeId || L.status !== 'running') return;
   const left = liveLeftMs(L);
-  L.status = 'paused';
-  L.leftAtStart = Math.max(0, left);
-  L.startedAt = Date.now();
+  L.status = 'paused'; L.leftAtStart = Math.max(0, left); L.startedAt = Date.now();
   L.taskPausedByRest = true;
 }
 function silentResumeTask(){
@@ -3909,8 +3750,7 @@ function silentResumeTask(){
   L.taskPausedByRest = false;
   if(!wasByRest) return;
   if(!L.activeId || L.status !== 'paused') return;
-  L.status = 'running';
-  L.startedAt = Date.now();
+  L.status = 'running'; L.startedAt = Date.now();
 }
 function pauseEyeForTaskEnd(){
   const L = state.live;
@@ -3922,19 +3762,16 @@ function pauseEyeForTaskEnd(){
 }
 
 /* ============================================================
-   ★ 计时主循环
+   计时主循环
 ============================================================ */
 let lastTickedActiveId = null;
-
 function tick(){
   if(!state || !state.live) return;
   const L = state.live;
   const now = Date.now();
   const amOwner = isLiveOwner();
 
-  if(L.eyeActive && amOwner && !hasPendingWork()){
-    liveStopEyeCare();
-  }
+  if(L.eyeActive && amOwner && !hasPendingWork()) liveStopEyeCare();
 
   if(L.activeId && L.status === 'running' && amOwner){
     const info = findTask(L.activeId);
@@ -3942,56 +3779,40 @@ function tick(){
     const left = liveLeftMs(L);
     if(left <= 0){
       if(!penaltyOn){
-        L.status = 'timeup';
-        L.leftAtStart = 0;
-        L.soundSeq = (L.soundSeq || 0) + 1;
-        L.soundKind = 'pause';
+        L.status = 'timeup'; L.leftAtStart = 0;
+        L.soundSeq = (L.soundSeq || 0) + 1; L.soundKind = 'pause';
         pushLive();
         toast('⏰ 时间到啦！点打勾完成即可', 3000);
       } else if(!L.overdue){
-        L.overdue = true;
-        L.rounds = 0;
-        L.leftAtStart = OVERDUE_MINUTE_MS;
-        L.startedAt = now;
-        L.soundSeq = (L.soundSeq || 0) + 1;
-        L.soundKind = 'round';
+        L.overdue = true; L.rounds = 0;
+        L.leftAtStart = OVERDUE_MINUTE_MS; L.startedAt = now;
+        L.soundSeq = (L.soundSeq || 0) + 1; L.soundKind = 'round';
         pushLive();
         toast('⏰ 任务超时啦！<br>每超时 1 分钟扣 1 个金币 💰', 3000);
       } else {
         L.rounds = (L.rounds || 0) + 1;
-        L.leftAtStart = OVERDUE_MINUTE_MS;
-        L.startedAt = now;
-        L.soundSeq = (L.soundSeq || 0) + 1;
-        L.soundKind = 'round';
+        L.leftAtStart = OVERDUE_MINUTE_MS; L.startedAt = now;
+        L.soundSeq = (L.soundSeq || 0) + 1; L.soundKind = 'round';
         state.sun -= 1;
         pushSunLog(-1, '超时扣 1 个金币');
         renderStats();
         sunAnchor.classList.add('eaten');
-        dogEl.classList.remove('running');
-        dogEl.classList.add('chomp');
-        bumpPill(sunPillEl);
-        flySunAway(1);
+        dogEl.classList.remove('running'); dogEl.classList.add('chomp');
+        bumpPill(sunPillEl); flySunAway(1);
         setTimeout(() => { sunAnchor.classList.remove('eaten'); }, 650);
-        setTimeout(() => {
-          if(L.status === 'running' && L.overdue){ dogEl.classList.remove('chomp'); dogEl.classList.add('running'); }
-        }, 600);
+        setTimeout(() => { if(L.status === 'running' && L.overdue){ dogEl.classList.remove('chomp'); dogEl.classList.add('running'); } }, 600);
         toast('⏰ 超时 ' + L.rounds + ' 分钟，扣掉 1 个金币 💰', 3000);
         pushLive();
       }
     }
   }
-
   if(L.eyeActive && amOwner){
     if(L.eyeMode === 'use'){
       if(!L.eyePaused){
         const left = liveEyeLeftMs(L);
         if(left <= 0){
-          L.eyeMode = 'need-rest';
-          L.eyeStageStart = now;
-          L.eyeTotalMs = 0;
-          L.eyeNagCount = 0;
-          L.soundSeq = (L.soundSeq || 0) + 1;
-          L.soundKind = 'eyeAlert';
+          L.eyeMode = 'need-rest'; L.eyeStageStart = now; L.eyeTotalMs = 0; L.eyeNagCount = 0;
+          L.soundSeq = (L.soundSeq || 0) + 1; L.soundKind = 'eyeAlert';
           pushLive();
           toast('⏰ 该放松眼睛啦！点屏幕任意位置开始', 3400);
         }
@@ -4001,8 +3822,7 @@ function tick(){
       const expectNags = Math.floor(overdue / EYE_NAG_MS);
       if(expectNags > (L.eyeNagCount || 0)){
         L.eyeNagCount = expectNags;
-        L.soundSeq = (L.soundSeq || 0) + 1;
-        L.soundKind = 'eyeAlert';
+        L.soundSeq = (L.soundSeq || 0) + 1; L.soundKind = 'eyeAlert';
         pushLive();
         toast('⚠️ 还没放松眼睛哦，快点屏幕任意位置吧', 2600);
       }
@@ -4010,56 +3830,39 @@ function tick(){
       if(L.activeId && L.status === 'running') silentPauseTask();
       const left = liveEyeLeftMs(L);
       const secs = Math.max(0, Math.ceil(left / 1000));
-      if(secs % 5 === 0 && L.eyeLastNarrated !== secs){
-        L.eyeLastNarrated = secs;
-        speakNumber(secs);
-      }
+      if(secs % 5 === 0 && L.eyeLastNarrated !== secs){ L.eyeLastNarrated = secs; speakNumber(secs); }
       if(left <= 0){
         const cfg = getEyeCfg();
-        L.eyeMode = 'use';
-        L.eyeStageStart = now;
-        L.eyeTotalMs = cfg.useMin * 60000;
-        L.eyeNagCount = 0;
-        L.eyeLastNarrated = -1;
-        L.soundSeq = (L.soundSeq || 0) + 1;
-        L.soundKind = 'restDone';
+        L.eyeMode = 'use'; L.eyeStageStart = now; L.eyeTotalMs = cfg.useMin * 60000;
+        L.eyeNagCount = 0; L.eyeLastNarrated = -1;
+        L.soundSeq = (L.soundSeq || 0) + 1; L.soundKind = 'restDone';
         silentResumeTask();
         pushLive();
         toast('✅ 放松结束，继续加油！', 2200);
       }
     }
   }
-
-  syncLegacyFromLive();
-  syncRuntimeFromLive();
-
+  syncLegacyFromLive(); syncRuntimeFromLive();
   if(lastTickedActiveId !== (L.activeId || null)){
     lastTickedActiveId = L.activeId || null;
     if(lastTickedActiveId && cardRefs[lastTickedActiveId]) initCharTimer(lastTickedActiveId);
     else clearCharTimer();
   }
-
   if(charTimer.active && charTimer.taskId === L.activeId){
     paintCharBarsFromLive();
     const wantPaused = (L.status === 'paused' || L.status === 'timeup');
     if(wantPaused !== lastCharPaused){ setCharPaused(wantPaused); lastCharPaused = wantPaused; }
   }
-
   if(L.activeId && L.status === 'running' && !L.overdue){
-    dogEl.classList.remove('paused','chomp');
-    dogEl.classList.add('running');
+    dogEl.classList.remove('paused','chomp'); dogEl.classList.add('running');
   } else if(L.activeId && L.status === 'paused'){
-    dogEl.classList.remove('running','chomp');
-    dogEl.classList.add('paused');
+    dogEl.classList.remove('running','chomp'); dogEl.classList.add('paused');
   } else if(!L.activeId){
     dogEl.classList.remove('running','paused','chomp');
   }
-
   updateDogBar();
   if(activeId) updateCardVisual(activeId);
-  updateEyeUI();
-  updateMainBtn();
-
+  updateEyeUI(); updateMainBtn();
   const needTick = !!L.activeId || L.eyeActive;
   if(!needTick && tickTimer){ clearInterval(tickTimer); tickTimer = null; }
 }
@@ -4074,7 +3877,7 @@ function stopTick(){
 }
 
 /* ============================================================
-   任务操作（★ 旧版：总时长固定，打勾不会收紧倒计时）
+   任务操作（旧版：总时长固定）
 ============================================================ */
 function liveStartTask(taskId){
   const info = findTask(taskId);
@@ -4087,81 +3890,58 @@ function liveStartTask(taskId){
     const cfg = getUnitCfg(type);
     unitMs = cfg.min * 60000;
   }
-  L.activeId = taskId;
-  L.status = 'running';
-  L.startedAt = Date.now();
-  L.leftAtStart = totalMs;
-  L.totalMs = totalMs;
-  L.unitMs = unitMs;
-  L.overdue = false;
-  L.cycleStart = 0;
-  L.rounds = 0;
-  L.ownerTab = TAB_ID;
-  L.taskPausedByRest = false;
-  L.soundSeq = (L.soundSeq || 0) + 1;
-  L.soundKind = 'start';
+  L.activeId = taskId; L.status = 'running';
+  L.startedAt = Date.now(); L.leftAtStart = totalMs; L.totalMs = totalMs;
+  L.unitMs = unitMs; L.overdue = false; L.cycleStart = 0; L.rounds = 0;
+  L.ownerTab = TAB_ID; L.taskPausedByRest = false;
+  L.soundSeq = (L.soundSeq || 0) + 1; L.soundKind = 'start';
   L.tab = (currentSubject === 'shop' || currentSubject === 'timetable') ? 'chinese' : currentSubject;
   if(L.eyeActive && L.eyeMode === 'use' && L.eyePaused){
     L.eyeStageStart = Date.now() - (L.eyeTotalMs - L.eyePausedLeftMs);
     L.eyePaused = false;
   } else if(!L.eyeActive){
     const cfg = getEyeCfg();
-    L.eyeActive = true;
-    L.eyeMode = 'use';
-    L.eyeStageStart = Date.now();
-    L.eyeTotalMs = cfg.useMin * 60000;
-    L.eyeNagCount = 0;
-    L.eyeLastNarrated = -1;
+    L.eyeActive = true; L.eyeMode = 'use'; L.eyeStageStart = Date.now();
+    L.eyeTotalMs = cfg.useMin * 60000; L.eyeNagCount = 0; L.eyeLastNarrated = -1;
   }
   ensureRuntime(info.task);
   ensureTickRunning();
   pushLive();
   if(!charTimer.active || charTimer.taskId !== taskId) initCharTimer(taskId);
   else rebindCharTimer();
-  lastCharPaused = false;
-  setCharPaused(false);
+  lastCharPaused = false; setCharPaused(false);
   paintCharBarsFromLive();
   refreshAllCards();
   updateDogBar(); updateMainBtn(); updateEyeUI();
   scrollToCard(taskId);
 }
-/* ★ 学生手动暂停：倒计时和用眼一起暂停 */
 function livePause(){
   const L = state.live;
   if(!L.activeId || L.status !== 'running') return;
   const left = liveLeftMs(L);
-  L.status = 'paused';
-  L.leftAtStart = Math.max(0, left);
-  L.startedAt = Date.now();
-  L.ownerTab = TAB_ID;
-  L.taskPausedByRest = false;
+  L.status = 'paused'; L.leftAtStart = Math.max(0, left); L.startedAt = Date.now();
+  L.ownerTab = TAB_ID; L.taskPausedByRest = false;
   if(L.eyeActive && L.eyeMode === 'use' && !L.eyePaused){
-    L.eyePausedLeftMs = liveEyeLeftMs(L);
-    L.eyePaused = true;
+    L.eyePausedLeftMs = liveEyeLeftMs(L); L.eyePaused = true;
   }
-  L.soundSeq = (L.soundSeq || 0) + 1;
-  L.soundKind = 'pause';
+  L.soundSeq = (L.soundSeq || 0) + 1; L.soundKind = 'pause';
   pushLive();
   setCharPaused(true); lastCharPaused = true;
   paintCharBarsFromLive();
   refreshAllCards(); updateDogBar(); updateMainBtn(); updateEyeUI();
   toast('⏸ 已暂停（用眼也一起暂停）', 1800);
 }
-/* ★ 恢复：任务和用眼一起恢复（放松眼睛导致的暂停不会在这里恢复用眼） */
 function liveResume(){
   const L = state.live;
   if(!L.activeId || L.status !== 'paused') return;
   const wasByRest = !!L.taskPausedByRest;
-  L.status = 'running';
-  L.startedAt = Date.now();
-  L.ownerTab = TAB_ID;
+  L.status = 'running'; L.startedAt = Date.now(); L.ownerTab = TAB_ID;
   L.taskPausedByRest = false;
   if(!wasByRest && L.eyeActive && L.eyeMode === 'use' && L.eyePaused){
     L.eyeStageStart = Date.now() - (L.eyeTotalMs - L.eyePausedLeftMs);
     L.eyePaused = false;
   }
-  L.soundSeq = (L.soundSeq || 0) + 1;
-  L.soundKind = 'resume';
+  L.soundSeq = (L.soundSeq || 0) + 1; L.soundKind = 'resume';
   pushLive();
   setCharPaused(false); lastCharPaused = false;
   paintCharBarsFromLive();
@@ -4170,15 +3950,8 @@ function liveResume(){
 }
 function liveStopTask(){
   const L = state.live;
-  L.activeId = '';
-  L.status = 'idle';
-  L.startedAt = 0;
-  L.leftAtStart = 0;
-  L.totalMs = 0;
-  L.unitMs = 0;
-  L.overdue = false;
-  L.cycleStart = 0;
-  L.rounds = 0;
+  L.activeId = ''; L.status = 'idle'; L.startedAt = 0; L.leftAtStart = 0;
+  L.totalMs = 0; L.unitMs = 0; L.overdue = false; L.cycleStart = 0; L.rounds = 0;
   L.taskPausedByRest = false;
   clearCharTimer();
   pushLive();
@@ -4188,12 +3961,8 @@ function liveStartEyeRest(){
   if(!L.eyeActive) return;
   if(L.eyeMode !== 'use' && L.eyeMode !== 'need-rest') return;
   const cfg = getEyeCfg();
-  L.eyeMode = 'rest';
-  L.eyeStageStart = Date.now();
-  L.eyeTotalMs = cfg.restMin * 60000;
-  L.eyeNagCount = 0;
-  L.eyeLastNarrated = -1;
-  L.ownerTab = TAB_ID;
+  L.eyeMode = 'rest'; L.eyeStageStart = Date.now(); L.eyeTotalMs = cfg.restMin * 60000;
+  L.eyeNagCount = 0; L.eyeLastNarrated = -1; L.ownerTab = TAB_ID;
   silentPauseTask();
   pushLive();
   try{ speakNumber(Math.round(cfg.restMin * 60)); }catch(e){}
@@ -4203,14 +3972,8 @@ function liveStartEyeRest(){
 function liveStopEyeCare(){
   const L = state.live;
   if(!L || !L.eyeActive) return;
-  L.eyeActive = false;
-  L.eyeMode = 'idle';
-  L.eyeStageStart = 0;
-  L.eyeTotalMs = 0;
-  L.eyeNagCount = 0;
-  L.eyeLastNarrated = -1;
-  L.eyePaused = false;
-  L.eyePausedLeftMs = 0;
+  L.eyeActive = false; L.eyeMode = 'idle'; L.eyeStageStart = 0; L.eyeTotalMs = 0;
+  L.eyeNagCount = 0; L.eyeLastNarrated = -1; L.eyePaused = false; L.eyePausedLeftMs = 0;
   pushLive();
   updateEyeUI();
 }
@@ -4242,9 +4005,7 @@ function onMainBtnClick(){
   liveStartTask(L.activeId);
 }
 
-/* ============================================================
-   🔒 密码验证（仅家长面板使用；暂停不需密码）
-============================================================ */
+/* 密码 */
 let pwdPurpose = '';
 let pendingCheckId = null;
 function currentParentPassword(){
@@ -4284,28 +4045,18 @@ function confirmPassword(){
   if(purpose === 'admin') enterAdminMode();
   else if(purpose === 'check'){ if(checkId) doToggleTaskDone(checkId); }
 }
-/* ★ 学生可以直接暂停（无需家长密码） */
 function requestPause(){
   const L = state.live;
   if(!L.activeId || L.status !== 'running') return;
   livePause();
 }
-/* ★ 学生页打勾规则：
-   - 自定义作业：直接勾选完成，不需要密码
-   - 非自定义作业：必须先拍照，才能勾选完成
-*/
 function toggleTaskDone(id){
   const info = findTask(id); if(!info) return;
   if(isAdminMode){ doToggleTaskDone(id); return; }
-
   const task = info.task;
   if(!task.done && task.type !== 'custom'){
     const photos = getTaskPhotos(task);
-    if(!photos.length){
-      toast('📷 请先拍照上传作业照片，才能点完成哦', 3200);
-      playSound('fail');
-      return;
-    }
+    if(!photos.length){ toast('📷 请先拍照上传作业照片，才能点完成哦', 3200); playSound('fail'); return; }
   }
   doToggleTaskDone(id);
 }
@@ -4386,10 +4137,7 @@ function switchSubject(subject, fromRemote){
   if(subject === 'shop') renderShop();
   if(subject === 'timetable') renderTimetable();
   if(!fromRemote && state && state.live){
-    if(state.live.tab !== subject){
-      state.live.tab = subject;
-      pushLive();
-    }
+    if(state.live.tab !== subject){ state.live.tab = subject; pushLive(); }
   }
 }
 function switchDate(dateStr){
@@ -4409,7 +4157,7 @@ function switchDate(dateStr){
 }
 
 /* ============================================================
-   ★ 每晚 21:00 自动重置
+   每晚 21:00 重置
 ============================================================ */
 function maybeNightlyReset(){
   if(!state) return;
@@ -4418,10 +4166,7 @@ function maybeNightlyReset(){
   const d = todayStr();
   if(state.lastNightReset === d) return;
   state.lastNightReset = d;
-
-  liveStopTask();
-  liveStopEyeCare();
-
+  liveStopTask(); liveStopEyeCare();
   const day = state.days[state.date];
   if(day){
     ['chinese','math','english'].forEach(k => {
@@ -4433,7 +4178,6 @@ function maybeNightlyReset(){
       });
     });
   }
-
   saveLocalState(); uploadToCloud();
   renderStats(); renderBoard(); refreshAllCards();
   updateDogBar(); updateMainBtn(); updateEyeUI();
@@ -4463,8 +4207,7 @@ function renderCalendar(){
   const today = todayStr();
   for(let i = startWeek - 1; i >= 0; i--){
     const cell = document.createElement('div');
-    cell.className = 'cal-day other-month';
-    cell.textContent = prevMonthDays - i;
+    cell.className = 'cal-day other-month'; cell.textContent = prevMonthDays - i;
     calGrid.appendChild(cell);
   }
   for(let d = 1; d <= daysInMonth; d++){
@@ -4555,16 +4298,10 @@ function playStroke(char){
   }
 }
 $('strokeReplay').addEventListener('click', () => { if(lastStrokeChar) playStroke(lastStrokeChar); });
-$('strokeClose').addEventListener('click', () => {
-  strokeModal.classList.remove('show'); strokeStage.innerHTML = ''; currentWriter = null;
-});
+$('strokeClose').addEventListener('click', () => { strokeModal.classList.remove('show'); strokeStage.innerHTML = ''; currentWriter = null; });
 strokeModal.addEventListener('click', e => {
-  if(e.target === strokeModal){
-      strokeModal.classList.remove('show'); strokeStage.innerHTML = ''; currentWriter = null;
-  }
+  if(e.target === strokeModal){ strokeModal.classList.remove('show'); strokeStage.innerHTML = ''; currentWriter = null; }
 });
-
-/* ★ 手动组词输入绑定 */
 (function bindManualWordInput(){
   const addBtn = $('strokeVoiceAddBtn');
   const input = $('strokeVoiceInput');
@@ -4681,8 +4418,7 @@ $('adminEyeSaveBtn').addEventListener('click', () => {
   renderEyePanel();
   toast('✅ 护眼提醒设置已保存');
 });
-
-/* ★ 课程表管理面板渲染 */
+/* ★ 课程表管理面板 */
 function renderAdminTimetable(){
   const badge = $('adminTtBadge');
   const hint  = $('adminTtHint');
@@ -4696,6 +4432,15 @@ function renderAdminTimetable(){
   } else if(hint && !has){
     hint.className = 'aa-hint';
     hint.textContent = '支持 .xlsx / .xls / .csv 格式';
+  }
+  const st = state.settings || DEFAULT_SETTINGS;
+  const fsEl = $('adminTtFontSize'); const lhEl = $('adminTtLineHeight');
+  if(fsEl) fsEl.value = st.ttFontSize;
+  if(lhEl) lhEl.value = st.ttLineHeight;
+  const fh = $('adminTtFontHint');
+  if(fh){
+    fh.className = 'aa-hint';
+    fh.textContent = '当前：字号 ' + st.ttFontSize + 'px · 行高 ' + st.ttLineHeight + '（保存后学生端立即生效）';
   }
 }
 $('adminTtUploadBtn').addEventListener('click', async () => {
@@ -4736,6 +4481,17 @@ $('adminTtClearBtn').addEventListener('click', () => {
   renderTimetable(); renderAdminTimetable();
   toast('已清除课程表');
 });
+$('adminTtFontSaveBtn').addEventListener('click', () => {
+  const fs = clamp(Number($('adminTtFontSize').value) || 12.5, 8, 24);
+  const lh = clamp(Number($('adminTtLineHeight').value) || 1.4, 1, 3);
+  if(!state.settings) state.settings = {};
+  state.settings.ttFontSize = fs;
+  state.settings.ttLineHeight = lh;
+  saveLocalState(); uploadToCloud();
+  renderTimetable();
+  renderAdminTimetable();
+  toast('✅ 已保存课程表显示设置');
+});
 
 function renderPwdPanel(){
   const hint = $('adminPwdHint'); if(!hint) return;
@@ -4766,9 +4522,7 @@ $('adminResetPwdBtn').addEventListener('click', () => {
 function pushSunLog(delta, reason){
   if(!Array.isArray(state.sunLog)) state.sunLog = [];
   state.sunLog.unshift({
-    t: Date.now(),
-    delta: Math.round(delta),
-    after: Math.round(Number(state.sun) || 0),
+    t: Date.now(), delta: Math.round(delta), after: Math.round(Number(state.sun) || 0),
     reason: reason || (delta < 0 ? '手动扣除' : '手动增加')
   });
   if(state.sunLog.length > 60) state.sunLog.length = 60;
@@ -4794,11 +4548,10 @@ function renderSunPanel(){
     const text = d === 0 ? '—' : ((d > 0 ? '+' : '') + d + ' 个');
     let time = '';
     try{ time = new Date(Number(e.t) || Date.now()).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); }catch(err){ time = ''; }
-    return '<div class="sun-log-row">'
-      + '<span class="sl-time">' + escapeHtml(time) + '</span>'
-      + '<span class="sl-reason">' + escapeHtml(String(e.reason || '')) + '</span>'
-      + '<span class="sl-delta ' + cls + '">' + text + '</span>'
-      + '</div>';
+    return '<div class="sun-log-row">' +
+      '<span class="sl-time">' + escapeHtml(time) + '</span>' +
+      '<span class="sl-reason">' + escapeHtml(String(e.reason || '')) + '</span>' +
+      '<span class="sl-delta ' + cls + '">' + text + '</span></div>';
   }).join('');
 }
 function adminSunAdjust(sign){
@@ -4824,9 +4577,7 @@ $('adminSunPlusBtn').addEventListener('click', () => adminSunAdjust(1));
 let shopSaveTimer = null;
 function scheduleShopSave(){
   clearTimeout(shopSaveTimer);
-  shopSaveTimer = setTimeout(() => {
-    saveLocalState(); uploadToCloud(); renderShop();
-  }, 700);
+  shopSaveTimer = setTimeout(() => { saveLocalState(); uploadToCloud(); renderShop(); }, 700);
 }
 function renderAdminShop(){
   const list = $('adminShopList');
@@ -4834,21 +4585,16 @@ function renderAdminShop(){
   if(!list) return;
   const items = state.shop || [];
   if(badge) badge.textContent = items.length + ' 项';
-  if(!items.length){
-    list.innerHTML = '<div class="admin-empty">还没有兑换项目，在下方添加</div>';
-    return;
-  }
+  if(!items.length){ list.innerHTML = '<div class="admin-empty">还没有兑换项目，在下方添加</div>'; return; }
   list.innerHTML = items.map(item => (
     '<div class="shop-admin-row" data-id="' + escapeAttr(item.id) + '" draggable="true" title="按住 ☷ 拖动调整顺序">' +
       '<span class="sa-handle">☷</span>' +
       '<input class="sa-icon" value="' + escapeAttr(item.icon) + '" maxlength="4" title="图标">' +
       '<input class="sa-name" value="' + escapeAttr(item.name) + '" maxlength="30" title="名称">' +
       '<input class="sa-min" type="number" value="' + item.minutes + '" min="1" max="240" step="5" title="分钟">' +
-      '<input class="sa-sun" type="number" value="' + item.sun + '" min="-999" max="999" step="5" title="金币（负=扣除，正=增加）">' +
-      '<button class="sa-del" data-del="' + escapeAttr(item.id) + '" title="删除">✕</button>' +
-    '</div>'
+      '<input class="sa-sun" type="number" value="' + item.sun + '" min="-999" max="999" step="5" title="金币">' +
+      '<button class="sa-del" data-del="' + escapeAttr(item.id) + '" title="删除">✕</button></div>'
   )).join('');
-
   list.querySelectorAll('.shop-admin-row').forEach(row => {
     const id = row.dataset.id;
     const item = items.find(x => x.id === id);
@@ -4857,31 +4603,14 @@ function renderAdminShop(){
     const nameIn = row.querySelector('.sa-name');
     const minIn  = row.querySelector('.sa-min');
     const sunIn  = row.querySelector('.sa-sun');
-
-    iconIn.addEventListener('input', () => {
-      item.icon = String(iconIn.value || '🎁').slice(0,4) || '🎁';
-      scheduleShopSave();
-    });
-    nameIn.addEventListener('input', () => {
-      item.name = String(nameIn.value || '').slice(0,30);
-      scheduleShopSave();
-    });
-    minIn.addEventListener('input', () => {
-      item.minutes = clamp(Math.round(Number(minIn.value) || 30), 1, 240);
-      scheduleShopSave();
-    });
-    sunIn.addEventListener('input', () => {
-      item.sun = clamp(Math.round(Number(sunIn.value) || 0), -999, 999);
-      scheduleShopSave();
-    });
+    iconIn.addEventListener('input', () => { item.icon = String(iconIn.value || '🎁').slice(0,4) || '🎁'; scheduleShopSave(); });
+    nameIn.addEventListener('input', () => { item.name = String(nameIn.value || '').slice(0,30); scheduleShopSave(); });
+    minIn.addEventListener('input', () => { item.minutes = clamp(Math.round(Number(minIn.value) || 30), 1, 240); scheduleShopSave(); });
+    sunIn.addEventListener('input', () => { item.sun = clamp(Math.round(Number(sunIn.value) || 0), -999, 999); scheduleShopSave(); });
     iconIn.addEventListener('blur', () => { iconIn.value = item.icon; saveLocalState(); uploadToCloud(); renderShop(); });
     minIn.addEventListener('blur', () => { minIn.value = item.minutes; saveLocalState(); uploadToCloud(); renderShop(); });
     sunIn.addEventListener('blur', () => { sunIn.value = item.sun; saveLocalState(); uploadToCloud(); renderShop(); });
-    nameIn.addEventListener('blur', () => {
-      if(!item.name){ item.name = '兑换项'; nameIn.value = item.name; }
-      saveLocalState(); uploadToCloud(); renderShop();
-    });
-
+    nameIn.addEventListener('blur', () => { if(!item.name){ item.name = '兑换项'; nameIn.value = item.name; } saveLocalState(); uploadToCloud(); renderShop(); });
     row.querySelector('.sa-del').addEventListener('click', () => {
       if(!confirm('确定删除兑换项目「' + (item.name || '兑换项') + '」吗？')) return;
       state.shop = (state.shop || []).filter(x => x.id !== id);
@@ -4890,7 +4619,6 @@ function renderAdminShop(){
       toast('已删除兑换项目');
     });
   });
-
   let dragId = null;
   list.querySelectorAll('.shop-admin-row').forEach(row => {
     row.addEventListener('dragstart', e => {
@@ -4929,10 +4657,8 @@ function renderAdminShop(){
   });
 }
 $('adminShopAddBtn').addEventListener('click', () => {
-  const iconEl = $('adminShopIcon');
-  const nameEl = $('adminShopName');
-  const minEl = $('adminShopMin');
-  const sunEl = $('adminShopSun');
+  const iconEl = $('adminShopIcon'); const nameEl = $('adminShopName');
+  const minEl = $('adminShopMin'); const sunEl = $('adminShopSun');
   const icon = String(iconEl.value || '🎁').trim().slice(0,4) || '🎁';
   const name = String(nameEl.value || '').trim().slice(0,30);
   if(!name){ toast('请输入兑换项目名称'); return; }
@@ -4941,10 +4667,7 @@ $('adminShopAddBtn').addEventListener('click', () => {
   if(!Array.isArray(state.shop)) state.shop = [];
   state.shop.push({ id: newId(), icon, name, minutes, sun, tickets: 0 });
   saveLocalState(); uploadToCloud();
-  nameEl.value = '';
-  iconEl.value = '🎁';
-  minEl.value = 30;
-  sunEl.value = -30;
+  nameEl.value = ''; iconEl.value = '🎁'; minEl.value = 30; sunEl.value = -30;
   renderAdminShop(); renderShop();
   toast('✅ 已添加兑换项目：' + escapeHtml(name));
 });
@@ -4971,8 +4694,7 @@ function renderAdminTaskList(subject, listId, badgeId){
   list.querySelectorAll('[data-del]').forEach(el => {
     el.addEventListener('click', e => {
       e.stopPropagation();
-      const id = el.dataset.del;
-      const subj = el.dataset.subject;
+      const id = el.dataset.del; const subj = el.dataset.subject;
       const info = findTask(id);
       if(info && info.task.done){
         const linked = getLinkedTasks(info.task);
@@ -4991,8 +4713,7 @@ function renderAdminTaskList(subject, listId, badgeId){
   let dragId = null;
   list.querySelectorAll('.admin-task-row').forEach(row => {
     row.addEventListener('dragstart', e => {
-      dragId = row.dataset.id;
-      row.classList.add('dragging');
+      dragId = row.dataset.id; row.classList.add('dragging');
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', dragId);
     });
@@ -5008,8 +4729,7 @@ function renderAdminTaskList(subject, listId, badgeId){
     });
     row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
     row.addEventListener('drop', e => {
-      e.preventDefault();
-      row.classList.remove('drag-over');
+      e.preventDefault(); row.classList.remove('drag-over');
       const fromId = dragId || e.dataTransfer.getData('text/plain');
       const toId = row.dataset.id;
       if(!fromId || fromId === toId) return;
@@ -5087,8 +4807,7 @@ UNIT_FIELDS.forEach(([t, minId, sunId]) => {
   if(!minEl || !sunEl) return;
   const save = () => {
     const d = DEFAULT_SETTINGS.unit[t];
-    const m = parseFloat(minEl.value);
-    const s = parseFloat(sunEl.value);
+    const m = parseFloat(minEl.value); const s = parseFloat(sunEl.value);
     state.settings.unit[t] = {
       min: clamp(isFinite(m) && m > 0 ? m : d.min, 0.5, 20),
       sun: clamp(isFinite(s) && s > 0 ? s : d.sun, 0.5, 50)
@@ -5112,11 +4831,8 @@ UNIT_FIELDS.forEach(([t, minId, sunId]) => {
     rememberInput(keyMap[id], el.value);
   });
 });
-
-/* ★ 分钟 / 金币 同步 */
 function setupMinSunSync(minId, sunId){
-  const minEl = $(minId);
-  const sunEl = $(sunId);
+  const minEl = $(minId); const sunEl = $(sunId);
   if(!minEl || !sunEl) return;
   sunEl.dataset.manual = '0';
   sunEl.addEventListener('input', () => { sunEl.dataset.manual = '1'; });
@@ -5127,8 +4843,7 @@ function setupMinSunSync(minId, sunId){
   });
 }
 function resetMinSunSync(sunId){
-  const sunEl = $(sunId);
-  if(sunEl) sunEl.dataset.manual = '0';
+  const sunEl = $(sunId); if(sunEl) sunEl.dataset.manual = '0';
 }
 setupMinSunSync('adminAddChineseMin', 'adminAddChineseSun');
 setupMinSunSync('adminAddMathMin',    'adminAddMathSun');
@@ -5145,15 +4860,18 @@ function renderLessonLibrary(){
   const preview = s => (s && String(s).trim()) ? String(s).slice(0,80) : '（无）';
   list.innerHTML = keys.map(name => {
     const item = lib[name] || {};
+    const oldChars = item.oldChars ? `<div><b class="old">会写字-旧：</b>${escapeHtml(preview(item.oldChars))}</div>` : '';
+    const oldWgs = item.oldWordgroups ? `<div><b class="old">会识字-旧：</b>${escapeHtml(preview(item.oldWordgroups))}</div>` : '';
+    const oldWords = item.oldWords ? `<div><b class="old">抄写词语-旧：</b>${escapeHtml(preview(item.oldWords))}</div>` : '';
     return `<div class="lib-row" data-lib-edit="${escapeAttr(name)}" title="双击编辑">
       <div class="lib-lesson">📖 ${escapeHtml(name)}</div>
       <div class="lib-info">
         <div><b>会写字：</b>${escapeHtml(preview(item.chars))}</div>
         <div><b>会识字：</b>${escapeHtml(preview(item.wordgroups))}</div>
         <div><b>抄写词语：</b>${escapeHtml(preview(item.words))}</div>
+        ${oldChars}${oldWgs}${oldWords}
       </div>
-      <button class="lib-del" data-lib-del="${escapeAttr(name)}">删除</button>
-    </div>`;
+      <button class="lib-del" data-lib-del="${escapeAttr(name)}">删除</button></div>`;
   }).join('');
   list.querySelectorAll('[data-lib-del]').forEach(el => {
     el.addEventListener('click', (e) => {
@@ -5170,7 +4888,6 @@ function renderLessonLibrary(){
     el.addEventListener('dblclick', () => openLibEdit(el.dataset.libEdit));
   });
 }
-
 function saveLessonPick(kind, value){
   if(!state.settings) state.settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
   if(!state.settings.lessonPick) state.settings.lessonPick = { preview:'', wordgroup:'', copy:'' };
@@ -5216,7 +4933,7 @@ $('adminLibAddBtn').addEventListener('click', () => {
   const wordgroups = wgEl.value.trim().slice(0,600);
   const words = wordsEl.value.trim().slice(0,600);
   if(!chars && !wordgroups && !words){ toast('会写字 / 会识字 / 抄写词语至少填一项'); return; }
-  state.lessonLibrary[name] = { chars, wordgroups, words };
+  state.lessonLibrary[name] = { chars, wordgroups, words, oldChars:'', oldWordgroups:'', oldWords:'' };
   saveLocalState(); uploadToCloud();
   nameEl.value = ''; charsEl.value = ''; wgEl.value = ''; wordsEl.value = '';
   renderLessonLibrary(); populateLessonSelects();
@@ -5332,7 +5049,7 @@ function mergeSheet(entries, field){
     const name = label.slice(0, 60);
     const uniq = [...new Set(parseChars(list.join('')))];
     if(!uniq.length) return;
-    if(!state.lessonLibrary[name]){ state.lessonLibrary[name] = { chars:'', wordgroups:'', words:'' }; added++; }
+    if(!state.lessonLibrary[name]){ state.lessonLibrary[name] = { chars:'', wordgroups:'', words:'', oldChars:'', oldWordgroups:'', oldWords:'' }; added++; }
     else { updated++; }
     const item = state.lessonLibrary[name];
     const oldList = (field === 'chars') ? parseChars(item.chars) : parseChars(item.wordgroups);
@@ -5402,7 +5119,8 @@ $('libEditSave').addEventListener('click', () => {
   const words = $('libEditWords').value.trim().slice(0,600);
   if(!chars && !wordgroups && !words){ toast('至少填一项'); return; }
   if(newName !== editingLibName) delete state.lessonLibrary[editingLibName];
-  state.lessonLibrary[newName] = { chars, wordgroups, words };
+  const old = (state.lessonLibrary[editingLibName]) || {};
+  state.lessonLibrary[newName] = { chars, wordgroups, words, oldChars: old.oldChars||'', oldWordgroups: old.oldWordgroups||'', oldWords: old.oldWords||'' };
   saveLocalState(); uploadToCloud();
   libEditModal.classList.remove('show');
   renderLessonLibrary(); populateLessonSelects();
@@ -5414,7 +5132,7 @@ function openTaskEdit(id){
   const info = findTask(id); if(!info) return;
   editingTaskId = id;
   const t = info.task;
-  $('taskEditText').value = t.text;                 /* ★ textarea，保留换行 */
+  $('taskEditText').value = t.text;
   $('taskEditMin').value = t.minutes;
   $('taskEditSun').value = t.sun;
   const wrap = $('taskEditExtraWrap');
@@ -5425,13 +5143,8 @@ function openTaskEdit(id){
   else if(t.type === 'copy'){ wrap.style.display = ''; $('taskEditExtraLabel').textContent = '抄写词语（空格分隔）'; $('taskEditExtra').value = (t.words || []).join(' '); }
   else { wrap.style.display = 'none'; $('taskEditExtra').value = ''; }
   if(penWrap && penEl){
-    if(t.type === 'custom'){
-      penWrap.style.display = '';
-      penEl.checked = (t.penalty === true);
-    } else {
-      penWrap.style.display = 'none';
-      penEl.checked = false;
-    }
+    if(t.type === 'custom'){ penWrap.style.display = ''; penEl.checked = (t.penalty === true); }
+    else { penWrap.style.display = 'none'; penEl.checked = false; }
   }
   taskEditModal.classList.add('show');
   setTimeout(() => $('taskEditText').focus(), 120);
@@ -5497,10 +5210,7 @@ function renderLessonHint(kind){
 Object.keys(LESSON_PICK).forEach(kind => {
   const cfg = LESSON_PICK[kind];
   const sel = $(cfg.sel);
-  if(sel) sel.addEventListener('change', () => {
-    saveLessonPick(kind, sel.value);
-    renderLessonHint(kind);
-  });
+  if(sel) sel.addEventListener('change', () => { saveLessonPick(kind, sel.value); renderLessonHint(kind); });
 });
 $('adminAddPreviewBtn').addEventListener('click', () => {
   const { name, items } = lessonPickItems('preview');
@@ -5510,7 +5220,7 @@ $('adminAddPreviewBtn').addEventListener('click', () => {
   const cfg = getUnitCfg('preview');
   const minutes = clamp(Math.round(chars.length * cfg.min), 1, 120);
   const sun = clamp(Math.round(chars.length * cfg.sun), 1, 500);
-  const task = makeTask(`预习生字（${chars.length}字）`, minutes, sun, { type:'preview', chars });
+  const task = makeTask(`预习生字（${chars.length}字）`, minutes, sun, { type:'preview', chars, lessonName: name });
   state.subjects.chinese.push(task);
   saveLocalState(); uploadToCloud();
   renderBoard(); refreshAllCards(); renderAdminPanel();
@@ -5524,7 +5234,7 @@ $('adminAddWordgroupBtn').addEventListener('click', () => {
   const cfg = getUnitCfg('wordgroup');
   const minutes = clamp(Math.round(chars.length * cfg.min), 1, 120);
   const sun = clamp(Math.round(chars.length * cfg.sun), 1, 500);
-  const task = makeTask(`抄写并组词（${chars.length}字）`, minutes, sun, { type:'wordgroup', words: chars });
+  const task = makeTask(`抄写并组词（${chars.length}字）`, minutes, sun, { type:'wordgroup', words: chars, lessonName: name });
   state.subjects.chinese.push(task);
   saveLocalState(); uploadToCloud();
   renderBoard(); refreshAllCards(); renderAdminPanel();
@@ -5538,13 +5248,12 @@ $('adminAddCopyBtn').addEventListener('click', () => {
   const cfg = getUnitCfg('copy');
   const minutes = clamp(Math.round(words.length * cfg.min), 1, 120);
   const sun = clamp(Math.round(words.length * cfg.sun), 1, 500);
-  const task = makeTask(`抄写词语（${words.length}组）`, minutes, sun, { type:'copy', words });
+  const task = makeTask(`抄写词语（${words.length}组）`, minutes, sun, { type:'copy', words, lessonName: name });
   state.subjects.chinese.push(task);
   saveLocalState(); uploadToCloud();
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加「'+escapeHtml(name)+'」抄写词语');
 });
-
 function addQuickChineseTask(text, minId, sunId){
   const minutes = clamp(parseFloat($(minId).value) || 10, 1, 120);
   const sun = clamp(parseInt($(sunId).value, 10) || 10, 1, 500);
@@ -5616,13 +5325,11 @@ $('adminAddEnglishBtn').addEventListener('click', () => {
 });
 $('adminDateInput').addEventListener('change', e => { const v = e.target.value; if(v) switchDate(v); });
 $('adminGoToday').addEventListener('click', () => switchDate(todayStr()));
-
-/* ★ 家长面板手动同步前一天按钮 */
 (function bindSyncPrevButtons(){
   const adminSyncBtn = $('adminSyncPrevBtn');
   if(adminSyncBtn){
     adminSyncBtn.addEventListener('click', () => {
-      const r = syncFromPreviousDay(state.date, { force: true });
+      const r = syncFromPreviousDay(state.date);
       if(r.ok) toast('✅ 已从 ' + r.srcDate + ' 同步 ' + r.count + ' 项作业');
       else if(r.reason === 'no-source') toast('⚠️ 前一天没有作业可同步');
       else toast('⚠️ 同步失败');
@@ -5671,9 +5378,7 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
     state.parentPassword = (typeof imported.parentPassword === 'string' && /^\d{4}$/.test(imported.parentPassword)) ? imported.parentPassword : MASTER_PASSWORD;
     if(typeof imported.lastNightReset === 'string') state.lastNightReset = imported.lastNightReset;
     if(typeof imported.eyeSoundOffDate === 'string') state.eyeSoundOffDate = imported.eyeSoundOffDate;
-    if(imported.live && typeof imported.live === 'object'){
-      state.live = Object.assign({}, DEFAULT_LIVE, imported.live);
-    }
+    if(imported.live && typeof imported.live === 'object') state.live = Object.assign({}, DEFAULT_LIVE, imported.live);
     if(!state.days[state.date]) state.days[state.date] = makeDay();
     saveLocalState(); renderStats(); renderBoard(); refreshAllCards();
     syncLegacyFromLive(); syncRuntimeFromLive();
@@ -5713,7 +5418,6 @@ document.querySelectorAll('.subject-tab').forEach(tab => {
   tab.addEventListener('click', () => { unlockAudio(); switchSubject(tab.dataset.tab); });
 });
 mainBtn.addEventListener('click', () => { unlockAudio(); onMainBtnClick(); });
-
 window.addEventListener('resize', () => { updateDogBar(); updateEyeUI(); });
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState === 'visible'){
@@ -5737,8 +5441,6 @@ window.addEventListener('pageshow', () => {
   if(charTimer.active) paintCharBarsFromLive();
   renderAllLiveUI();
 });
-
-/* ★★★ Service Worker 自动更新（不再需要手动清缓存） ★★★ */
 let autoReloading = false;
 function scheduleAutoReload(){
   if(autoReloading) return;
@@ -5760,8 +5462,7 @@ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
         console.log('SW 注册成功:', reg.scope);
         try{ reg.update(); }catch(e){}
         reg.addEventListener('updatefound', () => {
-          const nw = reg.installing;
-          if(!nw) return;
+          const nw = reg.installing; if(!nw) return;
           nw.addEventListener('statechange', () => {
             if(nw.state === 'installed' && navigator.serviceWorker.controller){
               try{ nw.postMessage({ type:'SKIP_WAITING' }); }catch(e){}
@@ -5790,19 +5491,15 @@ window.addEventListener('beforeunload', () => {
 state = attachSubjectsProxy(loadLocalState());
 state.date = todayStr();
 if(!state.days[state.date]) state.days[state.date] = makeDay();
-
 lastSoundSeq = Number(state.live.soundSeq) || 0;
-
 dateTextEl.textContent = dateLabel(state.date);
 updateDateText();
 saveLocalState();
 renderStats(); renderBoard();
-const initTab = (state.live.tab && ['chinese','math','timetable','shop'].indexOf(state.live.tab) >= 0)
-  ? state.live.tab : 'chinese';
+const initTab = (state.live.tab && ['chinese','math','timetable','shop'].indexOf(state.live.tab) >= 0) ? state.live.tab : 'chinese';
 switchSubject(initTab, true);
 refreshAllCards();
 renderTimetable();
-
 requestAnimationFrame(() => { updateEyeUI(); updateDogBar(); updateMainBtn(); });
 
 (function restoreLiveFromState(){
@@ -5810,18 +5507,14 @@ requestAnimationFrame(() => { updateEyeUI(); updateDogBar(); updateMainBtn(); })
   if(!L || !L.activeId) return;
   const info = findTask(L.activeId);
   if(!info || info.task.done){
-    L.activeId = ''; L.status = 'idle';
-    L.startedAt = 0; L.leftAtStart = 0; L.totalMs = 0;
+    L.activeId = ''; L.status = 'idle'; L.startedAt = 0; L.leftAtStart = 0; L.totalMs = 0;
     return;
   }
   if(typeof L.unitMs !== 'number') L.unitMs = 0;
   if(typeof L.overdue !== 'boolean') L.overdue = false;
   if(typeof L.cycleStart !== 'number') L.cycleStart = 0;
   ensureRuntime(info.task);
-  if(L.status === 'running'){
-    L.ownerTab = TAB_ID;
-    L.updatedAt = Date.now();
-  }
+  if(L.status === 'running'){ L.ownerTab = TAB_ID; L.updatedAt = Date.now(); }
   syncLegacyFromLive(); syncRuntimeFromLive();
   renderAllLiveUI(); refreshAllCards();
   ensureTickRunning();
@@ -5833,25 +5526,15 @@ requestAnimationFrame(() => { updateEyeUI(); updateDogBar(); updateMainBtn(); })
     }
   }, 220);
 })();
-
 (function cleanEyeIfNoWork(){
   const L = state.live;
   if(!L || !L.eyeActive) return;
   if(hasPendingWork()) return;
-  L.eyeActive = false;
-  L.eyeMode = 'idle';
-  L.eyeStageStart = 0;
-  L.eyeTotalMs = 0;
-  L.eyeNagCount = 0;
-  L.eyeLastNarrated = -1;
-  L.eyePaused = false;
-  L.eyePausedLeftMs = 0;
-  saveLocalState();
-  updateEyeUI();
+  L.eyeActive = false; L.eyeMode = 'idle'; L.eyeStageStart = 0; L.eyeTotalMs = 0;
+  L.eyeNagCount = 0; L.eyeLastNarrated = -1; L.eyePaused = false; L.eyePausedLeftMs = 0;
+  saveLocalState(); updateEyeUI();
 })();
-
 updateEyeSoundBtn();
-
 const familyIdEl = document.getElementById('familyIdText');
 if(familyIdEl) familyIdEl.textContent = FAMILY_ID;
 
