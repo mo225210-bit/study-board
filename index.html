@@ -17,8 +17,13 @@
   :root{
     --font-body:"Kaiti SC","STKaiti","KaiTi","楷体","KaiTi_GB2312","PingFang SC","Microsoft YaHei",serif;
     --font-title:var(--font-body);
+    --font-subtitle:var(--font-body);
+    --font-button:var(--font-body);
     --font-mizi:"Kaiti SC","STKaiti","KaiTi","楷体","KaiTi_GB2312","PingFang SC","Microsoft YaHei",serif;
     --font-pinyin:var(--font-body);
+    --font-hint:var(--font-body);
+    --fs-title:18px; --fs-subtitle:14px; --fs-body:14px; --fs-button:13px;
+    --fs-mizi:38px; --fs-pinyin:16px; --fs-hint:11.5px;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
@@ -919,6 +924,22 @@
   .dict-empty{position:absolute;inset:12px;display:flex;flex-direction:column;
     align-items:center;justify-content:center;gap:8px;color:#8b7a5e;
     font-size:14px;font-weight:800;text-align:center;padding:14px}
+  /* ===== 字体大小（家长端可分类设置） ===== */
+  .brand-title,.admin-header h2{font-size:var(--fs-title)}
+  .admin-section h3,.admin-sub-label,.admin-label,.panel-head2,
+  .dict-letter-block .dl-head{font-size:var(--fs-subtitle)}
+  .task-text,.custom-task-text,
+  .task-info .t-min,.task-info .t-sun,.task-info .t-time{font-size:var(--fs-body)}
+  .aa-btn,.admin-bar .admin-btn,.admin-header .admin-close,
+  .btn,.tab-btn,.chip,.btn-ghost,.file-btn{font-size:var(--fs-button)}
+  .mizi-char{font-size:var(--fs-mizi)}
+  .char-pinyin{font-size:var(--fs-pinyin)}
+  .aa-hint,.aa-unit,.admin-bar .admin-status,.empty-tip,.word-empty,
+  .dict-tools,.dict-entry .pg,.dict-file-row{font-size:var(--fs-hint)}
+  /* 快速添加日常作业：输入框与抄写词语下拉框同宽 */
+  .admin-add-row.quick-add-row .aa-text,
+  .admin-add-row.quick-add-row .aa-num{flex:1 1 90px;width:auto;min-width:0}
+
   @media (max-width:700px){
     .dict-index{flex-basis:150px}
     .dict-entry-list{grid-template-columns:1fr}
@@ -1275,22 +1296,22 @@
       </div>
       <div class="aa-hint" id="copyLessonHint">选好课文直接点「添加」即可</div>
       <div class="admin-sub-label">⚡ 快速添加日常作业</div>
-      <div class="admin-add-row inline-row">
-        <span class="aa-unit" style="font-size:14px;color:#2E7D32;font-weight:900">📚 每日阅读</span>
-        <input class="aa-num" id="quickReadingMin" type="number" value="20" min="1" max="120" aria-label="每日阅读分钟">
+      <div class="admin-add-row inline-row quick-add-row">
+        <input class="aa-text" id="quickContent" type="text" maxlength="40" placeholder="作业内容，如：每日阅读">
+        <input class="aa-num" id="quickCount" type="number" min="1" max="20" value="1" aria-label="数量">
+        <span class="aa-unit">数量</span>
+        <input class="aa-num" id="quickMin" type="number" min="1" max="120" value="20" aria-label="分钟">
         <span class="aa-unit">分钟</span>
-        <input class="aa-num" id="quickReadingSun" type="number" value="30" min="1" max="500" aria-label="每日阅读金币">
+        <input class="aa-num" id="quickSun" type="number" min="1" max="500" value="30" aria-label="金币">
         <span class="aa-unit">金币</span>
-        <button class="aa-btn" id="quickAddReadingBtn">添加</button>
+        <button class="aa-btn" id="quickAddBtn">添加</button>
       </div>
-      <div class="admin-add-row inline-row">
-        <span class="aa-unit" style="font-size:14px;color:#2E7D32;font-weight:900">🤸 跳绳</span>
-        <input class="aa-num" id="quickRopeMin" type="number" value="10" min="1" max="120" aria-label="跳绳分钟">
-        <span class="aa-unit">分钟</span>
-        <input class="aa-num" id="quickRopeSun" type="number" value="20" min="1" max="500" aria-label="跳绳金币">
-        <span class="aa-unit">金币</span>
-        <button class="aa-btn" id="quickAddRopeBtn">添加</button>
+      <div class="admin-add-row inline-row" style="margin-top:2px">
+        <button class="aa-btn" id="quickPresetReading" type="button">📚 每日阅读</button>
+        <button class="aa-btn" id="quickPresetRope" type="button">🤸 跳绳</button>
+        <span class="aa-unit">点击预设快速填入内容</span>
       </div>
+      <div class="aa-hint" id="quickAddHint">内容、数量、分钟、金币都会记住，下次打开自动填好</div>
       <div class="admin-sub-label">➕ 添加自定义作业（支持换行）</div>
       <div class="admin-add-row">
         <textarea class="aa-text" id="adminAddChineseText" rows="3" placeholder="作业内容（可换行）"></textarea>
@@ -1463,27 +1484,30 @@
     <div class="admin-section collapsed" id="adminPanelFont">
       <h3>🔤 字体设置</h3>
       <p style="font-size:12px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
-        可分别为<b style="color:#FFD54F">标题、正文、田字格、拼音</b>选择字体，保存后学生端立即生效。<br>
-        田字格里的汉字、生字拼音、页面标题和正文会按分类分别应用所选字体。
+        可为<b style="color:#FFD54F">标题、小标题、正文、按钮、田字格、拼音、提示</b>分别选择字体和字号，保存后学生端立即生效。
       </p>
       <div id="adminFontRows" style="display:flex;flex-direction:column;gap:8px"></div>
       <div class="admin-sub-label">👀 效果预览</div>
       <div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;background:#fff;border:2px solid #D7E8D7;border-radius:12px;padding:12px">
         <div style="text-align:center">
           <div style="font-size:11px;color:#7a9aaa;font-weight:700;margin-bottom:4px">标题</div>
-          <div id="fontPreviewTitle" style="font-size:18px;font-weight:900;color:#2b3a2b">学习打卡台</div>
+          <div id="fontPreviewTitle" style="font-weight:900;color:#2b3a2b">学习打卡台</div>
         </div>
         <div style="text-align:center">
           <div style="font-size:11px;color:#7a9aaa;font-weight:700;margin-bottom:4px">正文</div>
-          <div id="fontPreviewBody" style="font-size:14px;font-weight:700;color:#2b3a2b">预习生字真有趣</div>
+          <div id="fontPreviewBody" style="font-weight:700;color:#2b3a2b">预习生字真有趣</div>
         </div>
         <div style="text-align:center">
           <div style="font-size:11px;color:#7a9aaa;font-weight:700;margin-bottom:4px">田字格</div>
-          <div class="mizi" style="width:54px;height:54px;margin:0 auto"><div class="mizi-char" id="fontPreviewMizi" style="font-size:38px">字</div></div>
+          <div class="mizi" style="width:54px;height:54px;margin:0 auto"><div class="mizi-char" id="fontPreviewMizi">字</div></div>
         </div>
         <div style="text-align:center">
           <div style="font-size:11px;color:#7a9aaa;font-weight:700;margin-bottom:4px">拼音</div>
-          <div id="fontPreviewPinyin" class="char-pinyin" style="font-size:16px;max-width:none">xué xí</div>
+          <div id="fontPreviewPinyin" class="char-pinyin" style="max-width:none">xué xí</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:11px;color:#7a9aaa;font-weight:700;margin-bottom:4px">按钮</div>
+          <button class="aa-btn" id="fontPreviewBtn" type="button" style="cursor:default">开始学习</button>
         </div>
       </div>
       <div class="admin-add-row" style="margin-top:10px">
@@ -1657,7 +1681,7 @@ const DEFAULT_DATA = {
 };
 
 /* ============================================================
-   字体设置（家长端可分类设置）
+   字体设置（家长端可分类设置：字体 + 字号）
 ============================================================ */
 const FONT_OPTIONS = {
   kaiti:    { label:'楷体',     css:'"Kaiti SC","STKaiti","KaiTi","楷体","KaiTi_GB2312",serif' },
@@ -1670,20 +1694,31 @@ const FONT_OPTIONS = {
   default:  { label:'系统默认', css:'-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif' }
 };
 const FONT_CATEGORIES = [
-  { key:'title',  label:'标题',   varName:'--font-title' },
-  { key:'body',   label:'正文',   varName:'--font-body' },
-  { key:'mizi',   label:'田字格', varName:'--font-mizi' },
-  { key:'pinyin', label:'拼音',   varName:'--font-pinyin' }
+  { key:'title',    label:'标题',   varName:'--font-title',    sizeVar:'--fs-title',    defFont:'kaiti', defSize:18,  min:12, max:36 },
+  { key:'subtitle', label:'小标题', varName:'--font-subtitle', sizeVar:'--fs-subtitle', defFont:'kaiti', defSize:14,  min:10, max:28 },
+  { key:'body',     label:'正文',   varName:'--font-body',     sizeVar:'--fs-body',     defFont:'kaiti', defSize:14,  min:10, max:28 },
+  { key:'button',   label:'按钮',   varName:'--font-button',   sizeVar:'--fs-button',   defFont:'kaiti', defSize:13,  min:10, max:24 },
+  { key:'mizi',     label:'田字格', varName:'--font-mizi',     sizeVar:'--fs-mizi',     defFont:'kaiti', defSize:38,  min:20, max:72 },
+  { key:'pinyin',   label:'拼音',   varName:'--font-pinyin',   sizeVar:'--fs-pinyin',   defFont:'kaiti', defSize:16,  min:10, max:32 },
+  { key:'hint',     label:'提示',   varName:'--font-hint',     sizeVar:'--fs-hint',     defFont:'kaiti', defSize:11.5, min:8,  max:20 }
 ];
-function normalizeFontKey(v, dv){
-  return (typeof v === 'string' && FONT_OPTIONS[v]) ? v : dv;
+const DEFAULT_FONTS = {};
+FONT_CATEGORIES.forEach(c => { DEFAULT_FONTS[c.key] = { font:c.defFont, size:c.defSize }; });
+function normalizeFontEntry(v, c){
+  const o = (v && typeof v === 'object') ? v : {};
+  const font = (typeof o.font === 'string' && FONT_OPTIONS[o.font]) ? o.font : c.defFont;
+  const n = Number(o.size);
+  const size = clamp(isFinite(n) ? n : c.defSize, c.min, c.max);
+  return { font, size };
 }
 function applyFontSettings(){
-  const fs = (state && state.settings && state.settings.fonts) || DEFAULT_SETTINGS.fonts;
+  const fs = (state && state.settings && state.settings.fonts) || DEFAULT_FONTS;
   const root = document.documentElement;
   FONT_CATEGORIES.forEach(c => {
-    const opt = FONT_OPTIONS[fs[c.key]] || FONT_OPTIONS[DEFAULT_SETTINGS.fonts[c.key]];
+    const e = normalizeFontEntry(fs[c.key], c);
+    const opt = FONT_OPTIONS[e.font] || FONT_OPTIONS[c.defFont];
     root.style.setProperty(c.varName, opt.css);
+    root.style.setProperty(c.sizeVar, e.size + 'px');
   });
 }
 
@@ -1694,13 +1729,14 @@ const DEFAULT_SETTINGS = {
     copy:      { min: 2,   sun: 6 }
   },
   eyeCare: { useMin: 20, restMin: 2 },
-  fonts: { title:'kaiti', body:'kaiti', mizi:'kaiti', pinyin:'kaiti' },
+  fonts: DEFAULT_FONTS,
   lessonPick: { preview: '', wordgroup: '', copy: '' },
   lastInputs: {
     chineseMin: 10, chineseSun: 10,
     mathMin: 10, mathSun: 10,
     englishMin: 10, englishSun: 10,
-    sunAmount: 30
+    sunAmount: 30,
+    quickContent: '每日阅读', quickCount: 1, quickMin: 20, quickSun: 30
   },
   panelCollapsed: {
     progress: true, sun: true, date: true, library: true, sync: true,
@@ -1905,12 +1941,11 @@ function normalizeSettings(raw){
       useMin:  num(ec.useMin, d.eyeCare.useMin, 1, 120),
       restMin: num(restRaw,  d.eyeCare.restMin, 1, 60)
     },
-    fonts: {
-      title:  normalizeFontKey(fo.title,  d.fonts.title),
-      body:   normalizeFontKey(fo.body,   d.fonts.body),
-      mizi:   normalizeFontKey(fo.mizi,   d.fonts.mizi),
-      pinyin: normalizeFontKey(fo.pinyin, d.fonts.pinyin)
-    },
+    fonts: (function(){
+      const o = {};
+      FONT_CATEGORIES.forEach(c => { o[c.key] = normalizeFontEntry(fo[c.key], c); });
+      return o;
+    })(),
     lessonPick: {
       preview:   String(lp.preview   || '').slice(0,60),
       wordgroup: String(lp.wordgroup || '').slice(0,60),
@@ -1923,7 +1958,11 @@ function normalizeSettings(raw){
       mathSun: num(li.mathSun, d.lastInputs.mathSun, 1, 500),
       englishMin: num(li.englishMin, d.lastInputs.englishMin, 1, 120),
       englishSun: num(li.englishSun, d.lastInputs.englishSun, 1, 500),
-      sunAmount: num(li.sunAmount, d.lastInputs.sunAmount, 1, 9999)
+      sunAmount: num(li.sunAmount, d.lastInputs.sunAmount, 1, 9999),
+      quickContent: String(li.quickContent || d.lastInputs.quickContent).slice(0, 40),
+      quickCount: num(li.quickCount, d.lastInputs.quickCount, 1, 20),
+      quickMin:   num(li.quickMin,   d.lastInputs.quickMin,   1, 120),
+      quickSun:   num(li.quickSun,   d.lastInputs.quickSun,   1, 500)
     },
     panelCollapsed: {
       progress: pc.progress !== undefined ? !!pc.progress : true,
@@ -4905,50 +4944,86 @@ $('adminTtFontSaveBtn').addEventListener('click', () => {
 function renderFontPanel(){
   const wrap = $('adminFontRows');
   if(!wrap) return;
-  const fs = (state.settings && state.settings.fonts) || DEFAULT_SETTINGS.fonts;
+  const fs = (state.settings && state.settings.fonts) || DEFAULT_FONTS;
   wrap.innerHTML = '';
   FONT_CATEGORIES.forEach(c => {
+    const e = normalizeFontEntry(fs[c.key], c);
     const row = document.createElement('div');
     row.className = 'admin-add-row inline-row';
-    row.innerHTML = '<span class="aa-unit" style="min-width:52px">' + c.label + '</span>';
+    const lab = document.createElement('span');
+    lab.className = 'aa-unit';
+    lab.style.minWidth = '52px';
+    lab.textContent = c.label;
+    row.appendChild(lab);
+
     const sel = document.createElement('select');
-    sel.className = 'aa-text';
+    sel.className = 'aa-select';
     sel.id = 'adminFontSel_' + c.key;
-    sel.style.flex = '1';
+    sel.style.flex = '2 1 90px';
     Object.entries(FONT_OPTIONS).forEach(([k, o]) => {
       const op = document.createElement('option');
       op.value = k; op.textContent = o.label;
       sel.appendChild(op);
     });
-    sel.value = fs[c.key] || DEFAULT_SETTINGS.fonts[c.key];
+    sel.value = e.font;
     row.appendChild(sel);
+
+    const num = document.createElement('input');
+    num.className = 'aa-num';
+    num.id = 'adminFontSize_' + c.key;
+    num.type = 'number';
+    num.min = c.min; num.max = c.max; num.step = c.key === 'mizi' ? 1 : 0.5;
+    num.value = e.size;
+    num.style.width = '64px';
+    row.appendChild(num);
+
+    const px = document.createElement('span');
+    px.className = 'aa-unit';
+    px.textContent = 'px';
+    row.appendChild(px);
     wrap.appendChild(row);
   });
   const hint = $('adminFontHint');
   if(hint){
     hint.className = 'aa-hint';
-    hint.textContent = '当前：标题「' + FONT_OPTIONS[fs.title].label + '」 · 正文「' + FONT_OPTIONS[fs.body].label
-      + '」 · 田字格「' + FONT_OPTIONS[fs.mizi].label + '」 · 拼音「' + FONT_OPTIONS[fs.pinyin].label + '」';
+    hint.textContent = '当前：' + FONT_CATEGORIES.map(c => {
+      const e = normalizeFontEntry(fs[c.key], c);
+      return c.label + '「' + FONT_OPTIONS[e.font].label + ' ' + e.size + 'px」';
+    }).join(' · ');
   }
   previewFonts();
 }
 function previewFonts(){
   FONT_CATEGORIES.forEach(c => {
     const sel = $('adminFontSel_' + c.key);
-    if(!sel) return;
-    const opt = FONT_OPTIONS[sel.value] || FONT_OPTIONS[DEFAULT_SETTINGS.fonts[c.key]];
-    document.documentElement.style.setProperty(c.varName, opt.css);
+    const num = $('adminFontSize_' + c.key);
+    if(sel){
+      const opt = FONT_OPTIONS[sel.value] || FONT_OPTIONS[c.defFont];
+      document.documentElement.style.setProperty(c.varName, opt.css);
+    }
+    if(num){
+      const n = clamp(parseFloat(num.value) || c.defSize, c.min, c.max);
+      document.documentElement.style.setProperty(c.sizeVar, n + 'px');
+    }
   });
 }
 $('adminFontRows').addEventListener('change', e => {
   if(e.target.tagName === 'SELECT') previewFonts();
+});
+$('adminFontRows').addEventListener('input', e => {
+  if(e.target.type === 'number') previewFonts();
 });
 $('adminFontSaveBtn').addEventListener('click', () => {
   if(!state.settings) state.settings = {};
   if(!state.settings.fonts) state.settings.fonts = {};
   FONT_CATEGORIES.forEach(c => {
     const sel = $('adminFontSel_' + c.key);
-    if(sel) state.settings.fonts[c.key] = sel.value;
+    const num = $('adminFontSize_' + c.key);
+    const n = num ? (parseFloat(num.value) || c.defSize) : c.defSize;
+    state.settings.fonts[c.key] = {
+      font: sel ? sel.value : c.defFont,
+      size: clamp(isFinite(n) ? n : c.defSize, c.min, c.max)
+    };
   });
   saveLocalState(); uploadToCloud();
   applyFontSettings();
@@ -4956,8 +5031,8 @@ $('adminFontSaveBtn').addEventListener('click', () => {
   toast('✅ 字体设置已保存，学生端已生效');
 });
 $('adminFontResetBtn').addEventListener('click', () => {
-  if(!confirm('确定恢复默认楷体吗？')) return;
-  state.settings.fonts = JSON.parse(JSON.stringify(DEFAULT_SETTINGS.fonts));
+  if(!confirm('确定恢复默认楷体和默认字号吗？')) return;
+  state.settings.fonts = JSON.parse(JSON.stringify(DEFAULT_FONTS));
   saveLocalState(); uploadToCloud();
   applyFontSettings();
   renderFontPanel();
@@ -5225,13 +5300,20 @@ function syncLastInputFields(){
     adminAddChineseMin: li.chineseMin, adminAddChineseSun: li.chineseSun,
     adminAddMathMin: li.mathMin, adminAddMathSun: li.mathSun,
     adminAddEnglishMin: li.englishMin, adminAddEnglishSun: li.englishSun,
-    adminSunAmount: li.sunAmount
+    adminSunAmount: li.sunAmount,
+    quickContent: li.quickContent, quickCount: li.quickCount,
+    quickMin: li.quickMin, quickSun: li.quickSun
   };
   Object.entries(map).forEach(([id,val]) => { const el=$(id); if(el) el.value=val; });
 }
 function rememberInput(key, value){
   if(!state.settings.lastInputs) state.settings.lastInputs = JSON.parse(JSON.stringify(DEFAULT_SETTINGS.lastInputs));
   state.settings.lastInputs[key] = Number(value);
+  saveLocalState(); uploadToCloud();
+}
+function rememberText(key, value){
+  if(!state.settings.lastInputs) state.settings.lastInputs = JSON.parse(JSON.stringify(DEFAULT_SETTINGS.lastInputs));
+  state.settings.lastInputs[key] = String(value || '').slice(0, 40);
   saveLocalState(); uploadToCloud();
 }
 function applyAdminPanelStates(){
@@ -5725,17 +5807,37 @@ $('adminAddCopyBtn').addEventListener('click', () => {
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加「'+escapeHtml(name)+'」抄写词语');
 });
-function addQuickChineseTask(text, minId, sunId){
-  const minutes = clamp(parseFloat($(minId).value) || 10, 1, 120);
-  const sun = clamp(parseInt($(sunId).value, 10) || 10, 1, 500);
-  const task = makeTask(text, minutes, sun);
-  state.subjects.chinese.push(task);
+/* 快速添加日常作业（内容/数量/分钟/金币均记忆） */
+function addQuickChineseTask(){
+  const text = ($('quickContent').value || '').trim() || '每日阅读';
+  const count = clamp(parseInt($('quickCount').value, 10) || 1, 1, 20);
+  const minutes = clamp(parseFloat($('quickMin').value) || 10, 1, 120);
+  const sun = clamp(parseInt($('quickSun').value, 10) || 10, 1, 500);
+  rememberInput('quickCount', count); rememberInput('quickMin', minutes); rememberInput('quickSun', sun);
+  rememberText('quickContent', text);
+  for(let i = 0; i < count; i++){
+    const task = makeTask(text, minutes, sun);
+    state.subjects.chinese.push(task);
+  }
   saveLocalState(); uploadToCloud();
   renderBoard(); refreshAllCards(); renderAdminPanel();
-  toast('✅ 已添加「' + escapeHtml(text) + '」');
+  toast('✅ 已添加 ' + count + ' 个「' + escapeHtml(text) + '」');
 }
-$('quickAddReadingBtn').addEventListener('click', () => addQuickChineseTask('每日阅读', 'quickReadingMin', 'quickReadingSun'));
-$('quickAddRopeBtn').addEventListener('click', () => addQuickChineseTask('跳绳', 'quickRopeMin', 'quickRopeSun'));
+$('quickAddBtn').addEventListener('click', addQuickChineseTask);
+$('quickPresetReading').addEventListener('click', () => {
+  $('quickContent').value = '每日阅读';
+  $('quickMin').value = 20; $('quickSun').value = 30;
+  rememberText('quickContent', '每日阅读');
+  rememberInput('quickMin', 20); rememberInput('quickSun', 30);
+  toast('已填入「每日阅读」');
+});
+$('quickPresetRope').addEventListener('click', () => {
+  $('quickContent').value = '跳绳';
+  $('quickMin').value = 10; $('quickSun').value = 20;
+  rememberText('quickContent', '跳绳');
+  rememberInput('quickMin', 10); rememberInput('quickSun', 20);
+  toast('已填入「跳绳」');
+});
 
 $('adminAddChineseBtn').addEventListener('click', () => {
   const textEl = $('adminAddChineseText');
