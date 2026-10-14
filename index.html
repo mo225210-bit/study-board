@@ -916,7 +916,7 @@
   .dict-index .panel-head2{display:flex;align-items:center;gap:6px;padding:6px 8px;
     border-bottom:1px solid #e2d9c6;background:#f3ece0;font-size:14px;font-weight:900;color:#6b5c46}
   .dict-letter-bar{display:flex;flex-wrap:wrap;gap:6px;padding:8px;border-bottom:1px solid #e2d9c6;background:#fbf6ec}
-  .dict-letter-bar button{width:36px;height:36px;padding:0;border-radius:50%;
+  .dict-letter-bar button{width:42px;height:36px;padding:0 3px;border-radius:18px;
     border:1.5px solid #d5c9b2;background:#fff;color:#8b7a5e;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
   .dict-letter-bar button:hover{border-color:#9c3b2e;color:#9c3b2e}
   .dict-letter-bar button.on{background:#9c3b2e;border-color:#9c3b2e;color:#fff}
@@ -968,6 +968,12 @@
   .char-pinyin{font-size:var(--fs-pinyin)}
   .aa-hint,.aa-unit,.admin-bar .admin-status,.empty-tip,.word-empty,
   .dict-tools,.dict-entry .pg,.dict-file-row{font-size:var(--fs-hint)}
+  .quick-rows{display:flex;flex-direction:column;gap:6px}
+  .quick-row{display:flex;align-items:center;gap:6px;flex-wrap:nowrap}
+  .quick-row .aa-text{flex:1;min-width:100px;width:auto}
+  .quick-row .aa-num{width:68px;min-width:58px}
+  .quick-row .aa-btn{flex-shrink:0}
+  @media(max-width:650px){.quick-row{flex-wrap:wrap}.quick-row .aa-text{flex-basis:100%}}
   /* 快速添加日常作业：输入框与抄写词语下拉框同宽 */
   .admin-add-row.quick-add-row .aa-text,
   .admin-add-row.quick-add-row .aa-num{flex:1 1 90px;width:auto;min-width:0}
@@ -1328,23 +1334,15 @@
         <button class="aa-btn" id="adminAddCopyBtn">添加</button>
       </div>
       <div class="aa-hint" id="copyLessonHint">选好课文直接点「添加」即可</div>
-      <div class="admin-sub-label">⚡ 快速添加日常作业</div>
-      <div class="admin-add-row inline-row quick-add-row">
-        <input class="aa-text" id="quickContent" type="text" maxlength="40" placeholder="作业内容，如：每日阅读">
-        <input class="aa-num" id="quickCount" type="number" min="1" max="20" value="1" aria-label="数量">
-        <span class="aa-unit">数量</span>
-        <input class="aa-num" id="quickMin" type="number" min="1" max="120" value="20" aria-label="分钟">
-        <span class="aa-unit">分钟</span>
-        <input class="aa-num" id="quickSun" type="number" min="1" max="500" value="30" aria-label="金币">
-        <span class="aa-unit">金币</span>
-        <button class="aa-btn" id="quickAddBtn">添加</button>
-      </div>
-      <div class="admin-add-row inline-row" style="margin-top:2px">
+      <div class="admin-sub-label">⚡ 语文自定义添加日常作业</div>
+      <div id="quickRows" class="quick-rows"></div>
+      <div class="admin-add-row inline-row quick-row-controls" style="margin-top:5px">
+        <button class="aa-btn" id="quickRowPlus" type="button" aria-label="增加一行">＋</button>
+        <button class="aa-btn" id="quickRowMinus" type="button" aria-label="减少一行">－</button>
         <button class="aa-btn" id="quickPresetReading" type="button">📚 每日阅读</button>
         <button class="aa-btn" id="quickPresetRope" type="button">🤸 跳绳</button>
-        <span class="aa-unit">点击预设快速填入内容</span>
       </div>
-      <div class="aa-hint" id="quickAddHint">内容、数量、分钟、金币都会记住，下次打开自动填好</div>
+      <div class="aa-hint" id="quickAddHint">每行独立设置内容、分钟和金币；＋增加一行，－删除最后一行。设置自动保存。</div>
       <div class="admin-sub-label">➕ 添加自定义作业（支持换行）</div>
       <div class="admin-add-row">
         <textarea class="aa-text" id="adminAddChineseText" rows="3" placeholder="作业内容（可换行）"></textarea>
@@ -1776,7 +1774,7 @@ const DEFAULT_SETTINGS = {
     mathMin: 10, mathSun: 10,
     englishMin: 10, englishSun: 10,
     sunAmount: 30,
-    quickContent: '每日阅读', quickCount: 1, quickMin: 20, quickSun: 30
+    quickContent: '每日阅读', quickCount: 1, quickMin: 20, quickSun: 30, quickRows: [{content:'每日阅读',minutes:20,sun:30}]
   },
   panelCollapsed: {
     progress: true, sun: true, date: true, library: true, sync: true,
@@ -2002,7 +2000,8 @@ function normalizeSettings(raw){
       quickContent: String(li.quickContent || d.lastInputs.quickContent).slice(0, 40),
       quickCount: num(li.quickCount, d.lastInputs.quickCount, 1, 20),
       quickMin:   num(li.quickMin,   d.lastInputs.quickMin,   1, 120),
-      quickSun:   num(li.quickSun,   d.lastInputs.quickSun,   1, 500)
+      quickSun:   num(li.quickSun,   d.lastInputs.quickSun,   1, 500),
+      quickRows: Array.isArray(li.quickRows) && li.quickRows.length ? li.quickRows.slice(0,20).map(r=>({content:String(r.content||'').slice(0,40),minutes:num(r.minutes,20,1,120),sun:num(r.sun,30,1,500)})) : JSON.parse(JSON.stringify(d.lastInputs.quickRows || [{content:'每日阅读',minutes:20,sun:30}]))
     },
     panelCollapsed: {
       progress: pc.progress !== undefined ? !!pc.progress : true,
@@ -5381,10 +5380,9 @@ function syncLastInputFields(){
     adminAddMathMin: li.mathMin, adminAddMathSun: li.mathSun,
     adminAddEnglishMin: li.englishMin, adminAddEnglishSun: li.englishSun,
     adminSunAmount: li.sunAmount,
-    quickContent: li.quickContent, quickCount: li.quickCount,
-    quickMin: li.quickMin, quickSun: li.quickSun
   };
   Object.entries(map).forEach(([id,val]) => { const el=$(id); if(el) el.value=val; });
+  if($('quickRows')) renderQuickRows(li.quickRows || DEFAULT_SETTINGS.lastInputs.quickRows);
 }
 function rememberInput(key, value){
   if(!state.settings.lastInputs) state.settings.lastInputs = JSON.parse(JSON.stringify(DEFAULT_SETTINGS.lastInputs));
@@ -5887,38 +5885,69 @@ $('adminAddCopyBtn').addEventListener('click', () => {
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加「'+escapeHtml(name)+'」抄写词语');
 });
-/* 快速添加日常作业（内容/数量/分钟/金币均记忆） */
-function addQuickChineseTask(){
-  const text = ($('quickContent').value || '').trim() || '每日阅读';
-  const count = clamp(parseInt($('quickCount').value, 10) || 1, 1, 20);
-  const minutes = clamp(parseFloat($('quickMin').value) || 10, 1, 120);
-  const sun = clamp(parseInt($('quickSun').value, 10) || 10, 1, 500);
-  rememberInput('quickCount', count); rememberInput('quickMin', minutes); rememberInput('quickSun', sun);
-  rememberText('quickContent', text);
-  for(let i = 0; i < count; i++){
-    const task = makeTask(text, minutes, sun);
-    state.subjects.chinese.push(task);
-  }
-  saveLocalState(); uploadToCloud();
-  renderBoard(); refreshAllCards(); renderAdminPanel();
-  toast('✅ 已添加 ' + count + ' 个「' + escapeHtml(text) + '」');
+/* 语文自定义日常作业：多行配置，逐行添加并持久保存 */
+function getQuickRows(){
+  const rows = Array.from(document.querySelectorAll('#quickRows .quick-row')).map(row=>({
+    content: (row.querySelector('.quick-content').value||'').trim(),
+    minutes: clamp(parseFloat(row.querySelector('.quick-min').value)||10,1,120),
+    sun: clamp(parseInt(row.querySelector('.quick-sun').value,10)||10,1,500)
+  }));
+  return rows.length ? rows : [{content:'每日阅读',minutes:20,sun:30}];
 }
-$('quickAddBtn').addEventListener('click', addQuickChineseTask);
-$('quickPresetReading').addEventListener('click', () => {
-  $('quickContent').value = '每日阅读';
-  $('quickMin').value = 20; $('quickSun').value = 30;
-  rememberText('quickContent', '每日阅读');
-  rememberInput('quickMin', 20); rememberInput('quickSun', 30);
-  toast('已填入「每日阅读」');
+function saveQuickRows(){
+  const rows=getQuickRows();
+  if(!state.settings.lastInputs) state.settings.lastInputs=JSON.parse(JSON.stringify(DEFAULT_SETTINGS.lastInputs));
+  state.settings.lastInputs.quickRows=rows;
+  saveLocalState(); uploadToCloud();
+}
+function renderQuickRows(rows){
+  const host=$('quickRows'); if(!host)return;
+  host.innerHTML='';
+  (Array.isArray(rows)&&rows.length?rows:[{content:'',minutes:20,sun:30}]).slice(0,20).forEach((r,i)=>{
+    const row=document.createElement('div'); row.className='admin-add-row inline-row quick-row'; row.dataset.index=i;
+    row.innerHTML='<input class="aa-text quick-content" type="text" maxlength="40" placeholder="作业内容，如：每日阅读" aria-label="作业内容">'+
+      '<input class="aa-num quick-min" type="number" min="1" max="120" value="'+clamp(Number(r.minutes)||20,1,120)+'" aria-label="分钟"><span class="aa-unit">分钟</span>'+
+      '<input class="aa-num quick-sun" type="number" min="1" max="500" value="'+clamp(Number(r.sun)||30,1,500)+'" aria-label="金币"><span class="aa-unit">金币</span>'+
+      '<button class="aa-btn quick-add-one" type="button">添加</button>';
+    row.querySelector('.quick-content').value=String(r.content||'');
+    host.appendChild(row);
+  });
+}
+function addQuickRowTask(row){
+  const text=(row.querySelector('.quick-content').value||'').trim();
+  if(!text){toast('请输入作业内容');row.querySelector('.quick-content').focus();return;}
+  const minutes=clamp(parseFloat(row.querySelector('.quick-min').value)||10,1,120);
+  const sun=clamp(parseInt(row.querySelector('.quick-sun').value,10)||10,1,500);
+  const task=makeTask(text,minutes,sun);
+  state.subjects.chinese.push(task);
+  saveQuickRows(); saveLocalState(); uploadToCloud();
+  renderBoard(); refreshAllCards(); renderAdminPanel();
+  toast('✅ 已添加日常作业：「'+escapeHtml(text)+'」');
+}
+$('quickRows').addEventListener('click',e=>{
+  const btn=e.target.closest('.quick-add-one'); if(btn) addQuickRowTask(btn.closest('.quick-row'));
 });
-$('quickPresetRope').addEventListener('click', () => {
-  $('quickContent').value = '跳绳';
-  $('quickMin').value = 10; $('quickSun').value = 20;
-  rememberText('quickContent', '跳绳');
-  rememberInput('quickMin', 10); rememberInput('quickSun', 20);
-  toast('已填入「跳绳」');
+$('quickRows').addEventListener('change',e=>{if(e.target.matches('input'))saveQuickRows();});
+$('quickRows').addEventListener('input',e=>{if(e.target.matches('input[type="text"]')){if(e.target._saveTimer)clearTimeout(e.target._saveTimer);e.target._saveTimer=setTimeout(saveQuickRows,250);}});
+$('quickRowPlus').addEventListener('click',()=>{
+  const rows=getQuickRows(); if(rows.length>=20){toast('最多添加20行');return;}
+  rows.push({content:'',minutes:20,sun:30}); renderQuickRows(rows); saveQuickRows();
+  const inputs=$('quickRows').querySelectorAll('.quick-content'); if(inputs.length)inputs[inputs.length-1].focus();
 });
-
+$('quickRowMinus').addEventListener('click',()=>{
+  const rows=getQuickRows(); if(rows.length<=1){toast('至少保留一行');return;}
+  rows.pop(); renderQuickRows(rows); saveQuickRows();
+});
+$('quickPresetReading').addEventListener('click',()=>{
+  const row=$('quickRows').querySelector('.quick-row'); if(!row)return;
+  row.querySelector('.quick-content').value='每日阅读'; row.querySelector('.quick-min').value=20; row.querySelector('.quick-sun').value=30;
+  saveQuickRows(); toast('已填入「每日阅读」');
+});
+$('quickPresetRope').addEventListener('click',()=>{
+  const row=$('quickRows').querySelector('.quick-row'); if(!row)return;
+  row.querySelector('.quick-content').value='跳绳'; row.querySelector('.quick-min').value=10; row.querySelector('.quick-sun').value=20;
+  saveQuickRows(); toast('已填入「跳绳」');
+});
 $('adminAddChineseBtn').addEventListener('click', () => {
   const textEl = $('adminAddChineseText');
   const minEl = $('adminAddChineseMin');
@@ -6447,7 +6476,7 @@ function dictBuildIndex(){
   const frag = document.createDocumentFragment();
   DICT_INDEX_DATA.forEach(d => {
     const b = document.createElement('button');
-    b.type = 'button'; b.textContent = d.letter; b.dataset.letter = d.letter;
+    b.type = 'button'; b.textContent = d.letter + d.letter.toLowerCase(); b.dataset.letter = d.letter; b.title = '字母 ' + d.letter + ' / ' + d.letter.toLowerCase();
     b.addEventListener('click', () => {
       const block = scroll.querySelector('.dict-letter-block[data-letter="' + d.letter + '"]');
       if(block) block.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -6460,7 +6489,7 @@ function dictBuildIndex(){
     block.dataset.letter = d.letter;
     const head = document.createElement('div');
     head.className = 'dl-head';
-    head.textContent = d.letter;
+    head.textContent = d.letter + ' / ' + d.letter.toLowerCase();
     block.appendChild(head);
     const list = document.createElement('div');
     list.className = 'dict-entry-list';
