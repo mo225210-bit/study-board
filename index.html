@@ -4218,13 +4218,13 @@ function tick(){
       const secs = Math.max(0, Math.ceil(left / 1000));
       if(secs % 5 === 0 && L.eyeLastNarrated !== secs){ L.eyeLastNarrated = secs; speakNumber(secs); }
       if(left <= 0){
-        const cfg = getEyeCfg();
-        L.eyeMode = 'use'; L.eyeStageStart = now; L.eyeTotalMs = cfg.useMin * 60000;
-        L.eyeNagCount = 0; L.eyeLastNarrated = -1;
+        // 护眼放松倒计时结束：彻底结束本轮护眼，避免界面停留在 0。
+        L.eyeActive = false; L.eyeMode = 'idle'; L.eyeStageStart = 0; L.eyeTotalMs = 0;
+        L.eyeNagCount = 0; L.eyeLastNarrated = -1; L.eyePaused = false; L.eyePausedLeftMs = 0;
         L.soundSeq = (L.soundSeq || 0) + 1; L.soundKind = 'restDone';
         silentResumeTask();
         pushLive();
-        toast('✅ 放松结束，继续加油！', 2200);
+        toast('✅ 护眼放松结束！', 2200);
       }
     }
   }
