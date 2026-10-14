@@ -879,7 +879,7 @@
   .char-info.char-page{font-family:"Kaiti SC","STKaiti","KaiTi","楷体",serif}
 
   /* ===== 查字典弹窗 ===== */
-  .dict-card{max-width:1020px;height:86vh;display:flex;flex-direction:column;padding:14px}
+  .dict-card{width:min(1500px,98vw);max-width:1500px;height:96vh;max-height:96vh;display:flex;flex-direction:column;padding:10px}
   .dict-head{display:flex;align-items:center;justify-content:space-between;
     gap:10px;margin-bottom:8px;flex-wrap:wrap}
   .dict-head h3{display:flex;align-items:center;gap:8px}
@@ -892,9 +892,9 @@
     background:#F6FBF6;border:2px solid #D7E8D7;border-radius:999px;padding:5px 12px}
   .dict-file-row input{font-size:12px;max-width:170px}
   .dict-file-row .dict-loaded{color:#2E7D32}
-  .dict-layout{flex:1;display:flex;gap:8px;min-height:0}
+  .dict-layout{flex:1;display:flex;gap:8px;min-height:0;overflow:hidden}
   /* ★ 左索引 / 右汉字表：各占一半 */
-  .dict-index{flex:1 1 50%;min-width:0;display:flex;flex-direction:column;min-height:0;
+  .dict-index{flex:0 0 36%;min-width:0;display:flex;flex-direction:column;min-height:0;
     border:2px solid #cbbfa6;border-radius:10px;background:#fdfaf3;overflow:hidden}
   .dict-index .panel-head2{display:flex;align-items:center;gap:6px;padding:6px 8px;
     border-bottom:1px solid #e2d9c6;background:#f3ece0;font-size:14px;font-weight:900;color:#6b5c46}
@@ -915,7 +915,7 @@
   .dict-entry .syl{letter-spacing:.3px}
   .dict-entry .pg{margin-left:auto;color:#a2937a;font-size:12px}
   .dict-entry .pg.none{color:#cfc3ad}
-  .dict-pages-wrap{flex:1 1 50%;min-width:0;display:flex;flex-direction:column;min-height:0;
+  .dict-pages-wrap{flex:1 1 64%;min-width:0;display:flex;flex-direction:column;min-height:0;
     border:2px solid #cbbfa6;border-radius:10px;background:#ddd4c2;overflow:hidden}
   .dict-tools{display:flex;align-items:center;gap:8px;padding:5px 8px;font-size:13px;
     font-weight:800;color:#6b5c46;background:#f3ece0;border-bottom:1px solid #e2d9c6;flex-wrap:wrap}
@@ -928,6 +928,7 @@
   .dict-scroll{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;position:relative}
   /* ★ 虚拟滚动容器：只渲染可视区附近的页 */
   .dict-pages{position:relative;margin:0 auto;padding:0}
+  @media(max-width:700px){.dict-card{width:98vw;height:96vh;padding:7px}.dict-layout{gap:5px}.dict-index{flex:0 0 34%}.dict-pages-wrap{flex:1 1 66%}.dict-tools{gap:4px;padding:4px;font-size:12px}}
   .pdf-page{position:absolute;left:0;top:0;background:#fff;flex:0 0 auto;
     box-shadow:0 2px 10px rgba(0,0,0,.2);border-radius:2px;overflow:hidden}
   .pdf-page::after{content:attr(data-num);position:absolute;top:4px;right:8px;
@@ -1225,7 +1226,6 @@
       <h3>📖 查字典 · 当前生字 <span class="dict-cur-char" id="dictCurChar">字</span></h3>
       <button class="btn-ghost" id="dictCloseBtn" type="button">关闭</button>
     </div>
-    <div class="dict-file-row"><span id="dictFileStatus">字典图片按需加载；双击页面即可保存生字页码</span></div>
     <div class="dict-layout">
       <section class="dict-index">
         <div class="panel-head2">汉语拼音音节索引</div>
@@ -1253,7 +1253,7 @@
           <div class="dict-empty" id="dictEmpty">
             <div style="font-size:34px">📖</div>
             <div>未找到字典图片</div>
-            <div style="font-size:13px;opacity:.75">请将《汉字表1.pdf》（1-362页）和《汉字表2.pdf》（363-664页）放在 index.html 同一目录（汉字表1 第 1 页 = 总第 1 页 · 汉字表2 第 1 页 = 总第 363 页），也可点上方按钮手动上传，然后点「🔄 重载」</div>
+            <div style="font-size:13px;opacity:.75">请确认 index.html 同级目录存在 dictionary-data 文件夹，内含 Dictionary_p001.webp 至 Dictionary_p664.webp 图片。</div>
           </div>
         </div>
       </section>
@@ -1653,6 +1653,7 @@ try{
    常量
 ============================================================ */
 const STORAGE_KEY = 'study_board_v9';
+const REWARD_STORAGE_KEY = 'study_board_rewards_v1';
 const MAX_DAYS_KEPT = 180;
 const EYE_NAG_MS = 30000;
 const OVERDUE_MINUTE_MS = 60000;
@@ -2157,8 +2158,12 @@ function loadLocalState(){
   s.lessonLibrary = normalizeLessonLibrary(s.lessonLibrary);
   if(!Object.keys(s.lessonLibrary).length) s.lessonLibrary = JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY));
   const shopNorm = normalizeShop(s.shop);
-  if(shopNorm === null) s.shop = JSON.parse(JSON.stringify(DEFAULT_SHOP));
+  let savedRewards = null;
+  try{ savedRewards = normalizeShop(JSON.parse(localStorage.getItem(REWARD_STORAGE_KEY) || 'null')); }catch(e){ savedRewards = null; }
+  if(savedRewards && (freshBoot || shopNorm === null)) s.shop = savedRewards;
+  else if(shopNorm === null) s.shop = JSON.parse(JSON.stringify(DEFAULT_SHOP));
   else s.shop = shopNorm;
+  try{ localStorage.setItem(REWARD_STORAGE_KEY, JSON.stringify(s.shop)); }catch(e){}
   s.wordBank = normalizeWordBank(s.wordBank);
   if(!s.charPages || typeof s.charPages !== 'object' || Array.isArray(s.charPages)) s.charPages = {};
   s.timetable = normalizeTimetable(s.timetable);
@@ -2186,6 +2191,7 @@ function attachSubjectsProxy(s){
 function saveLocalState(){
   pruneDays();
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  try{ localStorage.setItem(REWARD_STORAGE_KEY, JSON.stringify(state.shop || [])); }catch(e){}
 }
 function pruneDays(){
   const keys = Object.keys(state.days).sort();
@@ -2850,7 +2856,7 @@ function applyRemoteState(remote){
   if(typeof remote.lastNightReset === 'string') state.lastNightReset = remote.lastNightReset;
   if(typeof remote.eyeSoundOffDate === 'string') state.eyeSoundOffDate = remote.eyeSoundOffDate;
   const shopNorm = normalizeShop(remote.shop);
-  if(shopNorm !== null) state.shop = shopNorm;
+  if(shopNorm !== null){ state.shop = shopNorm; try{ localStorage.setItem(REWARD_STORAGE_KEY, JSON.stringify(state.shop)); }catch(e){} }
   if(remote.live && typeof remote.live === 'object'){
     const remoteLiveAt = Number(remote.live.updatedAt) || 0;
     const localLiveAt = Number(state.live && state.live.updatedAt) || 0;
@@ -3349,7 +3355,7 @@ function renderSubjectCards(subject, listEl){
 
     const top = document.createElement('div'); top.className = 'card-top';
     const cb = document.createElement('div');
-    const needPhotoFirst = (task.type !== 'custom') && !task.done && getTaskPhotos(task).length === 0;
+    const needPhotoFirst = !['custom','preview','wordgroup','copy'].includes(task.type) && !task.done && getTaskPhotos(task).length === 0;
     cb.className = 'checkbox' + (needPhotoFirst ? ' locked' : '');
     cb.innerHTML = '<span class="tick">✓</span>';
     cb.addEventListener('click', e => { e.stopPropagation(); toggleTaskDone(task.id); });
@@ -6182,7 +6188,6 @@ document.addEventListener('click',e=>{
 function dictInit(){
   if(!dictInitPromise) dictInitPromise=Promise.resolve().then(()=>{
     dictLoadingEl.style.display='none'; dictEmptyEl.style.display='none';
-    dictFileStatus.textContent='图片目录：dictionary-data/Dictionary_p001.webp 至 Dictionary_p664.webp（按需加载）';
     dictTotalPages=DICT_TOTAL_PAGES; dictTotalPagesEl.textContent='/ '+dictTotalPages+' 页';
     dictComputeBaseScale(); dictCurScale=dictBaseScale*dictZoom;
     dictZoomLabelEl.textContent=Math.round(dictZoom*100)+'%'; dictLayout(); dictUpdateWindow();
@@ -6191,14 +6196,18 @@ function dictInit(){
 }
 function dictEnsureScaled(){
   if(!dictScrollEl.clientWidth)return;
-  const w=Math.max(120,dictScrollEl.clientWidth-20);
+  const wByWidth=Math.max(120,dictScrollEl.clientWidth-20);
+  const hByHeight=Math.max(160,(dictScrollEl.clientHeight||500)-20);
+  const w=Math.max(120,Math.min(wByWidth,hByHeight/DICT_PAGE_RATIO));
   if(!dictPageW || Math.abs(w-dictPageW)>2){
     dictPageW=w; dictPageH=w*DICT_PAGE_RATIO; dictBaseScale=1;
     dictCurScale=dictBaseScale*dictZoom; dictLayout(); dictUpdateWindow();
   }
 }
 function dictComputeBaseScale(){
-  dictPageW=Math.max(120,(dictScrollEl.clientWidth||500)-20);
+  const wByWidth=Math.max(120,(dictScrollEl.clientWidth||500)-20);
+  const hByHeight=Math.max(160,(dictScrollEl.clientHeight||500)-20);
+  dictPageW=Math.max(120,Math.min(wByWidth,hByHeight/DICT_PAGE_RATIO));
   dictPageH=dictPageW*DICT_PAGE_RATIO; dictBaseScale=1;
 }
 function dictPageTop(num){return 12+(num-1)*(dictPageH*dictCurScale+12);}
@@ -6223,7 +6232,7 @@ function dictUpdateWindow(){
   const first=clamp(Math.floor((st-12)/rowH)+1,1,dictTotalPages);
   const last=clamp(Math.floor((st+vh-12)/rowH)+1,1,dictTotalPages);
   const want=new Set();
-  for(let n=Math.max(1,first-1);n<=Math.min(dictTotalPages,last+2);n++)want.add(n);
+  for(let n=first;n<=last;n++)want.add(n);
   for(const n of Array.from(dictRendered.keys()))if(!want.has(n))dictDisposeEntry(n);
   for(const n of want)if(!dictRendered.has(n))dictCreateEntry(n);
   dictLastShownPage=first;
@@ -6247,7 +6256,7 @@ async function dictScrollToPage(n,smooth){
   await dictInit(); dictEnsureScaled();
   n=clamp(Math.round(Number(n)||1),1,dictTotalPages);
   dictUpdateWindow();
-  dictScrollEl.scrollTo({top:Math.max(0,dictPageTop(n)-12),behavior:smooth===false?'auto':'smooth'});
+  dictScrollEl.scrollTo({top:Math.max(0,dictPageTop(n)-12),behavior:'auto'});
   dictLastShownPage=n;
   if(document.activeElement!==dictPageInputEl)dictPageInputEl.value=n;
   setTimeout(dictUpdateWindow,100);
