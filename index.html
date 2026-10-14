@@ -515,6 +515,11 @@
     font-family:"Kaiti SC","KaiTi","STKaiti","楷体",serif}
   .stroke-pinyin{font-size:15px;font-weight:800;color:#5b7a5b;margin-top:2px}
   .stroke-meta{font-size:13px;font-weight:800;color:#8aa88a;margin-top:4px}
+  /* ★ 偏旁右侧的字典页码（点击打开查字典对应页） */
+  .stroke-meta .dict-page-link{display:inline-block;margin-left:6px;padding:1px 9px;border-radius:999px;
+    background:#f7e9c9;border:1px solid #e0c9a0;color:#9c3b2e;font-weight:900;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;transition:transform .12s}
+  .stroke-meta .dict-page-link:active{transform:translateY(1px)}
   .stroke-stage{width:220px;height:220px;margin:14px auto 0;
     background:#E8F5E9;border:2px solid #EF9A9A;border-radius:8px;
     display:flex;align-items:center;justify-content:center;position:relative}
@@ -4672,7 +4677,16 @@ function showStroke(char, task, mode){
   strokePinyinEl.textContent = py || '';
   const info = HZ_INFO[char] || ['—','—'];
   const known = (task && task.strokeCounts && task.strokeCounts[char]) ? (' · 笔画：' + task.strokeCounts[char] + ' 画') : '';
-  strokeMetaEl.textContent = '偏旁：' + info[0] + known;
+  let metaHtml = '偏旁：' + escapeHtml(info[0]) + known;
+  /* ★ 偏旁右边显示字典页码：优先用户标记页，其次音节索引页 */
+  let dictPg = Number((state.charPages && state.charPages[char]) || 0);
+  if(dictPg < 1){
+    const it = dictFindEntryForChar(char);
+    dictPg = it ? (Number(it[2]) || 0) : 0;
+  }
+  if(dictPg >= 1) metaHtml += '<span class="dict-page-link" data-dict-char="' + escapeHtml(char) +
+    '" data-dict-page="' + dictPg + '" title="打开字典第 ' + dictPg + ' 页查看组词">📖 第' + dictPg + '页</span>';
+  strokeMetaEl.innerHTML = metaHtml;
   strokeStage.innerHTML = '';
 
   if(currentStrokeMode === 'wordgroup'){
@@ -6170,7 +6184,7 @@ function dictFindEntryForChar(char){
     if(String(it[0]).toLowerCase().replace(/[^a-zü]/g,'')===py) return it;
   return null;
 }
-function openDictFor(char){
+function openDictFor(char, preferPage){
   if(!char) return;
   dictCurrentChar=char; dictCurCharEl.textContent=char;
   dictModal.classList.add('show');
@@ -6179,7 +6193,7 @@ function openDictFor(char){
     for(const [,e] of dictRendered) e.el.title='双击标记「'+char+'」的页码为第 '+e.num+' 页';
     const saved=Number((state.charPages&&state.charPages[char])||0);
     dictMarkedPage=saved;
-    dictScrollToPage(saved>=1?saved:1,false);
+    dictScrollToPage(saved>=1?saved:(preferPage>=1?preferPage:1),false);
     highlightDictMarkedPage();
   });
 }
@@ -6189,6 +6203,13 @@ dictModal.addEventListener('click',e=>{if(e.target===dictModal)closeDictModal();
 document.addEventListener('click',e=>{
   const el=e.target.closest('.char-page[data-dict-char]');
   if(el) openDictFor(el.dataset.dictChar);
+});
+/* ★ 添加词语弹窗：点击偏旁右侧的页码 → 打开字典对应页查看组词 */
+document.addEventListener('click',e=>{
+  const el=e.target.closest('.dict-page-link[data-dict-char]');
+  if(!el) return;
+  e.stopPropagation();
+  openDictFor(el.dataset.dictChar, Number(el.dataset.dictPage)||0);
 });
 document.addEventListener('click',e=>{
   const el=e.target.closest('.char-stroke[data-stroke-char]');
@@ -6283,6 +6304,9 @@ dictPagesEl.addEventListener('dblclick',e=>{
   saveLocalState();uploadToCloud();dictClearHit();
   for(const [,entry] of dictRendered)entry.el.classList.toggle('mark-target',entry.num===n);
   document.querySelectorAll('.page-num[data-page-char="'+dictCurrentChar+'"]').forEach(sp=>sp.textContent=n);
+  document.querySelectorAll('.dict-page-link[data-dict-char="'+dictCurrentChar+'"]').forEach(l=>{
+    l.dataset.dictPage=n; l.textContent='📖 第'+n+'页';
+  });
   toast('✅「'+dictCurrentChar+'」页码已保存：第 '+n+' 页',2200);
   setTimeout(closeDictModal,700);
 });
