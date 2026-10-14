@@ -6511,6 +6511,31 @@ requestAnimationFrame(() => { updateEyeUI(); updateDogBar(); updateMainBtn(); })
     }
   }, 220);
 })();
+/* 待机页隐藏手势：连续点击页面空白处 5 次，强制复位护眼状态。 */
+(function bindStandbyEyeResetGesture(){
+  const root = $('appRoot');
+  if(!root) return;
+  let taps = 0;
+  let firstTapAt = 0;
+  root.addEventListener('click', e => {
+    const L = state && state.live;
+    // 仅待机时生效，避免影响正在进行的作业或正常控件操作。
+    if(!L || L.activeId) { taps = 0; firstTapAt = 0; return; }
+    if(e.target && e.target.closest('button, input, select, textarea, a, .task-card, .subject-tab, .tab-panel, .eye-card, .toast')) return;
+    const now = Date.now();
+    if(!firstTapAt || now - firstTapAt > 2500){ firstTapAt = now; taps = 0; }
+    taps++;
+    if(taps < 5) return;
+    taps = 0; firstTapAt = 0;
+    L.eyeActive = false; L.eyeMode = 'idle'; L.eyeStageStart = 0; L.eyeTotalMs = 0;
+    L.eyeNagCount = 0; L.eyeLastNarrated = -1; L.eyePaused = false; L.eyePausedLeftMs = 0;
+    L.soundSeq = (L.soundSeq || 0) + 1; L.soundKind = '';
+    pushLive();
+    updateEyeUI();
+    toast('✅ 护眼已复位', 1800);
+  });
+})();
+
 (function cleanEyeIfNoWork(){
   const L = state.live;
   if(!L || !L.eyeActive) return;
