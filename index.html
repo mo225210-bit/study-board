@@ -272,6 +272,15 @@
   .task-card.done .checkbox{background:#43A047;border-color:#43A047;opacity:1}
   .subject-col[data-subject="math"] .task-card.done .checkbox{background:#039BE5;border-color:#039BE5}
   .task-card.done .checkbox .tick{opacity:1;transform:scale(1)}
+  /* 作业完成后自动折叠：保留作业名称和勾选状态，收起详情、田字格与操作按钮 */
+  .task-card.done .task-info{display:none!important}
+  .task-card.done .char-grid{display:none!important}
+  .task-card.done .card-actions{display:none!important}
+  .task-card.done .card-top{padding-bottom:2px}
+  .task-card.done .task-text{font-size:13px;line-height:1.35}
+  .task-card.done{padding-bottom:3px;min-height:0}
+  .task-card.done .card-progress{display:none}
+
   .card-body{flex:1;min-width:0}
   .task-text{font-size:14px;font-weight:800;color:#2b3a2b;line-height:1.5;word-break:break-word}
   .task-card.done .task-text{text-decoration:line-through;color:#9aad9a}
@@ -1334,16 +1343,14 @@
         <button class="aa-btn" id="adminAddCopyBtn">添加</button>
       </div>
       <div class="aa-hint" id="copyLessonHint">选好课文直接点「添加」即可</div>
-      <div class="admin-sub-label">⚡ 语文自定义添加日常作业</div>
+      <div class="admin-sub-label">📝 添加日常作业</div>
       <div id="quickRows" class="quick-rows"></div>
       <div class="admin-add-row inline-row quick-row-controls" style="margin-top:5px">
         <button class="aa-btn" id="quickRowPlus" type="button" aria-label="增加一行">＋</button>
         <button class="aa-btn" id="quickRowMinus" type="button" aria-label="减少一行">－</button>
-        <button class="aa-btn" id="quickPresetReading" type="button">📚 每日阅读</button>
-        <button class="aa-btn" id="quickPresetRope" type="button">🤸 跳绳</button>
       </div>
       <div class="aa-hint" id="quickAddHint">每行独立设置内容、分钟和金币；＋增加一行，－删除最后一行。设置自动保存。</div>
-      <div class="admin-sub-label">➕ 添加自定义作业（支持换行）</div>
+      <div class="admin-sub-label">🧩 添加自定义作业（支持换行）</div>
       <div class="admin-add-row">
         <textarea class="aa-text" id="adminAddChineseText" rows="3" placeholder="作业内容（可换行）"></textarea>
         <input class="aa-num" id="adminAddChineseMin" type="number" value="10" min="1" max="120">
@@ -1360,7 +1367,7 @@
     <div class="admin-section" id="adminPanelMath">
       <h3>🔢 数学作业 <span class="badge" id="adminMathBadge">0</span></h3>
       <div id="adminMathList"></div>
-      <div class="admin-sub-label">➕ 添加数学作业（支持换行）</div>
+      <div class="admin-sub-label">➗ 添加数学作业（支持换行）</div>
       <div class="admin-add-row">
         <textarea class="aa-text" id="adminAddMathText" rows="3" placeholder="作业内容（可换行）"></textarea>
         <input class="aa-num" id="adminAddMathMin" type="number" value="10" min="1" max="120">
@@ -1377,7 +1384,7 @@
     <div class="admin-section" id="adminPanelEnglish">
       <h3>🔤 英语作业 <span class="badge" id="adminEnglishBadge">0</span></h3>
       <div id="adminEnglishList"></div>
-      <div class="admin-sub-label">➕ 添加英语作业（支持换行）</div>
+      <div class="admin-sub-label">🔤 添加英语作业（支持换行）</div>
       <div class="admin-add-row">
         <textarea class="aa-text" id="adminAddEnglishText" rows="3" placeholder="作业内容（可换行）"></textarea>
         <input class="aa-num" id="adminAddEnglishMin" type="number" value="10" min="1" max="120">
@@ -1399,7 +1406,7 @@
         <b style="color:#FFD54F">按住 ☷ 可上下拖动调整顺序，修改内容会自动保存。</b>
       </p>
       <div id="adminShopList"></div>
-      <div class="admin-sub-label">➕ 添加兑换项目</div>
+      <div class="admin-sub-label">🎁 添加兑换项目</div>
       <div class="admin-add-row inline-row">
         <input class="aa-num" id="adminShopIcon" type="text" maxlength="4" value="🎁" placeholder="🎁"
                style="width:52px;text-align:center;font-size:20px;padding-left:2px;padding-right:2px">
@@ -1477,7 +1484,7 @@
       </p>
       <div class="admin-add-row"><button class="aa-btn" id="adminLibSyncBtn">📤 上传写字表 / 识字表</button></div>
       <div id="adminLibList"></div>
-      <div class="admin-sub-label">➕ 添加课文库条目</div>
+      <div class="admin-sub-label">📚 添加课文库条目</div>
       <div class="admin-add-row"><input class="aa-text" id="adminLibLesson" placeholder="课文名"></div>
       <div class="admin-add-row"><input class="aa-text" id="adminLibChars" placeholder="会写字，空格分隔"></div>
       <div class="admin-add-row"><input class="aa-text" id="adminLibWordgroups" placeholder="会识字，空格分隔"></div>
@@ -1587,7 +1594,7 @@
 /* ============================================================
    ★★★ 版本号：每次修改界面/功能后请把这里 +1
 ============================================================ */
-const APP_VERSION = '2026.10.13.2';
+const APP_VERSION = '2026.10.14.1';
 
 /* ============================================================
    🔄 自动更新
@@ -2209,6 +2216,18 @@ function saveLocalState(){
   pruneDays();
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
   try{ localStorage.setItem(REWARD_STORAGE_KEY, JSON.stringify(state.shop || [])); }catch(e){}
+  // 独立保存各日期的作业完成状态，刷新或重新打开网页时可作为持久化校验副本。
+  try{
+    const doneMirror = {};
+    Object.keys(state.days || {}).forEach(date => {
+      const day = state.days[date] || {};
+      doneMirror[date] = {};
+      ['chinese','math','english'].forEach(subject => {
+        doneMirror[date][subject] = (day[subject] || []).map(task => ({id:task.id, syncKey:task.syncKey || '', done:!!task.done}));
+      });
+    });
+    localStorage.setItem(STORAGE_KEY + '_done_mirror', JSON.stringify(doneMirror));
+  }catch(e){}
 }
 function pruneDays(){
   const keys = Object.keys(state.days).sort();
@@ -5938,16 +5957,6 @@ $('quickRowMinus').addEventListener('click',()=>{
   const rows=getQuickRows(); if(rows.length<=1){toast('至少保留一行');return;}
   rows.pop(); renderQuickRows(rows); saveQuickRows();
 });
-$('quickPresetReading').addEventListener('click',()=>{
-  const row=$('quickRows').querySelector('.quick-row'); if(!row)return;
-  row.querySelector('.quick-content').value='每日阅读'; row.querySelector('.quick-min').value=20; row.querySelector('.quick-sun').value=30;
-  saveQuickRows(); toast('已填入「每日阅读」');
-});
-$('quickPresetRope').addEventListener('click',()=>{
-  const row=$('quickRows').querySelector('.quick-row'); if(!row)return;
-  row.querySelector('.quick-content').value='跳绳'; row.querySelector('.quick-min').value=10; row.querySelector('.quick-sun').value=20;
-  saveQuickRows(); toast('已填入「跳绳」');
-});
 $('adminAddChineseBtn').addEventListener('click', () => {
   const textEl = $('adminAddChineseText');
   const minEl = $('adminAddChineseMin');
@@ -6523,6 +6532,25 @@ dictBuildIndex();
    初始化
 ============================================================ */
 state = attachSubjectsProxy(loadLocalState());
+// 将独立完成状态副本合并回来，避免仅因刷新/重开页面丢失已完成标记。
+try{
+  const doneMirror = JSON.parse(localStorage.getItem(STORAGE_KEY + '_done_mirror') || '{}');
+  Object.keys(doneMirror || {}).forEach(date => {
+    const day = state.days && state.days[date];
+    const mirrorDay = doneMirror[date];
+    if(!day || !mirrorDay) return;
+    ['chinese','math','english'].forEach(subject => {
+      const saved = Array.isArray(mirrorDay[subject]) ? mirrorDay[subject] : [];
+      const byId = new Map(saved.map(x => [String(x.id), x]));
+      const bySync = new Map(saved.filter(x => x.syncKey).map(x => [String(x.syncKey), x]));
+      (day[subject] || []).forEach(task => {
+        const m = byId.get(String(task.id)) || (task.syncKey ? bySync.get(String(task.syncKey)) : null);
+        if(m) task.done = !!m.done;
+      });
+    });
+  });
+}catch(e){}
+
 state.date = todayStr();
 applyFontSettings();
 if(!state.days[state.date]) state.days[state.date] = makeDay();
