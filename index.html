@@ -892,10 +892,22 @@
     background:#F6FBF6;border:2px solid #D7E8D7;border-radius:999px;padding:5px 12px}
   .dict-file-row input{font-size:12px;max-width:170px}
   .dict-file-row .dict-loaded{color:#2E7D32}
-  .dict-layout{flex:1;display:flex;gap:8px;min-height:0;overflow:hidden}
-  /* ★ 左索引 / 右汉字表：各占一半 */
-  .dict-index{flex:0 0 36%;min-width:0;display:flex;flex-direction:column;min-height:0;
+  .dict-layout{flex:1;display:flex;min-height:0;overflow:hidden;--dict-left-pct:36%}
+  /* ★ 左索引 / 右汉字表：宽度可由中间分隔条拖动调整 */
+  .dict-index{flex:0 0 var(--dict-left-pct,36%);min-width:0;display:flex;flex-direction:column;min-height:0;
     border:2px solid #cbbfa6;border-radius:10px;background:#fdfaf3;overflow:hidden}
+  /* ★ 左右栏中间的可拖拽分隔条 */
+  .dict-resizer{flex:0 0 14px;align-self:stretch;position:relative;cursor:col-resize;
+    touch-action:none;-webkit-user-select:none;user-select:none;z-index:6}
+  .dict-resizer::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;
+    transform:translateX(-50%);background:#cbbfa6;border-radius:2px;transition:background .15s,width .15s}
+  .dict-resizer::after{content:'';position:absolute;left:50%;top:50%;width:6px;height:46px;
+    transform:translate(-50%,-50%);background:#cbbfa6;border-radius:3px;opacity:.8;
+    transition:background .15s,opacity .15s}
+  .dict-resizer:hover::before,.dict-resizer.dragging::before{width:3px;background:#9c3b2e}
+  .dict-resizer:hover::after,.dict-resizer.dragging::after{background:#9c3b2e;opacity:1}
+  body.dict-resizing{cursor:col-resize!important;-webkit-user-select:none;user-select:none!important}
+  body.dict-resizing .dict-scroll img{pointer-events:none}
   .dict-index .panel-head2{display:flex;align-items:center;gap:6px;padding:6px 8px;
     border-bottom:1px solid #e2d9c6;background:#f3ece0;font-size:14px;font-weight:900;color:#6b5c46}
   .dict-letter-bar{display:flex;flex-wrap:wrap;gap:6px;padding:8px;border-bottom:1px solid #e2d9c6;background:#fbf6ec}
@@ -915,7 +927,7 @@
   .dict-entry .syl{letter-spacing:.3px}
   .dict-entry .pg{margin-left:auto;color:#a2937a;font-size:12px}
   .dict-entry .pg.none{color:#cfc3ad}
-  .dict-pages-wrap{flex:1 1 64%;min-width:0;display:flex;flex-direction:column;min-height:0;
+  .dict-pages-wrap{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;min-height:0;
     border:2px solid #cbbfa6;border-radius:10px;background:#ddd4c2;overflow:hidden}
   .dict-tools{display:flex;align-items:center;gap:8px;padding:5px 8px;font-size:13px;
     font-weight:800;color:#6b5c46;background:#f3ece0;border-bottom:1px solid #e2d9c6;flex-wrap:wrap}
@@ -928,7 +940,7 @@
   .dict-scroll{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;position:relative}
   /* ★ 虚拟滚动容器：只渲染可视区附近的页 */
   .dict-pages{position:relative;margin:0 auto;padding:0}
-  @media(max-width:700px){.dict-card{width:98vw;height:96vh;padding:7px}.dict-layout{gap:5px}.dict-index{flex:0 0 34%}.dict-pages-wrap{flex:1 1 66%}.dict-tools{gap:4px;padding:4px;font-size:12px}}
+  @media(max-width:700px){.dict-card{width:98vw;height:96vh;padding:7px}.dict-resizer{flex-basis:18px}.dict-index{flex:0 0 var(--dict-left-pct,34%)}.dict-pages-wrap{flex:1 1 auto}.dict-tools{gap:4px;padding:4px;font-size:12px}}
   .pdf-page{position:absolute;left:0;top:0;background:#fff;flex:0 0 auto;
     box-shadow:0 2px 10px rgba(0,0,0,.2);border-radius:2px;overflow:hidden}
   .pdf-page::after{content:attr(data-num);position:absolute;top:4px;right:8px;
@@ -1232,6 +1244,7 @@
         <div class="dict-letter-bar" id="dictLetterBar"></div>
         <div class="dict-index-scroll" id="dictIndexScroll"></div>
       </section>
+      <div class="dict-resizer" id="dictResizer" title="拖动调整左右栏宽度，双击恢复默认"></div>
       <section class="dict-pages-wrap">
         <div class="dict-tools">
           <span>跳至</span>
@@ -6308,6 +6321,78 @@ window.addEventListener('resize',()=>{
   const anchor=dictLastShownPage||1;dictComputeBaseScale();dictCurScale=dictBaseScale*dictZoom;
   for(const n of Array.from(dictRendered.keys()))dictDisposeEntry(n);
   dictLayout();dictScrollEl.scrollTop=Math.max(0,dictPageTop(anchor)-12);dictUpdateWindow();
+});
+/* ---------- 左右分栏：中间分隔条可拖动，宽度本地保存 ---------- */
+const dictLayoutEl=document.querySelector('.dict-layout');
+const dictResizerEl=$('dictResizer');
+const DICT_SPLIT_KEY='dict_split_left_pct';
+const DICT_SPLIT_DEF=36,DICT_SPLIT_MIN=18,DICT_SPLIT_MAX=82;
+function dictApplySplit(pct){
+  pct=Math.min(DICT_SPLIT_MAX,Math.max(DICT_SPLIT_MIN,Number(pct)||DICT_SPLIT_DEF));
+  dictLayoutEl.style.setProperty('--dict-left-pct',pct.toFixed(2)+'%');
+  return pct;
+}
+function dictSplitNow(){
+  const m=/([\d.]+)%/.exec(dictLayoutEl.style.getPropertyValue('--dict-left-pct')||'');
+  return m?parseFloat(m[1]):DICT_SPLIT_DEF;
+}
+/* 启动时恢复上次保存的位置 */
+(function dictRestoreSplit(){
+  let saved=parseFloat(localStorage.getItem(DICT_SPLIT_KEY));
+  if(isNaN(saved))saved=DICT_SPLIT_DEF;
+  dictApplySplit(saved);
+})();
+/* 拖拽结束后按右侧新宽度重新适配字典页（锚定当前页，不跳页） */
+function dictRefitAfterSplit(){
+  if(!dictModal.classList.contains('show')||!dictPageW)return;
+  const anchor=dictLastShownPage||1;
+  dictComputeBaseScale();dictCurScale=dictBaseScale*dictZoom;
+  for(const n of Array.from(dictRendered.keys()))dictDisposeEntry(n);
+  dictLayout();dictScrollEl.scrollTop=Math.max(0,dictPageTop(anchor)-12);dictUpdateWindow();
+}
+let dictSplitting=false,dictSplitMoved=false,dictSplitStartX=0,dictSplitStartPct=0,dictSplitRaf=0;
+dictResizerEl.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  dictSplitting=true;
+  dictSplitMoved=false;
+  dictSplitStartX=e.clientX;
+  dictSplitStartPct=dictSplitNow();
+  dictResizerEl.classList.add('dragging');
+  document.body.classList.add('dict-resizing');
+  try{dictResizerEl.setPointerCapture(e.pointerId);}catch(err){}
+});
+dictResizerEl.addEventListener('pointermove',e=>{
+  if(!dictSplitting)return;
+  const rect=dictLayoutEl.getBoundingClientRect();
+  if(!rect.width)return;
+  const next=dictSplitStartPct+(e.clientX-dictSplitStartX)/rect.width*100;
+  if(Math.abs(next-dictSplitStartPct)>0.05)dictSplitMoved=true;
+  dictApplySplit(next);
+  if(!dictSplitRaf){
+    dictSplitRaf=requestAnimationFrame(()=>{
+      dictSplitRaf=0;
+      if(dictModal.classList.contains('show')&&dictPageW)dictEnsureScaled();
+    });
+  }
+});
+function dictEndSplit(e){
+  if(!dictSplitting)return;
+  dictSplitting=false;
+  dictResizerEl.classList.remove('dragging');
+  document.body.classList.remove('dict-resizing');
+  try{ if(dictResizerEl.hasPointerCapture(e.pointerId))dictResizerEl.releasePointerCapture(e.pointerId); }catch(err){}
+  if(!dictSplitMoved)return;   /* 只是点按没有拖动：不保存、不重渲染 */
+  const pct=dictApplySplit(dictSplitNow());
+  try{localStorage.setItem(DICT_SPLIT_KEY,String(pct));}catch(err){}
+  dictRefitAfterSplit();
+}
+dictResizerEl.addEventListener('pointerup',dictEndSplit);
+dictResizerEl.addEventListener('pointercancel',dictEndSplit);
+/* 双击分隔条恢复默认宽度 */
+dictResizerEl.addEventListener('dblclick',()=>{
+  dictApplySplit(DICT_SPLIT_DEF);
+  try{localStorage.setItem(DICT_SPLIT_KEY,String(DICT_SPLIT_DEF));}catch(e){}
+  dictRefitAfterSplit();
 });
 /* ---------- 拼音音节索引 ---------- */
 function dictBuildIndex(){
