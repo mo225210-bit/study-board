@@ -4684,6 +4684,11 @@ function loadHanziData(char, onComplete, onError){
 /* ★ 自动演示笔顺（田字格单击 / 已确认笔画后的「笔画：」） */
 function showStroke(char, task, mode){
   if(!char || !/[\u4e00-\u9fa5]/.test(char)) return;
+  // 未确认笔画的生字必须进入手写笔顺测验；不能误走自动演示流程。
+  if(mode === 'quiz'){
+    showStrokeQuiz(char, task);
+    return;
+  }
   lastStrokeChar = char;
   currentStrokeTask = task || null;
   currentStrokeMode = mode || 'plain';
