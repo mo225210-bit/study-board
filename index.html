@@ -579,7 +579,7 @@
   .eye-overlay{position:fixed;inset:0;z-index:450;
     background:rgba(255,90,90,.34);opacity:0;pointer-events:none;
     transition:opacity 2.4s ease,background .7s ease;
-    display:flex;align-items:center;justify-content:center;backdrop-filter:none;-webkit-backdrop-filter:none;}
+    display:flex;align-items:center;justify-content:center;backdrop-filter:blur(1.5px);}
   .eye-overlay.show{opacity:1;pointer-events:auto}
   .eye-overlay.resting{background:rgba(70,165,255,.26)}
   .eye-overlay-msg{color:#fff;text-align:center;font-weight:900;
@@ -3935,13 +3935,24 @@ function updateEyeOverlay(){
   const L = state.live;
   let cls = 'eye-overlay';
   let html = '';
+  // 双保险：即使主 tick 因标签页休眠/同步异常没有处理到 0，渲染护眼层时也立即解除全屏遮罩。
+  if(L && L.eyeActive && L.eyeMode === 'rest' && liveEyeLeftMs(L) <= 0){
+    L.eyeActive = false; L.eyeMode = 'idle'; L.eyeStageStart = 0; L.eyeTotalMs = 0;
+    L.eyeNagCount = 0; L.eyeLastNarrated = -1; L.eyePaused = false; L.eyePausedLeftMs = 0;
+    L.soundSeq = (L.soundSeq || 0) + 1; L.soundKind = 'restDone';
+    silentResumeTask();
+    pushLive();
+    toast('✅ 护眼放松结束！', 2200);
+  }
   if(L && L.eyeActive){
     if(L.eyeMode === 'need-rest'){
       cls += ' show';
       html = '<div class="eom-icon">😌</div><div class="eom-tip">点击任意位置开始放松眼睛</div>';
     } else if(L.eyeMode === 'rest'){
       cls += ' show resting';
-      html = '<div class="eom-icon">🌿</div><div class="eom-tip">放松中 · 请看向远处</div>';
+      const left = liveEyeLeftMs(L);
+      const secs = Math.max(0, Math.ceil(left / 1000));
+      html = '<div class="eom-num">' + secs + '</div><div class="eom-tip">放松中 · 请看向远处</div>';
     }
   }
   if(cls !== lastOverlayCls){ ov.className = cls; lastOverlayCls = cls; }
@@ -3955,6 +3966,13 @@ function updateEyeOverlay(){
     const L = state.live;
     if(!L || !L.eyeActive) return;
     if(L.eyeMode === 'need-rest'){ unlockAudio(); liveStartEyeRest(); }
+    else if(L.eyeMode === 'rest' && liveEyeLeftMs(L) <= 0){
+      L.eyeActive = false; L.eyeMode = 'idle'; L.eyeStageStart = 0; L.eyeTotalMs = 0;
+      L.eyeNagCount = 0; L.eyeLastNarrated = -1; L.eyePaused = false; L.eyePausedLeftMs = 0;
+      L.soundSeq = (L.soundSeq || 0) + 1; L.soundKind = 'restDone';
+      silentResumeTask(); pushLive(); updateEyeUI();
+      toast('✅ 护眼放松结束！', 2200);
+    }
   });
 })();
 function updateEyeSoundBtn(){
