@@ -579,7 +579,7 @@
   .eye-overlay{position:fixed;inset:0;z-index:450;
     background:rgba(255,90,90,.34);opacity:0;pointer-events:none;
     transition:opacity 2.4s ease,background .7s ease;
-    display:flex;align-items:center;justify-content:center;backdrop-filter:blur(1.5px);}
+    display:flex;align-items:center;justify-content:center;backdrop-filter:none;-webkit-backdrop-filter:none;}
   .eye-overlay.show{opacity:1;pointer-events:auto}
   .eye-overlay.resting{background:rgba(70,165,255,.26)}
   .eye-overlay-msg{color:#fff;text-align:center;font-weight:900;
@@ -3941,9 +3941,7 @@ function updateEyeOverlay(){
       html = '<div class="eom-icon">😌</div><div class="eom-tip">点击任意位置开始放松眼睛</div>';
     } else if(L.eyeMode === 'rest'){
       cls += ' show resting';
-      const left = liveEyeLeftMs(L);
-      const secs = Math.max(0, Math.ceil(left / 1000));
-      html = '<div class="eom-num">' + secs + '</div><div class="eom-tip">放松中 · 请看向远处</div>';
+      html = '<div class="eom-icon">🌿</div><div class="eom-tip">放松中 · 请看向远处</div>';
     }
   }
   if(cls !== lastOverlayCls){ ov.className = cls; lastOverlayCls = cls; }
