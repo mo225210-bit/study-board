@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+pdfjsLib.GlobalWorkerOptions.workerSrc =<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -5506,7 +5506,7 @@ $('adminLibAddBtn').addEventListener('click', () => {
 let pdfJsLoading = null;
 function loadPdfJs(){
   if(window.pdfjsLib){
-    try{ window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js'; }catch(e){}
+    /*try{ window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js'; }catch(e){}*/
     return Promise.resolve(window.pdfjsLib);
   }
   if(pdfJsLoading) return pdfJsLoading;
@@ -6518,6 +6518,13 @@ function dictBuildIndex(){
 }
 dictBuildIndex();
 
+/* 字典模块兜底：出错不阻断页面其余功能 */
+window.addEventListener('error', e => {
+  const src = String(e.filename || '');
+  if(src.includes('index.html') || src === ''){
+    console.warn('[全局错误]', e.message, e.lineno);
+  }
+}, true);
 
 /* ============================================================
    初始化
