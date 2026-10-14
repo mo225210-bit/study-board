@@ -888,9 +888,6 @@
     font-family:"Kaiti SC","STKaiti","KaiTi","楷体",serif}
   .dict-file-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
     margin-bottom:8px;font-size:13px;font-weight:800;color:#5b7a5b}
-  .dict-file-row label{display:inline-flex;align-items:center;gap:5px;cursor:pointer;
-    background:#F6FBF6;border:2px solid #D7E8D7;border-radius:999px;padding:5px 12px}
-  .dict-file-row input{font-size:12px;max-width:170px}
   .dict-file-row .dict-loaded{color:#2E7D32}
   .dict-layout{flex:1;display:flex;gap:8px;min-height:0}
   /* ★ 左索引 / 右汉字表：各占一半 */
@@ -926,15 +923,18 @@
   .dict-tools input.pgnum{width:48px;height:24px;text-align:center;border:1px solid #d5c9b2;
     border-radius:4px;font-family:inherit;font-size:13px;color:#2f2a24;background:#fff}
   .dict-scroll{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;position:relative}
-  /* ★ 虚拟滚动容器：只渲染可视区附近的页 */
+  /* ★ 虚拟滚动容器：懒加载可视区附近的页 */
   .dict-pages{position:relative;margin:0 auto;padding:0}
-  .pdf-page{position:absolute;left:0;top:0;background:#fff;flex:0 0 auto;
+  .dict-page{position:absolute;left:0;top:0;background:#fff;flex:0 0 auto;
     box-shadow:0 2px 10px rgba(0,0,0,.2);border-radius:2px;overflow:hidden}
-  .pdf-page::after{content:attr(data-num);position:absolute;top:4px;right:8px;
-    font-size:12px;color:#c4b8a2;pointer-events:none;z-index:2}
-  .pdf-canvas{display:block;width:100%;height:100%;opacity:0;transition:opacity .18s}
-  .pdf-page.rendered .pdf-canvas{opacity:1}
-  .pdf-page.mark-target{outline:3px solid #9c3b2e;outline-offset:-3px}
+  .dict-page-img{display:block;width:100%;height:100%;object-fit:contain;
+    opacity:0;transition:opacity .2s;background:#fff}
+  .dict-page.loaded .dict-page-img{opacity:1}
+  .dict-page.failed{background:#f3ece0}
+  .dict-page.failed::after{content:'该页未找到';position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    color:#a2937a;font-size:14px;font-weight:800}
+  .dict-page.mark-target{outline:3px solid #9c3b2e;outline-offset:-3px}
   .dict-empty{position:absolute;inset:12px;display:flex;flex-direction:column;
     align-items:center;justify-content:center;gap:8px;color:#8b7a5e;
     font-size:15px;font-weight:800;text-align:center;padding:14px}
@@ -1068,7 +1068,7 @@
     </section>
   </div>
 
-  <div class="timer-hint" style="margin-top:-3px">自定义作业可直接勾选完成 · 📷 其他作业需先拍照再勾选 · 🖼️ 查看作业照片 · ✋ 抄写并组词长按田字格可修改/删除 · ↶↷ 撤销恢复</div>
+  <div class="timer-hint" style="margin-top:-3px">自定义作业可直接勾选完成 · 📷 其他作业可拍照留档 · 🖼️ 查看作业照片 · ✋ 抄写并组词长按田字格可修改/删除 · ↶↷ 撤销恢复</div>
 </div>
 
 <div class="modal" id="calModal">
@@ -1226,9 +1226,7 @@
       <button class="btn-ghost" id="dictCloseBtn" type="button">关闭</button>
     </div>
     <div class="dict-file-row">
-      <label>📄 汉字表1<input type="file" id="dictFile1" accept=".pdf,application/pdf" title="仅在根目录未找到文件时使用"></label>
-      <label>📄 汉字表2<input type="file" id="dictFile2" accept=".pdf,application/pdf" title="仅在根目录未找到文件时使用"></label>
-      <span id="dictFileStatus">提示：双击 PDF 页面即可标记该生字的页码</span>
+      <span id="dictFileStatus">提示：双击页面即可标记该生字的页码</span>
     </div>
     <div class="dict-layout">
       <section class="dict-index">
@@ -1240,24 +1238,23 @@
         <div class="dict-tools">
           <span>跳至</span>
           <input class="pgnum" id="dictPageInput" type="number" min="1" value="1">
-          <span id="dictTotalPages">/ 664 页</span>
+          <span id="dictTotalPages">/ — 页</span>
           <button id="dictZoomOut" type="button">−</button>
           <span id="dictZoomLabel">100%</span>
           <button id="dictZoomIn" type="button">+</button>
           <button id="dictZoomFit" type="button">适配</button>
-          <button id="dictReloadBtn" type="button" title="重新从 index.html 所在目录载入汉字表 PDF">🔄 重载</button>
         </div>
         <div class="dict-scroll" id="dictScroll">
           <div class="dict-pages" id="dictPages"></div>
           <div class="dict-empty" id="dictLoading" style="display:none">
             <div style="font-size:34px">⏳</div>
-            <div>正在载入汉字表 PDF…</div>
-            <div style="font-size:13px;opacity:.75">仅首次需要等待，载入完成后再次打开查字典不再等待</div>
+            <div>正在载入字典…</div>
+            <div style="font-size:13px;opacity:.75">首次打开需要几秒钟，之后打开即可秒开</div>
           </div>
           <div class="dict-empty" id="dictEmpty">
             <div style="font-size:34px">📖</div>
-            <div>未找到汉字表 PDF</div>
-            <div style="font-size:13px;opacity:.75">请将《汉字表1.pdf》（1-362页）和《汉字表2.pdf》（363-664页）放在 index.html 同一目录（汉字表1 第 1 页 = 总第 1 页 · 汉字表2 第 1 页 = 总第 363 页），也可点上方按钮手动上传，然后点「🔄 重载」</div>
+            <div>未找到字典图片</div>
+            <div style="font-size:13px;opacity:.75">请把字典图片放在 index.html 同目录的 dictionary-data 文件夹中<br>文件名：Dictionary_p001.webp、Dictionary_p002.webp …（三位数字，不足补 0）</div>
           </div>
         </div>
       </section>
@@ -1477,7 +1474,7 @@
     <div class="admin-section collapsed" id="adminPanelTimetable">
       <h3>📅 课程表 <span class="badge" id="adminTtBadge">未上传</span></h3>
       <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
-        上传 Excel 课程表后，学生端「课程表」页会自动显示，<b style="color:#FFD54F">并永久保存在本机与云端</b>。<br>
+        上传 Excel 课程表后，学生端「课程表」页会自动显示，<b style="color:#FFD54F">并永久保存在本机与云端（换设备也能用）</b>。<br>
         表头需包含 <b style="color:#FFD54F">时间</b> 与 <b style="color:#FFD54F">项目</b> 两列，后面依次为星期一 ~ 星期五。<br>
         <b style="color:#FFD54F">15:00 前高亮当天课程，15:00 后高亮第二天的课程；合并单元格不高亮且文字居中。</b>
       </p>
@@ -1557,7 +1554,8 @@
     <div class="admin-section collapsed" id="adminPanelSync">
       <h3>☁️ 云端同步</h3>
       <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
-        房间号：<b id="familyIdText" style="color:#2e7d32">—</b>
+        房间号：<b id="familyIdText" style="color:#2e7d32">—</b><br>
+        <b style="color:#FFD54F">笔画数、页码、课程表都会自动同步到云端，换设备登录后可直接加载。</b>
       </p>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button class="aa-btn" id="adminForceSyncBtn">🔄 强制上传本地数据</button>
@@ -1575,7 +1573,7 @@
 /* ============================================================
    ★★★ 版本号：每次修改界面/功能后请把这里 +1
 ============================================================ */
-const APP_VERSION = '2026.10.13.2';
+const APP_VERSION = '2026.10.14.1';
 
 /* ============================================================
    🔄 自动更新
@@ -1702,8 +1700,6 @@ const DEFAULT_DATA = {
 /* ============================================================
    字体设置（家长端可分类设置字号；字体统一为楷体）
 ============================================================ */
-/* 所有中文字体统一为楷体：仅保留楷体选项，
-   旧存档中的其他字体（宋体/黑体/仿宋等）会自动回退为楷体 */
 const FONT_OPTIONS = {
   kaiti:    { label:'楷体',     css:'"Kaiti SC","STKaiti","KaiTi","楷体","KaiTi_GB2312",serif' }
 };
@@ -1716,8 +1712,6 @@ const FONT_CATEGORIES = [
   { key:'pinyin',   label:'拼音',   varName:'--font-pinyin',   sizeVar:'--fs-pinyin',   defFont:'kaiti', defSize:18,  min:10, max:32 },
   { key:'hint',     label:'提示',   varName:'--font-hint',     sizeVar:'--fs-hint',     defFont:'kaiti', defSize:13,  min:8,  max:20 }
 ];
-/* 旧版默认字号 → 新版默认字号（整体加大，田字格除外）；
-   存档中仍为旧默认值的分类自动迁移到新默认，家长自定义过的字号保持不动 */
 const OLD_DEF_SIZES = { title:18, subtitle:14, body:14, button:13, mizi:38, pinyin:16, hint:11.5 };
 const DEFAULT_FONTS = {};
 FONT_CATEGORIES.forEach(c => { DEFAULT_FONTS[c.key] = { font:c.defFont, size:c.defSize }; });
@@ -1729,7 +1723,7 @@ function normalizeFontEntry(v, c){
   if(isFinite(n) && n > 0){
     size = n;
     if(OLD_DEF_SIZES[c.key] !== undefined && Math.abs(n - OLD_DEF_SIZES[c.key]) < 0.001){
-      size = c.defSize;  /* 旧默认 → 新默认（整体加大） */
+      size = c.defSize;
     }
   }else{
     size = c.defSize;
@@ -2003,7 +1997,6 @@ function normalizeSettings(raw){
       timetable: pc.timetable !== undefined ? !!pc.timetable : true,
       font: pc.font !== undefined ? !!pc.font : true
     },
-    /* 旧版课程表默认字号 12.5 → 新版 13.5（整体加大） */
     ttFontSize: num(Number(r.ttFontSize) === 12.5 ? 13.5 : r.ttFontSize, d.ttFontSize, 8, 24),
     ttLineHeight: num(r.ttLineHeight, d.ttLineHeight, 1, 3)
   };
@@ -2333,9 +2326,6 @@ function redoMizi(taskId){
   toast('↷ 已恢复');
 }
 
-/* 把任务的最新字/词语写回课文库：
-   - 首次写入时，把课文库原字段备份到 oldChars / oldWordgroups / oldWords
-   - 新内容写入 chars / wordgroups / words */
 function syncTaskToLessonLibrary(task){
   if(!task || !task.lessonName) return;
   const lib = state.lessonLibrary;
@@ -2356,7 +2346,6 @@ function syncTaskToLessonLibrary(task){
   if(isAdminMode) renderLessonLibrary();
 }
 
-/* 重新计算任务分钟数与金币（按剩余数量 × 单位配置） */
 function recalcTaskUnits(task){
   const type = task.type;
   if(type !== 'preview' && type !== 'wordgroup' && type !== 'copy') return;
@@ -2520,7 +2509,6 @@ function bindMiziClicks(container, task){
     el.__lpFired = false;
     const cancelLp = () => { if(lpTimer){ clearTimeout(lpTimer); lpTimer = null; } };
     const startLp = (ev) => {
-      /* 只对「抄写并组词」启用长按修改/删除 */
       if(!task || task.type !== 'wordgroup') return;
       const p = ev.touches ? ev.touches[0] : ev;
       if(!p) return;
@@ -2550,7 +2538,6 @@ function bindMiziClicks(container, task){
     el.addEventListener('mouseleave', cancelLp);
     el.addEventListener('contextmenu', e => e.preventDefault());
 
-    /* ★ 单击田字格 → 直接自动演示笔画顺序 */
     el.addEventListener('click', e => {
       e.stopPropagation();
       if(el.__lpFired){ el.__lpFired = false; return; }
@@ -2632,7 +2619,6 @@ function removeCharWord(char, index){
   refreshWordBankInCards(char);
 }
 
-/* 刷新卡片上该生字后面显示的词语 */
 function refreshWordBankInCards(char){
   document.querySelectorAll('[data-word-after="' + char + '"]').forEach(el => {
     const words = (state.wordBank && state.wordBank[char]) ? state.wordBank[char] : [];
@@ -2763,7 +2749,9 @@ async function uploadToCloud(force){
     sun: state.sun, checkins: state.checkins,
     sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
     lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword,
-    shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
+    shop: state.shop, wordBank: state.wordBank,
+    charPages: state.charPages || {},          /* ★ 生字页码，永久保存 */
+    timetable: state.timetable,                 /* ★ 课程表，永久保存 */
     lastNightReset: state.lastNightReset || '',
     eyeSoundOffDate: state.eyeSoundOffDate || '',
     live: state.live, updatedAt: Date.now()
@@ -2785,7 +2773,8 @@ function getEditableStateForCompare(){
     days: state.days, date: state.date, settings: state.settings,
     sun: state.sun, checkins: state.checkins, sunLog: state.sunLog,
     lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword,
-    shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
+    shop: state.shop, wordBank: state.wordBank,
+    charPages: state.charPages || {}, timetable: state.timetable,
     lastNightReset: state.lastNightReset || '', eyeSoundOffDate: state.eyeSoundOffDate || ''
   });
 }
@@ -3107,7 +3096,6 @@ function miziSvg(){
     <line x1="100" y1="0" x2="0" y2="100"/>
   </svg>`;
 }
-/* 预习生字卡片：偏旁 + 笔画（手写确认后显示） */
 function renderCharCard(char, task){
   const info = HZ_INFO[char] || ['—','—'];
   const py = getPinyin(char);
@@ -3143,14 +3131,12 @@ function renderWordGroup(word, showInfo, task){
     </div>`;
   }).join('')}</div>`;
 }
-/* 小号词语田字格（显示在生字后面） */
 function renderSmallWord(word){
   const chars = [...word].filter(c => /[\u4e00-\u9fa5]/.test(c));
   return '<span class="word-item">' + chars.map(c =>
     '<span class="mizi small">' + miziSvg() + '<span class="mizi-char">' + escapeHtml(c) + '</span></span>'
   ).join('') + '</span>';
 }
-/* 抄写并组词卡片：生字 + 后面跟已组词语 */
 function renderWordGroupWithWords(char, task){
   const py = getPinyin(char);
   const checked = !!(task && Array.isArray(task.checkedChars) && task.checkedChars.indexOf(char) >= 0);
@@ -3353,8 +3339,8 @@ function renderSubjectCards(subject, listEl){
 
     const top = document.createElement('div'); top.className = 'card-top';
     const cb = document.createElement('div');
-    const needPhotoFirst = (task.type !== 'custom') && !task.done && getTaskPhotos(task).length === 0;
-    cb.className = 'checkbox' + (needPhotoFirst ? ' locked' : '');
+    /* ★ 打勾不再要求先拍照 */
+    cb.className = 'checkbox';
     cb.innerHTML = '<span class="tick">✓</span>';
     cb.addEventListener('click', e => { e.stopPropagation(); toggleTaskDone(task.id); });
 
@@ -3379,7 +3365,6 @@ function renderSubjectCards(subject, listEl){
 
     const actions = document.createElement('div'); actions.className = 'card-actions';
 
-    /* ★ 撤销/恢复按钮（仅「抄写并组词」显示） */
     if(task.type === 'wordgroup'){
       const undoBtn = document.createElement('button');
       undoBtn.type = 'button'; undoBtn.className = 'mini-btn undo'; undoBtn.textContent = '↶'; undoBtn.title = '撤销';
@@ -3693,7 +3678,6 @@ function renderTimetable(){
     lastTtKey = 'empty';
     return;
   }
-  /* ★ 应用字体设置 */
   const st = state.settings || DEFAULT_SETTINGS;
   wrap.style.setProperty('--tt-font-size', (Number(st.ttFontSize) || 13.5) + 'px');
   wrap.style.setProperty('--tt-line-height', String(Number(st.ttLineHeight) || 1.4));
@@ -3751,7 +3735,7 @@ setInterval(() => {
 }, 30000);
 
 /* ============================================================
-   田字格倒计时（旧版：总时长固定）
+   田字格倒计时
 ============================================================ */
 function charBarEnsure(mizi){
   let bar = mizi.querySelector('.mizi-bar');
@@ -4243,7 +4227,7 @@ function stopTick(){
 }
 
 /* ============================================================
-   任务操作（旧版：总时长固定）
+   任务操作
 ============================================================ */
 function liveStartTask(taskId){
   const info = findTask(taskId);
@@ -4416,14 +4400,9 @@ function requestPause(){
   if(!L.activeId || L.status !== 'running') return;
   livePause();
 }
+/* ★ 打勾不再需要先拍照 */
 function toggleTaskDone(id){
   const info = findTask(id); if(!info) return;
-  if(isAdminMode){ doToggleTaskDone(id); return; }
-  const task = info.task;
-  if(!task.done && task.type !== 'custom'){
-    const photos = getTaskPhotos(task);
-    if(!photos.length){ toast('📷 请先拍照上传作业照片，才能点完成哦', 3200); playSound('fail'); return; }
-  }
   doToggleTaskDone(id);
 }
 function doToggleTaskDone(id){
@@ -4629,7 +4608,6 @@ function setStrokeToolsVisible(visible){
   if(wordsBox) wordsBox.style.display = visible ? '' : 'none';
 }
 
-/* 本地优先的笔顺数据加载 */
 function loadHanziData(char, onComplete, onError){
   fetch('hanzi-writer-data/' + char + '.json')
     .then(r => { if(!r.ok) throw new Error('no local data'); return r.json(); })
@@ -4645,7 +4623,6 @@ function loadHanziData(char, onComplete, onError){
     });
 }
 
-/* ★ 自动演示笔顺（田字格单击 / 已确认笔画后的「笔画：」） */
 function showStroke(char, task, mode){
   if(!char || !/[\u4e00-\u9fa5]/.test(char)) return;
   lastStrokeChar = char;
@@ -4674,7 +4651,6 @@ function showStroke(char, task, mode){
   setTimeout(() => playStroke(char), 60);
 }
 
-/* ★ 手写确认笔画（仅点击「笔画：」且尚未确认时） */
 function showStrokeQuiz(char, task){
   if(!char || !/[\u4e00-\u9fa5]/.test(char)) return;
   lastStrokeChar = char;
@@ -4905,7 +4881,7 @@ function renderAdminTimetable(){
   if(hint && has){
     hint.className = 'aa-hint ok';
     hint.textContent = '✅ 当前课程表：' + (tt.fileName || '已上传') +
-      '（' + tt.rows.length + ' 行 · ' + tt.headers.length + ' 天）已保存，重启/刷新后依然有效';
+      '（' + tt.rows.length + ' 行 · ' + tt.headers.length + ' 天）已保存到本机与云端，换设备也能加载';
   } else if(hint && !has){
     hint.className = 'aa-hint';
     hint.textContent = '支持 .xlsx / .xls / .csv 格式';
@@ -4939,11 +4915,12 @@ $('adminTtUploadBtn').addEventListener('click', async () => {
     if(!parsed) throw new Error('未找到课程表结构（需要含「时间」「项目」表头）');
     parsed.fileName = String(file.name || '').slice(0, 80);
     state.timetable = normalizeTimetable(parsed);
-    saveLocalState(); uploadToCloud();
+    saveLocalState();
+    const ok = await uploadToCloud(true);   /* ★ 立即上传云端，换设备也能加载 */
     renderTimetable();
     renderAdminTimetable();
     if(fileInput) fileInput.value = '';
-    toast('✅ 课程表已保存');
+    toast(ok ? '✅ 课程表已保存到本机与云端' : '✅ 课程表已保存到本机（云端同步失败）');
   }catch(err){
     console.error(err);
     hint.className = 'aa-hint warn';
@@ -5524,11 +5501,14 @@ $('adminLibAddBtn').addEventListener('click', () => {
 });
 
 /* ============================================================
-   上传 PDF
+   上传 PDF（写字表 / 识字表）
 ============================================================ */
 let pdfJsLoading = null;
 function loadPdfJs(){
-  if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if(window.pdfjsLib){
+    try{ window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js'; }catch(e){}
+    return Promise.resolve(window.pdfjsLib);
+  }
   if(pdfJsLoading) return pdfJsLoading;
   pdfJsLoading = new Promise((resolve, reject) => {
     const s = document.createElement('script');
@@ -5837,7 +5817,6 @@ $('adminAddCopyBtn').addEventListener('click', () => {
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加「'+escapeHtml(name)+'」抄写词语');
 });
-/* 快速添加日常作业（内容/数量/分钟/金币均记忆） */
 function addQuickChineseTask(){
   const text = ($('quickContent').value || '').trim() || '每日阅读';
   const count = clamp(parseInt($('quickCount').value, 10) || 1, 1, 20);
@@ -5975,6 +5954,7 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
     state.settings = normalizeSettings(imported.settings);
     state.lessonLibrary = normalizeLessonLibrary(imported.lessonLibrary);
     state.wordBank = normalizeWordBank(imported.wordBank);
+    if(imported.charPages && typeof imported.charPages === 'object') state.charPages = imported.charPages;
     state.timetable = normalizeTimetable(imported.timetable);
     const shopNorm = normalizeShop(imported.shop);
     if(shopNorm !== null) state.shop = shopNorm;
@@ -6089,38 +6069,19 @@ window.addEventListener('beforeunload', () => {
 });
 
 /* ============================================================
-   ★★★ 查字典模块（虚拟滚动 / 按需加载）★★★
-   左索引与右汉字表各占一半，右侧只渲染可视区附近的页，
-   点击索引 N → 立即加载 N-1、N、N+1；滑动到下一页再加载下一页。
+   ★★★ 查字典模块（dictionary-data / WebP 懒加载）★★★
+   图片路径：dictionary-data/Dictionary_p001.webp
+              dictionary-data/Dictionary_p002.webp
+              …（三位数字，不足补 0）
+   · 首次打开自动探测总页数（HEAD 请求 + 指数/二分查找）
+   · 只加载可视区域附近的页，滚动到哪加载到哪
+   · 双击页面即可把该页页码记到当前生字上，并同步到云端
 ============================================================ */
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-const DICT_INDEX_DATA = [
-  {letter:'A',items:[['a','啊',1],['ai','哀',2],['an','安',3],['ang','肮',5],['ao','熬',6]]},
-  {letter:'B',items:[['ba','八',7],['bai','白',10],['ban','班',12],['bang','帮',14],['bao','包',15],['bei','杯',18],['ben','奔',20],['beng','崩',21],['bi','逼',22],['bian','边',27],['biao','标',29],['bie','别',31],['bin','宾',32],['bing','兵',33],['bo','玻',34],['bu','不',37]]},
-  {letter:'C',items:[['ca','擦',39],['cai','猜',40],['can','餐',41],['cang','仓',42],['cao','操',42],['ce','策',43],['cen','岑',44],['ceng','层',44],['cha','插',45],['chai','拆',47],['chan','搀',47],['chang','昌',50],['chao','超',52],['che','车',53],['chen','尘',54],['cheng','称',56],['chi','吃',58],['chong','充',61],['chou','抽',63],['chu','初',64],['chua','欻',67],['chuai','揣',67],['chuan','川',68],['chuang','窗',69],['chui','吹',70],['chun','春',70],['chuo','戳',71],['ci','词',72],['cong','聪',74],['cou','凑',75],['cu','粗',75],['cuan','撺',76],['cui','崔',77],['cun','村',78],['cuo','搓',78]]},
-  {letter:'D',items:[['da','搭',80],['dai','呆',82],['dan','丹',84],['dang','当',87],['dao','刀',89],['de','德',91],['dei','得',92],['deng','登',92],['di','低',93],['dia','嗲',97],['dian','点',97],['diao','刁',100],['die','爹',101],['ding','丁',102],['diu','丢',104],['dong','东',104],['dou','兜',106],['du','都',107],['duan','端',110],['dui','堆',111],['dun','吨',112],['duo','多',114]]},
-  {letter:'E',items:[['e','鹅',116],['en','恩',119],['er','儿',119]]},
-  {letter:'F',items:[['fa','发',121],['fan','帆',122],['fang','方',125],['fei','非',127],['fen','分',130],['feng','风',132],['fo','佛',134],['fou','否',134],['fu','夫',134]]},
-  {letter:'G',items:[['ga','嘎',142],['gai','该',143],['gan','干',144],['gang','钢',147],['gao','高',148],['ge','哥',150],['gei','给',153],['gen','根',153],['geng','耕',154],['gong','工',155],['gou','沟',157],['gu','姑',159],['gua','瓜',164],['guai','乖',165],['guan','关',165],['guang','光',168],['gui','归',169],['gun','棍',172],['guo','锅',172]]},
-  {letter:'H',items:[['ha','哈',174],['hai','孩',175],['han','含',176],['hang','航',178],['hao','蒿',179],['he','喝',181],['hei','黑',184],['hen','痕',185],['heng','恒',185],['hng','哼',186],['hong','烘',186],['hou','喉',188],['hu','呼',189],['hua','花',193],['huai','怀',195],['huan','欢',195],['huang','荒',198],['hui','灰',200],['hun','昏',204],['huo','活',205]]},
-  {letter:'J',items:[['ji','机',207],['jia','加',216],['jian','尖',220],['jiang','江',226],['jiao','交',228],['jie','阶',232],['jin','今',237],['jing','京',240],['jiong','迥',244],['jiu','究',245],['ju','居',247],['juan','捐',251],['jue','决',252],['jun','军',255]]},
-  {letter:'K',items:[['ka','咖',256],['kai','开',257],['kan','刊',258],['kang','康',260],['kao','考',261],['ke','科',261],['ken','肯',265],['keng','坑',265],['kong','空',265],['kou','抠',266],['ku','枯',268],['kua','夸',269],['kuai','快',269],['kuan','宽',270],['kuang','筐',270],['kui','亏',272],['kun','昆',274],['kuo','阔',275]]},
-  {letter:'L',items:[['la','拉',275],['lai','来',277],['lan','兰',278],['lang','狼',280],['lao','捞',282],['le','勒',283],['lei','类',284],['leng','冷',286],['li','里',286],['lia','俩',293],['lian','连',293],['liang','良',295],['liao','疗',298],['lie','列',300],['lin','林',301],['ling','玲',303],['liu','留',306],['long','龙',308],['lou','搂',310],['lu','卢',312],['lü','吕',315],['luan','乱',316],['lüe','略',317],['lun','抡',318],['luo','罗',319]]},
-  {letter:'M',items:[['ma','妈',322],['mai','埋',323],['man','蛮',324],['mang','忙',326],['mao','猫',327],['me','么',329],['mei','眉',329],['men','门',331],['meng','蒙',332],['mi','迷',334],['mian','面',336],['miao','苗',338],['mie','灭',339],['min','民',339],['ming','明',341],['miu','谬',342],['mo','摸',342],['mou','谋',345],['mu','木',346]]},
-  {letter:'N',items:[['na','那',348],['nai','乃',349],['nan','男',350],['nang','囊',351],['nao','闹',351],['ne','讷',353],['nei','内',353],['nen','嫩',353],['neng','能',354],['ni','泥',354],['nian','年',356],['niang','娘',357],['niao','鸟',357],['nie','捏',357],['nin','您',358],['ning','宁',358],['niu','牛',360],['nong','农',360],['nou','耨',361],['nu','奴',361],['nü','女',361],['nuan','暖',362],['nüe','虐',362],['nuo','挪',362]]},
-  {letter:'O',items:[['o','哦',363],['ou','欧',363]]},
-  {letter:'P',items:[['pa','怕',364],['pai','拍',365],['pan','攀',366],['pang','旁',367],['pao','抛',368],['pei','胚',370],['pen','喷',371],['peng','烹',371],['pi','批',372],['pian','偏',376],['piao','飘',377],['pie','撇',378],['pin','拼',379],['ping','乒',380],['po','坡',381],['pou','剖',383],['pu','扑',383]]},
-  {letter:'Q',items:[['qi','七',385],['qia','恰',391],['qian','千',392],['qiang','枪',396],['qiao','敲',398],['qie','切',400],['qin','亲',401],['qing','青',403],['qiong','穷',405],['qiu','秋',406],['qu','区',408],['quan','圈',411],['que','缺',412],['qun','群',414]]},
-  {letter:'R',items:[['ran','然',414],['rang','嚷',415],['rao','饶',415],['re','热',416],['ren','人',416],['reng','扔',418],['ri','日',418],['rong','容',418],['rou','柔',420],['ru','如',420],['rua','挼',421],['ruan','软',422],['rui','锐',422],['run','润',423],['ruo','弱',423]]},
-  {letter:'S',items:[['sa','撒',424],['sai','塞',424],['san','三',425],['sang','桑',425],['sao','搔',426],['se','涩',427],['sen','森',427],['seng','僧',427],['sha','杀',428],['shai','筛',429],['shan','山',429],['shang','商',432],['shao','烧',434],['she','奢',436],['shei','谁',437],['shen','深',437],['sheng','升',441],['shi','诗',443],['shou','收',449],['shu','书',450],['shua','刷',454],['shuai','衰',454],['shuan','闩',455],['shuang','双',455],['shui','水',456],['shun','顺',456],['shuo','说',457],['si','思',457],['song','松',460],['sou','搜',461],['su','苏',462],['suan','酸',464],['sui','虽',464],['sun','孙',466],['suo','梭',466]]},
-  {letter:'T',items:[['ta','他',468],['tai','胎',470],['tan','贪',471],['tang','汤',474],['tao','涛',476],['te','特',478],['teng','疼',479],['ti','梯',479],['tian','天',482],['tiao','挑',484],['tie','贴',485],['ting','听',486],['tong','通',488],['tou','偷',490],['tu','突',492],['tuan','团',494],['tui','推',494],['tun','吞',495],['tuo','拖',496]]},
-  {letter:'W',items:[['wa','挖',498],['wai','歪',499],['wan','弯',499],['wang','汪',502],['wei','危',503],['wen','温',509],['weng','翁',510],['wo','窝',511],['wu','污',512]]},
-  {letter:'X',items:[['xi','西',516],['xia','虾',522],['xian','先',524],['xiang','香',529],['xiao','消',532],['xie','些',535],['xin','心',538],['xing','星',539],['xiong','兄',542],['xiu','休',543],['xu','需',545],['xuan','宣',548],['xue','靴',550],['xun','勋',551]]},
-  {letter:'Y',items:[['ya','呀',554],['yan','烟',556],['yang','央',562],['yao','腰',565],['ye','爷',568],['yi','一',570],['yin','音',579],['ying','英',582],['yo','唷',586],['yong','拥',586],['you','优',588],['yu','于',592],['yuan','渊',599],['yue','约',602],['yun','云',604]]},
-  {letter:'Z',items:[['za','匝',606],['zai','栽',607],['zan','赞',608],['zang','脏',609],['zao','遭',610],['ze','则',612],['zei','贼',613],['zen','怎',613],['zeng','增',614],['zha','扎',614],['zhai','摘',617],['zhan','沾',618],['zhang','章',620],['zhao','招',622],['zhe','遮',624],['zhei','这',626],['zhen','针',627],['zheng','征',629],['zhi','之',632],['zhong','忠',639],['zhou','州',641],['zhu','朱',643],['zhua','抓',647],['zhuai','拽',648],['zhuan','专',648],['zhuang','庄',649],['zhui','追',650],['zhun','准',651],['zhuo','捉',652],['zi','资',653],['zong','宗',657],['zou','邹',658],['zu','租',659],['zuan','钻',660],['zui','最',661],['zun','尊',661],['zuo','作',662]]}
-];
+const DICT_DIR = 'dictionary-data/';
+const DICT_TOTAL_KEY = 'study_board_dict_total_pages_v1';
+const DICT_GAP = 12;          // 页间距（px）
+const DICT_PAD = 12;          // 顶部/底部留白（px）
+const DICT_MAX_PROBE = 4096;  // 探测上限，防止死循环
 
 const dictModal = $('dictModal');
 const dictCurCharEl = $('dictCurChar');
@@ -6133,25 +6094,234 @@ const dictPageInputEl = $('dictPageInput');
 const dictTotalPagesEl = $('dictTotalPages');
 const dictZoomLabelEl = $('dictZoomLabel');
 
-const DICT_PDF_NAMES = [
-  ['汉字表1.pdf', '汉字表1.PDF', '汉字表一.pdf', '../汉字表1.pdf', '../识字表.pdf'],
-  ['汉字表2.pdf', '汉字表2.PDF', '汉字表二.pdf', '../汉字表2.pdf', '../写字表.pdf']
-];
-const DICT_GAP = 12;   // 页间距（px）
-const DICT_PAD = 12;   // 顶部/底部留白（px）
-
 let dictCurrentChar = null;
-let dictPdfs = [null, null];         // { pdf, name }
-let dictPdfLoading = [null, null];   // Promise
-let dictInitPromise = null;
-let dictPageW = 0, dictPageH = 0;
 let dictTotalPages = 0;
+let dictInitPromise = null;
+let dictProbeMode = 'head';        // 'head' | 'image'
+let dictPageW = 1000, dictPageH = 1414;
 let dictBaseScale = 1, dictZoom = 1, dictCurScale = 0;
-let dictRendered = new Map();        // num -> entry
+let dictRendered = new Map();      // num -> { num, el, img }
 let dictLastShownPage = 1;
 let dictMarkedPage = 0;
 let dictHitEntryBtn = null;
 let dictScrollRaf = null;
+let dictObserver = null;
+
+function dictUrl(n){
+  return DICT_DIR + 'Dictionary_p' + String(n).padStart(3, '0') + '.webp';
+}
+
+/* ---------- 页数探测 ---------- */
+function dictImageExists(n, timeout){
+  return new Promise(resolve => {
+    const img = new Image();
+    let done = false;
+    const finish = ok => {
+      if(done) return; done = true;
+      clearTimeout(timer);
+      img.onload = img.onerror = null;
+      resolve(ok);
+    };
+    const timer = setTimeout(() => finish(false), timeout || 8000);
+    img.onload = () => finish(true);
+    img.onerror = () => finish(false);
+    img.src = dictUrl(n);
+  });
+}
+async function dictProbe(n){
+  if(dictProbeMode === 'head'){
+    try{
+      const res = await fetch(dictUrl(n), { method: 'HEAD' });
+      return !!res.ok;
+    }catch(e){
+      dictProbeMode = 'image';   // HEAD 不可用，改用图片探测
+    }
+  }
+  return await dictImageExists(n);
+}
+async function dictDiscoverTotal(){
+  if(dictTotalPages > 0) return dictTotalPages;
+  let cached = 0;
+  try{ cached = Number(localStorage.getItem(DICT_TOTAL_KEY)) || 0; }catch(e){}
+  if(cached > 0 && await dictProbe(cached) && await dictProbe(1)){
+    dictTotalPages = cached;
+    return cached;
+  }
+  if(!await dictProbe(1)){
+    if(dictProbeMode === 'head' && await dictImageExists(1)){
+      dictProbeMode = 'image';
+    } else {
+      dictTotalPages = 0;
+      return 0;
+    }
+  }
+  /* 指数查找上界 */
+  let lo = 1, hi = 0, step = 2;
+  while(step <= DICT_MAX_PROBE){
+    if(await dictProbe(step)){ lo = step; step *= 2; }
+    else { hi = step; break; }
+  }
+  if(hi === 0) hi = lo + 1;
+  /* 二分收敛 */
+  while(hi - lo > 1){
+    const mid = Math.floor((lo + hi) / 2);
+    if(await dictProbe(mid)) lo = mid; else hi = mid;
+  }
+  dictTotalPages = lo;
+  try{ localStorage.setItem(DICT_TOTAL_KEY, String(lo)); }catch(e){}
+  return lo;
+}
+
+/* ---------- 初始化 ---------- */
+async function dictDoInit(){
+  dictLoadingEl.style.display = 'flex';
+  dictEmptyEl.style.display = 'none';
+  dictFileStatus.textContent = '⏳ 正在载入字典…';
+  const total = await dictDiscoverTotal();
+  if(!total){
+    dictLoadingEl.style.display = 'none';
+    dictEmptyEl.style.display = 'flex';
+    dictFileStatus.textContent = '⚠️ 未找到字典图片，请把 Dictionary_p001.webp … 放到 dictionary-data 文件夹';
+    return 0;
+  }
+  const size = await new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => resolve({ w: img.naturalWidth || 1000, h: img.naturalHeight || 1414 });
+    img.onerror = () => resolve(null);
+    img.src = dictUrl(1);
+  });
+  if(size){ dictPageW = size.w; dictPageH = size.h; }
+  dictComputeBaseScale();
+  dictCurScale = dictBaseScale * dictZoom;
+  dictZoomLabelEl.textContent = Math.round(dictZoom * 100) + '%';
+  dictBuildPages();
+  dictLayout();
+  dictTotalPagesEl.textContent = '/ ' + total + ' 页';
+  dictPageInputEl.max = String(total);
+  dictLoadingEl.style.display = 'none';
+  dictFileStatus.innerHTML = '<span class="dict-loaded">✅ 已载入 ' + total + ' 页</span>　提示：双击页面即可标记该生字的页码';
+  dictLastShownPage = 1;
+  dictPageInputEl.value = 1;
+  dictScrollEl.scrollTop = 0;
+  return total;
+}
+function dictInit(){
+  if(dictTotalPages > 0) return Promise.resolve(dictTotalPages);
+  if(!dictInitPromise){
+    dictInitPromise = dictDoInit().catch(err => {
+      dictInitPromise = null;
+      console.warn('字典载入失败', err);
+      dictLoadingEl.style.display = 'none';
+      dictEmptyEl.style.display = 'flex';
+      dictFileStatus.textContent = '⚠️ 字典载入失败：' + (err && err.message ? err.message : '未知错误');
+      throw err;
+    });
+  }
+  return dictInitPromise;
+}
+
+/* ---------- 页面 DOM（懒加载） ---------- */
+function dictBuildPages(){
+  if(dictObserver){ try{ dictObserver.disconnect(); }catch(e){} dictObserver = null; }
+  dictRendered.clear();
+  dictPagesEl.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  for(let n = 1; n <= dictTotalPages; n++){
+    const el = document.createElement('div');
+    el.className = 'dict-page';
+    el.dataset.num = String(n);
+    const img = document.createElement('img');
+    img.className = 'dict-page-img';
+    img.dataset.src = dictUrl(n);
+    img.alt = '第 ' + n + ' 页';
+    img.decoding = 'async';
+    el.appendChild(img);
+    img.addEventListener('load', () => { el.classList.add('loaded'); el.classList.remove('failed'); });
+    img.addEventListener('error', () => { el.classList.add('failed'); el.classList.remove('loaded'); });
+    frag.appendChild(el);
+    dictRendered.set(n, { num: n, el, img });
+  }
+  dictPagesEl.appendChild(frag);
+  dictSetupObserver();
+}
+function dictSetupObserver(){
+  if(!('IntersectionObserver' in window)){
+    dictRendered.forEach(e => { if(!e.img.getAttribute('src')) e.img.src = e.img.dataset.src; });
+    return;
+  }
+  dictObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(!entry.isIntersecting) return;
+      const el = entry.target;
+      const img = el.querySelector('.dict-page-img');
+      if(img && !img.getAttribute('src')) img.src = img.dataset.src;
+      try{ dictObserver.unobserve(el); }catch(e){}
+    });
+  }, { root: dictScrollEl, rootMargin: '900px 0px' });
+  dictRendered.forEach(e => { try{ dictObserver.observe(e.el); }catch(err){} });
+}
+function dictEnsureLoaded(n){
+  const e = dictRendered.get(n);
+  if(e && !e.img.getAttribute('src')) e.img.src = e.img.dataset.src;
+}
+
+/* ---------- 布局 / 缩放 ---------- */
+function dictPageTop(num){
+  return DICT_PAD + (num - 1) * (dictPageH * dictCurScale + DICT_GAP);
+}
+function dictLayout(){
+  if(!dictTotalPages || !dictPageH) return;
+  const h = dictPageH * dictCurScale;
+  const w = dictPageW * dictCurScale;
+  dictPagesEl.style.width = Math.round(w) + 'px';
+  dictPagesEl.style.height = Math.round(DICT_PAD * 2 + dictTotalPages * h + (dictTotalPages - 1) * DICT_GAP) + 'px';
+  dictRendered.forEach(e => {
+    e.el.style.width = Math.round(w) + 'px';
+    e.el.style.height = Math.round(h) + 'px';
+    e.el.style.top = Math.round(dictPageTop(e.num)) + 'px';
+  });
+}
+function dictComputeBaseScale(){
+  const availH = dictScrollEl.clientHeight - 24;
+  const availW = dictScrollEl.clientWidth - 24;
+  if(availH <= 20 || availW <= 20 || !dictPageH){ dictBaseScale = 1; return; }
+  dictBaseScale = Math.min(availH / dictPageH, availW / dictPageW);
+}
+function dictEnsureScaled(){
+  if(!dictPageH || !dictTotalPages) return;
+  const availH = dictScrollEl.clientHeight - 24;
+  const availW = dictScrollEl.clientWidth - 24;
+  if(availH <= 20 || availW <= 20) return;
+  const want = Math.min(availH / dictPageH, availW / dictPageW);
+  if(Math.abs(want - dictBaseScale) > 0.0005 || dictCurScale === 0){
+    dictBaseScale = want;
+    dictApplyScale();
+  }
+}
+function dictApplyScale(){
+  if(!dictPageH || !dictTotalPages) return;
+  const anchor = dictLastShownPage || 1;
+  dictCurScale = dictBaseScale * dictZoom;
+  dictZoomLabelEl.textContent = Math.round(dictZoom * 100) + '%';
+  dictLayout();
+  dictScrollEl.scrollTop = Math.max(0, dictPageTop(anchor) - DICT_PAD);
+  dictEnsureLoaded(anchor); dictEnsureLoaded(anchor - 1); dictEnsureLoaded(anchor + 1);
+}
+function dictSetZoom(z){
+  dictZoom = Math.min(5, Math.max(.25, z));
+  dictApplyScale();
+}
+
+/* ---------- 跳页 ---------- */
+function dictScrollToPage(n, smooth){
+  if(!dictTotalPages) return;
+  n = clamp(Math.round(n), 1, dictTotalPages);
+  const top = Math.max(0, dictPageTop(n) - DICT_PAD);
+  dictScrollEl.scrollTo({ top, behavior: smooth === false ? 'auto' : 'smooth' });
+  dictLastShownPage = n;
+  if(document.activeElement !== dictPageInputEl) dictPageInputEl.value = n;
+  dictEnsureLoaded(n); dictEnsureLoaded(n - 1); dictEnsureLoaded(n + 1); dictEnsureLoaded(n + 2);
+}
 
 /* ---------- 打开 / 关闭 ---------- */
 function dictClearHit(){
@@ -6165,12 +6335,11 @@ function dictLocateEntry(item){
     if(b.dataset.syl === item[0] && b.dataset.ex === item[1]){
       b.classList.add('dict-hit');
       dictHitEntryBtn = b;
-      b.scrollIntoView({ behavior:'smooth', block:'center' });
+      try{ b.scrollIntoView({ behavior:'smooth', block:'center' }); }catch(e){}
       return;
     }
   }
 }
-/* 在音节索引中查找生字：先例字精确匹配，再按无声调拼音匹配 */
 function dictFindEntryForChar(char){
   if(!char) return null;
   for(const d of DICT_INDEX_DATA){
@@ -6195,33 +6364,32 @@ function dictFindEntryForChar(char){
   }
   return null;
 }
+function dictApplyMarkHighlight(){
+  const saved = (dictCurrentChar && state.charPages) ? (state.charPages[dictCurrentChar] || 0) : 0;
+  dictMarkedPage = saved;
+  dictRendered.forEach(e => {
+    e.el.classList.toggle('mark-target', saved > 0 && e.num === saved);
+  });
+}
 function openDictFor(char){
   if(!char) return;
   dictCurrentChar = char;
   dictCurCharEl.textContent = char;
   dictModal.classList.add('show');
-  dictInit().then(() => {
-    dictEnsureScaled();
-    for(const [, e] of dictRendered){
-      e.el.title = '双击标记「' + char + '」的页码为第 ' + e.num + ' 页';
-    }
-    const saved = (state.charPages && state.charPages[char]) || 0;
-    dictMarkedPage = saved;
-    if(saved >= 1){
-      dictScrollToPage(saved, false);
-    }else{
+  dictInit().then(total => {
+    if(!total) return;
+    /* 等弹窗布局完成后再算尺寸，保证第一次打开就能正确适配 */
+    setTimeout(() => {
+      dictEnsureScaled();
+      dictApplyMarkHighlight();
+      const saved = (state.charPages && state.charPages[char]) || 0;
+      /* ★ 页码为空 → 加载第一页 */
+      const target = (saved >= 1) ? saved : 1;
+      dictScrollToPage(target, false);
       const hit = dictFindEntryForChar(char);
-      if(hit){
-        const pg = Number(hit[2]) || 0;
-        dictLocateEntry(hit);
-        if(pg >= 1){
-          dictScrollToPage(pg, false);
-          toast('已定位到「' + hit[0] + '」音节第 ' + pg + ' 页附近，找到「' + char + '」后双击所在页即可标记页码', 3000);
-        }
-      }
-    }
-    highlightDictMarkedPage();
-  });
+      if(hit) dictLocateEntry(hit); else dictClearHit();
+    }, 120);
+  }).catch(() => {});
 }
 function closeDictModal(){
   dictModal.classList.remove('show');
@@ -6250,311 +6418,9 @@ document.addEventListener('click', e => {
   else showStrokeQuiz(ch, task);
 });
 
-/* ---------- PDF 文档懒加载 ---------- */
-async function dictLoadDoc(idx){
-  if(dictPdfs[idx]) return dictPdfs[idx];
-  if(dictPdfLoading[idx]) return dictPdfLoading[idx];
-  dictPdfLoading[idx] = (async () => {
-    for(const name of DICT_PDF_NAMES[idx]){
-      try{
-        const res = await fetch(name);
-        if(!res.ok) continue;
-        const buf = await res.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
-        dictPdfs[idx] = { pdf, name };
-        return dictPdfs[idx];
-      }catch(err){ /* 尝试下一个候选文件名 */ }
-    }
-    return null;
-  })();
-  return dictPdfLoading[idx];
-}
-function dictN1(){ return dictPdfs[0] ? dictPdfs[0].pdf.numPages : 0; }
-function dictTotalKnown(){
-  let n = 0;
-  if(dictPdfs[0]) n += dictPdfs[0].pdf.numPages;
-  if(dictPdfs[1]) n += dictPdfs[1].pdf.numPages;
-  return n;
-}
-function dictPagePos(num){
-  const n1 = dictN1();
-  if(num <= n1) return { pdfIdx: 0, localPage: num };
-  return { pdfIdx: 1, localPage: num - n1 };
-}
-function dictPageTop(num){
-  return DICT_PAD + (num - 1) * (dictPageH * dictCurScale + DICT_GAP);
-}
-
-async function dictDoInit(){
-  dictLoadingEl.style.display = 'flex';
-  dictEmptyEl.style.display = 'none';
-  dictFileStatus.innerHTML = '⏳ 正在载入汉字表 PDF…';
-  const d1 = await dictLoadDoc(0);
-  if(!d1) await dictLoadDoc(1);
-  const ref = dictPdfs[0] || dictPdfs[1];
-  dictUpdateFileStatus();
-  if(!ref) return;
-  try{
-    const p = await ref.pdf.getPage(1);
-    const vp = p.getViewport({ scale: 1 });
-    dictPageW = vp.width; dictPageH = vp.height;
-  }catch(e){ console.warn('读取汉字表尺寸失败', e); return; }
-  dictTotalPages = dictTotalKnown();
-  dictTotalPagesEl.textContent = '/ ' + dictTotalPages + ' 页';
-  dictComputeBaseScale();
-  dictCurScale = dictBaseScale * dictZoom;
-  dictZoomLabelEl.textContent = Math.round(dictZoom * 100) + '%';
-  dictLayout();
-  dictUpdateWindow();
-  /* 汉字表2 空闲后再载入，避免一上来就同时解析两个大 PDF */
-  if(!dictPdfs[1]){
-    setTimeout(() => {
-      dictLoadDoc(1).then(d => {
-        if(!d){ dictUpdateFileStatus(); return; }
-        dictTotalPages = dictTotalKnown();
-        dictTotalPagesEl.textContent = '/ ' + dictTotalPages + ' 页';
-        dictLayout();
-        dictUpdateWindow();
-        dictUpdateFileStatus();
-      });
-    }, 1200);
-  }
-}
-function dictInit(){
-  if(!dictInitPromise) dictInitPromise = dictDoInit();
-  return dictInitPromise;
-}
-function dictUpdateFileStatus(){
-  const n1 = dictPdfs[0] ? dictPdfs[0].pdf.numPages : 0;
-  const n2 = dictPdfs[1] ? dictPdfs[1].pdf.numPages : 0;
-  const loading = !!(dictPdfLoading[0] || dictPdfLoading[1]);
-  if(n1 || n2){
-    dictLoadingEl.style.display = 'none';
-    dictEmptyEl.style.display = 'none';
-    const s2 = n2
-      ? '　<span class="dict-loaded">✅ 汉字表2：' + n2 + ' 页</span>'
-      : (dictPdfLoading[1] ? '　⏳ 汉字表2 载入中…' : '　ℹ️ 汉字表2 未载入（翻到 363 页以后自动载入）');
-    dictFileStatus.innerHTML = '<span class="dict-loaded">✅ 汉字表1：' + n1 + ' 页</span>' + s2 + '　合计 ' + (n1 + n2) + ' 页';
-  } else if(loading){
-    dictLoadingEl.style.display = 'flex';
-    dictEmptyEl.style.display = 'none';
-    dictFileStatus.innerHTML = '⏳ 正在自动载入汉字表 PDF…';
-  } else {
-    dictLoadingEl.style.display = 'none';
-    dictEmptyEl.style.display = 'flex';
-    dictFileStatus.innerHTML = '⚠️ 未在根目录找到《汉字表1.pdf / 汉字表2.pdf》，可点上方按钮手动上传，或点「🔄 重载」重试';
-  }
-}
-/* 手动重新载入 */
-$('dictReloadBtn').addEventListener('click', () => {
-  dictInitPromise = null;
-  dictPdfs = [null, null];
-  dictPdfLoading = [null, null];
-  dictTotalPages = 0;
-  for(const num of Array.from(dictRendered.keys())) dictDisposeEntry(num);
-  dictPagesEl.innerHTML = '';
-  dictPageW = 0; dictPageH = 0; dictCurScale = 0;
-  dictUpdateFileStatus();
-  dictInit();
-  toast('正在重新载入汉字表 PDF…', 1800);
-});
-$('dictFile1').addEventListener('change', async e => {
-  const f = e.target.files[0]; if(!f) return;
-  try{
-    const buf = await f.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
-    dictPdfs[0] = { pdf, name: f.name };
-    dictRebuildAfterManualLoad();
-  }catch(err){ console.error(err); toast('PDF 载入失败：' + err.message); }
-});
-$('dictFile2').addEventListener('change', async e => {
-  const f = e.target.files[0]; if(!f) return;
-  try{
-    const buf = await f.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
-    dictPdfs[1] = { pdf, name: f.name };
-    dictRebuildAfterManualLoad();
-  }catch(err){ console.error(err); toast('PDF 载入失败：' + err.message); }
-});
-async function dictRebuildAfterManualLoad(){
-  const ref = dictPdfs[0] || dictPdfs[1];
-  if(ref && !dictPageH){
-    try{
-      const p = await ref.pdf.getPage(1);
-      const vp = p.getViewport({ scale: 1 });
-      dictPageW = vp.width; dictPageH = vp.height;
-    }catch(e){}
-  }
-  for(const num of Array.from(dictRendered.keys())) dictDisposeEntry(num);
-  dictPagesEl.innerHTML = '';
-  dictTotalPages = dictTotalKnown();
-  dictTotalPagesEl.textContent = '/ ' + dictTotalPages + ' 页';
-  dictComputeBaseScale();
-  dictCurScale = dictBaseScale * dictZoom;
-  dictLayout();
-  dictUpdateWindow();
-  dictUpdateFileStatus();
-}
-
-/* ---------- 缩放 / 布局 ---------- */
-function dictComputeBaseScale(){
-  const availH = dictScrollEl.clientHeight - 24;
-  const availW = dictScrollEl.clientWidth - 24;
-  if(availH <= 20 || availW <= 20 || !dictPageH){ dictBaseScale = 1; return; }
-  dictBaseScale = Math.min(availH / dictPageH, availW / dictPageW);
-}
-function dictEnsureScaled(){
-  if(!dictPageH || !dictTotalPages) return;
-  const availH = dictScrollEl.clientHeight - 24;
-  const availW = dictScrollEl.clientWidth - 24;
-  if(availH <= 20 || availW <= 20) return;
-  const want = Math.min(availH / dictPageH, availW / dictPageW);
-  if(Math.abs(want - dictBaseScale) > 0.0005 || dictCurScale === 0){
-    dictBaseScale = want;
-    dictApplyScale();
-  }
-}
-function dictApplyScale(){
-  if(!dictPageH || !dictTotalPages) return;
-  const anchor = dictLastShownPage || 1;
-  dictCurScale = dictBaseScale * dictZoom;
-  dictZoomLabelEl.textContent = Math.round(dictZoom * 100) + '%';
-  for(const num of Array.from(dictRendered.keys())) dictDisposeEntry(num);
-  dictLayout();
-  dictScrollEl.scrollTop = Math.max(0, dictPageTop(anchor) - DICT_PAD);
-  dictUpdateWindow();
-}
-function dictLayout(){
-  if(!dictPageH || !dictTotalPages) return;
-  const h = dictPageH * dictCurScale;
-  const w = dictPageW * dictCurScale;
-  dictPagesEl.style.width = Math.round(w) + 'px';
-  dictPagesEl.style.height = Math.round(DICT_PAD * 2 + dictTotalPages * h + (dictTotalPages - 1) * DICT_GAP) + 'px';
-  for(const [, e] of dictRendered){
-    e.el.style.width = Math.round(w) + 'px';
-    e.el.style.height = Math.round(h) + 'px';
-    e.el.style.top = Math.round(dictPageTop(e.num)) + 'px';
-  }
-}
-
-/* ---------- 虚拟渲染窗口 ---------- */
-function dictDisposeEntry(num){
-  const e = dictRendered.get(num);
-  if(!e) return;
-  if(e.pdfTask){ try{ e.pdfTask.cancel(); }catch(_){} e.pdfTask = null; }
-  if(e.el && e.el.parentNode) e.el.parentNode.removeChild(e.el);
-  dictRendered.delete(num);
-}
-function dictUpdateWindow(){
-  if(!dictTotalPages || !dictPageH || !dictCurScale) return;
-  const rowH = dictPageH * dictCurScale + DICT_GAP;
-  const st = dictScrollEl.scrollTop;
-  const vh = dictScrollEl.clientHeight || 400;
-  const first = clamp(Math.floor((st - DICT_PAD) / rowH) + 1, 1, dictTotalPages);
-  const last  = clamp(Math.floor((st + vh - DICT_PAD) / rowH) + 1, 1, dictTotalPages);
-  const want = new Set();
-  for(let n = Math.max(1, first - 1); n <= Math.min(dictTotalPages, last + 1); n++) want.add(n);
-  for(const num of Array.from(dictRendered.keys())){
-    if(!want.has(num)) dictDisposeEntry(num);
-  }
-  for(const n of want){
-    if(!dictRendered.has(n)) dictCreateEntry(n);
-  }
-  if(first !== dictLastShownPage){
-    dictLastShownPage = first;
-    if(document.activeElement !== dictPageInputEl) dictPageInputEl.value = first;
-  }
-}
-function dictCreateEntry(num){
-  const pos = dictPagePos(num);
-  const d = dictPdfs[pos.pdfIdx];
-  if(!d) return;
-  const el = document.createElement('div');
-  el.className = 'pdf-page';
-  el.dataset.num = num;
-  el.dataset.page = num;
-  el.title = '双击标记「' + (dictCurrentChar || '字') + '」的页码为第 ' + num + ' 页';
-  el.style.width = Math.round(dictPageW * dictCurScale) + 'px';
-  el.style.height = Math.round(dictPageH * dictCurScale) + 'px';
-  el.style.top = Math.round(dictPageTop(num)) + 'px';
-  if(dictMarkedPage > 0 && num === dictMarkedPage) el.classList.add('mark-target');
-  const canvas = document.createElement('canvas');
-  canvas.className = 'pdf-canvas';
-  canvas.width = 1; canvas.height = 1;
-  el.appendChild(canvas);
-  dictPagesEl.appendChild(el);
-  const entry = {
-    num, el, canvas,
-    pdfIdx: pos.pdfIdx, localPage: pos.localPage,
-    pageObj: null, pagePromise: null,
-    busy: false, pdfTask: null, rendered: false
-  };
-  dictRendered.set(num, entry);
-  dictRenderEntry(entry);
-}
-async function dictRenderEntry(e){
-  if(e.busy || e.rendered) return;
-  const scaleAtStart = dictCurScale;
-  e.busy = true;
-  try{
-    const d = dictPdfs[e.pdfIdx];
-    if(!d) return;
-    if(!e.pageObj){
-      if(!e.pagePromise) e.pagePromise = d.pdf.getPage(e.localPage);
-      e.pageObj = await e.pagePromise;
-    }
-    if(!dictRendered.has(e.num) || Math.abs(dictCurScale - scaleAtStart) > 0.0005) return;
-    const dpr = window.devicePixelRatio || 1;
-    let ratio = Math.min(Math.max(dpr * 1.5, 1.5), 3);
-    const cssW = dictPageW * scaleAtStart, cssH = dictPageH * scaleAtStart;
-    if(cssW * cssH * ratio * ratio > 20e6) ratio = Math.max(.5, Math.sqrt(20e6 / (cssW * cssH)));
-    const vp = e.pageObj.getViewport({ scale: scaleAtStart * ratio });
-    const cvs = e.canvas;
-    cvs.width = Math.max(1, Math.round(vp.width));
-    cvs.height = Math.max(1, Math.round(vp.height));
-    const ctx = cvs.getContext('2d', { alpha: false });
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, cvs.width, cvs.height);
-    const task = e.pageObj.render({ canvasContext: ctx, viewport: vp });
-    e.pdfTask = task;
-    await task.promise;
-    if(!dictRendered.has(e.num) || Math.abs(dictCurScale - scaleAtStart) > 0.0005) return;
-    e.rendered = true;
-    e.el.classList.add('rendered');
-  }catch(err){
-    if(!err || err.name !== 'RenderingCancelledException') console.warn(err);
-  }finally{
-    e.busy = false;
-    e.pdfTask = null;
-  }
-}
-
-/* ---------- 跳页 ---------- */
-async function dictScrollToPage(n, smooth){
-  if(!dictTotalPages) return;
-  n = clamp(Math.round(n), 1, dictTotalPages);
-  const pos = dictPagePos(n);
-  if(!dictPdfs[pos.pdfIdx]){
-    toast('正在载入汉字表' + (pos.pdfIdx + 1) + '…', 1600);
-    const d = await dictLoadDoc(pos.pdfIdx);
-    if(!d){ toast('未找到汉字表' + (pos.pdfIdx + 1) + '.pdf'); return; }
-    dictTotalPages = dictTotalKnown();
-    dictTotalPagesEl.textContent = '/ ' + dictTotalPages + ' 页';
-    dictLayout();
-    dictUpdateFileStatus();
-    n = clamp(n, 1, dictTotalPages);
-  }
-  dictUpdateWindow();
-  const top = Math.max(0, dictPageTop(n) - DICT_PAD);
-  dictScrollEl.scrollTo({ top, behavior: smooth === false ? 'auto' : 'smooth' });
-  dictLastShownPage = n;
-  if(document.activeElement !== dictPageInputEl) dictPageInputEl.value = n;
-  setTimeout(dictUpdateWindow, 80);
-}
-
-/* ---------- 双击 PDF 页面 → 标记页码 ---------- */
+/* ---------- 双击页面 → 标记页码 ---------- */
 dictPagesEl.addEventListener('dblclick', e => {
-  const pageEl = e.target.closest('.pdf-page');
+  const pageEl = e.target.closest('.dict-page');
   if(!pageEl) return;
   if(!dictCurrentChar){ toast('请先从预习生字的「页码」进入查字典'); return; }
   const n = Number(pageEl.dataset.num);
@@ -6564,25 +6430,14 @@ dictPagesEl.addEventListener('dblclick', e => {
   dictMarkedPage = n;
   saveLocalState(); uploadToCloud();
   dictClearHit();
-  for(const [, entry] of dictRendered) entry.el.classList.toggle('mark-target', entry.num === n);
+  dictRendered.forEach(en => en.el.classList.toggle('mark-target', en.num === n));
   document.querySelectorAll('.page-num[data-page-char="' + dictCurrentChar + '"]')
     .forEach(sp => { sp.textContent = n; });
   toast('✅ 「' + dictCurrentChar + '」页码已标记为第 ' + n + ' 页', 2400);
   setTimeout(closeDictModal, 700);
 });
-function highlightDictMarkedPage(){
-  const saved = (dictCurrentChar && state.charPages) ? (state.charPages[dictCurrentChar] || 0) : 0;
-  dictMarkedPage = saved;
-  for(const [num, e] of dictRendered){
-    e.el.classList.toggle('mark-target', saved > 0 && num === saved);
-  }
-}
 
 /* ---------- 缩放按钮 / 跳页输入 / 滚动 ---------- */
-function dictSetZoom(z){
-  dictZoom = Math.min(5, Math.max(.25, z));
-  dictApplyScale();
-}
 $('dictZoomIn').addEventListener('click', () => dictSetZoom(dictZoom * 1.25));
 $('dictZoomOut').addEventListener('click', () => dictSetZoom(dictZoom / 1.25));
 $('dictZoomFit').addEventListener('click', () => { dictZoom = 1; dictApplyScale(); });
@@ -6603,7 +6458,13 @@ dictScrollEl.addEventListener('scroll', () => {
   if(dictScrollRaf) return;
   dictScrollRaf = requestAnimationFrame(() => {
     dictScrollRaf = null;
-    dictUpdateWindow();
+    /* 记录当前大致页码（供缩放时保持位置） */
+    if(dictPageH && dictCurScale){
+      const rowH = dictPageH * dictCurScale + DICT_GAP;
+      const n = clamp(Math.floor((dictScrollEl.scrollTop - DICT_PAD) / rowH) + 1, 1, dictTotalPages || 1);
+      if(n !== dictLastShownPage) dictLastShownPage = n;
+      if(document.activeElement !== dictPageInputEl) dictPageInputEl.value = n;
+    }
   });
 }, { passive: true });
 
@@ -6644,8 +6505,8 @@ function dictBuildIndex(){
         '<span class="ex">' + escapeHtml(ex) + '</span>' +
         '<span class="pg' + (pg ? '' : ' none') + '">' + (pg || '—') + '</span>';
       btn.addEventListener('click', async () => {
-        if(!dictTotalPages){ await dictInit(); }
-        if(!dictTotalPages){ toast('请先等待汉字表载入'); return; }
+        if(!dictTotalPages){ try{ await dictInit(); }catch(e){} }
+        if(!dictTotalPages){ toast('请先等待字典载入'); return; }
         if(pg >= 1) dictScrollToPage(pg);
       });
       list.appendChild(btn);
