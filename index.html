@@ -1617,6 +1617,7 @@
         <button class="aa-btn" id="adminLocalDownloadBtn">📥 本地下载</button>
         <button class="aa-btn" id="adminToggleSyncBtn" style="background:linear-gradient(180deg,#B0BEC5,#78909C);border-color:#546E7A;box-shadow:0 3px 0 #455A64;color:#fff;flex:1 1 100%">🔌 断开云同步（本机独立运行）</button>
         <button class="aa-btn" id="adminClearSyncBtn" style="background:linear-gradient(180deg,#FF6B6B,#D32F2F);border-color:#B71C1C;box-shadow:0 3px 0 #B71C1C;color:#fff;flex:1 1 100%">🗑 彻底清除同步任务（需密码）</button>
+        <button class="aa-btn" id="adminClearTasksBtn" style="background:linear-gradient(180deg,#FF9800,#EF6C00);border-color:#E65100;box-shadow:0 3px 0 #E65100;color:#fff;flex:1 1 100%">🧹 强制清除今天之后的任务并断开同步（需密码）</button>
         <input type="file" id="adminLocalUploadFile" accept=".json,application/json" style="display:none">
       </div>
       <div style="font-size:12px;color:#5a7a8a;font-weight:700;margin-top:10px" id="adminSyncInfo">最后同步：—</div>
@@ -4629,6 +4630,7 @@ function confirmPassword(){
   if(purpose === 'admin') enterAdminMode();
   else if(purpose === 'check'){ if(checkId) doToggleTaskDone(checkId); }
   else if(purpose === 'clearSync') doClearSyncTask();
+  else if(purpose === 'clearFrom16') doClearTasksAfterToday();
 }
 function requestPause(){
   const L = state.live;
@@ -6342,6 +6344,42 @@ $('adminForcePullBtn').addEventListener('click', async () => {
   } else if(result.state === 'empty'){ toast('⚠️ 云端暂无数据'); updateSyncInfo('云端暂无数据'); }
   else { toast('⚠️ 读取云端失败'); updateSyncInfo('读取云端失败'); }
 });
+
+/* ★★★ 强制清除【今天之后】的所有任务 + 断开云同步关系（家长密码 + 二次确认）
+   删除 date 严格大于今天的全部日子（今天及以前的作业保留），
+   并真正解绑实时监听 + 持久断开同步，本机转为独立运行。 */
+function doClearTasksAfterToday(){
+  const today = todayStr();
+  const keys = Object.keys(state.days || {});
+  const toDel = keys.filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k) && k > today);
+  if(toDel.length){
+    toDel.forEach(k => { delete state.days[k]; });
+    invalidateLinkedIndex();
+  }
+  if(!state.days[today]) state.days[today] = makeDay();
+  state.date = today;
+  saveLocalState();
+  schedulePersist();
+  setSyncEnabled(false); stopCloudSync();
+  if(typeof updateToggleSyncBtn === 'function') updateToggleSyncBtn();
+  if(typeof updateSyncInfo === 'function') updateSyncInfo('📴 已断开云同步，并已清除今天之后的所有任务');
+  if(typeof showSyncStatus === 'function') showSyncStatus('📴 已断开云同步', 'offline');
+  try{ renderBoard(); }catch(e){}
+  try{ refreshAllCards(); }catch(e){}
+  try{ if(typeof renderCalendar === 'function') renderCalendar(); }catch(e){}
+  if(isAdminMode) renderAdminPanel();
+  toast('🧹 已清除 ' + toDel.length + ' 天的任务，并断开云同步（今天 ' + today + ' 及以前的作业已保留）', 4800);
+}
+$('adminClearTasksBtn').addEventListener('click', () => {
+  const today = todayStr();
+  const keys = Object.keys(state.days || {});
+  const toDel = keys.filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k) && k > today).sort();
+  if(!toDel.length){ toast('ℹ️ 今天（' + today + '）之后没有任何任务，无需清除'); return; }
+  if(!confirm('危险操作！\n即将强制删除【今天（' + today + '）之后】的全部任务，共 ' + toDel.length + ' 天：\n' + toDel.join('、') + '\n\n同时会彻底断开云同步关系，本机转为独立运行。\n今天及以前的作业不会被删除。\n\n此操作不可撤销，确定继续吗？')) return;
+  pwdPurpose = 'clearFrom16';
+  openPwdModal('危险操作确认', '强制清除任务并断开同步需要输入家长密码');
+});
+
 /* ★★★ 彻底清除同步任务（需家长密码 + 二次确认，删除该房间号云端数据与历史）★★★ */
 async function doClearSyncTask(){
   if(!dataRef || !fbSet){ toast('⚠️ 云端未连接，无法清除'); return; }
