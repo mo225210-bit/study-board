@@ -1110,7 +1110,7 @@
     </section>
   </div>
 
-  <div class="timer-hint" style="margin-top:-3px">自定义作业可直接勾选完成 · 📷 其他作业可拍照留存 · 🖼️ 查看作业照片 · ✋ 抄写并组词长按田字格可修改/删除 · ↶↷ 撤销恢复</div>
+  <div class="timer-hint" style="margin-top:-3px">自定义作业可直接勾选完成 · 📷 其他作业可拍照留存 · 🖼️ 查看作业照片 · ✋ 抄写词语长按田字格可修改/删除 · ↶↷ 撤销恢复</div>
 </div>
 
 <div class="modal" id="calModal">
@@ -2613,12 +2613,13 @@ function saveMiziEdit(){
 function bindMiziClicks(container, task){
   container.querySelectorAll('.mizi[data-char]').forEach(el => {
     let clickTimer = null;
+    let lastClickAt = 0;
     let lpTimer = null, lpX = 0, lpY = 0;
     el.__lpFired = false;
     const cancelLp = () => { if(lpTimer){ clearTimeout(lpTimer); lpTimer = null; } };
     const startLp = (ev) => {
-      /* 只对「抄写并组词」启用长按修改/删除 */
-      if(!task || task.type !== 'wordgroup') return;
+      /* 长按修改/删除：只对「抄写词语」(copy) 启用 */
+      if(!task || task.type !== 'copy') return;
       const p = ev.touches ? ev.touches[0] : ev;
       if(!p) return;
       lpX = p.clientX; lpY = p.clientY;
@@ -2627,6 +2628,7 @@ function bindMiziClicks(container, task){
         lpTimer = null;
         el.__lpFired = true;
         clearTimeout(clickTimer);
+        lastClickAt = 0;
         const ctx = getMiziUnitCtx(el, task);
         if(ctx) openMiziActionModal(ctx);
       }, 550);
@@ -2647,21 +2649,7 @@ function bindMiziClicks(container, task){
     el.addEventListener('mouseleave', cancelLp);
     el.addEventListener('contextmenu', e => e.preventDefault());
 
-    /* ★ 单击田字格 → 直接自动演示笔画顺序 */
-    el.addEventListener('click', e => {
-      e.stopPropagation();
-      if(el.__lpFired){ el.__lpFired = false; return; }
-      clearTimeout(clickTimer);
-      clickTimer = setTimeout(() => {
-        if(!task) { showStroke(el.dataset.char, null, 'plain'); return; }
-        if(task.type === 'wordgroup'){ showStroke(el.dataset.char, task, 'wordgroup'); }
-        else { showStroke(el.dataset.char, task, 'plain'); }
-      }, 260);
-    });
-    el.addEventListener('dblclick', e => {
-      e.preventDefault(); e.stopPropagation();
-      if(el.__lpFired){ el.__lpFired = false; return; }
-      clearTimeout(clickTimer);
+    const handleCheckToggle = () => {
       const group = el.closest('.word-group');
       const targets = group ? Array.from(group.querySelectorAll('.mizi[data-char]')) : [el];
       const willCheck = !el.classList.contains('checked');
@@ -2670,6 +2658,31 @@ function bindMiziClicks(container, task){
         if(task) setCharChecked(task, x.dataset.char, willCheck);
       });
       if(task) scheduleCheckSave();
+    };
+
+    /* 手动识别双击，兼容 iPad / 移动浏览器 */
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      if(el.__lpFired){ el.__lpFired = false; lastClickAt = 0; return; }
+      const now = Date.now();
+      if(lastClickAt && (now - lastClickAt) < 320){
+        lastClickAt = 0;
+        clearTimeout(clickTimer);
+        clickTimer = null;
+        handleCheckToggle();
+        return;
+      }
+      lastClickAt = now;
+      clearTimeout(clickTimer);
+      clickTimer = setTimeout(() => {
+        lastClickAt = 0;
+        if(!task) { showStroke(el.dataset.char, null, 'plain'); return; }
+        if(task.type === 'wordgroup' || task.type === 'copy'){
+          showStroke(el.dataset.char, task, 'wordgroup');
+        } else {
+          showStroke(el.dataset.char, task, 'plain');
+        }
+      }, 320);
     });
   });
 }
@@ -3239,7 +3252,7 @@ function renderCharCard(char, task){
   const strokeTip = strokeCount ? '点击查看笔顺动画' : '点击手写确认笔画';
   return `<div class="char-card">
     <div class="char-pinyin">${py ? escapeHtml(py) : '&nbsp;'}</div>
-    <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(char)}" title="单击看笔顺 · 双击打勾">
+    <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(char)}" title="${tip}">
       ${miziSvg()}
       <span class="mizi-char">${escapeHtml(char)}</span>
     </div>
@@ -3253,6 +3266,8 @@ function renderWordGroup(word, showInfo, task){
   const chars = [...word].filter(c => /[\u4e00-\u9fa5]/.test(c));
   if(!chars.length) return '';
   const wrapCls = showInfo ? 'word-group' : 'word-group no-char-info';
+  const isCopy = !!(task && task.type === 'copy');
+  const tip = isCopy ? '单击看笔顺 · 双击打勾 · 长按修改/删除' : '单击看笔顺 · 双击打勾';
   return `<div class="${wrapCls}" data-word-group="1">${chars.map(c => {
     const py = getPinyin(c);
     const checked = !!(task && Array.isArray(task.checkedChars) && task.checkedChars.indexOf(c) >= 0);
@@ -3282,7 +3297,7 @@ function renderWordGroupWithWords(char, task){
     : '<span class="word-empty">点击田字格组词</span>';
   return `<div class="char-card wordgroup-card" data-char="${escapeAttr(char)}">
     <div class="char-pinyin">${py ? escapeHtml(py) : '&nbsp;'}</div>
-    <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(char)}" title="单击组词 · 双击打勾 · 长按修改/删除">
+    <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(char)}" title="单击组词 · 双击打勾">
       ${miziSvg()}
       <span class="mizi-char">${escapeHtml(char)}</span>
     </div>
@@ -3505,8 +3520,8 @@ function renderSubjectCards(subject, listEl){
 
     const actions = document.createElement('div'); actions.className = 'card-actions';
 
-    /* ★ 撤销/恢复按钮（仅「抄写并组词」显示） */
-    if(task.type === 'wordgroup'){
+    /* ★ 撤销/恢复按钮（仅「抄写词语」显示） */
+    if(task.type === 'copy'){
       const undoBtn = document.createElement('button');
       undoBtn.type = 'button'; undoBtn.className = 'mini-btn undo'; undoBtn.textContent = '↶'; undoBtn.title = '撤销';
       undoBtn.disabled = !canUndoMizi(task.id);
