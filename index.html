@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="学习打卡台">
-<title>学习打卡台10160225</title>
+<title>学习打卡台10160236</title>
 <link rel="manifest" href="manifest.json">
 <script src="hanzi-data.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5.0/dist/hanzi-writer.min.js"></script>
@@ -6388,6 +6388,62 @@ $('studentTodayBtn').addEventListener('click', e => { e.stopPropagation(); switc
 $('adminPrevDay').addEventListener('click', () => shiftSelectedDate(-1));
 $('adminNextDay').addEventListener('click', () => shiftSelectedDate(1));
 $('adminCalDay').addEventListener('click', () => { calYear = Number(state.date.slice(0,4)); calMonth = Number(state.date.slice(5,7))-1; openCalendar(); });
+
+/* ===== 家长面板里的日历按钮：长按 2 秒同步前一天 ===== */
+(function bindAdminCalDayLongPress(){
+  const btn = document.getElementById('adminCalDay');
+  if(!btn) return;
+
+  let lpTimer = null;
+  let lpFired = false;
+  let sx = 0, sy = 0, active = false;
+
+  function start(x, y){
+    if(!isAdminMode) return;            // 只家长模式生效
+    active = true;
+    lpFired = false;
+    sx = x; sy = y;
+    clearTimeout(lpTimer);
+    lpTimer = setTimeout(function(){
+      lpTimer = null;
+      active = false;
+      lpFired = true;
+      try{ if(navigator.vibrate) navigator.vibrate(30); }catch(e){}
+      trySyncFromPreviousDay(state.date);
+      setTimeout(function(){ lpFired = false; }, 800);
+    }, 2000);
+  }
+  function cancel(){
+    clearTimeout(lpTimer); lpTimer = null; active = false;
+  }
+
+  btn.addEventListener('pointerdown', function(e){
+    if(e.pointerType === 'mouse' && e.button !== 0) return;
+    start(e.clientX, e.clientY);
+  });
+  btn.addEventListener('pointermove', function(e){
+    if(!active) return;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if(dx*dx + dy*dy > 2500) cancel();   // 移动超过 50px 才取消
+  });
+  btn.addEventListener('pointerup', function(e){
+    if(lpFired){ e.preventDefault(); e.stopPropagation(); return; }
+    cancel();
+  });
+  btn.addEventListener('pointercancel', cancel);
+  btn.addEventListener('pointerleave', cancel);
+  btn.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+
+  /* 用 capture 阶段拦下原有点击，长按已触发就别打开日历 */
+  btn.addEventListener('click', function(e){
+    if(lpFired){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      lpFired = false;
+    }
+  }, true);
+})();  
+  
 $('adminLocalDownloadBtn').addEventListener('click', () => {
   try{
     saveLocalState();
