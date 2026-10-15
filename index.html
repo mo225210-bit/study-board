@@ -1602,7 +1602,7 @@
 /* ============================================================
    ★★★ 版本号：每次修改界面/功能后请把这里 +1
 ============================================================ */
-const APP_VERSION = '2026.10.14.1';
+const APP_VERSION = '2026.10.15.1';
 
 /* ============================================================
    🔄 自动更新
@@ -1730,8 +1730,6 @@ const DEFAULT_DATA = {
 /* ============================================================
    字体设置（家长端可分类设置字号；字体统一为楷体）
 ============================================================ */
-/* 所有中文字体统一为楷体：仅保留楷体选项，
-   旧存档中的其他字体（宋体/黑体/仿宋等）会自动回退为楷体 */
 const FONT_OPTIONS = {
   kaiti:    { label:'楷体',     css:'"Kaiti SC","STKaiti","KaiTi","楷体","KaiTi_GB2312",serif' }
 };
@@ -1744,8 +1742,6 @@ const FONT_CATEGORIES = [
   { key:'pinyin',   label:'拼音',   varName:'--font-pinyin',   sizeVar:'--fs-pinyin',   defFont:'kaiti', defSize:18,  min:10, max:32 },
   { key:'hint',     label:'提示',   varName:'--font-hint',     sizeVar:'--fs-hint',     defFont:'kaiti', defSize:13,  min:8,  max:20 }
 ];
-/* 旧版默认字号 → 新版默认字号（整体加大，田字格除外）；
-   存档中仍为旧默认值的分类自动迁移到新默认，家长自定义过的字号保持不动 */
 const OLD_DEF_SIZES = { title:18, subtitle:14, body:14, button:13, mizi:38, pinyin:16, hint:11.5 };
 const DEFAULT_FONTS = {};
 FONT_CATEGORIES.forEach(c => { DEFAULT_FONTS[c.key] = { font:c.defFont, size:c.defSize }; });
@@ -1757,7 +1753,7 @@ function normalizeFontEntry(v, c){
   if(isFinite(n) && n > 0){
     size = n;
     if(OLD_DEF_SIZES[c.key] !== undefined && Math.abs(n - OLD_DEF_SIZES[c.key]) < 0.001){
-      size = c.defSize;  /* 旧默认 → 新默认（整体加大） */
+      size = c.defSize;
     }
   }else{
     size = c.defSize;
@@ -1963,6 +1959,39 @@ let miziActionCtx = null;
 let miziEditCtx = null;
 
 /* ============================================================
+   ★ 性能优化：保存/上传防抖 + 关联任务缓存
+============================================================ */
+let persistTimer = null;
+let persistPending = false;
+function schedulePersist(delay){
+  persistPending = true;
+  clearTimeout(persistTimer);
+  persistTimer = setTimeout(() => {
+    persistTimer = null;
+    if(!persistPending) return;
+    persistPending = false;
+    saveLocalState();
+    uploadToCloud();
+  }, delay == null ? 500 : delay);
+}
+function flushPersist(){
+  if(!persistPending) return;
+  persistPending = false;
+  clearTimeout(persistTimer); persistTimer = null;
+  try{ saveLocalState(); uploadToCloud(); }catch(e){}
+}
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'hidden') flushPersist();
+});
+window.addEventListener('pagehide', flushPersist);
+window.addEventListener('beforeunload', flushPersist);
+
+/* getLinkedTasks 缓存：避免每次勾选都全量扫描所有日期 */
+let _linkedIndexDirty = true;
+let _linkedIndex = new Map();
+function invalidateLinkedIndex(){ _linkedIndexDirty = true; }
+
+/* ============================================================
    设置规范化
 ============================================================ */
 function normalizeSettings(raw){
@@ -2019,7 +2048,6 @@ function normalizeSettings(raw){
       quickRows: (function(){
         const norm = arr => arr.map(r=>({content:String(r.content||'').slice(0,40),minutes:num(r.minutes,20,1,120),sun:num(r.sun,30,1,500)})).slice(0,20);
         if(Array.isArray(li.quickRows) && li.quickRows.length) return norm(li.quickRows);
-        /* 云端旧数据可能还没有 quickRows 字段，回退到本地独立副本，避免日常作业配置被清空 */
         const bak = readQuickRowsBackup();
         if(bak && bak.length) return norm(bak);
         return JSON.parse(JSON.stringify(d.lastInputs.quickRows || [{content:'每日阅读',minutes:20,sun:30}]));
@@ -2039,7 +2067,6 @@ function normalizeSettings(raw){
       timetable: pc.timetable !== undefined ? !!pc.timetable : true,
       font: pc.font !== undefined ? !!pc.font : true
     },
-    /* 旧版课程表默认字号 12.5 → 新版 13.5（整体加大） */
     ttFontSize: num(Number(r.ttFontSize) === 12.5 ? 13.5 : r.ttFontSize, d.ttFontSize, 8, 24),
     ttLineHeight: num(r.ttLineHeight, d.ttLineHeight, 1, 3)
   };
@@ -2246,7 +2273,10 @@ function saveLocalState(){
 }
 function pruneDays(){
   const keys = Object.keys(state.days).sort();
-  if(keys.length > MAX_DAYS_KEPT){ keys.slice(0, keys.length - MAX_DAYS_KEPT).forEach(k => delete state.days[k]); }
+  if(keys.length > MAX_DAYS_KEPT){
+    keys.slice(0, keys.length - MAX_DAYS_KEPT).forEach(k => delete state.days[k]);
+    invalidateLinkedIndex();
+  }
 }
 function allTasks(){ return Object.keys(SUBJECTS).flatMap(k => state.subjects[k] || []); }
 function findTask(id){
@@ -2290,6 +2320,7 @@ function syncFromPreviousDay(targetDate){
     });
   });
   state.days[targetDate] = out;
+  invalidateLinkedIndex();
   saveLocalState(); uploadToCloud();
   if(state.date === targetDate){
     renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
@@ -2297,16 +2328,29 @@ function syncFromPreviousDay(targetDate){
   }
   return { ok:true, srcDate, count };
 }
+/* ★ 缓存版：把 syncKey 相同的任务一次性建索引，避免每次勾选都全量扫描 */
 function getLinkedTasks(task){
-  if(!task || !task.syncKey) return [task].filter(Boolean);
-  const found = [];
-  Object.keys(state.days || {}).forEach(date => {
-    const day = state.days[date];
-    ['chinese','math','english'].forEach(k => (day[k] || []).forEach(t => {
-      if(t.syncKey === task.syncKey) found.push(t);
-    }));
-  });
-  return found.length ? found : [task];
+  if(!task) return [];
+  if(!task.syncKey) return [task];
+  if(_linkedIndexDirty){
+    _linkedIndex = new Map();
+    const days = state.days || {};
+    Object.keys(days).forEach(date => {
+      const day = days[date];
+      if(!day) return;
+      ['chinese','math','english'].forEach(k => {
+        (day[k] || []).forEach(t => {
+          if(!t.syncKey) return;
+          let arr = _linkedIndex.get(t.syncKey);
+          if(!arr){ arr = []; _linkedIndex.set(t.syncKey, arr); }
+          arr.push(t);
+        });
+      });
+    });
+    _linkedIndexDirty = false;
+  }
+  const found = _linkedIndex.get(task.syncKey);
+  return (found && found.length) ? found : [task];
 }
 
 /* ============================================================
@@ -2365,7 +2409,7 @@ function undoMizi(taskId){
   h.index--;
   applySnapshot(info.task, h.snapshots[h.index]);
   syncTaskToLessonLibrary(info.task);
-  saveLocalState(); uploadToCloud();
+  schedulePersist();
   renderBoard(); refreshAllCards();
   if(activeId === taskId){ initCharTimer(taskId); paintCharBarsFromLive(); updateDogBar(); }
   if(isAdminMode) renderAdminPanel();
@@ -2379,7 +2423,7 @@ function redoMizi(taskId){
   h.index++;
   applySnapshot(info.task, h.snapshots[h.index]);
   syncTaskToLessonLibrary(info.task);
-  saveLocalState(); uploadToCloud();
+  schedulePersist();
   renderBoard(); refreshAllCards();
   if(activeId === taskId){ initCharTimer(taskId); paintCharBarsFromLive(); updateDogBar(); }
   if(isAdminMode) renderAdminPanel();
@@ -2405,7 +2449,7 @@ function syncTaskToLessonLibrary(task){
     if(!entry.oldWords && entry.words) entry.oldWords = entry.words;
     entry.words = (task.words || []).join(' ');
   }
-  saveLocalState(); uploadToCloud();
+  schedulePersist();
   if(isAdminMode) renderLessonLibrary();
 }
 
@@ -2454,7 +2498,7 @@ function getMiziUnitCtx(el, task){
   return null;
 }
 function commitMiziChange(taskId){
-  saveLocalState(); uploadToCloud();
+  schedulePersist();
   renderBoard(); refreshAllCards();
   if(activeId === taskId){
     initCharTimer(taskId);
@@ -2842,11 +2886,28 @@ function getEditableStateForCompare(){
     lastNightReset: state.lastNightReset || '', eyeSoundOffDate: state.eyeSoundOffDate || ''
   });
 }
+/* 历史快照体积控制：只保存作业结构，剥离照片；并限制总条数 */
+const HISTORY_MAX = 20;
+function stripPhotosFromDays(days){
+  const out = {};
+  Object.keys(days || {}).forEach(d => {
+    const src = days[d] || {};
+    out[d] = {};
+    ['chinese','math','english'].forEach(k => {
+      out[d][k] = (src[k] || []).map(t => {
+        const c = Object.assign({}, t);
+        delete c.photos;
+        return c;
+      });
+    });
+  });
+  return out;
+}
 function makeHistorySnapshot(reason){
   return {
     savedAt: Date.now(), reason: reason || '数据修改',
     data: {
-      days: JSON.parse(JSON.stringify(state.days)), date: state.date,
+      days: stripPhotosFromDays(state.days), date: state.date,
       settings: JSON.parse(JSON.stringify(state.settings)), sun: state.sun,
       checkins: JSON.parse(JSON.stringify(state.checkins || [])),
       sunLog: JSON.parse(JSON.stringify(state.sunLog || [])),
@@ -2860,6 +2921,11 @@ function makeHistorySnapshot(reason){
     }
   };
 }
+let historyTimer = null;
+function scheduleHistorySnapshot(reason){
+  clearTimeout(historyTimer);
+  historyTimer = setTimeout(() => { try{ saveHistorySnapshot(reason); }catch(e){} }, 1500);
+}
 async function saveHistorySnapshot(reason){
   try{
     const entry = makeHistorySnapshot(reason);
@@ -2868,12 +2934,14 @@ async function saveHistorySnapshot(reason){
       let entries = snap.exists() ? snap.val() : [];
       if(!Array.isArray(entries)) entries = Array.isArray(entries && entries.entries) ? entries.entries : [];
       entries.unshift(entry);
+      if(entries.length > HISTORY_MAX) entries = entries.slice(0, HISTORY_MAX);
       await fbSet(historyRef, entries);
     } else {
       let entries = [];
       try{ entries = JSON.parse(localStorage.getItem(STORAGE_KEY + '_history') || '[]'); }catch(e){}
       if(!Array.isArray(entries)) entries = [];
       entries.unshift(entry);
+      if(entries.length > HISTORY_MAX) entries = entries.slice(0, HISTORY_MAX);
       localStorage.setItem(STORAGE_KEY + '_history', JSON.stringify(entries));
     }
     showSyncStatus('🗂️ 已生成数据备份', 'online');
@@ -2894,6 +2962,7 @@ function applyRemoteState(remote){
   const newDays = {};
   Object.keys(remote.days).forEach(k => { newDays[k] = normalizeDay(remote.days[k]); });
   state.days = newDays;
+  invalidateLinkedIndex();
   if(!state.days[state.date]) state.days[state.date] = makeDay();
   if(remote.settings) state.settings = normalizeSettings(remote.settings);
   if(typeof remote.sun === 'number') state.sun = remote.sun;
@@ -3385,10 +3454,14 @@ function renderBoard(){
   if(chineseCountEl) chineseCountEl.textContent = state.subjects.chinese.length;
   if(mathCountEl)    mathCountEl.textContent    = state.subjects.math.length;
   if(englishCountEl) englishCountEl.textContent = state.subjects.english.length;
+  updateSubjectCounts();
+  rebindCharTimer();
+}
+/* ★ 只更新科目 tab 上的未完成计数，避免整版重绘 */
+function updateSubjectCounts(){
   if(chineseTabCountEl) chineseTabCountEl.textContent = state.subjects.chinese.filter(t=>!t.done).length;
   if(mathTabCountEl)    mathTabCountEl.textContent    = state.subjects.math.filter(t=>!t.done).length;
   if(englishTabCountEl) englishTabCountEl.textContent = state.subjects.english.filter(t=>!t.done).length;
-  rebindCharTimer();
 }
 function renderSubjectCards(subject, listEl){
   listEl.innerHTML = '';
@@ -3497,6 +3570,13 @@ function renderSubjectCards(subject, listEl){
     cardRefs[task.id] = {el:card, timeEl, progressEl:prog};
   });
   tasks.forEach(t => updateCardVisual(t.id));
+}
+/* ★ 只刷新某张卡片的完成/未完成外观（比 renderBoard 便宜得多） */
+function refreshCardDoneState(id){
+  const ref = cardRefs[id];
+  if(!ref) return;
+  ref._sig = null;  // 强制 updateCardVisual 重算
+  updateCardVisual(id);
 }
 function updateCardVisual(id){
   const ref = cardRefs[id]; if(!ref) return;
@@ -4503,6 +4583,7 @@ function toggleTaskDone(id){
   }
   doToggleTaskDone(id);
 }
+/* ★ 性能优化：单条任务状态变化不再整版重绘，只刷新受影响的卡片 */
 function doToggleTaskDone(id){
   const info = findTask(id); if(!info) return;
   const task = info.task;
@@ -4512,15 +4593,18 @@ function doToggleTaskDone(id){
     const reward = Number(task.sun) || 0;
     state.sun -= reward;
     pushSunLog(-reward, '取消完成：' + task.text);
-    saveLocalState(); uploadToCloud();
-    renderStats(); renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
+    schedulePersist();
+    renderStats();
+    linked.forEach(t => refreshCardDoneState(t.id));
+    updateSubjectCounts();
+    updateDogBar(); updateMainBtn();
     if(isAdminMode) renderAdminPanel();
-    if(!isAdminMode) saveHistorySnapshot('学生取消作业完成');
+    if(!isAdminMode) scheduleHistorySnapshot('学生取消作业完成');
     toast('↩️ 已取消完成（关联日期同步更新）');
     return;
   }
   completeTask(id);
-  if(!isAdminMode) saveHistorySnapshot('学生勾选作业完成');
+  if(!isAdminMode) scheduleHistorySnapshot('学生勾选作业完成');
 }
 function completeTask(id){
   const info = findTask(id);
@@ -4529,7 +4613,9 @@ function completeTask(id){
   const linked = getLinkedTasks(task);
   if(linked.some(t => t.done)){
     linked.forEach(t => { t.done = true; });
-    saveLocalState(); uploadToCloud(); renderBoard(); refreshAllCards();
+    schedulePersist();
+    linked.forEach(t => refreshCardDoneState(t.id));
+    updateSubjectCounts();
     toast('✅ 关联日期已同步完成，不重复奖励');
     return;
   }
@@ -4540,13 +4626,17 @@ function completeTask(id){
   const reward = task.sun;
   linked.forEach(t => { t.done = true; });
   state.sun += reward;
-  saveLocalState(); uploadToCloud();
+  schedulePersist();
   renderStats();
   const ref = cardRefs[id];
   if(ref){ flySun(ref.el); playSound('hit'); setTimeout(() => playSound('plant'), 420); }
   bumpPill(sunPillEl);
-  renderBoard();
-  /* 完成动画只播一次（重绘不再重播，提升多作业时的流畅度） */
+
+  /* 只刷新受影响的卡片 */
+  linked.forEach(t => refreshCardDoneState(t.id));
+  updateSubjectCounts();
+
+  /* 完成动画只播一次（不重绘整版，提升多作业时的流畅度） */
   (function(){
     const r = cardRefs[id]; if(!r) return;
     r.el.classList.add('card-just-done');
@@ -4558,7 +4648,7 @@ function completeTask(id){
   if(!remaining.length){
     if(!state.checkins.includes(state.date)) state.checkins.push(state.date);
     liveStopEyeCare();
-    saveLocalState(); uploadToCloud();
+    schedulePersist();
     renderStats();
     state.live.soundSeq = (state.live.soundSeq||0) + 1;
     state.live.soundKind = 'win';
@@ -4595,6 +4685,7 @@ function switchDate(dateStr){
   runtimeMap = {}; clearCharTimer();
   state.date = dateStr;
   if(!state.days[state.date]) state.days[state.date] = makeDay();
+  invalidateLinkedIndex();
   saveLocalState(); uploadToCloud();
   updateDateText(); renderBoard(); renderStats();
   refreshAllCards(); updateDogBar(); updateMainBtn();
@@ -4731,7 +4822,6 @@ function loadHanziData(char, onComplete, onError){
 /* ★ 自动演示笔顺（田字格单击 / 已确认笔画后的「笔画：」） */
 function showStroke(char, task, mode){
   if(!char || !/[\u4e00-\u9fa5]/.test(char)) return;
-  // 未确认笔画的生字必须进入手写笔顺测验；不能误走自动演示流程。
   if(mode === 'quiz'){
     showStrokeQuiz(char, task);
     return;
@@ -4921,7 +5011,7 @@ function enterAdminMode(){
 function exitAdminMode(){
   const changed = adminEntrySnapshot !== null && adminEntrySnapshot !== getEditableStateForCompare();
   adminEntrySnapshot = null;
-  if(changed){ saveLocalState(); uploadToCloud(true); saveHistorySnapshot('家长端修改'); }
+  if(changed){ saveLocalState(); uploadToCloud(true); scheduleHistorySnapshot('家长端修改'); }
   isAdminMode = false;
   adminBar.classList.remove('show');
   adminPanel.classList.remove('show');
@@ -5375,6 +5465,7 @@ function renderAdminTaskList(subject, listId, badgeId){
         if(!otherDone) state.sun -= Number(info.task.sun)||0;
       }
       state.subjects[subj] = state.subjects[subj].filter(t => t.id !== id);
+      invalidateLinkedIndex();
       if(state.live.activeId === id){ liveStopTask(); }
       cleanupRuntime();
       saveLocalState(); uploadToCloud();
@@ -6084,6 +6175,7 @@ function undoLastSync(){
   if(!syncUndoInfo || syncUndoInfo.used){ toast('没有可撤回的同步'); return; }
   const info = syncUndoInfo;
   state.days[info.targetDate] = normalizeDay(info.prev);
+  invalidateLinkedIndex();
   info.used = true;
   saveLocalState(); uploadToCloud();
   if(state.date === info.targetDate){ renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn(); }
@@ -6137,6 +6229,7 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
     const newDays = {};
     Object.keys(imported.days).forEach(k => { newDays[k] = normalizeDay(imported.days[k]); });
     state.days = newDays;
+    invalidateLinkedIndex();
     state.date = imported.date || todayStr();
     state.sun = Number(imported.sun) || 0;
     state.checkins = Array.isArray(imported.checkins) ? imported.checkins : [];
@@ -6500,13 +6593,11 @@ function dictSplitNow(){
   const m=/([\d.]+)%/.exec(dictLayoutEl.style.getPropertyValue('--dict-left-pct')||'');
   return m?parseFloat(m[1]):DICT_SPLIT_DEF;
 }
-/* 启动时恢复上次保存的位置 */
 (function dictRestoreSplit(){
   let saved=parseFloat(localStorage.getItem(DICT_SPLIT_KEY));
   if(isNaN(saved))saved=DICT_SPLIT_DEF;
   dictApplySplit(saved);
 })();
-/* 拖拽结束后按右侧新宽度重新适配字典页（锚定当前页，不跳页） */
 function dictRefitAfterSplit(){
   if(!dictModal.classList.contains('show')||!dictPageW)return;
   const anchor=dictLastShownPage||1;
@@ -6545,14 +6636,13 @@ function dictEndSplit(e){
   dictResizerEl.classList.remove('dragging');
   document.body.classList.remove('dict-resizing');
   try{ if(dictResizerEl.hasPointerCapture(e.pointerId))dictResizerEl.releasePointerCapture(e.pointerId); }catch(err){}
-  if(!dictSplitMoved)return;   /* 只是点按没有拖动：不保存、不重渲染 */
+  if(!dictSplitMoved)return;
   const pct=dictApplySplit(dictSplitNow());
   try{localStorage.setItem(DICT_SPLIT_KEY,String(pct));}catch(err){}
   dictRefitAfterSplit();
 }
 dictResizerEl.addEventListener('pointerup',dictEndSplit);
 dictResizerEl.addEventListener('pointercancel',dictEndSplit);
-/* 双击分隔条恢复默认宽度 */
 dictResizerEl.addEventListener('dblclick',()=>{
   dictApplySplit(DICT_SPLIT_DEF);
   try{localStorage.setItem(DICT_SPLIT_KEY,String(DICT_SPLIT_DEF));}catch(e){}
@@ -6613,6 +6703,7 @@ dictBuildIndex();
    初始化
 ============================================================ */
 state = attachSubjectsProxy(loadLocalState());
+invalidateLinkedIndex();
 // 将独立完成状态副本合并回来，避免仅因刷新/重开页面丢失已完成标记。
 try{
   const doneMirror = JSON.parse(localStorage.getItem(STORAGE_KEY + '_done_mirror') || '{}');
@@ -6678,7 +6769,6 @@ requestAnimationFrame(() => { updateEyeUI(); updateDogBar(); updateMainBtn(); })
   let firstTapAt = 0;
   root.addEventListener('click', e => {
     const L = state && state.live;
-    // 仅待机时生效，避免影响正在进行的作业或正常控件操作。
     if(!L || L.activeId) { taps = 0; firstTapAt = 0; return; }
     if(e.target && e.target.closest('button, input, select, textarea, a, .task-card, .subject-tab, .tab-panel, .eye-card, .toast')) return;
     const now = Date.now();
@@ -6732,6 +6822,5 @@ if(dataRef && fbSet && fbGet && fbOnValue){
   showSyncStatus('📴 纯本地模式', 'offline');
 }
 </script>
-
 
 </body></html>
