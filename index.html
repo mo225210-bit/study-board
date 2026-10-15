@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="学习打卡台">
-<title>学习打卡台10160236</title>
+<title>学习打卡台10160245</title>
 <link rel="manifest" href="manifest.json">
 <script src="hanzi-data.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5.0/dist/hanzi-writer.min.js"></script>
@@ -529,6 +529,25 @@
   .cal-mark{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
     width:5px;height:5px;border-radius:50%;background:#FF9800}
   .cal-mark.done{background:#4CAF50}
+
+    /* ★ 已同步过前一天的日期：蓝色底 */
+  .cal-day.synced{
+    background:linear-gradient(180deg,#B3E5FC,#81D4FA);
+    color:#01579B;font-weight:900;
+  }
+  .cal-day.synced:hover{background:linear-gradient(180deg,#9EDBFB,#4FC3F7)}
+  .cal-day.synced.selected{
+    background:linear-gradient(180deg,#42A5F5,#1976D2);
+    color:#fff;
+    box-shadow:0 3px 0 #0D47A1;
+  }
+  .cal-day.synced.today{border-color:#1976D2}
+  .cal-sync-mark{
+    position:absolute;top:2px;right:3px;font-size:10px;line-height:1;
+    pointer-events:none;
+  }
+  
+  
   .cal-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
   .cal-actions button{flex:1;min-width:90px}
 
@@ -1137,6 +1156,9 @@
     <div class="cal-week"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div>
     <div class="cal-grid" id="calGrid"></div>
     <div class="cal-actions">
+
+           <button class="btn-ghost" id="calSyncPrevBtn" style="display:none;background:linear-gradient(180deg,#64B5F6,#1976D2);border-color:#1565C0;color:#fff;box-shadow:0 4px 12px rgba(30,100,180,.28)">📋 同步前一天</button>
+      
       <button class="btn-ghost" id="calTodayBtn">📌 回到今天</button>
       <button class="btn-main" id="calCloseBtn">关闭</button>
     </div>
@@ -2246,6 +2268,9 @@ function loadLocalState(){
   if(!s.days[s.date]) s.days[s.date] = makeDay();
   if(!Array.isArray(s.checkins)) s.checkins = [];
   if(!Array.isArray(s.sunLog)) s.sunLog = [];
+
+  if(!s.syncedDates || typeof s.syncedDates !== 'object' || Array.isArray(s.syncedDates)) s.syncedDates = {};
+  
   if(typeof s.sun !== 'number') s.sun = 0;
   if(!('chinesePaper' in s)) s.chinesePaper = null;
   if(typeof s.lastNightReset !== 'string') s.lastNightReset = '';
@@ -2373,11 +2398,17 @@ function writeSyncTasks(targetDate, srcDate, mode){
     });
     state.days[targetDate]=out;
   }
+  // ★ 记录：这个日期已经同步过
+  if(!state.syncedDates) state.syncedDates = {};
+  state.syncedDates[targetDate] = Date.now();
+
   invalidateLinkedIndex(); saveLocalState(); uploadToCloud();
   if(state.date===targetDate){
     renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
     if(isAdminMode) renderAdminPanel();
   }
+  // ★ 日历开着就刷新一下，让当前日期立刻变蓝
+  if(calModal && calModal.classList.contains('show')) renderCalendar();
   toast(mode==='merge' ? ('已叠加 '+added+' 项作业（含完成状态）') : ('已同步 '+added+' 项作业（含完成状态）'), 2600);
 }
 function trySyncFromPreviousDay(targetDate){
@@ -2969,6 +3000,7 @@ async function uploadToCloud(force){
     shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
     lastNightReset: state.lastNightReset || '',
     eyeSoundOffDate: state.eyeSoundOffDate || '',
+    syncedDates: state.syncedDates || {},
     live: state.live, updatedAt: Date.now()
   };
   const prevPushed = lastPushedUpdatedAt;
@@ -3082,6 +3114,11 @@ function applyRemoteState(remote){
   if(typeof remote.parentPassword === 'string' && /^\d{4}$/.test(remote.parentPassword)) state.parentPassword = remote.parentPassword;
   if(typeof remote.lastNightReset === 'string') state.lastNightReset = remote.lastNightReset;
   if(typeof remote.eyeSoundOffDate === 'string') state.eyeSoundOffDate = remote.eyeSoundOffDate;
+
+  if(remote.syncedDates && typeof remote.syncedDates === 'object' && !Array.isArray(remote.syncedDates)){
+    state.syncedDates = remote.syncedDates;
+  }
+  
   const shopNorm = normalizeShop(remote.shop);
   if(shopNorm !== null){ state.shop = shopNorm; try{ localStorage.setItem(REWARD_STORAGE_KEY, JSON.stringify(state.shop)); }catch(e){} }
   if(remote.live && typeof remote.live === 'object'){
@@ -4888,8 +4925,23 @@ let calYear = 0, calMonth = 0;
 function openCalendar(){
   const d = new Date(state.date + 'T00:00:00');
   calYear = d.getFullYear(); calMonth = d.getMonth();
+  // ★ 家长模式才显示「同步前一天」按钮
+  const syncBtn = $('calSyncPrevBtn');
+  if(syncBtn) syncBtn.style.display = isAdminMode ? '' : 'none';
   renderCalendar(); calModal.classList.add('show');
 }
+
+
+/* ★ 家长端日历：点击「同步前一天」 */
+(function bindCalSyncBtn(){
+  const btn = document.getElementById('calSyncPrevBtn');
+  if(!btn) return;
+  btn.addEventListener('click', function(){
+    if(!isAdminMode) return;
+    trySyncFromPreviousDay(state.date);
+  });
+})();
+  
 function renderCalendar(){
   calTitle.textContent = `${calYear}年${calMonth+1}月`;
   calGrid.innerHTML = '';
@@ -4909,6 +4961,16 @@ function renderCalendar(){
     cell.className = 'cal-day'; cell.textContent = d;
     if(dateStr === today) cell.classList.add('today');
     if(dateStr === state.date) cell.classList.add('selected');
+
+        // ★ 已同步过前一天的日期：加蓝色底 + 📋 标记
+    if(state.syncedDates && state.syncedDates[dateStr]){
+      cell.classList.add('synced');
+      const sm = document.createElement('span');
+      sm.className = 'cal-sync-mark';
+      sm.textContent = '📋';
+      cell.appendChild(sm);
+    }
+    
     const day = state.days[dateStr];
     if(day){
       const all = [...(day.chinese||[]), ...(day.math||[]), ...(day.english||[])];
