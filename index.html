@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
+<html lang="zh-CN"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#7EC8F0">
@@ -255,11 +254,13 @@
 
   .task-card{position:relative;overflow:hidden;background:rgba(255,255,255,.97);
     border:2px solid #fff;border-radius:12px;padding:7px 9px 6px;
-    transition:all .16s;box-shadow:0 3px 9px rgba(0,0,0,.13)}
+    transition:border-color .16s,box-shadow .16s,transform .16s;box-shadow:0 3px 9px rgba(0,0,0,.13)}
   .task-card.active{border-color:#FFC107;box-shadow:0 0 0 3px rgba(255,193,7,.4),0 6px 16px rgba(0,0,0,.16)}
   .task-card.active.paused-card{border-color:#FFB74D;box-shadow:0 0 0 3px rgba(255,183,77,.4)}
   .task-card.active.chomping-card{border-color:#FF7043;box-shadow:0 0 0 3px rgba(255,112,67,.4)}
-  .task-card.done{background:rgba(238,248,236,.97);border-color:#B7E0A8;animation:cardDone .6s ease}
+  .task-card.done{background:rgba(238,248,236,.97);border-color:#B7E0A8}
+  /* 完成动画只在“刚勾选完成”时播放一次，避免每次重绘整版卡片都重播导致卡顿 */
+  .task-card.card-just-done{animation:cardDone .6s ease}
   @keyframes cardDone{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,193,7,.75)}
     50%{transform:scale(1.03);box-shadow:0 0 0 9px rgba(255,193,7,0)}100%{transform:scale(1)}}
   .card-top{display:flex;gap:10px;align-items:flex-start}
@@ -272,14 +273,16 @@
   .task-card.done .checkbox{background:#43A047;border-color:#43A047;opacity:1}
   .subject-col[data-subject="math"] .task-card.done .checkbox{background:#039BE5;border-color:#039BE5}
   .task-card.done .checkbox .tick{opacity:1;transform:scale(1)}
-  /* 作业完成后自动折叠：保留作业名称和勾选状态，收起详情、田字格与操作按钮 */
+  /* 作业完成后自动折叠：固定为「一行文字」的高度 */
+  .task-card.done{min-height:0;padding:6px 9px}
   .task-card.done .task-info{display:none!important}
   .task-card.done .char-grid{display:none!important}
   .task-card.done .card-actions{display:none!important}
-  .task-card.done .card-top{padding-bottom:2px}
-  .task-card.done .task-text{font-size:13px;line-height:1.35}
-  .task-card.done{padding-bottom:3px;min-height:0}
   .task-card.done .card-progress{display:none}
+  .task-card.done .card-top{align-items:center;padding-bottom:0}
+  /* 自定义作业正文是 26px!important，这里必须同样用 !important 才能压成一行并省略号截断 */
+  .task-card.done .task-text{font-size:13px!important;line-height:1.35!important;
+    white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis}
 
   .card-body{flex:1;min-width:0}
   .task-text{font-size:14px;font-weight:800;color:#2b3a2b;line-height:1.5;word-break:break-word}
@@ -640,6 +643,12 @@
     background:linear-gradient(180deg,#EF9A9A,#E53935);
     border:2px solid #E53935;padding:10px 24px;border-radius:999px;cursor:pointer;
     box-shadow:0 3px 0 #B71C1C;transition:all .15s}
+  /* 日期选择：与「家长管理面板」标题同一行 */
+  .admin-header-date{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    flex:1 1 auto;justify-content:center}
+  .admin-header-date .aa-btn,
+  .admin-header-date #adminGoToday{font-size:13px;padding:8px 12px;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+  .admin-header-date .aa-btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
   .admin-section{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
     border-radius:18px;padding:18px;margin-bottom:16px}
   .admin-section h3{font-size:16.5px;font-weight:900;color:#E0E8F0;margin-bottom:12px;
@@ -1041,23 +1050,23 @@
       <div class="eye-token" id="eyeToken">
         <svg class="ce-svg" viewBox="0 0 48 48" aria-hidden="true">
           <g class="ce-eye">
-            <path d="M12 12.2 L9 6.6" stroke="#4FA8D8" stroke-width="2.6" stroke-linecap="round"/>
-            <path d="M24 9.2 L24 3.4" stroke="#4FA8D8" stroke-width="2.6" stroke-linecap="round"/>
-            <path d="M36 12.2 L39 6.6" stroke="#4FA8D8" stroke-width="2.6" stroke-linecap="round"/>
-            <ellipse cx="24" cy="26" rx="18" ry="13.5" fill="#ffffff" stroke="#3D8FC0" stroke-width="2.6"/>
+            <path d="M12 12.2 L9 6.6" stroke="#4FA8D8" stroke-width="2.6" stroke-linecap="round"></path>
+            <path d="M24 9.2 L24 3.4" stroke="#4FA8D8" stroke-width="2.6" stroke-linecap="round"></path>
+            <path d="M36 12.2 L39 6.6" stroke="#4FA8D8" stroke-width="2.6" stroke-linecap="round"></path>
+            <ellipse cx="24" cy="26" rx="18" ry="13.5" fill="#ffffff" stroke="#3D8FC0" stroke-width="2.6"></ellipse>
             <g class="ce-iris">
-              <circle cx="24" cy="26" r="8.4" fill="#6FC3E8"/>
-              <circle cx="24" cy="26" r="4.6" fill="#12304A"/>
-              <circle cx="20.6" cy="22.6" r="2.5" fill="#ffffff"/>
-              <circle cx="27" cy="29.2" r="1.2" fill="#ffffff" opacity=".85"/>
+              <circle cx="24" cy="26" r="8.4" fill="#6FC3E8"></circle>
+              <circle cx="24" cy="26" r="4.6" fill="#12304A"></circle>
+              <circle cx="20.6" cy="22.6" r="2.5" fill="#ffffff"></circle>
+              <circle cx="27" cy="29.2" r="1.2" fill="#ffffff" opacity=".85"></circle>
             </g>
-            <path class="ce-lid" d="M8.6 25 Q24 32.6 39.4 25" fill="none" stroke="#3D8FC0" stroke-width="2.6" stroke-linecap="round"/>
+            <path class="ce-lid" d="M8.6 25 Q24 32.6 39.4 25" fill="none" stroke="#3D8FC0" stroke-width="2.6" stroke-linecap="round"></path>
           </g>
         </svg>
       </div>
     </div>
     <span class="eye-end eye-end-r">放松</span>
-    <button class="eye-btn" id="eyeRestBtn" disabled>😌 放松眼睛</button>
+    <button class="eye-btn" id="eyeRestBtn" disabled="">😌 放松眼睛</button>
   </div>
 
   <div class="subject-tabs">
@@ -1146,8 +1155,7 @@
     <p id="miziActionSub">删除会同步减少任务时间与金币奖励，并保存到课文库</p>
     <div class="modal-actions">
       <button class="btn-ghost" id="miziActionEdit">✏️ 修改</button>
-      <button class="btn-main" id="miziActionDel"
-        style="background:linear-gradient(180deg,#FF8A80,#EF5350);border-color:#EF5350;box-shadow:0 3px 0 #C62828">🗑 删除</button>
+      <button class="btn-main" id="miziActionDel" style="background:linear-gradient(180deg,#FF8A80,#EF5350);border-color:#EF5350;box-shadow:0 3px 0 #C62828">🗑 删除</button>
     </div>
     <div class="modal-actions">
       <button class="btn-ghost" id="miziActionCancel" style="flex:1">取消</button>
@@ -1306,6 +1314,10 @@
   <div class="admin-panel-inner">
     <div class="admin-header">
       <h2>🔑 家长管理面板</h2>
+      <div class="admin-header-date">
+        <input type="date" id="adminDateInput" style="font-family:inherit;font-size:14px;font-weight:800;color:#E0E8F0;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);padding:8px 12px;border-radius:10px;outline:none">
+        <button class="aa-btn" id="adminGoToday">回到今天</button>
+      </div>
       <button class="admin-close" id="adminCloseBtn">✕ 关闭</button>
     </div>
 
@@ -1408,8 +1420,7 @@
       <div id="adminShopList"></div>
       <div class="admin-sub-label">🎁 添加兑换项目</div>
       <div class="admin-add-row inline-row">
-        <input class="aa-num" id="adminShopIcon" type="text" maxlength="4" value="🎁" placeholder="🎁"
-               style="width:52px;text-align:center;font-size:20px;padding-left:2px;padding-right:2px">
+        <input class="aa-num" id="adminShopIcon" type="text" maxlength="4" value="🎁" placeholder="🎁" style="width:52px;text-align:center;font-size:20px;padding-left:2px;padding-right:2px">
         <input class="aa-text" id="adminShopName" placeholder="项目名称（如：玩手机）">
         <input class="aa-num" id="adminShopMin" type="number" min="1" max="240" step="5" value="30" placeholder="分钟">
         <span class="aa-unit">分钟</span>
@@ -1418,15 +1429,6 @@
         <button class="aa-btn" id="adminShopAddBtn">添加</button>
       </div>
       <div class="aa-hint" id="adminShopHint">金币填负数表示扣除（消耗），填正数表示增加（奖励）</div>
-    </div>
-
-    <div class="admin-section collapsed" id="adminPanelDate">
-      <h3>📅 日期选择</h3>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <input type="date" id="adminDateInput" style="font-family:inherit;font-size:14px;font-weight:800;color:#E0E8F0;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);padding:8px 12px;border-radius:10px;outline:none">
-        <button class="aa-btn" id="adminGoToday">回到今天</button>
-        <button class="aa-btn" id="adminSyncPrevBtn" style="background:linear-gradient(180deg,#90CAF9,#42A5F5);border-color:#42A5F5;box-shadow:0 3px 0 #1976D2;color:#fff">📋 手动同步前一天作业</button>
-      </div>
     </div>
 
     <div class="admin-section collapsed" id="adminPanelSun">
@@ -1578,6 +1580,12 @@
       <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
         房间号：<b id="familyIdText" style="color:#2e7d32">—</b>
       </p>
+      <div class="admin-sub-label">📋 前一天作业</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="aa-btn" id="adminSyncPrevBtn" style="background:linear-gradient(180deg,#90CAF9,#42A5F5);border-color:#42A5F5;box-shadow:0 3px 0 #1976D2;color:#fff">📋 手动同步前一天作业</button>
+        <button class="aa-btn" id="adminSyncUndoBtn" disabled="" style="background:linear-gradient(180deg,#FFCC80,#FB8C00);border-color:#FB8C00;box-shadow:0 3px 0 #EF6C00;color:#fff">↩ 撤回同步</button>
+      </div>
+      <div class="aa-hint" style="margin-top:8px">「手动同步前一天作业」需要家长密码，会把前一天的作业复制到当前日期；若发现不对，可点「↩ 撤回同步」恢复同步前的作业。</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button class="aa-btn" id="adminForceSyncBtn">🔄 强制上传本地数据</button>
         <button class="aa-btn" id="adminForcePullBtn" style="background:linear-gradient(180deg,#90CAF9,#42A5F5);border-color:#42A5F5;box-shadow:0 3px 0 #1976D2;color:#fff">⬇️ 强制拉取云端数据</button>
@@ -2008,7 +2016,14 @@ function normalizeSettings(raw){
       quickCount: num(li.quickCount, d.lastInputs.quickCount, 1, 20),
       quickMin:   num(li.quickMin,   d.lastInputs.quickMin,   1, 120),
       quickSun:   num(li.quickSun,   d.lastInputs.quickSun,   1, 500),
-      quickRows: Array.isArray(li.quickRows) && li.quickRows.length ? li.quickRows.slice(0,20).map(r=>({content:String(r.content||'').slice(0,40),minutes:num(r.minutes,20,1,120),sun:num(r.sun,30,1,500)})) : JSON.parse(JSON.stringify(d.lastInputs.quickRows || [{content:'每日阅读',minutes:20,sun:30}]))
+      quickRows: (function(){
+        const norm = arr => arr.map(r=>({content:String(r.content||'').slice(0,40),minutes:num(r.minutes,20,1,120),sun:num(r.sun,30,1,500)})).slice(0,20);
+        if(Array.isArray(li.quickRows) && li.quickRows.length) return norm(li.quickRows);
+        /* 云端旧数据可能还没有 quickRows 字段，回退到本地独立副本，避免日常作业配置被清空 */
+        const bak = readQuickRowsBackup();
+        if(bak && bak.length) return norm(bak);
+        return JSON.parse(JSON.stringify(d.lastInputs.quickRows || [{content:'每日阅读',minutes:20,sun:30}]));
+      })()
     },
     panelCollapsed: {
       progress: pc.progress !== undefined ? !!pc.progress : true,
@@ -3488,7 +3503,11 @@ function updateCardVisual(id){
   const info = findTask(id); if(!info) return;
   const task = info.task;
   const rt = runtimeMap[id];
+  /* ★ 性能优化：非活动卡片只在状态变化时才写 DOM。
+     refreshAllCards() 每次都会遍历全部卡片，作业多时这里是卡顿主因。 */
   if(task.done){
+    if(ref._sig === 'done') return;
+    ref._sig = 'done';
     ref.el.className = 'task-card done';
     ref.timeEl.className = 't-time done-t';
     ref.timeEl.textContent = '✓ 已完成';
@@ -3498,15 +3517,23 @@ function updateCardVisual(id){
   }
   const isActive = activeId === id;
   const L = state.live || {};
-  let cls = 'task-card';
-  if(isActive){
-    cls += ' active';
-    if(L.status === 'timeup') cls += ' chomping-card';
-    else if(pauseState.active) cls += ' paused-card';
-    else if(rt && rt.overdue) cls += ' chomping-card';
+  if(!isActive){
+    if(ref._sig === 'idle') return;
+    ref._sig = 'idle';
+    ref.el.className = 'task-card';
+    ref.timeEl.className = 't-time';
+    ref.timeEl.textContent = task.minutes+'分钟';
+    ref.progressEl.className = 'card-progress';
+    ref.progressEl.style.width = '0%';
+    return;
   }
+  ref._sig = 'active';
+  let cls = 'task-card active';
+  if(L.status === 'timeup') cls += ' chomping-card';
+  else if(pauseState.active) cls += ' paused-card';
+  else if(rt && rt.overdue) cls += ' chomping-card';
   ref.el.className = cls;
-  if(rt && isActive){
+  if(rt){
     if(L.status === 'timeup'){
       ref.timeEl.className = 't-time chomping';
       ref.timeEl.textContent = '时间到';
@@ -3530,11 +3557,6 @@ function updateCardVisual(id){
       ref.progressEl.className = 'card-progress';
       ref.progressEl.style.width = (clamp(p,0,1)*100)+'%';
     }
-  } else {
-    ref.timeEl.className = 't-time';
-    ref.timeEl.textContent = task.minutes+'分钟';
-    ref.progressEl.className = 'card-progress';
-    ref.progressEl.style.width = '0%';
   }
 }
 function refreshAllCards(){ Object.keys(cardRefs).forEach(id => updateCardVisual(id)); }
@@ -4464,6 +4486,7 @@ function confirmPassword(){
   pwdPurpose = ''; pendingCheckId = null;
   if(purpose === 'admin') enterAdminMode();
   else if(purpose === 'check'){ if(checkId) doToggleTaskDone(checkId); }
+  else if(purpose === 'syncPrev'){ performSyncPrev(); }
 }
 function requestPause(){
   const L = state.live;
@@ -4523,6 +4546,12 @@ function completeTask(id){
   if(ref){ flySun(ref.el); playSound('hit'); setTimeout(() => playSound('plant'), 420); }
   bumpPill(sunPillEl);
   renderBoard();
+  /* 完成动画只播一次（重绘不再重播，提升多作业时的流畅度） */
+  (function(){
+    const r = cardRefs[id]; if(!r) return;
+    r.el.classList.add('card-just-done');
+    setTimeout(() => { try{ r.el.classList.remove('card-just-done'); }catch(e){} }, 700);
+  })();
   toast('✅ 「'+escapeHtml(task.text)+'」完成！<br>结算 +'+reward+' 个 💰', 2400);
 
   const remaining = allTasks().filter(t => !t.done);
@@ -5905,6 +5934,14 @@ $('adminAddCopyBtn').addEventListener('click', () => {
   toast('✅ 已添加「'+escapeHtml(name)+'」抄写词语');
 });
 /* 语文自定义日常作业：多行配置，逐行添加并持久保存 */
+function readQuickRowsBackup(){
+  try{
+    const raw = localStorage.getItem('study_board_quick_rows_v1');
+    if(!raw) return null;
+    const arr = JSON.parse(raw);
+    return (Array.isArray(arr) && arr.length) ? arr : null;
+  }catch(e){ return null; }
+}
 function getQuickRows(){
   const rows = Array.from(document.querySelectorAll('#quickRows .quick-row')).map(row=>({
     content: (row.querySelector('.quick-content').value||'').trim(),
@@ -5914,9 +5951,13 @@ function getQuickRows(){
   return rows.length ? rows : [{content:'每日阅读',minutes:20,sun:30}];
 }
 function saveQuickRows(){
+  /* 面板未渲染时（例如云端数据回写触发）不写库，避免把已保存的日常作业配置覆盖成默认值 */
+  if(!document.querySelectorAll('#quickRows .quick-row').length) return;
   const rows=getQuickRows();
   if(!state.settings.lastInputs) state.settings.lastInputs=JSON.parse(JSON.stringify(DEFAULT_SETTINGS.lastInputs));
   state.settings.lastInputs.quickRows=rows;
+  /* 独立保存一份本地副本：名称/分钟/金币永久保留，多行也一并保存 */
+  try{ localStorage.setItem('study_board_quick_rows_v1', JSON.stringify(rows)); }catch(e){}
   saveLocalState(); uploadToCloud();
 }
 function renderQuickRows(rows){
@@ -6016,16 +6057,56 @@ $('adminAddEnglishBtn').addEventListener('click', () => {
 });
 $('adminDateInput').addEventListener('change', e => { const v = e.target.value; if(v) switchDate(v); });
 $('adminGoToday').addEventListener('click', () => switchDate(todayStr()));
+/* ★ 手动同步前一天作业：需家长密码，且同步后可一键撤回，防止误操作 */
+let syncUndoInfo = null;
+function updateSyncUndoBtn(){
+  const btn = $('adminSyncUndoBtn');
+  if(!btn) return;
+  const can = !!(syncUndoInfo && !syncUndoInfo.used);
+  btn.disabled = !can;
+  btn.title = can ? ('撤回最近一次同步：' + syncUndoInfo.targetDate + ' ← ' + syncUndoInfo.srcDate) : '暂无可撤回的同步';
+}
+function performSyncPrev(){
+  const targetDate = state.date;
+  const prevDay = JSON.parse(JSON.stringify(state.days[targetDate] || makeDay()));
+  const r = syncFromPreviousDay(targetDate);
+  if(r.ok){
+    syncUndoInfo = { targetDate, srcDate: r.srcDate, prev: prevDay, used: false };
+    updateSyncUndoBtn();
+    toast('✅ 已从 ' + r.srcDate + ' 同步 ' + r.count + ' 项作业<br><span style="font-size:13px">如需撤销，点「↩ 撤回同步」</span>', 3600);
+  } else if(r.reason === 'no-source'){
+    toast('⚠️ 前一天没有作业可同步');
+  } else {
+    toast('⚠️ 同步失败');
+  }
+}
+function undoLastSync(){
+  if(!syncUndoInfo || syncUndoInfo.used){ toast('没有可撤回的同步'); return; }
+  const info = syncUndoInfo;
+  state.days[info.targetDate] = normalizeDay(info.prev);
+  info.used = true;
+  saveLocalState(); uploadToCloud();
+  if(state.date === info.targetDate){ renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn(); }
+  if(isAdminMode) renderAdminPanel();
+  updateSyncUndoBtn();
+  toast('↩️ 已撤回同步，恢复同步前的作业');
+}
 (function bindSyncPrevButtons(){
   const adminSyncBtn = $('adminSyncPrevBtn');
   if(adminSyncBtn){
     adminSyncBtn.addEventListener('click', () => {
-      const r = syncFromPreviousDay(state.date);
-      if(r.ok) toast('✅ 已从 ' + r.srcDate + ' 同步 ' + r.count + ' 项作业');
-      else if(r.reason === 'no-source') toast('⚠️ 前一天没有作业可同步');
-      else toast('⚠️ 同步失败');
+      pwdPurpose = 'syncPrev';
+      openPwdModal('🔑 家长验证', '同步前一天作业会覆盖当前日期的作业，请输入家长密码');
     });
   }
+  const undoBtn = $('adminSyncUndoBtn');
+  if(undoBtn){
+    undoBtn.addEventListener('click', () => {
+      if(!syncUndoInfo || syncUndoInfo.used){ toast('没有可撤回的同步'); return; }
+      if(confirm('确定撤回最近一次「同步前一天作业」吗？\n将恢复同步前的作业内容。')) undoLastSync();
+    });
+  }
+  updateSyncUndoBtn();
 })();
 
 $('adminLocalDownloadBtn').addEventListener('click', () => {
@@ -6651,5 +6732,6 @@ if(dataRef && fbSet && fbGet && fbOnValue){
   showSyncStatus('📴 纯本地模式', 'offline');
 }
 </script>
-</body>
-</html>
+
+
+</body></html>
