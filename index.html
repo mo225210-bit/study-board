@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="学习打卡台">
-<title>学习打卡台10160245</title>
+<title>学习打卡台</title>
 <link rel="manifest" href="manifest.json">
 <script src="hanzi-data.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5.0/dist/hanzi-writer.min.js"></script>
@@ -529,25 +529,6 @@
   .cal-mark{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
     width:5px;height:5px;border-radius:50%;background:#FF9800}
   .cal-mark.done{background:#4CAF50}
-
-    /* ★ 已同步过前一天的日期：蓝色底 */
-  .cal-day.synced{
-    background:linear-gradient(180deg,#B3E5FC,#81D4FA);
-    color:#01579B;font-weight:900;
-  }
-  .cal-day.synced:hover{background:linear-gradient(180deg,#9EDBFB,#4FC3F7)}
-  .cal-day.synced.selected{
-    background:linear-gradient(180deg,#42A5F5,#1976D2);
-    color:#fff;
-    box-shadow:0 3px 0 #0D47A1;
-  }
-  .cal-day.synced.today{border-color:#1976D2}
-  .cal-sync-mark{
-    position:absolute;top:2px;right:3px;font-size:10px;line-height:1;
-    pointer-events:none;
-  }
-  
-  
   .cal-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
   .cal-actions button{flex:1;min-width:90px}
 
@@ -1156,9 +1137,6 @@
     <div class="cal-week"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div>
     <div class="cal-grid" id="calGrid"></div>
     <div class="cal-actions">
-
-           <button class="btn-ghost" id="calSyncPrevBtn" style="display:none;background:linear-gradient(180deg,#64B5F6,#1976D2);border-color:#1565C0;color:#fff;box-shadow:0 4px 12px rgba(30,100,180,.28)">📋 同步前一天</button>
-      
       <button class="btn-ghost" id="calTodayBtn">📌 回到今天</button>
       <button class="btn-main" id="calCloseBtn">关闭</button>
     </div>
@@ -2268,9 +2246,6 @@ function loadLocalState(){
   if(!s.days[s.date]) s.days[s.date] = makeDay();
   if(!Array.isArray(s.checkins)) s.checkins = [];
   if(!Array.isArray(s.sunLog)) s.sunLog = [];
-
-  if(!s.syncedDates || typeof s.syncedDates !== 'object' || Array.isArray(s.syncedDates)) s.syncedDates = {};
-  
   if(typeof s.sun !== 'number') s.sun = 0;
   if(!('chinesePaper' in s)) s.chinesePaper = null;
   if(typeof s.lastNightReset !== 'string') s.lastNightReset = '';
@@ -2398,17 +2373,11 @@ function writeSyncTasks(targetDate, srcDate, mode){
     });
     state.days[targetDate]=out;
   }
-  // ★ 记录：这个日期已经同步过
-  if(!state.syncedDates) state.syncedDates = {};
-  state.syncedDates[targetDate] = Date.now();
-
   invalidateLinkedIndex(); saveLocalState(); uploadToCloud();
   if(state.date===targetDate){
     renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
     if(isAdminMode) renderAdminPanel();
   }
-  // ★ 日历开着就刷新一下，让当前日期立刻变蓝
-  if(calModal && calModal.classList.contains('show')) renderCalendar();
   toast(mode==='merge' ? ('已叠加 '+added+' 项作业（含完成状态）') : ('已同步 '+added+' 项作业（含完成状态）'), 2600);
 }
 function trySyncFromPreviousDay(targetDate){
@@ -3000,7 +2969,6 @@ async function uploadToCloud(force){
     shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
     lastNightReset: state.lastNightReset || '',
     eyeSoundOffDate: state.eyeSoundOffDate || '',
-    syncedDates: state.syncedDates || {},
     live: state.live, updatedAt: Date.now()
   };
   const prevPushed = lastPushedUpdatedAt;
@@ -3114,11 +3082,6 @@ function applyRemoteState(remote){
   if(typeof remote.parentPassword === 'string' && /^\d{4}$/.test(remote.parentPassword)) state.parentPassword = remote.parentPassword;
   if(typeof remote.lastNightReset === 'string') state.lastNightReset = remote.lastNightReset;
   if(typeof remote.eyeSoundOffDate === 'string') state.eyeSoundOffDate = remote.eyeSoundOffDate;
-
-  if(remote.syncedDates && typeof remote.syncedDates === 'object' && !Array.isArray(remote.syncedDates)){
-    state.syncedDates = remote.syncedDates;
-  }
-  
   const shopNorm = normalizeShop(remote.shop);
   if(shopNorm !== null){ state.shop = shopNorm; try{ localStorage.setItem(REWARD_STORAGE_KEY, JSON.stringify(state.shop)); }catch(e){} }
   if(remote.live && typeof remote.live === 'object'){
@@ -4925,23 +4888,8 @@ let calYear = 0, calMonth = 0;
 function openCalendar(){
   const d = new Date(state.date + 'T00:00:00');
   calYear = d.getFullYear(); calMonth = d.getMonth();
-  // ★ 家长模式才显示「同步前一天」按钮
-  const syncBtn = $('calSyncPrevBtn');
-  if(syncBtn) syncBtn.style.display = isAdminMode ? '' : 'none';
   renderCalendar(); calModal.classList.add('show');
 }
-
-
-/* ★ 家长端日历：点击「同步前一天」 */
-(function bindCalSyncBtn(){
-  const btn = document.getElementById('calSyncPrevBtn');
-  if(!btn) return;
-  btn.addEventListener('click', function(){
-    if(!isAdminMode) return;
-    trySyncFromPreviousDay(state.date);
-  });
-})();
-  
 function renderCalendar(){
   calTitle.textContent = `${calYear}年${calMonth+1}月`;
   calGrid.innerHTML = '';
@@ -4961,16 +4909,6 @@ function renderCalendar(){
     cell.className = 'cal-day'; cell.textContent = d;
     if(dateStr === today) cell.classList.add('today');
     if(dateStr === state.date) cell.classList.add('selected');
-
-        // ★ 已同步过前一天的日期：加蓝色底 + 📋 标记
-    if(state.syncedDates && state.syncedDates[dateStr]){
-      cell.classList.add('synced');
-      const sm = document.createElement('span');
-      sm.className = 'cal-sync-mark';
-      sm.textContent = '📋';
-      cell.appendChild(sm);
-    }
-    
     const day = state.days[dateStr];
     if(day){
       const all = [...(day.chinese||[]), ...(day.math||[]), ...(day.english||[])];
@@ -5024,59 +4962,68 @@ function calPressCancel(){
   syncLongPressTouchActive = false;
 }
 
-/* 桌面：鼠标按住 */
-calBtn.addEventListener('mousedown', function(e){
-  if(e.button !== 0) return;
-  calPressStart(e.clientX, e.clientY);
-});
-calBtn.addEventListener('mouseup', calPressCancel);
-calBtn.addEventListener('mouseleave', calPressCancel);
-/* 桌面：鼠标移动太远才取消（阈值放宽到 30px）*/
-calBtn.addEventListener('mousemove', function(e){
-  if(!syncPressStart || !syncLongPressTouchActive) return;
-  var dx = e.clientX - syncPressStart.x;
-  var dy = e.clientY - syncPressStart.y;
-  if(dx*dx + dy*dy > 900) calPressCancel();   // 900 = 30px²
-});
+/* 绑定长按日历日期按钮 2 秒 → 同步前一天作业（仅家长模式触发）。
+   同时绑定到家长页日历按钮 adminCalDay 与学生学习页日历按钮 calBtn。 */
+function attachCalLongPress(el, openOnClick){
+  if(!el) return;
 
-/* 移动端：触摸按住 —— 不再监听 touchmove，防止微动取消 */
-calBtn.addEventListener('touchstart', function(e){
-  if(e.touches && e.touches[0]){
-    calPressStart(e.touches[0].clientX, e.touches[0].clientY);
-  }
-}, { passive: true });
+  /* 桌面：鼠标按住 */
+  el.addEventListener('mousedown', function(e){
+    if(e.button !== 0) return;
+    calPressStart(e.clientX, e.clientY);
+  });
+  el.addEventListener('mouseup', calPressCancel);
+  el.addEventListener('mouseleave', calPressCancel);
+  /* 桌面：鼠标移动太远才取消（阈值放宽到 30px）*/
+  el.addEventListener('mousemove', function(e){
+    if(!syncPressStart || !syncLongPressTouchActive) return;
+    var dx = e.clientX - syncPressStart.x;
+    var dy = e.clientY - syncPressStart.y;
+    if(dx*dx + dy*dy > 900) calPressCancel();   // 900 = 30px²
+  });
 
-calBtn.addEventListener('touchend', function(e){
-  // 还没到 2 秒就抬手 → 取消长按（当作普通点击）
-  if(syncLongPressTimer){
-    calPressCancel();
-    return;                       // 让 click 事件正常触发 → 打开日历
-  }
-  // 长按已经触发 → 阻止随后的 click 打开日历
-  if(syncLongPressFired){
-    e.preventDefault();
-    e.stopPropagation();
-    setTimeout(function(){ syncLongPressFired = false; }, 300);
-  }
-});
+  /* 移动端：触摸按住 —— 不再监听 touchmove，防止微动取消 */
+  el.addEventListener('touchstart', function(e){
+    if(e.touches && e.touches[0]){
+      calPressStart(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  }, { passive: true });
 
-calBtn.addEventListener('touchcancel', calPressCancel);
+  el.addEventListener('touchend', function(e){
+    // 还没到 2 秒就抬手 → 取消长按（当作普通点击）
+    if(syncLongPressTimer){
+      calPressCancel();
+      return;                       // 让 click 事件正常触发 → 打开日历
+    }
+    // 长按已经触发 → 阻止随后的 click 打开日历
+    if(syncLongPressFired){
+      e.preventDefault();
+      e.stopPropagation();
+      setTimeout(function(){ syncLongPressFired = false; }, 300);
+    }
+  });
 
-/* 阻止长按弹出系统菜单 */
-calBtn.addEventListener('contextmenu', function(e){
-  e.preventDefault();
-});
+  el.addEventListener('touchcancel', calPressCancel);
 
-/* 普通点击 → 打开日历（除非刚触发长按）*/
-calBtn.addEventListener('click', function(e){
-  if(syncLongPressFired){
-    e.preventDefault();
-    e.stopPropagation();
-    syncLongPressFired = false;
-    return;
-  }
-  openCalendar();
-});
+  /* 阻止长按弹出系统菜单 */
+  el.addEventListener('contextmenu', function(e){
+    if(isAdminMode) e.preventDefault();
+  });
+
+  /* 普通点击 → 打开日历（除非刚触发长按）*/
+  el.addEventListener('click', function(e){
+    if(syncLongPressFired){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      syncLongPressFired = false;
+      return;
+    }
+    if(openOnClick) openCalendar();
+  });
+}
+
+attachCalLongPress(calBtn, true);
+attachCalLongPress($('adminCalDay'), false);
 
 /* ============================================================
    笔顺
@@ -6449,63 +6396,10 @@ $('studentNextDay').addEventListener('click', e => { e.stopPropagation(); shiftS
 $('studentTodayBtn').addEventListener('click', e => { e.stopPropagation(); switchDate(todayStr()); });
 $('adminPrevDay').addEventListener('click', () => shiftSelectedDate(-1));
 $('adminNextDay').addEventListener('click', () => shiftSelectedDate(1));
-$('adminCalDay').addEventListener('click', () => { calYear = Number(state.date.slice(0,4)); calMonth = Number(state.date.slice(5,7))-1; openCalendar(); });
-
-/* ===== 家长面板里的日历按钮：长按 2 秒同步前一天 ===== */
-(function bindAdminCalDayLongPress(){
-  const btn = document.getElementById('adminCalDay');
-  if(!btn) return;
-
-  let lpTimer = null;
-  let lpFired = false;
-  let sx = 0, sy = 0, active = false;
-
-  function start(x, y){
-    if(!isAdminMode) return;            // 只家长模式生效
-    active = true;
-    lpFired = false;
-    sx = x; sy = y;
-    clearTimeout(lpTimer);
-    lpTimer = setTimeout(function(){
-      lpTimer = null;
-      active = false;
-      lpFired = true;
-      try{ if(navigator.vibrate) navigator.vibrate(30); }catch(e){}
-      trySyncFromPreviousDay(state.date);
-      setTimeout(function(){ lpFired = false; }, 800);
-    }, 2000);
-  }
-  function cancel(){
-    clearTimeout(lpTimer); lpTimer = null; active = false;
-  }
-
-  btn.addEventListener('pointerdown', function(e){
-    if(e.pointerType === 'mouse' && e.button !== 0) return;
-    start(e.clientX, e.clientY);
-  });
-  btn.addEventListener('pointermove', function(e){
-    if(!active) return;
-    const dx = e.clientX - sx, dy = e.clientY - sy;
-    if(dx*dx + dy*dy > 2500) cancel();   // 移动超过 50px 才取消
-  });
-  btn.addEventListener('pointerup', function(e){
-    if(lpFired){ e.preventDefault(); e.stopPropagation(); return; }
-    cancel();
-  });
-  btn.addEventListener('pointercancel', cancel);
-  btn.addEventListener('pointerleave', cancel);
-  btn.addEventListener('contextmenu', function(e){ e.preventDefault(); });
-
-  /* 用 capture 阶段拦下原有点击，长按已触发就别打开日历 */
-  btn.addEventListener('click', function(e){
-    if(lpFired){
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      lpFired = false;
-    }
-  }, true);
-})();  
-  
+$('adminCalDay').addEventListener('click', () => {
+  if(syncLongPressFired){ syncLongPressFired = false; return; }   // 刚触发长按同步，不要打开日历
+  calYear = Number(state.date.slice(0,4)); calMonth = Number(state.date.slice(5,7))-1; openCalendar();
+});
 $('adminLocalDownloadBtn').addEventListener('click', () => {
   try{
     saveLocalState();
