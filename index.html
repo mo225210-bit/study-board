@@ -1615,6 +1615,7 @@
         <button class="aa-btn" id="adminForcePullBtn" style="background:linear-gradient(180deg,#90CAF9,#42A5F5);border-color:#42A5F5;box-shadow:0 3px 0 #1976D2;color:#fff">⬇️ 强制拉取云端数据</button>
         <button class="aa-btn" id="adminLocalUploadBtn">📤 本地上传</button>
         <button class="aa-btn" id="adminLocalDownloadBtn">📥 本地下载</button>
+        <button class="aa-btn" id="adminClearSyncBtn" style="background:linear-gradient(180deg,#FF6B6B,#D32F2F);border-color:#B71C1C;box-shadow:0 3px 0 #B71C1C;color:#fff;flex:1 1 100%">🗑 彻底清除同步任务（需密码）</button>
         <input type="file" id="adminLocalUploadFile" accept=".json,application/json" style="display:none">
       </div>
       <div style="font-size:12px;color:#5a7a8a;font-weight:700;margin-top:10px" id="adminSyncInfo">最后同步：—</div>
@@ -2887,6 +2888,7 @@ function applyTabFromLive(){
    ☁️ 云端同步
 ============================================================ */
 let lastPushedUpdatedAt = 0;
+let cloudSyncCleared = false;
 let lastRemoteUpdatedAt = 0;
 let uploadFailedNotified = false;
 
@@ -2894,6 +2896,7 @@ async function uploadToCloud(force){
   if(!dataRef || !fbSet || !fbGet) return false;
   if(isRemoteUpdate && !force) return false;
   if(freshBoot && !force && !lastRemoteUpdatedAt) return false;
+  if(cloudSyncCleared) return false;
   const payload = {
     days: state.days, date: state.date, settings: state.settings,
     sun: state.sun, checkins: state.checkins,
@@ -2966,6 +2969,7 @@ function scheduleHistorySnapshot(reason){
   historyTimer = setTimeout(() => { try{ saveHistorySnapshot(reason); }catch(e){} }, 1500);
 }
 async function saveHistorySnapshot(reason){
+  if(cloudSyncCleared) return false;
   try{
     const entry = makeHistorySnapshot(reason);
     if(historyRef && fbGet && fbSet){
@@ -4615,6 +4619,7 @@ function confirmPassword(){
   pwdPurpose = ''; pendingCheckId = null;
   if(purpose === 'admin') enterAdminMode();
   else if(purpose === 'check'){ if(checkId) doToggleTaskDone(checkId); }
+  else if(purpose === 'clearSync') doClearSyncTask();
 }
 function requestPause(){
   const L = state.live;
@@ -6309,6 +6314,7 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
 });
 $('adminForceSyncBtn').addEventListener('click', async () => {
   if(!dataRef){ toast('⚠️ 云端未连接'); return; }
+  cloudSyncCleared = false;
   updateSyncInfo('正在上传…');
   const ok = await uploadToCloud(true);
   toast(ok ? '✅ 已上传本地数据到云端' : '⚠️ 上传失败：请检查网络');
@@ -6324,6 +6330,31 @@ $('adminForcePullBtn').addEventListener('click', async () => {
     toast('✅ 已从云端拉取最新数据');
   } else if(result.state === 'empty'){ toast('⚠️ 云端暂无数据'); updateSyncInfo('云端暂无数据'); }
   else { toast('⚠️ 读取云端失败'); updateSyncInfo('读取云端失败'); }
+});
+/* ★★★ 彻底清除同步任务（需家长密码 + 二次确认，删除该房间号云端数据与历史）★★★ */
+async function doClearSyncTask(){
+  if(!dataRef || !fbSet){ toast('⚠️ 云端未连接，无法清除'); return; }
+  if(!confirm('⚠️ 危险操作！\n即将彻底清除本房间号下的云端同步数据（含全部历史备份）。\n此操作不可撤销，本机数据不会被删除。\n\n确定继续吗？')) return;
+  if(!confirm('请再次确认：真的要彻底清除云端同步任务吗？')) return;
+  updateSyncInfo('正在清除云端…');
+  cloudSyncCleared = true;
+  try{
+    await fbSet(dataRef, null);
+    if(historyRef && fbSet){ try{ await fbSet(historyRef, null); }catch(e){} }
+  }catch(e){
+    cloudSyncCleared = false;
+    toast('⚠️ 清除失败：' + ((e && e.message) || e));
+    updateSyncInfo('清除失败');
+    return;
+  }
+  lastPushedUpdatedAt = 0; lastRemoteUpdatedAt = 0;
+  updateSyncInfo('☁️ 云端同步任务已彻底清除');
+  toast('🗑 已彻底清除云端同步任务，后续修改不再自动上云', 3800);
+  if(isAdminMode) renderAdminPanel();
+}$('adminClearSyncBtn').addEventListener('click', () => {
+  if(!dataRef){ toast('⚠️ 云端未连接'); return; }
+  pwdPurpose = 'clearSync';
+  openPwdModal('🔒 危险操作确认', '彻底清除同步任务需要输入家长密码');
 });
 
 /* ============================================================
