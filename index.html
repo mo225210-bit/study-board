@@ -4992,29 +4992,39 @@ function renderCalendar(){
 function toggleDateSync(targetDate){
   if(!state.dateSyncs || typeof state.dateSyncs !== 'object') state.dateSyncs = {};
   if(state.dateSyncs[targetDate]){
-    // 取消时清除该日期及所有依赖它的下游同步关系与任务，避免同步链残留。
+    // 取消当前日期同步：先完整找出所有直接/间接依赖的下游日期，再一次性清除规则和任务。
+    // 同时兼容旧版本留下的链式规则，避免日期仍被 applyDateSyncs 覆盖，导致新任务添加后消失。
+    const links = state.dateSyncs;
     const removeDates = new Set([targetDate]);
     let changed = true;
     while(changed){
       changed = false;
-      Object.keys(state.dateSyncs).forEach(date => {
-        if(removeDates.has(state.dateSyncs[date]) && !removeDates.has(date)){
-          removeDates.add(date); changed = true;
+      for(const date of Object.keys(links)){
+        const source = links[date];
+        if(removeDates.has(source) && !removeDates.has(date)){
+          removeDates.add(date);
+          changed = true;
         }
-      });
+      }
     }
-    removeDates.forEach(date => {
-      delete state.dateSyncs[date];
+    // 删除整条同步链的规则，清空链上日期的任务与完成状态。
+    for(const date of removeDates){
+      delete links[date];
       state.days[date] = makeDay();
-    });
-    invalidateLinkedIndex();
-    saveLocalState(); uploadToCloud();
-    if(removeDates.has(state.date)){
-      renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
-      if(isAdminMode) renderAdminPanel();
     }
+    // 清理任何指向已删除日期的残留规则，防止保存时再次生成幽灵同步任务。
+    for(const date of Object.keys(links)){
+      if(removeDates.has(links[date])) delete links[date];
+    }
+    invalidateLinkedIndex();
+    // 保存函数会重新计算剩余同步规则；此时被取消的日期已没有规则，后续可以独立添加作业。
+    saveLocalState();
+    uploadToCloud();
+    // 无论当前正在查看哪一天，都完整刷新界面，确保空日期重新显示“还没有作业”。
+    renderBoard(); refreshAllCards(); renderStats(); updateDateText(); updateDogBar(); updateMainBtn();
+    if(isAdminMode) renderAdminPanel();
     renderCalendar();
-    toast('已取消同步：同步链及相关日期的作业、完成状态已清除');
+    toast(`已取消同步：已清除 ${removeDates.size} 个日期的同步关系、作业和完成状态；这些日期现在可以独立添加作业`);
     return;
   }
   const d = new Date(targetDate + 'T12:00:00');
