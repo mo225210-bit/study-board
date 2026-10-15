@@ -535,6 +535,9 @@
   .cal-day.today{border-color:#FFC107;box-shadow:inset 0 0 0 1px rgba(255,193,7,.3)}
   .cal-day.selected{background:linear-gradient(180deg,#8FD14F,#68B32E);color:#fff;box-shadow:0 3px 0 #4E8A22}
   .cal-day.selected .cal-mark{background:#fff}
+  .cal-day.synced{background:#D8ECFF;border-color:#4A90E2;color:#174A7E;box-shadow:inset 0 0 0 1px rgba(74,144,226,.22)}
+  .cal-day.synced.selected{background:linear-gradient(180deg,#80B9F5,#4A90E2);color:#fff;border-color:#2F75BC}
+  .cal-day.sync-source{outline:2px dashed #4A90E2;outline-offset:-4px}
   .cal-mark{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
     width:5px;height:5px;border-radius:50%;background:#FF9800}
   .cal-mark.done{background:#4CAF50}
@@ -1163,7 +1166,7 @@
       <div class="cal-title" id="calTitle">2026年9月</div>
       <button id="calNext">▶</button>
     </div>
-    <div class="cal-week"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div>
+    <div class="cal-week"><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div></div>
     <div class="cal-grid" id="calGrid"></div>
     <div class="cal-actions">
       <button class="btn-ghost" id="calTodayBtn">📌 回到今天</button>
@@ -2244,7 +2247,7 @@ function loadLocalState(){
       shop: JSON.parse(JSON.stringify(DEFAULT_SHOP)),
       wordBank: {}, charPages: {}, timetable: null,
       parentPassword: MASTER_PASSWORD,
-      chinesePaper: null,
+      chinesePaper: null, dateSyncs: {},
       lastNightReset: '', eyeSoundOffDate: '',
       live: JSON.parse(JSON.stringify(DEFAULT_LIVE))
     };
@@ -2258,6 +2261,7 @@ function loadLocalState(){
   if(!Array.isArray(s.sunLog)) s.sunLog = [];
   if(typeof s.sun !== 'number') s.sun = 0;
   if(!('chinesePaper' in s)) s.chinesePaper = null;
+  if(!s.dateSyncs || typeof s.dateSyncs !== 'object' || Array.isArray(s.dateSyncs)) s.dateSyncs = {};
   if(typeof s.lastNightReset !== 'string') s.lastNightReset = '';
   if(typeof s.eyeSoundOffDate !== 'string') s.eyeSoundOffDate = '';
   if(typeof s.parentPassword !== 'string' || !/^\d{4}$/.test(s.parentPassword)) s.parentPassword = MASTER_PASSWORD;
@@ -2295,7 +2299,67 @@ function attachSubjectsProxy(s){
   });
   return s;
 }
+function applyDateSyncs(){
+  // 同步规则：来源日期是基准；目标日期新增的作业先合并回来源日期，再同步到目标日期。
+  // 这样在已同步的日期添加作业时，不会在保存过程中被覆盖掉。
+  const links = state.dateSyncs && typeof state.dateSyncs === 'object' ? state.dateSyncs : {};
+  const targets = Object.keys(links).sort();
+  for(const targetDate of targets){
+    const sourceDate = links[targetDate];
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(sourceDate || '') || sourceDate >= targetDate) continue;
+
+    const src = state.days[sourceDate] || (state.days[sourceDate] = makeDay());
+    const old = state.days[targetDate] || (state.days[targetDate] = makeDay());
+
+    ['chinese','math','english'].forEach(subject => {
+      if(!Array.isArray(src[subject])) src[subject] = [];
+      if(!Array.isArray(old[subject])) old[subject] = [];
+      const sourceKeys = new Set();
+      src[subject].forEach(task => {
+        if(!task.syncKey) task.syncKey = String(task.id || newId());
+        sourceKeys.add(String(task.syncKey));
+        if(task.id != null) sourceKeys.add(String(task.id));
+      });
+      // 把目标日期新添加、来源日期还没有的作业合并回来源日期。
+      old[subject].forEach(task => {
+        const key = String(task.syncKey || task.id || '');
+        if(!key || sourceKeys.has(key)) return;
+        const copy = JSON.parse(JSON.stringify(task));
+        copy.syncKey = key;
+        copy.id = newId();
+        delete copy.photos;
+        src[subject].push(copy);
+        sourceKeys.add(key);
+        sourceKeys.add(String(copy.id));
+      });
+    });
+
+    // 以合并后的来源日期为准刷新目标日期，并保留目标日期已有的任务 ID。
+    const refreshed = makeDay();
+    ['chinese','math','english'].forEach(subject => {
+      const oldTasks = old[subject] || [];
+      const oldByKey = new Map();
+      oldTasks.forEach(task => {
+        if(task.syncKey) oldByKey.set(String(task.syncKey), task);
+        if(task.id != null && !oldByKey.has(String(task.id))) oldByKey.set(String(task.id), task);
+      });
+      refreshed[subject] = (src[subject] || []).map(task => {
+        if(!task.syncKey) task.syncKey = String(task.id || newId());
+        const copy = JSON.parse(JSON.stringify(task));
+        const prior = oldByKey.get(String(task.syncKey)) || oldByKey.get(String(task.id));
+        copy.id = prior && prior.id ? prior.id : newId();
+        copy.syncKey = String(task.syncKey || task.id);
+        copy.done = !!task.done;
+        delete copy.photos;
+        return copy;
+      });
+    });
+    state.days[targetDate] = refreshed;
+  }
+  invalidateLinkedIndex();
+}
 function saveLocalState(){
+  try{ applyDateSyncs(); }catch(e){ console.warn('应用日期同步规则失败', e); }
   pruneDays();
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
   try{ localStorage.setItem(REWARD_STORAGE_KEY, JSON.stringify(state.shop || [])); }catch(e){}
@@ -4886,10 +4950,40 @@ function renderCalendar(){
   calTitle.textContent = `${calYear}年${calMonth+1}月`;
   calGrid.innerHTML = '';
   const firstDay = new Date(calYear, calMonth, 1);
-  const startWeek = firstDay.getDay();
+  // JavaScript Sunday=0; shift so Monday is the first column.
+  const startWeek = (firstDay.getDay() + 6) % 7;
   const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
   const prevMonthDays = new Date(calYear, calMonth, 0).getDate();
   const today = todayStr();
+  let longPressTimer = null;
+  let longPressTriggered = false;
+  const clearLongPress = () => { if(longPressTimer){ clearTimeout(longPressTimer); longPressTimer = null; } };
+  const attachAdminLongPress = (cell, dateStr) => {
+    if(!isAdminMode) return;
+    const begin = (e) => {
+      if(e && e.type === 'mousedown' && e.button !== 0) return;
+      longPressTriggered = false;
+      clearLongPress();
+      longPressTimer = setTimeout(() => {
+        longPressTimer = null;
+        longPressTriggered = true;
+        toggleDateSync(dateStr);
+        cell.classList.add('sync-press-done');
+        setTimeout(() => cell.classList.remove('sync-press-done'), 350);
+      }, 2000);
+    };
+    const end = () => clearLongPress();
+    cell.addEventListener('touchstart', begin, {passive:true});
+    cell.addEventListener('touchend', end, {passive:true});
+    cell.addEventListener('touchcancel', end, {passive:true});
+    cell.addEventListener('mousedown', begin);
+    cell.addEventListener('mouseup', end);
+    cell.addEventListener('mouseleave', end);
+    cell.addEventListener('contextmenu', e => e.preventDefault());
+    cell.addEventListener('click', e => {
+      if(longPressTriggered){ e.preventDefault(); e.stopImmediatePropagation(); longPressTriggered = false; }
+    }, true);
+  };
   for(let i = startWeek - 1; i >= 0; i--){
     const cell = document.createElement('div');
     cell.className = 'cal-day other-month'; cell.textContent = prevMonthDays - i;
@@ -4901,6 +4995,7 @@ function renderCalendar(){
     cell.className = 'cal-day'; cell.textContent = d;
     if(dateStr === today) cell.classList.add('today');
     if(dateStr === state.date) cell.classList.add('selected');
+    if(state.dateSyncs && state.dateSyncs[dateStr]) cell.classList.add('synced');
     const day = state.days[dateStr];
     if(day){
       const all = [...(day.chinese||[]), ...(day.math||[]), ...(day.english||[])];
@@ -4911,7 +5006,10 @@ function renderCalendar(){
         cell.appendChild(mark);
       }
     }
-    cell.addEventListener('click', () => { switchDate(dateStr); calModal.classList.remove('show'); });
+    attachAdminLongPress(cell, dateStr);
+    cell.addEventListener('click', () => {
+      switchDate(dateStr); calModal.classList.remove('show');
+    });
     calGrid.appendChild(cell);
   }
   const totalCells = startWeek + daysInMonth;
@@ -4921,6 +5019,48 @@ function renderCalendar(){
     cell.className = 'cal-day other-month'; cell.textContent = i;
     calGrid.appendChild(cell);
   }
+}
+function toggleDateSync(targetDate){
+  if(!state.dateSyncs || typeof state.dateSyncs !== 'object') state.dateSyncs = {};
+  if(state.dateSyncs[targetDate]){
+    // 取消同步只解除当前日期及其下游日期的同步关系，保留作业和完成状态。
+    const links = state.dateSyncs;
+    const removeDates = new Set([targetDate]);
+    let changed = true;
+    while(changed){
+      changed = false;
+      for(const date of Object.keys(links)){
+        const source = links[date];
+        if(removeDates.has(source) && !removeDates.has(date)){
+          removeDates.add(date);
+          changed = true;
+        }
+      }
+    }
+    for(const date of removeDates) delete links[date];
+    // 清理指向已解除日期的关系，但绝不清空日期数据。
+    for(const date of Object.keys(links)){
+      if(removeDates.has(links[date])) delete links[date];
+    }
+    invalidateLinkedIndex();
+    saveLocalState(); uploadToCloud();
+    renderBoard(); refreshAllCards(); renderStats(); updateDateText(); updateDogBar(); updateMainBtn();
+    if(isAdminMode) renderAdminPanel();
+    renderCalendar();
+    toast(`已取消同步：已解除 ${removeDates.size} 个日期的同步关系，作业和完成状态均已保留`);
+    return;
+  }
+  const d = new Date(targetDate + 'T12:00:00');
+  d.setDate(d.getDate()-1);
+  const srcDate = fmtDate(d);
+  // 先建立规则，再执行同步；即使来源日期暂无作业，也保留同步关系。
+  state.dateSyncs[targetDate] = srcDate;
+  applyDateSyncs();
+  saveLocalState(); uploadToCloud();
+  if(state.date === targetDate){ renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn(); if(isAdminMode) renderAdminPanel(); }
+  renderCalendar();
+  const count = ['chinese','math','english'].reduce((n,k) => n + ((state.days[targetDate]?.[k] || []).length),0);
+  toast(count ? `已建立与 ${srcDate} 的同步，当前同步 ${count} 项作业；后续新增内容也会自动同步` : `已预设与 ${srcDate} 的同步；后续新增作业会自动同步`);
 }
 calBtn.addEventListener('click', openCalendar);
 $('calPrev').addEventListener('click', () => { calMonth--; if(calMonth < 0){ calMonth = 11; calYear--; } renderCalendar(); });
