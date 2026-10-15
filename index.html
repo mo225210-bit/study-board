@@ -2691,7 +2691,7 @@ function bindMiziClicks(container, task){
       e.stopPropagation();
       if(el.__lpFired){ el.__lpFired = false; lastClickAt = 0; return; }
       const now = Date.now();
-      if(lastClickAt && (now - lastClickAt) < 320){
+      if(lastClickAt && (now - lastClickAt) < 400){
         lastClickAt = 0;
         clearTimeout(clickTimer);
         clickTimer = null;
