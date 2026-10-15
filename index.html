@@ -2299,7 +2299,36 @@ function attachSubjectsProxy(s){
   });
   return s;
 }
+function applyDateSyncs(){
+  // 日期同步关系是永久规则：即使源日期暂时没有作业，也保留关系；源日期以后新增/修改/勾选作业时自动传递。
+  const links = state.dateSyncs && typeof state.dateSyncs === 'object' ? state.dateSyncs : {};
+  const targets = Object.keys(links).sort();
+  for(const targetDate of targets){
+    const sourceDate = links[targetDate];
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(sourceDate || '') || sourceDate >= targetDate) continue;
+    const src = state.days[sourceDate] || makeDay();
+    const old = state.days[targetDate] || makeDay();
+    const out = makeDay();
+    ['chinese','math','english'].forEach(subject => {
+      const oldTasks = old[subject] || [];
+      const oldByKey = new Map(oldTasks.filter(t => t.syncKey).map(t => [String(t.syncKey), t]));
+      out[subject] = (src[subject] || []).map((task, index) => {
+        if(!task.syncKey) task.syncKey = task.id;
+        const copy = JSON.parse(JSON.stringify(task));
+        const prior = oldByKey.get(String(task.syncKey)) || oldTasks[index];
+        copy.id = prior && prior.id ? prior.id : newId();
+        copy.syncKey = task.syncKey || task.id;
+        copy.done = !!task.done;
+        delete copy.photos;
+        return copy;
+      });
+    });
+    state.days[targetDate] = out;
+  }
+  invalidateLinkedIndex();
+}
 function saveLocalState(){
+  try{ applyDateSyncs(); }catch(e){ console.warn('应用日期同步规则失败', e); }
   pruneDays();
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
   try{ localStorage.setItem(REWARD_STORAGE_KEY, JSON.stringify(state.shop || [])); }catch(e){}
@@ -4963,27 +4992,42 @@ function renderCalendar(){
 function toggleDateSync(targetDate){
   if(!state.dateSyncs || typeof state.dateSyncs !== 'object') state.dateSyncs = {};
   if(state.dateSyncs[targetDate]){
-    // Unlink only this date; retain its current tasks and completion states.
-    ['chinese','math','english'].forEach(k => {
-      (state.days[targetDate]?.[k] || []).forEach(task => { delete task.syncKey; });
+    // 取消时清除该日期及所有依赖它的下游同步关系与任务，避免同步链残留。
+    const removeDates = new Set([targetDate]);
+    let changed = true;
+    while(changed){
+      changed = false;
+      Object.keys(state.dateSyncs).forEach(date => {
+        if(removeDates.has(state.dateSyncs[date]) && !removeDates.has(date)){
+          removeDates.add(date); changed = true;
+        }
+      });
+    }
+    removeDates.forEach(date => {
+      delete state.dateSyncs[date];
+      state.days[date] = makeDay();
     });
-    delete state.dateSyncs[targetDate];
     invalidateLinkedIndex();
     saveLocalState(); uploadToCloud();
-    if(state.date === targetDate){ renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn(); if(isAdminMode) renderAdminPanel(); }
+    if(removeDates.has(state.date)){
+      renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
+      if(isAdminMode) renderAdminPanel();
+    }
     renderCalendar();
-    toast('已取消这一天的同步，现有作业和完成状态保留');
+    toast('已取消同步：同步链及相关日期的作业、完成状态已清除');
     return;
   }
   const d = new Date(targetDate + 'T12:00:00');
   d.setDate(d.getDate()-1);
   const srcDate = fmtDate(d);
-  const result = syncFromPreviousDay(targetDate);
-  if(!result.ok){ toast('前一天没有作业，无法同步'); return; }
+  // 即使前一天暂时没有作业，也先保存同步规则；以后新增作业会自动沿同步链传递。
   state.dateSyncs[targetDate] = srcDate;
+  applyDateSyncs();
   saveLocalState(); uploadToCloud();
+  if(state.date === targetDate){ renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn(); if(isAdminMode) renderAdminPanel(); }
   renderCalendar();
-  toast(`已同步 ${srcDate} 的作业和完成状态`);
+  const count = ['chinese','math','english'].reduce((n,k)=>n + ((state.days[targetDate]?.[k] || []).length),0);
+  toast(count ? `已建立与 ${srcDate} 的同步，当前同步 ${count} 项作业；后续新增内容也会自动同步` : `已预设与 ${srcDate} 的同步；后续新增作业会自动同步`);
 }
 calBtn.addEventListener('click', openCalendar);
 $('calPrev').addEventListener('click', () => { calMonth--; if(calMonth < 0){ calMonth = 11; calYear--; } renderCalendar(); });
