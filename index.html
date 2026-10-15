@@ -49,7 +49,7 @@
   .app{
     --c-main:#8FD14F;--c-dark:#74B93A;--c-deep:#5EA22C;--c-border:#4E8A22;
     --c-btn:#68B32E;--c-btn-shade:#4E8A22;--c-light:#EAF6E6;--c-soft:#F1F8EE;--c-text:#2E7D32;
-    position:relative;z-index:1;width:100%;max-width:902px;margin:0 auto;
+    position:relative;z-index:1;width:100%;max-width:820px;margin:0 auto;
     padding:6px 8px;display:flex;flex-direction:column;gap:7px;min-height:100vh;
   }
   .app.theme-math{
@@ -100,7 +100,7 @@
   .cal-btn .cal-icon{font-size:21px;opacity:.18}
   .date-nav{display:flex;align-items:center;gap:5px}
   .date-nav-btn{height:36px;min-width:34px;border:0;border-radius:10px;background:rgba(255,255,255,.88);color:#39722a;font-weight:900;font-size:17px;box-shadow:0 2px 7px #0001;cursor:pointer}
-  .date-nav-today{padding:0 12px;font-size:13px;border-radius:10px}
+  .date-nav-today{padding:0 9px;font-size:12px}
   .timer-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:stretch;margin-bottom:8px}
   .timer-pair .timer-card,.timer-pair .eye-card{margin:0;min-width:0}
   .timer-pair .timer-row{gap:6px}
@@ -111,9 +111,7 @@
   .timer-pair .eye-btn{grid-column:1 / -1;justify-self:stretch;padding:6px 8px}
   .timer-pair .eye-time{font-size:20px}
   @media(max-width:460px){.timer-pair{gap:5px}.timer-pair .timer-card{padding:7px}.timer-pair .timer-hint{font-size:10px}.timer-pair .timer-btn{font-size:12px;padding:7px}.timer-pair .eye-card{padding:6px}.timer-pair .eye-time{font-size:17px}}
-  .mizi, #miziActionModal, #miziEditModal, .subject-tab{ -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
-  .mizi, .mizi *{ -webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important}
-  #adminPanelProgress{display:none!important}
+  .mizi, #miziActionModal, #miziEditModal, .subject-tab{ -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
   #paperPrintFrame{pointer-events:none}
 
   .timer-card{
@@ -278,7 +276,6 @@
   .task-card.active.paused-card{border-color:#FFB74D;box-shadow:0 0 0 3px rgba(255,183,77,.4)}
   .task-card.active.chomping-card{border-color:#FF7043;box-shadow:0 0 0 3px rgba(255,112,67,.4)}
   .task-card.done{background:rgba(238,248,236,.97);border-color:#B7E0A8}
-  /* 完成动画只在“刚勾选完成”时播放一次，避免每次重绘整版卡片都重播导致卡顿 */
   .task-card.card-just-done{animation:cardDone .6s ease}
   @keyframes cardDone{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,193,7,.75)}
     50%{transform:scale(1.03);box-shadow:0 0 0 9px rgba(255,193,7,0)}100%{transform:scale(1)}}
@@ -292,15 +289,13 @@
   .task-card.done .checkbox{background:#43A047;border-color:#43A047;opacity:1}
   .subject-col[data-subject="math"] .task-card.done .checkbox{background:#039BE5;border-color:#039BE5}
   .task-card.done .checkbox .tick{opacity:1;transform:scale(1)}
-  /* 作业完成后自动折叠：固定为「一行文字」的高度 */
   .task-card.done{min-height:0;padding:6px 9px}
   .task-card.done .task-info{display:none!important}
   .task-card.done .char-grid{display:none!important}
   .task-card.done .card-actions{display:none!important}
   .task-card.done .card-progress{display:none}
   .task-card.done .card-top{align-items:center;padding-bottom:0}
-  /* 自定义作业正文是 26px!important，这里必须同样用 !important 才能压成一行并省略号截断 */
-  .task-card.done .task-text{font-size:15px!important;line-height:1.4!important;
+  .task-card.done .task-text{font-size:13px!important;line-height:1.35!important;
     white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis}
 
   .card-body{flex:1;min-width:0}
@@ -361,7 +356,6 @@
   .shop-btn .ticket-num{font-size:14.5px;margin-left:2px;
     background:rgba(255,255,255,.28);padding:0 6px;border-radius:999px;display:inline-block}
 
-  /* 课程表 */
   .tt-scroll{position:relative;z-index:2;overflow-x:auto;-webkit-overflow-scrolling:touch;
     border-radius:12px;background:rgba(255,255,255,.97);border:2px solid #fff;
     box-shadow:0 3px 10px rgba(0,0,0,.12)}
@@ -437,7 +431,6 @@
     font-family:var(--font-pinyin);
     max-width:78px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
     text-align:center;line-height:1.2}
-  /* 偏旁 / 笔画 / 页码：固定楷体 */
   .char-info{font-size:13.5px;font-weight:700;color:#000000;white-space:nowrap;
     font-family:"Kaiti SC","STKaiti","KaiTi","楷体","KaiTi_GB2312",serif;
     text-align:center;line-height:1.35;letter-spacing:-.2px}
@@ -447,7 +440,6 @@
     padding:4px;border-radius:6px;background:transparent}
   .wg-item{display:flex;flex-direction:column;align-items:center;gap:1px;flex:none}
 
-  /* ===== 抄写并组词：生字后面的小田字格词语 ===== */
   .wordgroup-grid{gap:12px 10px}
   .wordgroup-card{width:auto;min-width:78px;align-items:center}
   .word-after{
@@ -459,7 +451,6 @@
   .word-after .word-empty{
     font-size:11px;color:#9aad9a;font-weight:700;white-space:nowrap;
   }
-  /* 词语田字格与生字一样大 */
   .mizi.small{
     width:54px;height:54px;border-radius:3px;
     background:#F1F8E9;border-color:#C5E1A5;cursor:default;
@@ -535,9 +526,6 @@
   .cal-day.today{border-color:#FFC107;box-shadow:inset 0 0 0 1px rgba(255,193,7,.3)}
   .cal-day.selected{background:linear-gradient(180deg,#8FD14F,#68B32E);color:#fff;box-shadow:0 3px 0 #4E8A22}
   .cal-day.selected .cal-mark{background:#fff}
-  .cal-day.synced{background:#D8ECFF;border-color:#4A90E2;color:#174A7E;box-shadow:inset 0 0 0 1px rgba(74,144,226,.22)}
-  .cal-day.synced.selected{background:linear-gradient(180deg,#80B9F5,#4A90E2);color:#fff;border-color:#2F75BC}
-  .cal-day.sync-source{outline:2px dashed #4A90E2;outline-offset:-4px}
   .cal-mark{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
     width:5px;height:5px;border-radius:50%;background:#FF9800}
   .cal-mark.done{background:#4CAF50}
@@ -549,7 +537,6 @@
     font-family:"Kaiti SC","KaiTi","STKaiti","楷体",serif}
   .stroke-pinyin{font-size:15px;font-weight:800;color:#5b7a5b;margin-top:2px}
   .stroke-meta{font-size:13px;font-weight:800;color:#8aa88a;margin-top:4px}
-  /* ★ 偏旁右侧的字典页码（点击打开查字典对应页） */
   .stroke-meta .dict-page-link{display:inline-block;margin-left:6px;padding:1px 9px;border-radius:999px;
     background:#f7e9c9;border:1px solid #e0c9a0;color:#9c3b2e;font-weight:900;cursor:pointer;
     -webkit-tap-highlight-color:transparent;transition:transform .12s}
@@ -656,7 +643,7 @@
   .admin-panel{position:fixed;inset:0;z-index:300;display:none;
     background:linear-gradient(180deg,#0d1a26,#1a2a3a);overflow-y:auto;padding:20px}
   .admin-panel.show{display:block}
-  .admin-panel-inner{max-width:1210px;margin:0 auto}
+  .admin-panel-inner{max-width:1100px;margin:0 auto}
   .admin-header{display:flex;align-items:center;justify-content:space-between;
     gap:16px;margin-bottom:20px;flex-wrap:wrap}
   .admin-header h2{font-size:21px;font-weight:900;color:#FFD54F;letter-spacing:1px;
@@ -665,7 +652,6 @@
     background:linear-gradient(180deg,#EF9A9A,#E53935);
     border:2px solid #E53935;padding:10px 24px;border-radius:999px;cursor:pointer;
     box-shadow:0 3px 0 #B71C1C;transition:all .15s}
-  /* 日期选择：与「家长管理面板」标题同一行 */
   .admin-header-date{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
     flex:1 1 auto;justify-content:center}
   .admin-header-date .aa-btn,
@@ -909,7 +895,6 @@
 
   .word-group.no-char-info .char-info{display:none}
 
-  /* ===== 页码行（点击打开查字典） ===== */
   .char-info.char-page{
     cursor:pointer;font-family:"Kaiti SC","STKaiti","KaiTi","楷体",serif;
     transition:color .15s;
@@ -917,13 +902,10 @@
   .char-info.char-page:hover{color:#1565C0}
   .char-info.char-page .page-num{font-weight:900}
 
-  /* ===== 标题/字典大字号字体（家长端可设置） ===== */
   h1,h2,h3,h4,.panel-head2,.admin-label,.sheet-title,.dict-head h3{font-family:var(--font-title)}
   .dict-head .dict-cur-char{font-family:var(--font-mizi)}
-  /* 偏旁/笔画/页码行固定楷体，不随正文字体设置改变 */
   .char-info.char-page{font-family:"Kaiti SC","STKaiti","KaiTi","楷体",serif}
 
-  /* ===== 查字典弹窗 ===== */
   .dict-card{width:min(1500px,98vw);max-width:1500px;height:96vh;max-height:96vh;display:flex;flex-direction:column;padding:10px}
   .dict-head{display:flex;align-items:center;justify-content:space-between;
     gap:10px;margin-bottom:8px;flex-wrap:wrap}
@@ -938,10 +920,8 @@
   .dict-file-row input{font-size:12px;max-width:170px}
   .dict-file-row .dict-loaded{color:#2E7D32}
   .dict-layout{flex:1;display:flex;min-height:0;overflow:hidden;--dict-left-pct:36%}
-  /* ★ 左索引 / 右汉字表：宽度可由中间分隔条拖动调整 */
   .dict-index{flex:0 0 var(--dict-left-pct,36%);min-width:0;display:flex;flex-direction:column;min-height:0;
     border:2px solid #cbbfa6;border-radius:10px;background:#fdfaf3;overflow:hidden}
-  /* ★ 左右栏中间的可拖拽分隔条 */
   .dict-resizer{flex:0 0 14px;align-self:stretch;position:relative;cursor:col-resize;
     touch-action:none;-webkit-user-select:none;user-select:none;z-index:6}
   .dict-resizer::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;
@@ -983,7 +963,6 @@
   .dict-tools input.pgnum{width:48px;height:24px;text-align:center;border:1px solid #d5c9b2;
     border-radius:4px;font-family:inherit;font-size:13px;color:#2f2a24;background:#fff}
   .dict-scroll{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;position:relative}
-  /* ★ 虚拟滚动容器：只渲染可视区附近的页 */
   .dict-pages{position:relative;margin:0 auto;padding:0}
   @media(max-width:700px){.dict-card{width:98vw;height:96vh;padding:7px}.dict-resizer{flex-basis:18px}.dict-index{flex:0 0 var(--dict-left-pct,34%)}.dict-pages-wrap{flex:1 1 auto}.dict-tools{gap:4px;padding:4px;font-size:12px}}
   .pdf-page{position:absolute;left:0;top:0;background:#fff;flex:0 0 auto;
@@ -996,7 +975,6 @@
   .dict-empty{position:absolute;inset:12px;display:flex;flex-direction:column;
     align-items:center;justify-content:center;gap:8px;color:#8b7a5e;
     font-size:15px;font-weight:800;text-align:center;padding:14px}
-  /* ===== 字体大小（家长端可分类设置） ===== */
   .brand-title,.admin-header h2{font-size:var(--fs-title)}
   .admin-section h3,.admin-sub-label,.admin-label,.panel-head2,
   .dict-letter-block .dl-head{font-size:var(--fs-subtitle)}
@@ -1014,28 +992,18 @@
   .quick-row .aa-num{width:68px;min-width:58px}
   .quick-row .aa-btn{flex-shrink:0}
   @media(max-width:650px){.quick-row{flex-wrap:wrap}.quick-row .aa-text{flex-basis:100%}}
-  /* 快速添加日常作业：输入框与抄写词语下拉框同宽 */
   .admin-add-row.quick-add-row .aa-text,
   .admin-add-row.quick-add-row .aa-num{flex:1 1 90px;width:auto;min-width:0}
 
   @media (max-width:700px){
     .dict-entry-list{grid-template-columns:1fr}
   }
-
-  /* iPad Air 2 横屏：放大已完成作业文字，同时尽量压缩卡片高度 */
-  @media (min-width: 760px) and (orientation: landscape){
-    .app{padding:6px 10px;gap:6px}
-    .subject-tabs{padding:3px}
-    .subject-tab{font-size:15px;padding:8px 5px}
-    .task-card{padding:6px 9px 5px}
-    .task-card.done{padding:6px 9px}
-    .task-card.done .task-text{font-size:15px!important;line-height:1.35!important}
-    .task-text{font-size:15px;line-height:1.4}
-    .timer-pair{margin-bottom:6px}
-    .admin-panel{padding:16px}
-  }
 </style>
 </head>
+
+
+
+
 <body>
 
 <div class="cloud c1"></div>
@@ -1166,7 +1134,7 @@
       <div class="cal-title" id="calTitle">2026年9月</div>
       <button id="calNext">▶</button>
     </div>
-    <div class="cal-week"><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div></div>
+    <div class="cal-week"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div>
     <div class="cal-grid" id="calGrid"></div>
     <div class="cal-actions">
       <button class="btn-ghost" id="calTodayBtn">📌 回到今天</button>
@@ -1364,13 +1332,13 @@
         <button class="date-nav-btn" id="adminPrevDay" title="前一天">‹</button>
         <button class="cal-btn" id="adminCalDay" type="button" title="当前日期" style="width:40px;height:40px"><span class="cal-icon">📅</span><span class="cal-day-number" id="adminCalDayNumber">15</span></button>
         <button class="date-nav-btn" id="adminNextDay" title="后一天">›</button>
-        <button class="date-nav-btn date-nav-today" id="adminGoToday">今天</button>
+        <button class="aa-btn" id="adminGoToday">今天</button>
       </div>
       <button class="admin-close" id="adminCloseBtn">✕ 关闭</button>
     </div>
 
     <div class="admin-section" id="adminPanelChinese">
-      <h3>📖 语文作业 <span class="badge" id="adminChineseBadge">0</span><button type="button" class="aa-btn" id="uploadChinesePaperBtn" title="上传并永久保存作业纸" style="margin-left:auto;padding:7px 13px;border-radius:10px;white-space:nowrap;flex:none">📄 上传作业纸</button><input type="file" id="chinesePaperInput" accept="image/*,.pdf,application/pdf" style="display:none"></h3>
+      <h3>📖 语文作业 <span class="badge" id="adminChineseBadge">0</span><button type="button" class="aa-btn" id="uploadChinesePaperBtn" title="上传并永久保存作业纸" style="margin-left:auto;padding:5px 10px">📄 上传作业纸</button><input type="file" id="chinesePaperInput" accept="image/*,.pdf,application/pdf" style="display:none"></h3>
       <p style="font-size:12.5px;color:#5a7a8a;font-weight:700;margin-bottom:8px">💡 双击作业条目可重新编辑</p>
       <div id="adminChineseList"></div>
       <div class="admin-sub-label">➕ 添加预习生字</div>
@@ -1542,7 +1510,6 @@
       <div class="admin-add-row"><button class="aa-btn" id="adminLibAddBtn" style="flex:1">💾 保存到课文库</button></div>
     </div>
 
-    <!-- ★★★ 课程表：已移动到家长密码上面 ★★★ -->
     <div class="admin-section collapsed" id="adminPanelTimetable">
       <h3>📅 课程表 <span class="badge" id="adminTtBadge">未上传</span></h3>
       <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
@@ -1633,6 +1600,10 @@
         <button class="aa-btn" id="adminForcePullBtn" style="background:linear-gradient(180deg,#90CAF9,#42A5F5);border-color:#42A5F5;box-shadow:0 3px 0 #1976D2;color:#fff">⬇️ 强制拉取云端数据</button>
         <button class="aa-btn" id="adminLocalUploadBtn">📤 本地上传</button>
         <button class="aa-btn" id="adminLocalDownloadBtn">📥 本地下载</button>
+        <button class="aa-btn" id="adminToggleSyncBtn" style="background:linear-gradient(180deg,#B0BEC5,#78909C);border-color:#546E7A;box-shadow:0 3px 0 #455A64;color:#fff;flex:1 1 100%">🔌 断开云同步（本机独立运行）</button>
+        <button class="aa-btn" id="adminClearTodayBtn" style="background:linear-gradient(180deg,#FF8A65,#E64A19);border-color:#D84315;box-shadow:0 3px 0 #BF360C;color:#fff;flex:1 1 100%">🧹 清除今天的全部任务（需密码）</button>
+        <button class="aa-btn" id="adminClearSyncBtn" style="background:linear-gradient(180deg,#FF6B6B,#D32F2F);border-color:#B71C1C;box-shadow:0 3px 0 #B71C1C;color:#fff;flex:1 1 100%">🗑 彻底清除同步任务（需密码）</button>
+        <button class="aa-btn" id="adminClearTasksBtn" style="background:linear-gradient(180deg,#FF9800,#EF6C00);border-color:#E65100;box-shadow:0 3px 0 #E65100;color:#fff;flex:1 1 100%">🧹 强制清除今天之后的任务并断开同步（需密码）</button>
         <input type="file" id="adminLocalUploadFile" accept=".json,application/json" style="display:none">
       </div>
       <div style="font-size:12px;color:#5a7a8a;font-weight:700;margin-top:10px" id="adminSyncInfo">最后同步：—</div>
@@ -1640,11 +1611,14 @@
   </div>
 </div>
 
+
+
+
 <script type="module">
 /* ============================================================
    ★★★ 版本号：每次修改界面/功能后请把这里 +1
 ============================================================ */
-const APP_VERSION = '2026.10.15.1';
+const APP_VERSION = '2026.10.16.1';
 
 /* ============================================================
    🔄 自动更新
@@ -2247,7 +2221,7 @@ function loadLocalState(){
       shop: JSON.parse(JSON.stringify(DEFAULT_SHOP)),
       wordBank: {}, charPages: {}, timetable: null,
       parentPassword: MASTER_PASSWORD,
-      chinesePaper: null, dateSyncs: {},
+      chinesePaper: null,
       lastNightReset: '', eyeSoundOffDate: '',
       live: JSON.parse(JSON.stringify(DEFAULT_LIVE))
     };
@@ -2261,7 +2235,6 @@ function loadLocalState(){
   if(!Array.isArray(s.sunLog)) s.sunLog = [];
   if(typeof s.sun !== 'number') s.sun = 0;
   if(!('chinesePaper' in s)) s.chinesePaper = null;
-  if(!s.dateSyncs || typeof s.dateSyncs !== 'object' || Array.isArray(s.dateSyncs)) s.dateSyncs = {};
   if(typeof s.lastNightReset !== 'string') s.lastNightReset = '';
   if(typeof s.eyeSoundOffDate !== 'string') s.eyeSoundOffDate = '';
   if(typeof s.parentPassword !== 'string' || !/^\d{4}$/.test(s.parentPassword)) s.parentPassword = MASTER_PASSWORD;
@@ -2299,69 +2272,10 @@ function attachSubjectsProxy(s){
   });
   return s;
 }
-function applyDateSyncs(){
-  // 日期同步规则：源日期里带 syncKey 的作业会"投影"到目标日期；
-  // 目标日期自己手动添加的作业（没有 syncKey）会保留，不会被覆盖。
-  const links = state.dateSyncs && typeof state.dateSyncs === 'object' ? state.dateSyncs : {};
-  const targets = Object.keys(links).sort();
-  for(const targetDate of targets){
-    const sourceDate = links[targetDate];
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(sourceDate || '') || sourceDate >= targetDate) continue;
-    const src = state.days[sourceDate] || makeDay();
-    const old = state.days[targetDate] || makeDay();
-    const out = makeDay();
-    ['chinese','math','english'].forEach(subject => {
-      const oldTasks = old[subject] || [];
-      const srcTasks = src[subject] || [];
-      // 源日期的任务按 syncKey 建索引（缺 syncKey 的补上自己 id）
-      const srcByKey = new Map();
-      srcTasks.forEach(task => {
-        if(!task.syncKey) task.syncKey = task.id;
-        srcByKey.set(String(task.syncKey), task);
-      });
-      const result = [];
-      const usedKeys = new Set();
-      // 1) 按目标日期原有顺序遍历：
-      //    - 本地任务（无 syncKey）→ 原样保留
-      //    - 同步任务（有 syncKey）且源日期还有 → 用源日期最新数据替换
-      //    - 同步任务但源日期已删除 → 丢弃
-      oldTasks.forEach(t => {
-        if(t.syncKey && srcByKey.has(String(t.syncKey))){
-          const srcTask = srcByKey.get(String(t.syncKey));
-          usedKeys.add(String(t.syncKey));
-          const copy = JSON.parse(JSON.stringify(srcTask));
-          copy.id = t.id;                 // 保留目标日期原 id，避免本地关联丢失
-          copy.syncKey = t.syncKey;
-          copy.done = !!srcTask.done;
-          delete copy.photos;
-          result.push(copy);
-        } else if(!t.syncKey){
-          result.push(t);
-        }
-      });
-      // 2) 源日期里新增的同步任务，追加到末尾
-      srcTasks.forEach(task => {
-        const key = String(task.syncKey);
-        if(usedKeys.has(key)) return;
-        const copy = JSON.parse(JSON.stringify(task));
-        copy.id = newId();
-        copy.syncKey = task.syncKey;
-        copy.done = !!task.done;
-        delete copy.photos;
-        result.push(copy);
-      });
-      out[subject] = result;
-    });
-    state.days[targetDate] = out;
-  }
-  invalidateLinkedIndex();
-}
 function saveLocalState(){
-  try{ applyDateSyncs(); }catch(e){ console.warn('应用日期同步规则失败', e); }
   pruneDays();
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
   try{ localStorage.setItem(REWARD_STORAGE_KEY, JSON.stringify(state.shop || [])); }catch(e){}
-  // 独立保存各日期的作业完成状态，刷新或重新打开网页时可作为持久化校验副本。
   try{
     const doneMirror = {};
     Object.keys(state.days || {}).forEach(date => {
@@ -2431,7 +2345,6 @@ function syncFromPreviousDay(targetDate){
   }
   return { ok:true, srcDate, count };
 }
-/* ★ 缓存版：把 syncKey 相同的任务一次性建索引，避免每次勾选都全量扫描 */
 function getLinkedTasks(task){
   if(!task) return [];
   if(!task.syncKey) return [task];
@@ -2533,9 +2446,6 @@ function redoMizi(taskId){
   toast('↷ 已恢复');
 }
 
-/* 把任务的最新字/词语写回课文库：
-   - 首次写入时，把课文库原字段备份到 oldChars / oldWordgroups / oldWords
-   - 新内容写入 chars / wordgroups / words */
 function syncTaskToLessonLibrary(task){
   if(!task || !task.lessonName) return;
   const lib = state.lessonLibrary;
@@ -2556,7 +2466,6 @@ function syncTaskToLessonLibrary(task){
   if(isAdminMode) renderLessonLibrary();
 }
 
-/* 重新计算任务分钟数与金币（按剩余数量 × 单位配置） */
 function recalcTaskUnits(task){
   const type = task.type;
   if(type !== 'preview' && type !== 'wordgroup' && type !== 'copy') return;
@@ -2643,9 +2552,6 @@ function deleteMiziUnit(ctx){
     if((task.words || []).length <= 1){ toast('至少要保留一个字哦'); return; }
     recordHistoryBefore(ctx.taskId);
     task.words.splice(ctx.index, 1);
-    if(task.type === 'copy' && Array.isArray(task.checkedWords)){
-      task.checkedWords = task.checkedWords.filter(i => i !== ctx.index).map(i => i > ctx.index ? i - 1 : i);
-    }
     const remainStr = (task.words || []).join('');
     if(Array.isArray(task.checkedChars)) task.checkedChars = task.checkedChars.filter(c => remainStr.indexOf(c) >= 0);
   }
@@ -2724,7 +2630,6 @@ function bindMiziClicks(container, task){
     el.__lpFired = false;
     const cancelLp = () => { if(lpTimer){ clearTimeout(lpTimer); lpTimer = null; } };
     const startLp = (ev) => {
-      /* 长按修改/删除：只对「抄写词语」(copy) 启用 */
       if(!task || task.type !== 'copy') return;
       const p = ev.touches ? ev.touches[0] : ev;
       if(!p) return;
@@ -2759,28 +2664,18 @@ function bindMiziClicks(container, task){
       const group = el.closest('.word-group');
       const targets = group ? Array.from(group.querySelectorAll('.mizi[data-char]')) : [el];
       const willCheck = !el.classList.contains('checked');
-      targets.forEach(x => x.classList.toggle('checked', willCheck));
-      if(task && task.type === 'copy' && group){
-        // 抄写词语以词条索引记录完成状态；同一个汉字出现在别的词里不会被连带勾选。
-        if(!Array.isArray(task.checkedWords)) task.checkedWords = [];
-        const index = Number(group.dataset.wordIndex);
-        if(Number.isInteger(index) && index >= 0){
-          const i = task.checkedWords.indexOf(index);
-          if(willCheck && i < 0) task.checkedWords.push(index);
-          else if(!willCheck && i >= 0) task.checkedWords.splice(i, 1);
-        }
-      } else if(task){
-        targets.forEach(x => setCharChecked(task, x.dataset.char, willCheck));
-      }
+      targets.forEach(x => {
+        x.classList.toggle('checked', willCheck);
+        if(task) setCharChecked(task, x.dataset.char, willCheck);
+      });
       if(task) scheduleCheckSave();
     };
 
-    /* 手动识别双击，兼容 iPad / 移动浏览器 */
     el.addEventListener('click', e => {
       e.stopPropagation();
       if(el.__lpFired){ el.__lpFired = false; lastClickAt = 0; return; }
       const now = Date.now();
-      if(lastClickAt && (now - lastClickAt) < 420){
+      if(lastClickAt && (now - lastClickAt) < 320){
         lastClickAt = 0;
         clearTimeout(clickTimer);
         clickTimer = null;
@@ -2797,7 +2692,7 @@ function bindMiziClicks(container, task){
         } else {
           showStroke(el.dataset.char, task, 'plain');
         }
-      }, 450);
+      }, 320);
     });
   });
 }
@@ -2857,7 +2752,6 @@ function removeCharWord(char, index){
   refreshWordBankInCards(char);
 }
 
-/* 刷新卡片上该生字后面显示的词语 */
 function refreshWordBankInCards(char){
   document.querySelectorAll('[data-word-after="' + char + '"]').forEach(el => {
     const words = (state.wordBank && state.wordBank[char]) ? state.wordBank[char] : [];
@@ -2976,20 +2870,24 @@ function applyTabFromLive(){
    ☁️ 云端同步
 ============================================================ */
 let lastPushedUpdatedAt = 0;
+let cloudSyncCleared = false;
+const SYNC_TOGGLE_KEY = 'study_board_sync_enabled_v1';
+function getSyncEnabled(){ try{ return localStorage.getItem(SYNC_TOGGLE_KEY) !== '0'; }catch(e){ return true; } }
+function setSyncEnabled(v){ try{ localStorage.setItem(SYNC_TOGGLE_KEY, v ? '1' : '0'); }catch(e){} cloudSyncCleared = !v; }
 let lastRemoteUpdatedAt = 0;
 let uploadFailedNotified = false;
 
-async function uploadToCloudNow(force){
+async function uploadToCloud(force){
   if(!dataRef || !fbSet || !fbGet) return false;
   if(isRemoteUpdate && !force) return false;
   if(freshBoot && !force && !lastRemoteUpdatedAt) return false;
+  if(!getSyncEnabled() || cloudSyncCleared) return false;
   const payload = {
     days: state.days, date: state.date, settings: state.settings,
     sun: state.sun, checkins: state.checkins,
     sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
     lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword, chinesePaper: state.chinesePaper || null,
     shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
-    dateSyncs: (state.dateSyncs && typeof state.dateSyncs === 'object' && !Array.isArray(state.dateSyncs)) ? state.dateSyncs : {},
     lastNightReset: state.lastNightReset || '',
     eyeSoundOffDate: state.eyeSoundOffDate || '',
     live: state.live, updatedAt: Date.now()
@@ -3005,31 +2903,6 @@ async function uploadToCloudNow(force){
     return false;
   }
 }
-
-// 低资源同步策略：本地 localStorage 每次立即保存；普通云端写入合并为 900ms 内最后一次，
-// 避免连续点击、勾选时反复写 Firebase。显式强制同步仍立即执行。
-let cloudSyncDebounceTimer = null;
-function uploadToCloud(force){
-  if(force){
-    clearTimeout(cloudSyncDebounceTimer);
-    cloudSyncDebounceTimer = null;
-    return uploadToCloudNow(true);
-  }
-  clearTimeout(cloudSyncDebounceTimer);
-  cloudSyncDebounceTimer = setTimeout(() => {
-    cloudSyncDebounceTimer = null;
-    uploadToCloudNow(false);
-  }, 900);
-  return Promise.resolve(true);
-}
-window.addEventListener('pagehide', () => {
-  if(cloudSyncDebounceTimer){
-    clearTimeout(cloudSyncDebounceTimer);
-    cloudSyncDebounceTimer = null;
-    uploadToCloudNow(false);
-  }
-});
-
 let adminEntrySnapshot = null;
 function getEditableStateForCompare(){
   return JSON.stringify({
@@ -3037,11 +2910,9 @@ function getEditableStateForCompare(){
     sun: state.sun, checkins: state.checkins, sunLog: state.sunLog,
     lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword, chinesePaper: state.chinesePaper || null,
     shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
-    dateSyncs: state.dateSyncs || {},
     lastNightReset: state.lastNightReset || '', eyeSoundOffDate: state.eyeSoundOffDate || ''
   });
 }
-/* 历史快照体积控制：只保存作业结构，剥离照片；并限制总条数 */
 const HISTORY_MAX = 20;
 function stripPhotosFromDays(days){
   const out = {};
@@ -3082,6 +2953,7 @@ function scheduleHistorySnapshot(reason){
   historyTimer = setTimeout(() => { try{ saveHistorySnapshot(reason); }catch(e){} }, 1500);
 }
 async function saveHistorySnapshot(reason){
+  if(!getSyncEnabled() || cloudSyncCleared) return false;
   try{
     const entry = makeHistorySnapshot(reason);
     if(historyRef && fbGet && fbSet){
@@ -3128,17 +3000,6 @@ function applyRemoteState(remote){
   if(remote.wordBank) state.wordBank = normalizeWordBank(remote.wordBank);
   if(remote.charPages && typeof remote.charPages === 'object') state.charPages = remote.charPages;
   if('timetable' in remote) state.timetable = normalizeTimetable(remote.timetable);
-  if(remote.dateSyncs && typeof remote.dateSyncs === 'object' && !Array.isArray(remote.dateSyncs)){
-    const clean = {};
-    Object.keys(remote.dateSyncs).forEach(k => {
-      const v = remote.dateSyncs[k];
-      if(/^\d{4}-\d{2}-\d{2}$/.test(k) && /^\d{4}-\d{2}-\d{2}$/.test(String(v || ''))){
-        clean[k] = String(v);
-      }
-    });
-    state.dateSyncs = clean;
-    invalidateLinkedIndex();
-  }
   if(typeof remote.parentPassword === 'string' && /^\d{4}$/.test(remote.parentPassword)) state.parentPassword = remote.parentPassword;
   if(typeof remote.lastNightReset === 'string') state.lastNightReset = remote.lastNightReset;
   if(typeof remote.eyeSoundOffDate === 'string') state.eyeSoundOffDate = remote.eyeSoundOffDate;
@@ -3178,8 +3039,13 @@ function applyRemoteState(remote){
   }
 }
 let cloudListener = null;
+function stopCloudSync(){
+  if(typeof cloudListener === 'function'){ try{ cloudListener(); }catch(e){} }
+  cloudListener = null;
+}
 function startCloudSync(){
   if(!dataRef || !fbOnValue || cloudListener) return;
+  if(!getSyncEnabled()) return;
   cloudListener = fbOnValue(dataRef, snapshot => {
     const remote = snapshot.val(); if(!remote) return; applyRemoteState(remote);
   }, err => { console.warn('云端监听失败', err); showSyncStatus('⚠️ 云端连接失败', 'offline'); });
@@ -3398,7 +3264,6 @@ function miziSvg(){
     <line x1="100" y1="0" x2="0" y2="100"/>
   </svg>`;
 }
-/* 预习生字卡片：偏旁 + 笔画（手写确认后显示） */
 function renderCharCard(char, task){
   const info = HZ_INFO[char] || ['—','—'];
   const py = getPinyin(char);
@@ -3408,7 +3273,7 @@ function renderCharCard(char, task){
   const strokeTip = strokeCount ? '点击查看笔顺动画' : '点击手写确认笔画';
   return `<div class="char-card">
     <div class="char-pinyin">${py ? escapeHtml(py) : '&nbsp;'}</div>
-    <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(char)}" title="${tip}">
+    <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(char)}" title="单击看笔顺 · 双击打勾">
       ${miziSvg()}
       <span class="mizi-char">${escapeHtml(char)}</span>
     </div>
@@ -3417,17 +3282,16 @@ function renderCharCard(char, task){
     <div class="char-info char-page" data-dict-char="${escapeAttr(char)}" title="点击打开查字典">页码：<span class="page-num" data-page-char="${escapeAttr(char)}">${pageNum || '—'}</span></div>
   </div>`;
 }
-function renderWordGroup(word, showInfo, task, wordIndex){
+function renderWordGroup(word, showInfo, task){
   if(showInfo === undefined) showInfo = true;
   const chars = [...word].filter(c => /[\u4e00-\u9fa5]/.test(c));
   if(!chars.length) return '';
   const wrapCls = showInfo ? 'word-group' : 'word-group no-char-info';
   const isCopy = !!(task && task.type === 'copy');
   const tip = isCopy ? '单击看笔顺 · 双击打勾 · 长按修改/删除' : '单击看笔顺 · 双击打勾';
-  const checkedWord = !!(isCopy && Array.isArray(task.checkedWords) && task.checkedWords.includes(wordIndex));
-  return `<div class="${wrapCls}" data-word-group="1" data-word-index="${wordIndex == null ? '' : wordIndex}">${chars.map(c => {
+  return `<div class="${wrapCls}" data-word-group="1">${chars.map(c => {
     const py = getPinyin(c);
-    const checked = isCopy ? checkedWord : !!(task && Array.isArray(task.checkedChars) && task.checkedChars.indexOf(c) >= 0);
+    const checked = !!(task && Array.isArray(task.checkedChars) && task.checkedChars.indexOf(c) >= 0);
     return `<div class="wg-item">
       <div class="char-pinyin">${py ? escapeHtml(py) : '&nbsp;'}</div>
       <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(c)}" title="单击看笔顺 · 双击打勾">
@@ -3437,14 +3301,12 @@ function renderWordGroup(word, showInfo, task, wordIndex){
     </div>`;
   }).join('')}</div>`;
 }
-/* 小号词语田字格（显示在生字后面） */
 function renderSmallWord(word){
   const chars = [...word].filter(c => /[\u4e00-\u9fa5]/.test(c));
   return '<span class="word-item">' + chars.map(c =>
     '<span class="mizi small">' + miziSvg() + '<span class="mizi-char">' + escapeHtml(c) + '</span></span>'
   ).join('') + '</span>';
 }
-/* 抄写并组词卡片：生字 + 后面跟已组词语 */
 function renderWordGroupWithWords(char, task){
   const py = getPinyin(char);
   const checked = !!(task && Array.isArray(task.checkedChars) && task.checkedChars.indexOf(char) >= 0);
@@ -3629,7 +3491,6 @@ function renderBoard(){
   updateSubjectCounts();
   rebindCharTimer();
 }
-/* ★ 只更新科目 tab 上的未完成计数，避免整版重绘 */
 function updateSubjectCounts(){
   if(chineseTabCountEl) chineseTabCountEl.textContent = state.subjects.chinese.filter(t=>!t.done).length;
   if(mathTabCountEl)    mathTabCountEl.textContent    = state.subjects.math.filter(t=>!t.done).length;
@@ -3677,7 +3538,6 @@ function renderSubjectCards(subject, listEl){
 
     const actions = document.createElement('div'); actions.className = 'card-actions';
 
-    /* ★ 撤销/恢复按钮（仅「抄写词语」显示） */
     if(task.type === 'copy'){
       const undoBtn = document.createElement('button');
       undoBtn.type = 'button'; undoBtn.className = 'mini-btn undo'; undoBtn.textContent = '↶'; undoBtn.title = '撤销';
@@ -3731,7 +3591,7 @@ function renderSubjectCards(subject, listEl){
       const grid = document.createElement('div');
       grid.className = 'char-grid';
       grid.dataset.taskId = task.id;
-      grid.innerHTML = task.words.map((w, i) => renderWordGroup(w, false, task, i)).join('');
+      grid.innerHTML = task.words.map(w => renderWordGroup(w, false, task)).join('');
       card.appendChild(grid);
       bindMiziClicks(grid, task);
     }
@@ -3743,11 +3603,10 @@ function renderSubjectCards(subject, listEl){
   });
   tasks.forEach(t => updateCardVisual(t.id));
 }
-/* ★ 只刷新某张卡片的完成/未完成外观（比 renderBoard 便宜得多） */
 function refreshCardDoneState(id){
   const ref = cardRefs[id];
   if(!ref) return;
-  ref._sig = null;  // 强制 updateCardVisual 重算
+  ref._sig = null;
   updateCardVisual(id);
 }
 function updateCardVisual(id){
@@ -3755,8 +3614,6 @@ function updateCardVisual(id){
   const info = findTask(id); if(!info) return;
   const task = info.task;
   const rt = runtimeMap[id];
-  /* ★ 性能优化：非活动卡片只在状态变化时才写 DOM。
-     refreshAllCards() 每次都会遍历全部卡片，作业多时这里是卡顿主因。 */
   if(task.done){
     if(ref._sig === 'done') return;
     ref._sig = 'done';
@@ -4010,7 +3867,6 @@ function renderTimetable(){
     lastTtKey = 'empty';
     return;
   }
-  /* ★ 应用字体设置 */
   const st = state.settings || DEFAULT_SETTINGS;
   wrap.style.setProperty('--tt-font-size', (Number(st.ttFontSize) || 13.5) + 'px');
   wrap.style.setProperty('--tt-line-height', String(Number(st.ttLineHeight) || 1.4));
@@ -4068,7 +3924,7 @@ setInterval(() => {
 }, 30000);
 
 /* ============================================================
-   田字格倒计时（旧版：总时长固定）
+   田字格倒计时
 ============================================================ */
 function charBarEnsure(mizi){
   let bar = mizi.querySelector('.mizi-bar');
@@ -4232,7 +4088,6 @@ function updateEyeOverlay(){
   const L = state.live;
   let cls = 'eye-overlay';
   let html = '';
-  // 双保险：即使主 tick 因标签页休眠/同步异常没有处理到 0，渲染护眼层时也立即解除全屏遮罩。
   if(L && L.eyeActive && L.eyeMode === 'rest' && liveEyeLeftMs(L) <= 0){
     L.eyeActive = false; L.eyeMode = 'idle'; L.eyeStageStart = 0; L.eyeTotalMs = 0;
     L.eyeNagCount = 0; L.eyeLastNarrated = -1; L.eyePaused = false; L.eyePausedLeftMs = 0;
@@ -4531,7 +4386,6 @@ function tick(){
       const secs = Math.max(0, Math.ceil(left / 1000));
       if(secs % 5 === 0 && L.eyeLastNarrated !== secs){ L.eyeLastNarrated = secs; speakNumber(secs); }
       if(left <= 0){
-        // 护眼放松倒计时结束：彻底结束本轮护眼，避免界面停留在 0。
         L.eyeActive = false; L.eyeMode = 'idle'; L.eyeStageStart = 0; L.eyeTotalMs = 0;
         L.eyeNagCount = 0; L.eyeLastNarrated = -1; L.eyePaused = false; L.eyePausedLeftMs = 0;
         L.soundSeq = (L.soundSeq || 0) + 1; L.soundKind = 'restDone';
@@ -4576,7 +4430,7 @@ function stopTick(){
 }
 
 /* ============================================================
-   任务操作（旧版：总时长固定）
+   任务操作
 ============================================================ */
 function liveStartTask(taskId){
   const info = findTask(taskId);
@@ -4743,6 +4597,9 @@ function confirmPassword(){
   pwdPurpose = ''; pendingCheckId = null;
   if(purpose === 'admin') enterAdminMode();
   else if(purpose === 'check'){ if(checkId) doToggleTaskDone(checkId); }
+  else if(purpose === 'clearSync') doClearSyncTask();
+  else if(purpose === 'clearFrom16') doClearTasksAfterToday();
+  else if(purpose === 'clearToday') doClearTodayTasks();
 }
 function requestPause(){
   const L = state.live;
@@ -4759,7 +4616,6 @@ function toggleTaskDone(id){
   }
   doToggleTaskDone(id);
 }
-/* ★ 性能优化：单条任务状态变化不再整版重绘，只刷新受影响的卡片 */
 function doToggleTaskDone(id){
   const info = findTask(id); if(!info) return;
   const task = info.task;
@@ -4808,11 +4664,9 @@ function completeTask(id){
   if(ref){ flySun(ref.el); playSound('hit'); setTimeout(() => playSound('plant'), 420); }
   bumpPill(sunPillEl);
 
-  /* 只刷新受影响的卡片 */
   linked.forEach(t => refreshCardDoneState(t.id));
   updateSubjectCounts();
 
-  /* 完成动画只播一次（不重绘整版，提升多作业时的流畅度） */
   (function(){
     const r = cardRefs[id]; if(!r) return;
     r.el.classList.add('card-just-done');
@@ -4869,7 +4723,7 @@ $('paperPrintBtn').addEventListener('click', () => {
   let frame=document.getElementById('paperPrintFrame'); if(frame) frame.remove();
   frame=document.createElement('iframe'); frame.id='paperPrintFrame'; frame.style.cssText='position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0';
   frame.onload=()=>{ setTimeout(()=>{ try{frame.contentWindow.focus();frame.contentWindow.print();}catch(e){window.print();} },180); }; document.body.appendChild(frame);
-  const doc=frame.contentDocument; doc.open(); doc.write('<!doctype html><html><head><title>语文作业纸</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>@page{size:A4 portrait;margin:0}html,body{margin:0!important;padding:0!important;width:210mm;height:297mm;overflow:hidden!important}body{position:relative;page-break-after:avoid;break-after:avoid}.print-sheet{width:210mm;height:297mm;overflow:hidden;position:relative;page-break-after:avoid;break-after:avoid}.print-sheet img{display:block;width:105mm;height:auto;max-width:105mm;max-height:297mm;object-fit:contain;object-position:top left;margin:0;padding:0;page-break-after:avoid;break-after:avoid}</style></head><body><div class="print-sheet"><img src="'+paper.data+'"></div></body></html>'); doc.close();
+  const doc=frame.contentDocument; doc.open(); doc.write('<!doctype html><html><head><title>语文作业纸</title><style>@page{size:A4 portrait;margin:0}html,body{margin:0;padding:0;width:210mm;height:297mm}img{display:block;width:105mm;height:auto;max-height:297mm;object-fit:contain;object-position:top left}</style></head><body><img src="'+paper.data+'"></body></html>'); doc.close();
 });
 $('uploadChinesePaperBtn').addEventListener('click', () => $('chinesePaperInput').click());
 $('chinesePaperInput').addEventListener('change', async e => {
@@ -4961,40 +4815,10 @@ function renderCalendar(){
   calTitle.textContent = `${calYear}年${calMonth+1}月`;
   calGrid.innerHTML = '';
   const firstDay = new Date(calYear, calMonth, 1);
-  // JavaScript Sunday=0; shift so Monday is the first column.
-  const startWeek = (firstDay.getDay() + 6) % 7;
+  const startWeek = firstDay.getDay();
   const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
   const prevMonthDays = new Date(calYear, calMonth, 0).getDate();
   const today = todayStr();
-  let longPressTimer = null;
-  let longPressTriggered = false;
-  const clearLongPress = () => { if(longPressTimer){ clearTimeout(longPressTimer); longPressTimer = null; } };
-  const attachAdminLongPress = (cell, dateStr) => {
-    if(!isAdminMode) return;
-    const begin = (e) => {
-      if(e && e.type === 'mousedown' && e.button !== 0) return;
-      longPressTriggered = false;
-      clearLongPress();
-      longPressTimer = setTimeout(() => {
-        longPressTimer = null;
-        longPressTriggered = true;
-        toggleDateSync(dateStr);
-        cell.classList.add('sync-press-done');
-        setTimeout(() => cell.classList.remove('sync-press-done'), 350);
-      }, 2000);
-    };
-    const end = () => clearLongPress();
-    cell.addEventListener('touchstart', begin, {passive:true});
-    cell.addEventListener('touchend', end, {passive:true});
-    cell.addEventListener('touchcancel', end, {passive:true});
-    cell.addEventListener('mousedown', begin);
-    cell.addEventListener('mouseup', end);
-    cell.addEventListener('mouseleave', end);
-    cell.addEventListener('contextmenu', e => e.preventDefault());
-    cell.addEventListener('click', e => {
-      if(longPressTriggered){ e.preventDefault(); e.stopImmediatePropagation(); longPressTriggered = false; }
-    }, true);
-  };
   for(let i = startWeek - 1; i >= 0; i--){
     const cell = document.createElement('div');
     cell.className = 'cal-day other-month'; cell.textContent = prevMonthDays - i;
@@ -5006,7 +4830,6 @@ function renderCalendar(){
     cell.className = 'cal-day'; cell.textContent = d;
     if(dateStr === today) cell.classList.add('today');
     if(dateStr === state.date) cell.classList.add('selected');
-    if(state.dateSyncs && state.dateSyncs[dateStr]) cell.classList.add('synced');
     const day = state.days[dateStr];
     if(day){
       const all = [...(day.chinese||[]), ...(day.math||[]), ...(day.english||[])];
@@ -5017,10 +4840,7 @@ function renderCalendar(){
         cell.appendChild(mark);
       }
     }
-    attachAdminLongPress(cell, dateStr);
-    cell.addEventListener('click', () => {
-      switchDate(dateStr); calModal.classList.remove('show');
-    });
+    cell.addEventListener('click', () => { switchDate(dateStr); calModal.classList.remove('show'); });
     calGrid.appendChild(cell);
   }
   const totalCells = startWeek + daysInMonth;
@@ -5030,60 +4850,6 @@ function renderCalendar(){
     cell.className = 'cal-day other-month'; cell.textContent = i;
     calGrid.appendChild(cell);
   }
-}
-function toggleDateSync(targetDate){
-  if(!state.dateSyncs || typeof state.dateSyncs !== 'object') state.dateSyncs = {};
-  if(state.dateSyncs[targetDate]){
-    // 取消当前日期同步：先完整找出所有直接/间接依赖的下游日期，再一次性清除规则和任务。
-    // 同时兼容旧版本留下的链式规则，避免日期仍被 applyDateSyncs 覆盖，导致新任务添加后消失。
-    const links = state.dateSyncs;
-    const removeDates = new Set([targetDate]);
-    let changed = true;
-    while(changed){
-      changed = false;
-      for(const date of Object.keys(links)){
-        const source = links[date];
-        if(removeDates.has(source) && !removeDates.has(date)){
-          removeDates.add(date);
-          changed = true;
-        }
-      }
-    }
-    // 删除整条同步链的规则；只清理同步任务（有 syncKey 的），保留各日期本地手动添加的任务。
-    for(const date of removeDates){
-      delete links[date];
-      const day = state.days[date] || makeDay();
-      ['chinese','math','english'].forEach(k => {
-        day[k] = (day[k] || []).filter(t => !t.syncKey);
-      });
-      state.days[date] = day;
-    }
-    // 清理任何指向已删除日期的残留规则，防止保存时再次生成幽灵同步任务。
-    for(const date of Object.keys(links)){
-      if(removeDates.has(links[date])) delete links[date];
-    }
-    invalidateLinkedIndex();
-    // 保存函数会重新计算剩余同步规则；此时被取消的日期已没有规则，后续可以独立添加作业。
-    saveLocalState();
-    uploadToCloud();
-    // 无论当前正在查看哪一天，都完整刷新界面，确保空日期重新显示“还没有作业”。
-    renderBoard(); refreshAllCards(); renderStats(); updateDateText(); updateDogBar(); updateMainBtn();
-    if(isAdminMode) renderAdminPanel();
-    renderCalendar();
-    toast(`已取消同步：已清除 ${removeDates.size} 个日期的同步关系、作业和完成状态；这些日期现在可以独立添加作业`);
-    return;
-  }
-  const d = new Date(targetDate + 'T12:00:00');
-  d.setDate(d.getDate()-1);
-  const srcDate = fmtDate(d);
-  // 即使前一天暂时没有作业，也先保存同步规则；以后新增作业会自动沿同步链传递。
-  state.dateSyncs[targetDate] = srcDate;
-  applyDateSyncs();
-  saveLocalState(); uploadToCloud();
-  if(state.date === targetDate){ renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn(); if(isAdminMode) renderAdminPanel(); }
-  renderCalendar();
-  const count = ['chinese','math','english'].reduce((n,k)=>n + ((state.days[targetDate]?.[k] || []).length),0);
-  toast(count ? `已建立与 ${srcDate} 的同步，当前同步 ${count} 项作业；后续新增内容也会自动同步` : `已预设与 ${srcDate} 的同步；后续新增作业会自动同步`);
 }
 calBtn.addEventListener('click', openCalendar);
 $('calPrev').addEventListener('click', () => { calMonth--; if(calMonth < 0){ calMonth = 11; calYear--; } renderCalendar(); });
@@ -5111,7 +4877,6 @@ function setStrokeToolsVisible(visible){
   if(wordsBox) wordsBox.style.display = visible ? '' : 'none';
 }
 
-/* 本地优先的笔顺数据加载 */
 function loadHanziData(char, onComplete, onError){
   fetch('hanzi-writer-data/' + char + '.json')
     .then(r => { if(!r.ok) throw new Error('no local data'); return r.json(); })
@@ -5127,7 +4892,6 @@ function loadHanziData(char, onComplete, onError){
     });
 }
 
-/* ★ 自动演示笔顺（田字格单击 / 已确认笔画后的「笔画：」） */
 function showStroke(char, task, mode){
   if(!char || !/[\u4e00-\u9fa5]/.test(char)) return;
   if(mode === 'quiz'){
@@ -5144,7 +4908,6 @@ function showStroke(char, task, mode){
   const info = HZ_INFO[char] || ['—','—'];
   const known = (task && task.strokeCounts && task.strokeCounts[char]) ? (' · 笔画：' + task.strokeCounts[char] + ' 画') : '';
   let metaHtml = '偏旁：' + escapeHtml(info[0]) + known;
-  /* ★ 偏旁右边显示字典页码：优先用户标记页，其次音节索引页 */
   let dictPg = Number((state.charPages && state.charPages[char]) || 0);
   if(dictPg < 1){
     const it = dictFindEntryForChar(char);
@@ -5169,7 +4932,6 @@ function showStroke(char, task, mode){
   setTimeout(() => playStroke(char), 60);
 }
 
-/* ★ 手写确认笔画（仅点击「笔画：」且尚未确认时） */
 function showStrokeQuiz(char, task){
   if(!char || !/[\u4e00-\u9fa5]/.test(char)) return;
   lastStrokeChar = char;
@@ -5335,6 +5097,10 @@ $('eyeRestBtn').addEventListener('click', () => {
   unlockAudio();
   liveStartEyeRest();
 });
+
+
+
+
 
 /* ============================================================
    管理面板
@@ -6331,7 +6097,6 @@ $('adminAddCopyBtn').addEventListener('click', () => {
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加「'+escapeHtml(name)+'」抄写词语');
 });
-/* 语文自定义日常作业：多行配置，逐行添加并持久保存 */
 function readQuickRowsBackup(){
   try{
     const raw = localStorage.getItem('study_board_quick_rows_v1');
@@ -6349,12 +6114,10 @@ function getQuickRows(){
   return rows.length ? rows : [{content:'每日阅读',minutes:20,sun:30}];
 }
 function saveQuickRows(){
-  /* 面板未渲染时（例如云端数据回写触发）不写库，避免把已保存的日常作业配置覆盖成默认值 */
   if(!document.querySelectorAll('#quickRows .quick-row').length) return;
   const rows=getQuickRows();
   if(!state.settings.lastInputs) state.settings.lastInputs=JSON.parse(JSON.stringify(DEFAULT_SETTINGS.lastInputs));
   state.settings.lastInputs.quickRows=rows;
-  /* 独立保存一份本地副本：名称/分钟/金币永久保留，多行也一并保存 */
   try{ localStorage.setItem('study_board_quick_rows_v1', JSON.stringify(rows)); }catch(e){}
   saveLocalState(); uploadToCloud();
 }
@@ -6525,6 +6288,9 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
 });
 $('adminForceSyncBtn').addEventListener('click', async () => {
   if(!dataRef){ toast('⚠️ 云端未连接'); return; }
+  setSyncEnabled(true);
+  if(!cloudListener) startCloudSync();
+  if(typeof updateToggleSyncBtn==='function') updateToggleSyncBtn();
   updateSyncInfo('正在上传…');
   const ok = await uploadToCloud(true);
   toast(ok ? '✅ 已上传本地数据到云端' : '⚠️ 上传失败：请检查网络');
@@ -6540,6 +6306,169 @@ $('adminForcePullBtn').addEventListener('click', async () => {
     toast('✅ 已从云端拉取最新数据');
   } else if(result.state === 'empty'){ toast('⚠️ 云端暂无数据'); updateSyncInfo('云端暂无数据'); }
   else { toast('⚠️ 读取云端失败'); updateSyncInfo('读取云端失败'); }
+});
+
+/* ★★★ 强制清除【今天之后】的所有任务 + 断开云同步关系（家长密码 + 二次确认）★★★ */
+function doClearTasksAfterToday(){
+  const today = todayStr();
+  const keys = Object.keys(state.days || {});
+  const toDel = keys.filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k) && k > today);
+  if(toDel.length){
+    toDel.forEach(k => { delete state.days[k]; });
+    invalidateLinkedIndex();
+  }
+  if(!state.days[today]) state.days[today] = makeDay();
+  state.date = today;
+  saveLocalState();
+  schedulePersist();
+  setSyncEnabled(false); stopCloudSync();
+  if(typeof updateToggleSyncBtn === 'function') updateToggleSyncBtn();
+  if(typeof updateSyncInfo === 'function') updateSyncInfo('📴 已断开云同步，并已清除今天之后的所有任务');
+  if(typeof showSyncStatus === 'function') showSyncStatus('📴 已断开云同步', 'offline');
+  try{ renderBoard(); }catch(e){}
+  try{ refreshAllCards(); }catch(e){}
+  try{ if(typeof renderCalendar === 'function') renderCalendar(); }catch(e){}
+  if(isAdminMode) renderAdminPanel();
+  toast('🧹 已清除 ' + toDel.length + ' 天的任务，并断开云同步（今天 ' + today + ' 及以前的作业已保留）', 4800);
+}
+$('adminClearTasksBtn').addEventListener('click', () => {
+  const today = todayStr();
+  const keys = Object.keys(state.days || {});
+  const toDel = keys.filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k) && k > today).sort();
+  if(!toDel.length){ toast('ℹ️ 今天（' + today + '）之后没有任何任务，无需清除'); return; }
+  if(!confirm('危险操作！\n即将强制删除【今天（' + today + '）之后】的全部任务，共 ' + toDel.length + ' 天：\n' + toDel.join('、') + '\n\n同时会彻底断开云同步关系，本机转为独立运行。\n今天及以前的作业不会被删除。\n\n此操作不可撤销，确定继续吗？')) return;
+  pwdPurpose = 'clearFrom16';
+  openPwdModal('危险操作确认', '强制清除任务并断开同步需要输入家长密码');
+});
+
+/* ★★★ 一键清除【今天】的全部任务（需家长密码 + 二次确认）★★★ */
+function doClearTodayTasks(){
+  const today = todayStr();
+  const day = state.days[today];
+  const subjects = ['chinese', 'math', 'english'];
+
+  if(!day){ toast('ℹ️ 今天还没有任何任务'); return; }
+
+  let totalCount = 0;
+  let doneCount = 0;
+  subjects.forEach(k => {
+    (day[k] || []).forEach(t => { totalCount++; if(t.done) doneCount++; });
+  });
+  if(totalCount === 0){ toast('ℹ️ 今天还没有任何任务'); return; }
+
+  if(!confirm('确定要清除今天（' + today + '）的全部任务吗？\n共 ' + totalCount + ' 项（其中已完成 ' + doneCount + ' 项）\n\n此操作不可撤销。')) return;
+  if(!confirm('请再次确认：真的要清除今天的全部任务吗？')) return;
+
+  const L = state.live;
+  if(L && L.activeId){
+    let timerTaskIsToday = false;
+    subjects.forEach(k => {
+      if((day[k] || []).some(t => t.id === L.activeId)) timerTaskIsToday = true;
+    });
+    if(timerTaskIsToday){ liveStopTask(); liveStopEyeCare(); }
+  }
+
+  let refundSun = 0;
+  subjects.forEach(k => {
+    (day[k] || []).forEach(t => {
+      if(!t.done) return;
+      const linked = getLinkedTasks(t);
+      const otherDone = linked.some(x => x !== t && x.done);
+      if(!otherDone) refundSun += Number(t.sun) || 0;
+    });
+  });
+
+  subjects.forEach(k => { day[k] = []; });
+
+  if(refundSun > 0){
+    state.sun = Math.round(Number(state.sun) || 0) - refundSun;
+    pushSunLog(-refundSun, '清除今天任务，扣回已完成奖励');
+  }
+
+  if(Array.isArray(state.checkins)){
+    state.checkins = state.checkins.filter(d => d !== today);
+  }
+
+  invalidateLinkedIndex();
+  cleanupRuntime();
+  saveLocalState();
+  uploadToCloud();
+
+  renderStats();
+  renderBoard();
+  refreshAllCards();
+  updateDogBar();
+  updateMainBtn();
+  updateEyeUI();
+  if(currentSubject === 'shop') renderShop();
+  if(isAdminMode) renderAdminPanel();
+
+  toast(
+    '🧹 已清除今天的全部任务（' + totalCount + ' 项）' +
+    (refundSun > 0 ? '，扣回 ' + refundSun + ' 个金币 💰' : ''),
+    4200
+  );
+}
+/* ★ 清除今天全部任务入口（走家长密码验证） */
+$('adminClearTodayBtn').addEventListener('click', () => {
+  const today = todayStr();
+  const day = state.days[today];
+  const count = day
+    ? ['chinese','math','english'].reduce((n,k) => n + (day[k] || []).length, 0)
+    : 0;
+  if(!count){ toast('ℹ️ 今天还没有任何任务'); return; }
+  pwdPurpose = 'clearToday';
+  openPwdModal('🧹 清除今天任务', '清除今天的全部任务需要输入家长密码');
+});
+
+/* ★★★ 彻底清除同步任务 ★★★ */
+async function doClearSyncTask(){
+  if(!dataRef || !fbSet){ toast('⚠️ 云端未连接，无法清除'); return; }
+  if(!confirm('⚠️ 危险操作！\n即将彻底清除本房间号下的云端同步数据（含全部历史备份）。\n此操作不可撤销，本机数据不会被删除。\n\n确定继续吗？')) return;
+  if(!confirm('请再次确认：真的要彻底清除云端同步任务吗？')) return;
+  updateSyncInfo('正在清除云端…');
+  cloudSyncCleared = true;
+  try{
+    await fbSet(dataRef, null);
+    if(historyRef && fbSet){ try{ await fbSet(historyRef, null); }catch(e){} }
+  }catch(e){
+    cloudSyncCleared = false;
+    toast('⚠️ 清除失败：' + ((e && e.message) || e));
+    updateSyncInfo('清除失败');
+    return;
+  }
+  lastPushedUpdatedAt = 0; lastRemoteUpdatedAt = 0;
+  setSyncEnabled(false); stopCloudSync();
+  if(typeof updateToggleSyncBtn==='function') updateToggleSyncBtn();
+  updateSyncInfo('☁️ 云端同步任务已彻底清除（本机已转为独立运行）');
+  toast('🗑 已彻底清除云端同步任务，后续修改不再自动上云', 3800);
+  if(isAdminMode) renderAdminPanel();
+}
+function updateToggleSyncBtn(){
+  const b = $('adminToggleSyncBtn'); if(!b) return;
+  b.textContent = getSyncEnabled() ? '🔌 断开云同步（本机独立运行）' : '🔗 重新连接云同步';
+}
+$('adminToggleSyncBtn').addEventListener('click', async () => {
+  if(!dataRef){ toast('⚠️ 云端未连接，无需断开'); return; }
+  if(getSyncEnabled()){
+    setSyncEnabled(false); stopCloudSync();
+    updateSyncInfo('📴 已断开云同步（本机独立运行）');
+    showSyncStatus('📴 已断开云同步', 'offline');
+    toast('🔌 已断开云同步：此后只保存在本机，不再被云端覆盖，可正常单独添加 / 删除作业', 4200);
+  }else{
+    setSyncEnabled(true);
+    lastPushedUpdatedAt = 0; lastRemoteUpdatedAt = 0;
+    const ok = await uploadToCloud(true);
+    cloudListener = null; startCloudSync();
+    toast(ok ? '🔗 已重新连接云同步，并上传本机数据' : '🔗 已重连，但上传失败：请检查网络');
+  }
+  updateToggleSyncBtn();
+  if(isAdminMode) renderAdminPanel();
+});
+$('adminClearSyncBtn').addEventListener('click', () => {
+  if(!dataRef){ toast('⚠️ 云端未连接'); return; }
+  pwdPurpose = 'clearSync';
+  openPwdModal('🔒 危险操作确认', '彻底清除同步任务需要输入家长密码');
 });
 
 /* ============================================================
@@ -6703,7 +6632,6 @@ document.addEventListener('click',e=>{
   const el=e.target.closest('.char-page[data-dict-char]');
   if(el) openDictFor(el.dataset.dictChar);
 });
-/* ★ 添加词语弹窗：点击偏旁右侧的页码 → 打开字典对应页查看组词 */
 document.addEventListener('click',e=>{
   const el=e.target.closest('.dict-page-link[data-dict-char]');
   if(!el) return;
@@ -6845,7 +6773,7 @@ window.addEventListener('resize',()=>{
   for(const n of Array.from(dictRendered.keys()))dictDisposeEntry(n);
   dictLayout();dictScrollEl.scrollTop=Math.max(0,dictPageTop(anchor)-12);dictUpdateWindow();
 });
-/* ---------- 左右分栏：中间分隔条可拖动，宽度本地保存 ---------- */
+/* ---------- 左右分栏 ---------- */
 const dictLayoutEl=document.querySelector('.dict-layout');
 const dictResizerEl=$('dictResizer');
 const DICT_SPLIT_KEY='dict_split_left_pct';
@@ -6965,6 +6893,8 @@ function dictBuildIndex(){
 dictBuildIndex();
 
 
+
+
 /* ============================================================
    初始化
 ============================================================ */
@@ -7064,7 +6994,12 @@ const familyIdEl = document.getElementById('familyIdText');
 if(familyIdEl) familyIdEl.textContent = FAMILY_ID;
 
 if(dataRef && fbSet && fbGet && fbOnValue){
-  (async () => {
+  if(typeof updateToggleSyncBtn==='function') updateToggleSyncBtn();
+  if(!getSyncEnabled()){
+    freshBoot = false;
+    updateSyncInfo('📴 已断开云同步（本机独立运行）');
+    showSyncStatus('📴 已断开云同步', 'offline');
+  } else (async () => {
     const result = await readCloudOnce();
     if(result.state === 'has-data' && result.data && result.data.days && Object.keys(result.data.days).length){
       applyRemoteState(result.data);
@@ -7079,6 +7014,7 @@ if(dataRef && fbSet && fbGet && fbOnValue){
     freshBoot = false;
     startCloudSync();
     updateSyncInfo();
+    if(typeof updateToggleSyncBtn==='function') updateToggleSyncBtn();
     if(nameMigrated && result.state !== 'error'){
       try{ await uploadToCloud(true); }catch(e){ console.warn('改名回写云端失败', e); }
     }
@@ -7088,6 +7024,5 @@ if(dataRef && fbSet && fbGet && fbOnValue){
   showSyncStatus('📴 纯本地模式', 'offline');
 }
 </script>
-
 
 </body></html>
