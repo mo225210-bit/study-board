@@ -2300,61 +2300,30 @@ function attachSubjectsProxy(s){
   return s;
 }
 function applyDateSyncs(){
-  // 同步规则：来源日期是基准；目标日期新增的作业先合并回来源日期，再同步到目标日期。
-  // 这样在已同步的日期添加作业时，不会在保存过程中被覆盖掉。
+  // 日期同步关系是永久规则：即使源日期暂时没有作业，也保留关系；源日期以后新增/修改/勾选作业时自动传递。
   const links = state.dateSyncs && typeof state.dateSyncs === 'object' ? state.dateSyncs : {};
   const targets = Object.keys(links).sort();
   for(const targetDate of targets){
     const sourceDate = links[targetDate];
     if(!/^\d{4}-\d{2}-\d{2}$/.test(sourceDate || '') || sourceDate >= targetDate) continue;
-
-    const src = state.days[sourceDate] || (state.days[sourceDate] = makeDay());
-    const old = state.days[targetDate] || (state.days[targetDate] = makeDay());
-
-    ['chinese','math','english'].forEach(subject => {
-      if(!Array.isArray(src[subject])) src[subject] = [];
-      if(!Array.isArray(old[subject])) old[subject] = [];
-      const sourceKeys = new Set();
-      src[subject].forEach(task => {
-        if(!task.syncKey) task.syncKey = String(task.id || newId());
-        sourceKeys.add(String(task.syncKey));
-        if(task.id != null) sourceKeys.add(String(task.id));
-      });
-      // 把目标日期新添加、来源日期还没有的作业合并回来源日期。
-      old[subject].forEach(task => {
-        const key = String(task.syncKey || task.id || '');
-        if(!key || sourceKeys.has(key)) return;
-        const copy = JSON.parse(JSON.stringify(task));
-        copy.syncKey = key;
-        copy.id = newId();
-        delete copy.photos;
-        src[subject].push(copy);
-        sourceKeys.add(key);
-        sourceKeys.add(String(copy.id));
-      });
-    });
-
-    // 以合并后的来源日期为准刷新目标日期，并保留目标日期已有的任务 ID。
-    const refreshed = makeDay();
+    const src = state.days[sourceDate] || makeDay();
+    const old = state.days[targetDate] || makeDay();
+    const out = makeDay();
     ['chinese','math','english'].forEach(subject => {
       const oldTasks = old[subject] || [];
-      const oldByKey = new Map();
-      oldTasks.forEach(task => {
-        if(task.syncKey) oldByKey.set(String(task.syncKey), task);
-        if(task.id != null && !oldByKey.has(String(task.id))) oldByKey.set(String(task.id), task);
-      });
-      refreshed[subject] = (src[subject] || []).map(task => {
-        if(!task.syncKey) task.syncKey = String(task.id || newId());
+      const oldByKey = new Map(oldTasks.filter(t => t.syncKey).map(t => [String(t.syncKey), t]));
+      out[subject] = (src[subject] || []).map((task, index) => {
+        if(!task.syncKey) task.syncKey = task.id;
         const copy = JSON.parse(JSON.stringify(task));
-        const prior = oldByKey.get(String(task.syncKey)) || oldByKey.get(String(task.id));
+        const prior = oldByKey.get(String(task.syncKey)) || oldTasks[index];
         copy.id = prior && prior.id ? prior.id : newId();
-        copy.syncKey = String(task.syncKey || task.id);
+        copy.syncKey = task.syncKey || task.id;
         copy.done = !!task.done;
         delete copy.photos;
         return copy;
       });
     });
-    state.days[targetDate] = refreshed;
+    state.days[targetDate] = out;
   }
   invalidateLinkedIndex();
 }
@@ -5023,7 +4992,8 @@ function renderCalendar(){
 function toggleDateSync(targetDate){
   if(!state.dateSyncs || typeof state.dateSyncs !== 'object') state.dateSyncs = {};
   if(state.dateSyncs[targetDate]){
-    // 取消同步只解除当前日期及其下游日期的同步关系，保留作业和完成状态。
+    // 取消当前日期同步：先完整找出所有直接/间接依赖的下游日期，再一次性清除规则和任务。
+    // 同时兼容旧版本留下的链式规则，避免日期仍被 applyDateSyncs 覆盖，导致新任务添加后消失。
     const links = state.dateSyncs;
     const removeDates = new Set([targetDate]);
     let changed = true;
@@ -5037,29 +5007,36 @@ function toggleDateSync(targetDate){
         }
       }
     }
-    for(const date of removeDates) delete links[date];
-    // 清理指向已解除日期的关系，但绝不清空日期数据。
+    // 删除整条同步链的规则，清空链上日期的任务与完成状态。
+    for(const date of removeDates){
+      delete links[date];
+      state.days[date] = makeDay();
+    }
+    // 清理任何指向已删除日期的残留规则，防止保存时再次生成幽灵同步任务。
     for(const date of Object.keys(links)){
       if(removeDates.has(links[date])) delete links[date];
     }
     invalidateLinkedIndex();
-    saveLocalState(); uploadToCloud();
+    // 保存函数会重新计算剩余同步规则；此时被取消的日期已没有规则，后续可以独立添加作业。
+    saveLocalState();
+    uploadToCloud();
+    // 无论当前正在查看哪一天，都完整刷新界面，确保空日期重新显示“还没有作业”。
     renderBoard(); refreshAllCards(); renderStats(); updateDateText(); updateDogBar(); updateMainBtn();
     if(isAdminMode) renderAdminPanel();
     renderCalendar();
-    toast(`已取消同步：已解除 ${removeDates.size} 个日期的同步关系，作业和完成状态均已保留`);
+    toast(`已取消同步：已清除 ${removeDates.size} 个日期的同步关系、作业和完成状态；这些日期现在可以独立添加作业`);
     return;
   }
   const d = new Date(targetDate + 'T12:00:00');
   d.setDate(d.getDate()-1);
   const srcDate = fmtDate(d);
-  // 先建立规则，再执行同步；即使来源日期暂无作业，也保留同步关系。
+  // 即使前一天暂时没有作业，也先保存同步规则；以后新增作业会自动沿同步链传递。
   state.dateSyncs[targetDate] = srcDate;
   applyDateSyncs();
   saveLocalState(); uploadToCloud();
   if(state.date === targetDate){ renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn(); if(isAdminMode) renderAdminPanel(); }
   renderCalendar();
-  const count = ['chinese','math','english'].reduce((n,k) => n + ((state.days[targetDate]?.[k] || []).length),0);
+  const count = ['chinese','math','english'].reduce((n,k)=>n + ((state.days[targetDate]?.[k] || []).length),0);
   toast(count ? `已建立与 ${srcDate} 的同步，当前同步 ${count} 项作业；后续新增内容也会自动同步` : `已预设与 ${srcDate} 的同步；后续新增作业会自动同步`);
 }
 calBtn.addEventListener('click', openCalendar);
