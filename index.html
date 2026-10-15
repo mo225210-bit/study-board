@@ -535,6 +535,9 @@
   .cal-day.today{border-color:#FFC107;box-shadow:inset 0 0 0 1px rgba(255,193,7,.3)}
   .cal-day.selected{background:linear-gradient(180deg,#8FD14F,#68B32E);color:#fff;box-shadow:0 3px 0 #4E8A22}
   .cal-day.selected .cal-mark{background:#fff}
+  .cal-day.synced{background:#D8ECFF;border-color:#4A90E2;color:#174A7E;box-shadow:inset 0 0 0 1px rgba(74,144,226,.22)}
+  .cal-day.synced.selected{background:linear-gradient(180deg,#80B9F5,#4A90E2);color:#fff;border-color:#2F75BC}
+  .cal-day.sync-source{outline:2px dashed #4A90E2;outline-offset:-4px}
   .cal-mark{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
     width:5px;height:5px;border-radius:50%;background:#FF9800}
   .cal-mark.done{background:#4CAF50}
@@ -1163,7 +1166,7 @@
       <div class="cal-title" id="calTitle">2026年9月</div>
       <button id="calNext">▶</button>
     </div>
-    <div class="cal-week"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div>
+    <div class="cal-week"><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div></div>
     <div class="cal-grid" id="calGrid"></div>
     <div class="cal-actions">
       <button class="btn-ghost" id="calTodayBtn">📌 回到今天</button>
@@ -2244,7 +2247,7 @@ function loadLocalState(){
       shop: JSON.parse(JSON.stringify(DEFAULT_SHOP)),
       wordBank: {}, charPages: {}, timetable: null,
       parentPassword: MASTER_PASSWORD,
-      chinesePaper: null,
+      chinesePaper: null, dateSyncs: {},
       lastNightReset: '', eyeSoundOffDate: '',
       live: JSON.parse(JSON.stringify(DEFAULT_LIVE))
     };
@@ -2258,6 +2261,7 @@ function loadLocalState(){
   if(!Array.isArray(s.sunLog)) s.sunLog = [];
   if(typeof s.sun !== 'number') s.sun = 0;
   if(!('chinesePaper' in s)) s.chinesePaper = null;
+  if(!s.dateSyncs || typeof s.dateSyncs !== 'object' || Array.isArray(s.dateSyncs)) s.dateSyncs = {};
   if(typeof s.lastNightReset !== 'string') s.lastNightReset = '';
   if(typeof s.eyeSoundOffDate !== 'string') s.eyeSoundOffDate = '';
   if(typeof s.parentPassword !== 'string' || !/^\d{4}$/.test(s.parentPassword)) s.parentPassword = MASTER_PASSWORD;
@@ -4886,10 +4890,40 @@ function renderCalendar(){
   calTitle.textContent = `${calYear}年${calMonth+1}月`;
   calGrid.innerHTML = '';
   const firstDay = new Date(calYear, calMonth, 1);
-  const startWeek = firstDay.getDay();
+  // JavaScript Sunday=0; shift so Monday is the first column.
+  const startWeek = (firstDay.getDay() + 6) % 7;
   const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
   const prevMonthDays = new Date(calYear, calMonth, 0).getDate();
   const today = todayStr();
+  let longPressTimer = null;
+  let longPressTriggered = false;
+  const clearLongPress = () => { if(longPressTimer){ clearTimeout(longPressTimer); longPressTimer = null; } };
+  const attachAdminLongPress = (cell, dateStr) => {
+    if(!isAdminMode) return;
+    const begin = (e) => {
+      if(e && e.type === 'mousedown' && e.button !== 0) return;
+      longPressTriggered = false;
+      clearLongPress();
+      longPressTimer = setTimeout(() => {
+        longPressTimer = null;
+        longPressTriggered = true;
+        toggleDateSync(dateStr);
+        cell.classList.add('sync-press-done');
+        setTimeout(() => cell.classList.remove('sync-press-done'), 350);
+      }, 2000);
+    };
+    const end = () => clearLongPress();
+    cell.addEventListener('touchstart', begin, {passive:true});
+    cell.addEventListener('touchend', end, {passive:true});
+    cell.addEventListener('touchcancel', end, {passive:true});
+    cell.addEventListener('mousedown', begin);
+    cell.addEventListener('mouseup', end);
+    cell.addEventListener('mouseleave', end);
+    cell.addEventListener('contextmenu', e => e.preventDefault());
+    cell.addEventListener('click', e => {
+      if(longPressTriggered){ e.preventDefault(); e.stopImmediatePropagation(); longPressTriggered = false; }
+    }, true);
+  };
   for(let i = startWeek - 1; i >= 0; i--){
     const cell = document.createElement('div');
     cell.className = 'cal-day other-month'; cell.textContent = prevMonthDays - i;
@@ -4901,6 +4935,7 @@ function renderCalendar(){
     cell.className = 'cal-day'; cell.textContent = d;
     if(dateStr === today) cell.classList.add('today');
     if(dateStr === state.date) cell.classList.add('selected');
+    if(state.dateSyncs && state.dateSyncs[dateStr]) cell.classList.add('synced');
     const day = state.days[dateStr];
     if(day){
       const all = [...(day.chinese||[]), ...(day.math||[]), ...(day.english||[])];
@@ -4911,7 +4946,10 @@ function renderCalendar(){
         cell.appendChild(mark);
       }
     }
-    cell.addEventListener('click', () => { switchDate(dateStr); calModal.classList.remove('show'); });
+    attachAdminLongPress(cell, dateStr);
+    cell.addEventListener('click', () => {
+      switchDate(dateStr); calModal.classList.remove('show');
+    });
     calGrid.appendChild(cell);
   }
   const totalCells = startWeek + daysInMonth;
@@ -4921,6 +4959,31 @@ function renderCalendar(){
     cell.className = 'cal-day other-month'; cell.textContent = i;
     calGrid.appendChild(cell);
   }
+}
+function toggleDateSync(targetDate){
+  if(!state.dateSyncs || typeof state.dateSyncs !== 'object') state.dateSyncs = {};
+  if(state.dateSyncs[targetDate]){
+    // Unlink only this date; retain its current tasks and completion states.
+    ['chinese','math','english'].forEach(k => {
+      (state.days[targetDate]?.[k] || []).forEach(task => { delete task.syncKey; });
+    });
+    delete state.dateSyncs[targetDate];
+    invalidateLinkedIndex();
+    saveLocalState(); uploadToCloud();
+    if(state.date === targetDate){ renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn(); if(isAdminMode) renderAdminPanel(); }
+    renderCalendar();
+    toast('已取消这一天的同步，现有作业和完成状态保留');
+    return;
+  }
+  const d = new Date(targetDate + 'T12:00:00');
+  d.setDate(d.getDate()-1);
+  const srcDate = fmtDate(d);
+  const result = syncFromPreviousDay(targetDate);
+  if(!result.ok){ toast('前一天没有作业，无法同步'); return; }
+  state.dateSyncs[targetDate] = srcDate;
+  saveLocalState(); uploadToCloud();
+  renderCalendar();
+  toast(`已同步 ${srcDate} 的作业和完成状态`);
 }
 calBtn.addEventListener('click', openCalendar);
 $('calPrev').addEventListener('click', () => { calMonth--; if(calMonth < 0){ calMonth = 11; calYear--; } renderCalendar(); });
