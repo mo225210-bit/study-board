@@ -2300,7 +2300,8 @@ function attachSubjectsProxy(s){
   return s;
 }
 function applyDateSyncs(){
-  // 日期同步关系是永久规则：即使源日期暂时没有作业，也保留关系；源日期以后新增/修改/勾选作业时自动传递。
+  // 日期同步规则：源日期里带 syncKey 的作业会"投影"到目标日期；
+  // 目标日期自己手动添加的作业（没有 syncKey）会保留，不会被覆盖。
   const links = state.dateSyncs && typeof state.dateSyncs === 'object' ? state.dateSyncs : {};
   const targets = Object.keys(links).sort();
   for(const targetDate of targets){
@@ -2311,17 +2312,45 @@ function applyDateSyncs(){
     const out = makeDay();
     ['chinese','math','english'].forEach(subject => {
       const oldTasks = old[subject] || [];
-      const oldByKey = new Map(oldTasks.filter(t => t.syncKey).map(t => [String(t.syncKey), t]));
-      out[subject] = (src[subject] || []).map((task, index) => {
+      const srcTasks = src[subject] || [];
+      // 源日期的任务按 syncKey 建索引（缺 syncKey 的补上自己 id）
+      const srcByKey = new Map();
+      srcTasks.forEach(task => {
         if(!task.syncKey) task.syncKey = task.id;
+        srcByKey.set(String(task.syncKey), task);
+      });
+      const result = [];
+      const usedKeys = new Set();
+      // 1) 按目标日期原有顺序遍历：
+      //    - 本地任务（无 syncKey）→ 原样保留
+      //    - 同步任务（有 syncKey）且源日期还有 → 用源日期最新数据替换
+      //    - 同步任务但源日期已删除 → 丢弃
+      oldTasks.forEach(t => {
+        if(t.syncKey && srcByKey.has(String(t.syncKey))){
+          const srcTask = srcByKey.get(String(t.syncKey));
+          usedKeys.add(String(t.syncKey));
+          const copy = JSON.parse(JSON.stringify(srcTask));
+          copy.id = t.id;                 // 保留目标日期原 id，避免本地关联丢失
+          copy.syncKey = t.syncKey;
+          copy.done = !!srcTask.done;
+          delete copy.photos;
+          result.push(copy);
+        } else if(!t.syncKey){
+          result.push(t);
+        }
+      });
+      // 2) 源日期里新增的同步任务，追加到末尾
+      srcTasks.forEach(task => {
+        const key = String(task.syncKey);
+        if(usedKeys.has(key)) return;
         const copy = JSON.parse(JSON.stringify(task));
-        const prior = oldByKey.get(String(task.syncKey)) || oldTasks[index];
-        copy.id = prior && prior.id ? prior.id : newId();
-        copy.syncKey = task.syncKey || task.id;
+        copy.id = newId();
+        copy.syncKey = task.syncKey;
         copy.done = !!task.done;
         delete copy.photos;
-        return copy;
+        result.push(copy);
       });
+      out[subject] = result;
     });
     state.days[targetDate] = out;
   }
@@ -2960,6 +2989,7 @@ async function uploadToCloudNow(force){
     sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
     lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword, chinesePaper: state.chinesePaper || null,
     shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
+    dateSyncs: (state.dateSyncs && typeof state.dateSyncs === 'object' && !Array.isArray(state.dateSyncs)) ? state.dateSyncs : {},
     lastNightReset: state.lastNightReset || '',
     eyeSoundOffDate: state.eyeSoundOffDate || '',
     live: state.live, updatedAt: Date.now()
@@ -3007,6 +3037,7 @@ function getEditableStateForCompare(){
     sun: state.sun, checkins: state.checkins, sunLog: state.sunLog,
     lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword, chinesePaper: state.chinesePaper || null,
     shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
+    dateSyncs: state.dateSyncs || {},
     lastNightReset: state.lastNightReset || '', eyeSoundOffDate: state.eyeSoundOffDate || ''
   });
 }
@@ -3097,6 +3128,17 @@ function applyRemoteState(remote){
   if(remote.wordBank) state.wordBank = normalizeWordBank(remote.wordBank);
   if(remote.charPages && typeof remote.charPages === 'object') state.charPages = remote.charPages;
   if('timetable' in remote) state.timetable = normalizeTimetable(remote.timetable);
+  if(remote.dateSyncs && typeof remote.dateSyncs === 'object' && !Array.isArray(remote.dateSyncs)){
+    const clean = {};
+    Object.keys(remote.dateSyncs).forEach(k => {
+      const v = remote.dateSyncs[k];
+      if(/^\d{4}-\d{2}-\d{2}$/.test(k) && /^\d{4}-\d{2}-\d{2}$/.test(String(v || ''))){
+        clean[k] = String(v);
+      }
+    });
+    state.dateSyncs = clean;
+    invalidateLinkedIndex();
+  }
   if(typeof remote.parentPassword === 'string' && /^\d{4}$/.test(remote.parentPassword)) state.parentPassword = remote.parentPassword;
   if(typeof remote.lastNightReset === 'string') state.lastNightReset = remote.lastNightReset;
   if(typeof remote.eyeSoundOffDate === 'string') state.eyeSoundOffDate = remote.eyeSoundOffDate;
@@ -5007,10 +5049,14 @@ function toggleDateSync(targetDate){
         }
       }
     }
-    // 删除整条同步链的规则，清空链上日期的任务与完成状态。
+    // 删除整条同步链的规则；只清理同步任务（有 syncKey 的），保留各日期本地手动添加的任务。
     for(const date of removeDates){
       delete links[date];
-      state.days[date] = makeDay();
+      const day = state.days[date] || makeDay();
+      ['chinese','math','english'].forEach(k => {
+        day[k] = (day[k] || []).filter(t => !t.syncKey);
+      });
+      state.days[date] = day;
     }
     // 清理任何指向已删除日期的残留规则，防止保存时再次生成幽灵同步任务。
     for(const date of Object.keys(links)){
@@ -7042,5 +7088,6 @@ if(dataRef && fbSet && fbGet && fbOnValue){
   showSyncStatus('📴 纯本地模式', 'offline');
 }
 </script>
+
 
 </body></html>
