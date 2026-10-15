@@ -535,9 +535,6 @@
   .cal-day.today{border-color:#FFC107;box-shadow:inset 0 0 0 1px rgba(255,193,7,.3)}
   .cal-day.selected{background:linear-gradient(180deg,#8FD14F,#68B32E);color:#fff;box-shadow:0 3px 0 #4E8A22}
   .cal-day.selected .cal-mark{background:#fff}
-  .cal-day.synced{background:#D8ECFF;border-color:#4A90E2;color:#174A7E;box-shadow:inset 0 0 0 1px rgba(74,144,226,.22)}
-  .cal-day.synced.selected{background:linear-gradient(180deg,#80B9F5,#4A90E2);color:#fff;border-color:#2F75BC}
-  .cal-day.sync-source{outline:2px dashed #4A90E2;outline-offset:-4px}
   .cal-mark{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
     width:5px;height:5px;border-radius:50%;background:#FF9800}
   .cal-mark.done{background:#4CAF50}
@@ -1166,7 +1163,7 @@
       <div class="cal-title" id="calTitle">2026年9月</div>
       <button id="calNext">▶</button>
     </div>
-    <div class="cal-week"><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div></div>
+    <div class="cal-week"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div>
     <div class="cal-grid" id="calGrid"></div>
     <div class="cal-actions">
       <button class="btn-ghost" id="calTodayBtn">📌 回到今天</button>
@@ -2247,7 +2244,7 @@ function loadLocalState(){
       shop: JSON.parse(JSON.stringify(DEFAULT_SHOP)),
       wordBank: {}, charPages: {}, timetable: null,
       parentPassword: MASTER_PASSWORD,
-      chinesePaper: null, dateSyncs: {},
+      chinesePaper: null,
       lastNightReset: '', eyeSoundOffDate: '',
       live: JSON.parse(JSON.stringify(DEFAULT_LIVE))
     };
@@ -2261,7 +2258,6 @@ function loadLocalState(){
   if(!Array.isArray(s.sunLog)) s.sunLog = [];
   if(typeof s.sun !== 'number') s.sun = 0;
   if(!('chinesePaper' in s)) s.chinesePaper = null;
-  if(!s.dateSyncs || typeof s.dateSyncs !== 'object' || Array.isArray(s.dateSyncs)) s.dateSyncs = {};
   if(typeof s.lastNightReset !== 'string') s.lastNightReset = '';
   if(typeof s.eyeSoundOffDate !== 'string') s.eyeSoundOffDate = '';
   if(typeof s.parentPassword !== 'string' || !/^\d{4}$/.test(s.parentPassword)) s.parentPassword = MASTER_PASSWORD;
@@ -2299,65 +2295,7 @@ function attachSubjectsProxy(s){
   });
   return s;
 }
-function applyDateSyncs(){
-  // 日期同步规则：源日期里带 syncKey 的作业会"投影"到目标日期；
-  // 目标日期自己手动添加的作业（没有 syncKey）会保留，不会被覆盖。
-  const links = state.dateSyncs && typeof state.dateSyncs === 'object' ? state.dateSyncs : {};
-  const targets = Object.keys(links).sort();
-  for(const targetDate of targets){
-    const sourceDate = links[targetDate];
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(sourceDate || '') || sourceDate >= targetDate) continue;
-    const src = state.days[sourceDate] || makeDay();
-    const old = state.days[targetDate] || makeDay();
-    const out = makeDay();
-    ['chinese','math','english'].forEach(subject => {
-      const oldTasks = old[subject] || [];
-      const srcTasks = src[subject] || [];
-      // 源日期的任务按 syncKey 建索引（缺 syncKey 的补上自己 id）
-      const srcByKey = new Map();
-      srcTasks.forEach(task => {
-        if(!task.syncKey) task.syncKey = task.id;
-        srcByKey.set(String(task.syncKey), task);
-      });
-      const result = [];
-      const usedKeys = new Set();
-      // 1) 按目标日期原有顺序遍历：
-      //    - 本地任务（无 syncKey）→ 原样保留
-      //    - 同步任务（有 syncKey）且源日期还有 → 用源日期最新数据替换
-      //    - 同步任务但源日期已删除 → 丢弃
-      oldTasks.forEach(t => {
-        if(t.syncKey && srcByKey.has(String(t.syncKey))){
-          const srcTask = srcByKey.get(String(t.syncKey));
-          usedKeys.add(String(t.syncKey));
-          const copy = JSON.parse(JSON.stringify(srcTask));
-          copy.id = t.id;                 // 保留目标日期原 id，避免本地关联丢失
-          copy.syncKey = t.syncKey;
-          copy.done = !!srcTask.done;
-          delete copy.photos;
-          result.push(copy);
-        } else if(!t.syncKey){
-          result.push(t);
-        }
-      });
-      // 2) 源日期里新增的同步任务，追加到末尾
-      srcTasks.forEach(task => {
-        const key = String(task.syncKey);
-        if(usedKeys.has(key)) return;
-        const copy = JSON.parse(JSON.stringify(task));
-        copy.id = newId();
-        copy.syncKey = task.syncKey;
-        copy.done = !!task.done;
-        delete copy.photos;
-        result.push(copy);
-      });
-      out[subject] = result;
-    });
-    state.days[targetDate] = out;
-  }
-  invalidateLinkedIndex();
-}
 function saveLocalState(){
-  try{ applyDateSyncs(); }catch(e){ console.warn('应用日期同步规则失败', e); }
   pruneDays();
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
   try{ localStorage.setItem(REWARD_STORAGE_KEY, JSON.stringify(state.shop || [])); }catch(e){}
@@ -2989,7 +2927,6 @@ async function uploadToCloudNow(force){
     sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
     lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword, chinesePaper: state.chinesePaper || null,
     shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
-    dateSyncs: (state.dateSyncs && typeof state.dateSyncs === 'object' && !Array.isArray(state.dateSyncs)) ? state.dateSyncs : {},
     lastNightReset: state.lastNightReset || '',
     eyeSoundOffDate: state.eyeSoundOffDate || '',
     live: state.live, updatedAt: Date.now()
@@ -3037,7 +2974,6 @@ function getEditableStateForCompare(){
     sun: state.sun, checkins: state.checkins, sunLog: state.sunLog,
     lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword, chinesePaper: state.chinesePaper || null,
     shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
-    dateSyncs: state.dateSyncs || {},
     lastNightReset: state.lastNightReset || '', eyeSoundOffDate: state.eyeSoundOffDate || ''
   });
 }
@@ -3128,17 +3064,6 @@ function applyRemoteState(remote){
   if(remote.wordBank) state.wordBank = normalizeWordBank(remote.wordBank);
   if(remote.charPages && typeof remote.charPages === 'object') state.charPages = remote.charPages;
   if('timetable' in remote) state.timetable = normalizeTimetable(remote.timetable);
-  if(remote.dateSyncs && typeof remote.dateSyncs === 'object' && !Array.isArray(remote.dateSyncs)){
-    const clean = {};
-    Object.keys(remote.dateSyncs).forEach(k => {
-      const v = remote.dateSyncs[k];
-      if(/^\d{4}-\d{2}-\d{2}$/.test(k) && /^\d{4}-\d{2}-\d{2}$/.test(String(v || ''))){
-        clean[k] = String(v);
-      }
-    });
-    state.dateSyncs = clean;
-    invalidateLinkedIndex();
-  }
   if(typeof remote.parentPassword === 'string' && /^\d{4}$/.test(remote.parentPassword)) state.parentPassword = remote.parentPassword;
   if(typeof remote.lastNightReset === 'string') state.lastNightReset = remote.lastNightReset;
   if(typeof remote.eyeSoundOffDate === 'string') state.eyeSoundOffDate = remote.eyeSoundOffDate;
@@ -4961,40 +4886,10 @@ function renderCalendar(){
   calTitle.textContent = `${calYear}年${calMonth+1}月`;
   calGrid.innerHTML = '';
   const firstDay = new Date(calYear, calMonth, 1);
-  // JavaScript Sunday=0; shift so Monday is the first column.
-  const startWeek = (firstDay.getDay() + 6) % 7;
+  const startWeek = firstDay.getDay();
   const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
   const prevMonthDays = new Date(calYear, calMonth, 0).getDate();
   const today = todayStr();
-  let longPressTimer = null;
-  let longPressTriggered = false;
-  const clearLongPress = () => { if(longPressTimer){ clearTimeout(longPressTimer); longPressTimer = null; } };
-  const attachAdminLongPress = (cell, dateStr) => {
-    if(!isAdminMode) return;
-    const begin = (e) => {
-      if(e && e.type === 'mousedown' && e.button !== 0) return;
-      longPressTriggered = false;
-      clearLongPress();
-      longPressTimer = setTimeout(() => {
-        longPressTimer = null;
-        longPressTriggered = true;
-        toggleDateSync(dateStr);
-        cell.classList.add('sync-press-done');
-        setTimeout(() => cell.classList.remove('sync-press-done'), 350);
-      }, 2000);
-    };
-    const end = () => clearLongPress();
-    cell.addEventListener('touchstart', begin, {passive:true});
-    cell.addEventListener('touchend', end, {passive:true});
-    cell.addEventListener('touchcancel', end, {passive:true});
-    cell.addEventListener('mousedown', begin);
-    cell.addEventListener('mouseup', end);
-    cell.addEventListener('mouseleave', end);
-    cell.addEventListener('contextmenu', e => e.preventDefault());
-    cell.addEventListener('click', e => {
-      if(longPressTriggered){ e.preventDefault(); e.stopImmediatePropagation(); longPressTriggered = false; }
-    }, true);
-  };
   for(let i = startWeek - 1; i >= 0; i--){
     const cell = document.createElement('div');
     cell.className = 'cal-day other-month'; cell.textContent = prevMonthDays - i;
@@ -5006,7 +4901,6 @@ function renderCalendar(){
     cell.className = 'cal-day'; cell.textContent = d;
     if(dateStr === today) cell.classList.add('today');
     if(dateStr === state.date) cell.classList.add('selected');
-    if(state.dateSyncs && state.dateSyncs[dateStr]) cell.classList.add('synced');
     const day = state.days[dateStr];
     if(day){
       const all = [...(day.chinese||[]), ...(day.math||[]), ...(day.english||[])];
@@ -5017,10 +4911,7 @@ function renderCalendar(){
         cell.appendChild(mark);
       }
     }
-    attachAdminLongPress(cell, dateStr);
-    cell.addEventListener('click', () => {
-      switchDate(dateStr); calModal.classList.remove('show');
-    });
+    cell.addEventListener('click', () => { switchDate(dateStr); calModal.classList.remove('show'); });
     calGrid.appendChild(cell);
   }
   const totalCells = startWeek + daysInMonth;
@@ -5030,60 +4921,6 @@ function renderCalendar(){
     cell.className = 'cal-day other-month'; cell.textContent = i;
     calGrid.appendChild(cell);
   }
-}
-function toggleDateSync(targetDate){
-  if(!state.dateSyncs || typeof state.dateSyncs !== 'object') state.dateSyncs = {};
-  if(state.dateSyncs[targetDate]){
-    // 取消当前日期同步：先完整找出所有直接/间接依赖的下游日期，再一次性清除规则和任务。
-    // 同时兼容旧版本留下的链式规则，避免日期仍被 applyDateSyncs 覆盖，导致新任务添加后消失。
-    const links = state.dateSyncs;
-    const removeDates = new Set([targetDate]);
-    let changed = true;
-    while(changed){
-      changed = false;
-      for(const date of Object.keys(links)){
-        const source = links[date];
-        if(removeDates.has(source) && !removeDates.has(date)){
-          removeDates.add(date);
-          changed = true;
-        }
-      }
-    }
-    // 删除整条同步链的规则；只清理同步任务（有 syncKey 的），保留各日期本地手动添加的任务。
-    for(const date of removeDates){
-      delete links[date];
-      const day = state.days[date] || makeDay();
-      ['chinese','math','english'].forEach(k => {
-        day[k] = (day[k] || []).filter(t => !t.syncKey);
-      });
-      state.days[date] = day;
-    }
-    // 清理任何指向已删除日期的残留规则，防止保存时再次生成幽灵同步任务。
-    for(const date of Object.keys(links)){
-      if(removeDates.has(links[date])) delete links[date];
-    }
-    invalidateLinkedIndex();
-    // 保存函数会重新计算剩余同步规则；此时被取消的日期已没有规则，后续可以独立添加作业。
-    saveLocalState();
-    uploadToCloud();
-    // 无论当前正在查看哪一天，都完整刷新界面，确保空日期重新显示“还没有作业”。
-    renderBoard(); refreshAllCards(); renderStats(); updateDateText(); updateDogBar(); updateMainBtn();
-    if(isAdminMode) renderAdminPanel();
-    renderCalendar();
-    toast(`已取消同步：已清除 ${removeDates.size} 个日期的同步关系、作业和完成状态；这些日期现在可以独立添加作业`);
-    return;
-  }
-  const d = new Date(targetDate + 'T12:00:00');
-  d.setDate(d.getDate()-1);
-  const srcDate = fmtDate(d);
-  // 即使前一天暂时没有作业，也先保存同步规则；以后新增作业会自动沿同步链传递。
-  state.dateSyncs[targetDate] = srcDate;
-  applyDateSyncs();
-  saveLocalState(); uploadToCloud();
-  if(state.date === targetDate){ renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn(); if(isAdminMode) renderAdminPanel(); }
-  renderCalendar();
-  const count = ['chinese','math','english'].reduce((n,k)=>n + ((state.days[targetDate]?.[k] || []).length),0);
-  toast(count ? `已建立与 ${srcDate} 的同步，当前同步 ${count} 项作业；后续新增内容也会自动同步` : `已预设与 ${srcDate} 的同步；后续新增作业会自动同步`);
 }
 calBtn.addEventListener('click', openCalendar);
 $('calPrev').addEventListener('click', () => { calMonth--; if(calMonth < 0){ calMonth = 11; calYear--; } renderCalendar(); });
@@ -7088,6 +6925,5 @@ if(dataRef && fbSet && fbGet && fbOnValue){
   showSyncStatus('📴 纯本地模式', 'offline');
 }
 </script>
-
 
 </body></html>
