@@ -96,6 +96,23 @@
   .cal-btn .cal-dot{position:absolute;top:4px;right:4px;width:9px;height:9px;border-radius:50%;
     background:#FF5252;border:2px solid #fff;display:none;}
   .cal-btn.has-other .cal-dot{display:block}
+  .cal-btn .cal-day-number{position:absolute;inset:0;display:grid;place-items:center;font-size:16px;font-weight:1000;pointer-events:none}
+  .cal-btn .cal-icon{font-size:21px;opacity:.18}
+  .date-nav{display:flex;align-items:center;gap:5px}
+  .date-nav-btn{height:36px;min-width:34px;border:0;border-radius:10px;background:rgba(255,255,255,.88);color:#39722a;font-weight:900;font-size:17px;box-shadow:0 2px 7px #0001;cursor:pointer}
+  .date-nav-today{padding:0 9px;font-size:12px}
+  .timer-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:stretch;margin-bottom:8px}
+  .timer-pair .timer-card,.timer-pair .eye-card{margin:0;min-width:0}
+  .timer-pair .timer-row{gap:6px}
+  .timer-pair .timer-btn{padding-left:9px;padding-right:9px}
+  .timer-pair .eye-card{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:5px;padding:8px}
+  .timer-pair .eye-rail{grid-column:1 / -1;grid-row:2}
+  .timer-pair .eye-end{display:none}
+  .timer-pair .eye-btn{grid-column:1 / -1;justify-self:stretch;padding:6px 8px}
+  .timer-pair .eye-time{font-size:20px}
+  @media(max-width:460px){.timer-pair{gap:5px}.timer-pair .timer-card{padding:7px}.timer-pair .timer-hint{font-size:10px}.timer-pair .timer-btn{font-size:12px;padding:7px}.timer-pair .eye-card{padding:6px}.timer-pair .eye-time{font-size:17px}}
+  .mizi, #miziActionModal, #miziEditModal, .subject-tab{ -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  #paperPrintFrame{pointer-events:none}
 
   .timer-card{
     background:repeating-linear-gradient(90deg,rgba(255,255,255,.08) 0 24px,transparent 24px 48px),
@@ -252,7 +269,7 @@
     background:rgba(0,0,0,.16);border:2px dashed rgba(255,255,255,.5);
     border-radius:14px;padding:18px 8px;line-height:1.7}
 
-  .task-card{position:relative;overflow:hidden;background:rgba(255,255,255,.97);
+  .task-card{position:relative;overflow:hidden;background:rgba(255,255,255,.97);content-visibility:auto;contain-intrinsic-size:auto 180px;
     border:2px solid #fff;border-radius:12px;padding:7px 9px 6px;
     transition:border-color .16s,box-shadow .16s,transform .16s;box-shadow:0 3px 9px rgba(0,0,0,.13)}
   .task-card.active{border-color:#FFC107;box-shadow:0 0 0 3px rgba(255,193,7,.4),0 6px 16px rgba(0,0,0,.16)}
@@ -1023,12 +1040,13 @@
       </div>
     </div>
     <div class="stats">
-      <button class="cal-btn" id="calBtn" title="切换日期">📅<span class="cal-dot"></span></button>
+      <div class="date-nav"><button class="date-nav-btn" id="studentPrevDay" title="前一天">‹</button><button class="cal-btn" id="calBtn" title="切换日期"><span class="cal-icon">📅</span><span class="cal-day-number" id="studentCalDay">15</span><span class="cal-dot"></span></button><button class="date-nav-btn" id="studentNextDay" title="后一天">›</button><button class="date-nav-btn date-nav-today" id="studentTodayBtn">今天</button></div>
       <div class="pill sun-pill" id="sunPill">💰 <span id="sunCount">0</span>个</div>
       <div class="pill streak-pill">🔥 <span id="streakCount">0</span>天</div>
     </div>
   </header>
 
+  <div class="timer-pair">
   <div class="timer-card">
     <div class="timer-row">
       <div class="track" id="track">
@@ -1067,6 +1085,7 @@
     </div>
     <span class="eye-end eye-end-r">放松</span>
     <button class="eye-btn" id="eyeRestBtn" disabled="">😌 放松眼睛</button>
+  </div>
   </div>
 
   <div class="subject-tabs">
@@ -1111,6 +1130,15 @@
   </div>
 
   <div class="timer-hint" style="margin-top:-3px">自定义作业可直接勾选完成 · 📷 其他作业可拍照留存 · 🖼️ 查看作业照片 · ✋ 抄写词语长按田字格可修改/删除 · ↶↷ 撤销恢复</div>
+</div>
+
+
+<div class="modal" id="paperPreviewModal">
+  <div class="modal-card" style="max-width:520px">
+    <h3>📄 语文作业纸</h3>
+    <div id="paperPreviewContent" style="max-height:55vh;overflow:auto;background:#f5f5f5;padding:10px;text-align:left"></div>
+    <div class="modal-actions"><button class="btn-ghost" id="paperPreviewClose">关闭</button><button class="btn-main" id="paperPrintBtn">🖨️ 打印</button></div>
+  </div>
 </div>
 
 <div class="modal" id="calModal">
@@ -1315,14 +1343,16 @@
     <div class="admin-header">
       <h2>🔑 家长管理面板</h2>
       <div class="admin-header-date">
-        <input type="date" id="adminDateInput" style="font-family:inherit;font-size:14px;font-weight:800;color:#E0E8F0;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);padding:8px 12px;border-radius:10px;outline:none">
-        <button class="aa-btn" id="adminGoToday">回到今天</button>
+        <button class="date-nav-btn" id="adminPrevDay" title="前一天">‹</button>
+        <button class="cal-btn" id="adminCalDay" type="button" title="当前日期" style="width:40px;height:40px"><span class="cal-icon">📅</span><span class="cal-day-number" id="adminCalDayNumber">15</span></button>
+        <button class="date-nav-btn" id="adminNextDay" title="后一天">›</button>
+        <button class="aa-btn" id="adminGoToday">今天</button>
       </div>
       <button class="admin-close" id="adminCloseBtn">✕ 关闭</button>
     </div>
 
     <div class="admin-section" id="adminPanelChinese">
-      <h3>📖 语文作业 <span class="badge" id="adminChineseBadge">0</span></h3>
+      <h3>📖 语文作业 <span class="badge" id="adminChineseBadge">0</span><button type="button" class="aa-btn" id="uploadChinesePaperBtn" title="上传并永久保存作业纸" style="margin-left:auto;padding:5px 10px">📄 上传作业纸</button><input type="file" id="chinesePaperInput" accept="image/*,.pdf,application/pdf" style="display:none"></h3>
       <p style="font-size:12.5px;color:#5a7a8a;font-weight:700;margin-bottom:8px">💡 双击作业条目可重新编辑</p>
       <div id="adminChineseList"></div>
       <div class="admin-sub-label">➕ 添加预习生字</div>
@@ -1580,12 +1610,6 @@
       <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
         房间号：<b id="familyIdText" style="color:#2e7d32">—</b>
       </p>
-      <div class="admin-sub-label">📋 前一天作业</div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-        <button class="aa-btn" id="adminSyncPrevBtn" style="background:linear-gradient(180deg,#90CAF9,#42A5F5);border-color:#42A5F5;box-shadow:0 3px 0 #1976D2;color:#fff">📋 手动同步前一天作业</button>
-        <button class="aa-btn" id="adminSyncUndoBtn" disabled="" style="background:linear-gradient(180deg,#FFCC80,#FB8C00);border-color:#FB8C00;box-shadow:0 3px 0 #EF6C00;color:#fff">↩ 撤回同步</button>
-      </div>
-      <div class="aa-hint" style="margin-top:8px">「手动同步前一天作业」需要家长密码，会把前一天的作业复制到当前日期；若发现不对，可点「↩ 撤回同步」恢复同步前的作业。</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button class="aa-btn" id="adminForceSyncBtn">🔄 强制上传本地数据</button>
         <button class="aa-btn" id="adminForcePullBtn" style="background:linear-gradient(180deg,#90CAF9,#42A5F5);border-color:#42A5F5;box-shadow:0 3px 0 #1976D2;color:#fff">⬇️ 强制拉取云端数据</button>
@@ -2205,6 +2229,7 @@ function loadLocalState(){
       shop: JSON.parse(JSON.stringify(DEFAULT_SHOP)),
       wordBank: {}, charPages: {}, timetable: null,
       parentPassword: MASTER_PASSWORD,
+      chinesePaper: null,
       lastNightReset: '', eyeSoundOffDate: '',
       live: JSON.parse(JSON.stringify(DEFAULT_LIVE))
     };
@@ -2217,6 +2242,7 @@ function loadLocalState(){
   if(!Array.isArray(s.checkins)) s.checkins = [];
   if(!Array.isArray(s.sunLog)) s.sunLog = [];
   if(typeof s.sun !== 'number') s.sun = 0;
+  if(!('chinesePaper' in s)) s.chinesePaper = null;
   if(typeof s.lastNightReset !== 'string') s.lastNightReset = '';
   if(typeof s.eyeSoundOffDate !== 'string') s.eyeSoundOffDate = '';
   if(typeof s.parentPassword !== 'string' || !/^\d{4}$/.test(s.parentPassword)) s.parentPassword = MASTER_PASSWORD;
@@ -2872,7 +2898,7 @@ async function uploadToCloud(force){
     days: state.days, date: state.date, settings: state.settings,
     sun: state.sun, checkins: state.checkins,
     sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
-    lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword,
+    lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword, chinesePaper: state.chinesePaper || null,
     shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
     lastNightReset: state.lastNightReset || '',
     eyeSoundOffDate: state.eyeSoundOffDate || '',
@@ -2894,7 +2920,7 @@ function getEditableStateForCompare(){
   return JSON.stringify({
     days: state.days, date: state.date, settings: state.settings,
     sun: state.sun, checkins: state.checkins, sunLog: state.sunLog,
-    lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword,
+    lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword, chinesePaper: state.chinesePaper || null,
     shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
     lastNightReset: state.lastNightReset || '', eyeSoundOffDate: state.eyeSoundOffDate || ''
   });
@@ -2982,6 +3008,7 @@ function applyRemoteState(remote){
   if(Array.isArray(remote.checkins)) state.checkins = remote.checkins;
   if(Array.isArray(remote.sunLog)) state.sunLog = remote.sunLog.slice(0, 60);
   if(remote.lessonLibrary) state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary);
+  if('chinesePaper' in remote) state.chinesePaper = remote.chinesePaper || null;
   if(remote.wordBank) state.wordBank = normalizeWordBank(remote.wordBank);
   if(remote.charPages && typeof remote.charPages === 'object') state.charPages = remote.charPages;
   if('timetable' in remote) state.timetable = normalizeTimetable(remote.timetable);
@@ -3229,6 +3256,8 @@ function updateDateText(){
   const isToday = state.date === todayStr();
   dateTextEl.textContent = dateLabel(state.date);
   calBtn.classList.toggle('has-other', !isToday);
+  const dayEl = $('studentCalDay'); if(dayEl) dayEl.textContent = String(Number(state.date.slice(8,10)));
+  updateAdminCalendarDate();
 }
 
 /* ============================================================
@@ -3654,7 +3683,12 @@ function updateCardVisual(id){
     }
   }
 }
-function refreshAllCards(){ Object.keys(cardRefs).forEach(id => updateCardVisual(id)); }
+let refreshCardsQueued = false;
+function refreshAllCards(){
+  if(refreshCardsQueued) return;
+  refreshCardsQueued = true;
+  requestAnimationFrame(() => { refreshCardsQueued = false; const ids = Object.keys(cardRefs); for(let i=0;i<ids.length;i++) updateCardVisual(ids[i]); });
+}
 
 /* ============================================================
    兑换中心
@@ -4581,7 +4615,6 @@ function confirmPassword(){
   pwdPurpose = ''; pendingCheckId = null;
   if(purpose === 'admin') enterAdminMode();
   else if(purpose === 'check'){ if(checkId) doToggleTaskDone(checkId); }
-  else if(purpose === 'syncPrev'){ performSyncPrev(); }
 }
 function requestPause(){
   const L = state.live;
@@ -4681,6 +4714,50 @@ function completeTask(id){
 /* ============================================================
    切换科目 / 日期
 ============================================================ */
+let paperPressTimer = null, paperPressFired = false;
+const chineseTabButton = document.querySelector('.subject-tab[data-tab="chinese"]');
+if(chineseTabButton){
+  const startPaperPress = e => { paperPressFired = false; clearTimeout(paperPressTimer); paperPressTimer = setTimeout(() => { paperPressFired = true; e.preventDefault(); openChinesePaperPreview(); }, 550); };
+  const cancelPaperPress = () => { clearTimeout(paperPressTimer); paperPressTimer = null; };
+  chineseTabButton.addEventListener('touchstart', startPaperPress, {passive:false});
+  chineseTabButton.addEventListener('touchend', cancelPaperPress); chineseTabButton.addEventListener('touchcancel', cancelPaperPress);
+  chineseTabButton.addEventListener('mousedown', startPaperPress); chineseTabButton.addEventListener('mouseup', cancelPaperPress); chineseTabButton.addEventListener('mouseleave', cancelPaperPress);
+  chineseTabButton.addEventListener('click', e => { if(paperPressFired){ e.preventDefault(); e.stopImmediatePropagation(); paperPressFired=false; } }, true);
+}
+function openChinesePaperPreview(){
+  const paper = state && state.chinesePaper;
+  if(!paper || !paper.data){ toast('还没有上传语文作业纸'); return; }
+  const box = $('paperPreviewContent'); box.innerHTML = '';
+  if(paper.type === 'application/pdf' || paper.data.startsWith('data:application/pdf')){
+    const link = document.createElement('a'); link.href = paper.data; link.target='_blank'; link.rel='noopener'; link.textContent='打开作业纸 PDF'; box.appendChild(link);
+    const note=document.createElement('p'); note.textContent='PDF 将在新页面打开，可使用浏览器打印。'; box.appendChild(note);
+  } else { const img=document.createElement('img'); img.src=paper.data; img.alt='语文作业纸'; img.style.cssText='display:block;width:50%;height:auto;object-fit:contain;object-position:top left;margin:0 auto 0 0;'; box.appendChild(img); }
+  $('paperPreviewModal').classList.add('show');
+}
+$('paperPreviewClose').addEventListener('click', () => $('paperPreviewModal').classList.remove('show'));
+$('paperPrintBtn').addEventListener('click', () => {
+  const paper=state && state.chinesePaper; if(!paper || !paper.data) return;
+  if(paper.type === 'application/pdf' || paper.data.startsWith('data:application/pdf')){ const w=window.open(paper.data,'_blank'); if(w) setTimeout(()=>{try{w.focus();w.print()}catch(e){}},500); return; }
+  let frame=document.getElementById('paperPrintFrame'); if(frame) frame.remove();
+  frame=document.createElement('iframe'); frame.id='paperPrintFrame'; frame.style.cssText='position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0';
+  frame.onload=()=>{ setTimeout(()=>{ try{frame.contentWindow.focus();frame.contentWindow.print();}catch(e){window.print();} },180); }; document.body.appendChild(frame);
+  const doc=frame.contentDocument; doc.open(); doc.write('<!doctype html><html><head><title>语文作业纸</title><style>@page{size:A4 portrait;margin:0}html,body{margin:0;padding:0;width:210mm;height:297mm}img{display:block;width:105mm;height:auto;max-height:297mm;object-fit:contain;object-position:top left}</style></head><body><img src="'+paper.data+'"></body></html>'); doc.close();
+});
+$('uploadChinesePaperBtn').addEventListener('click', () => $('chinesePaperInput').click());
+$('chinesePaperInput').addEventListener('change', async e => {
+  const file=e.target.files && e.target.files[0]; if(!file) return;
+  if(!file.type.startsWith('image/') && file.type!=='application/pdf'){ toast('请上传图片或 PDF 作业纸'); e.target.value=''; return; }
+  try{
+    let data;
+    if(file.type==='application/pdf'){ if(file.size>1800000) {toast('PDF 文件较大，请压缩到 1.8MB 以内'); e.target.value=''; return;} data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file);}); }
+    else { data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const scale=Math.min(1,1600/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',0.78));};img.onerror=reject;img.src=r.result;};r.onerror=reject;r.readAsDataURL(file);}); }
+    state.chinesePaper={name:file.name,type:file.type.startsWith('image/')?'image/jpeg':file.type,data,updatedAt:Date.now()};
+    saveLocalState(); const cloudOK=await uploadToCloud(true);
+    toast(cloudOK?'✅ 作业纸已保存并同步云端':'✅ 作业纸已保存在本机（云端同步未确认）',3200);
+  }catch(err){console.warn(err);toast('上传失败，请换一张图片或较小的 PDF');}
+  e.target.value='';
+});
+
 function switchSubject(subject, fromRemote){
   currentSubject = subject;
   document.querySelectorAll('.subject-tab').forEach(t => { t.classList.toggle('active', t.dataset.tab === subject); });
@@ -5055,8 +5132,7 @@ function renderAdminPanel(){
   $('adminStatStreak').textContent = calcStreak();
   $('adminTodayBadge').textContent = state.date;
   $('adminSyncStatus').textContent = '☁️ 已连接云端';
-  const dateInput = $('adminDateInput');
-  if(dateInput) dateInput.value = state.date;
+  updateAdminCalendarDate();
   const st = state.settings || DEFAULT_SETTINGS;
   UNIT_FIELDS.forEach(([t, minId, sunId]) => {
     const u = (st.unit && st.unit[t]) || DEFAULT_SETTINGS.unit[t];
@@ -6161,61 +6237,20 @@ $('adminAddEnglishBtn').addEventListener('click', () => {
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加英语作业：「'+escapeHtml(text.split('\n')[0])+'」');
 });
-$('adminDateInput').addEventListener('change', e => { const v = e.target.value; if(v) switchDate(v); });
 $('adminGoToday').addEventListener('click', () => switchDate(todayStr()));
-/* ★ 手动同步前一天作业：需家长密码，且同步后可一键撤回，防止误操作 */
-let syncUndoInfo = null;
-function updateSyncUndoBtn(){
-  const btn = $('adminSyncUndoBtn');
-  if(!btn) return;
-  const can = !!(syncUndoInfo && !syncUndoInfo.used);
-  btn.disabled = !can;
-  btn.title = can ? ('撤回最近一次同步：' + syncUndoInfo.targetDate + ' ← ' + syncUndoInfo.srcDate) : '暂无可撤回的同步';
+function shiftSelectedDate(delta){
+  const d = new Date(state.date + 'T12:00:00'); d.setDate(d.getDate()+delta);
+  const v = fmtDate(d); switchDate(v);
 }
-function performSyncPrev(){
-  const targetDate = state.date;
-  const prevDay = JSON.parse(JSON.stringify(state.days[targetDate] || makeDay()));
-  const r = syncFromPreviousDay(targetDate);
-  if(r.ok){
-    syncUndoInfo = { targetDate, srcDate: r.srcDate, prev: prevDay, used: false };
-    updateSyncUndoBtn();
-    toast('✅ 已从 ' + r.srcDate + ' 同步 ' + r.count + ' 项作业<br><span style="font-size:13px">如需撤销，点「↩ 撤回同步」</span>', 3600);
-  } else if(r.reason === 'no-source'){
-    toast('⚠️ 前一天没有作业可同步');
-  } else {
-    toast('⚠️ 同步失败');
-  }
+function updateAdminCalendarDate(){
+  const el = $('adminCalDayNumber'); if(el && state && state.date) el.textContent = String(Number(state.date.slice(8,10)));
 }
-function undoLastSync(){
-  if(!syncUndoInfo || syncUndoInfo.used){ toast('没有可撤回的同步'); return; }
-  const info = syncUndoInfo;
-  state.days[info.targetDate] = normalizeDay(info.prev);
-  invalidateLinkedIndex();
-  info.used = true;
-  saveLocalState(); uploadToCloud();
-  if(state.date === info.targetDate){ renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn(); }
-  if(isAdminMode) renderAdminPanel();
-  updateSyncUndoBtn();
-  toast('↩️ 已撤回同步，恢复同步前的作业');
-}
-(function bindSyncPrevButtons(){
-  const adminSyncBtn = $('adminSyncPrevBtn');
-  if(adminSyncBtn){
-    adminSyncBtn.addEventListener('click', () => {
-      pwdPurpose = 'syncPrev';
-      openPwdModal('🔑 家长验证', '同步前一天作业会覆盖当前日期的作业，请输入家长密码');
-    });
-  }
-  const undoBtn = $('adminSyncUndoBtn');
-  if(undoBtn){
-    undoBtn.addEventListener('click', () => {
-      if(!syncUndoInfo || syncUndoInfo.used){ toast('没有可撤回的同步'); return; }
-      if(confirm('确定撤回最近一次「同步前一天作业」吗？\n将恢复同步前的作业内容。')) undoLastSync();
-    });
-  }
-  updateSyncUndoBtn();
-})();
-
+$('studentPrevDay').addEventListener('click', e => { e.stopPropagation(); shiftSelectedDate(-1); });
+$('studentNextDay').addEventListener('click', e => { e.stopPropagation(); shiftSelectedDate(1); });
+$('studentTodayBtn').addEventListener('click', e => { e.stopPropagation(); switchDate(todayStr()); });
+$('adminPrevDay').addEventListener('click', () => shiftSelectedDate(-1));
+$('adminNextDay').addEventListener('click', () => shiftSelectedDate(1));
+$('adminCalDay').addEventListener('click', () => { calYear = Number(state.date.slice(0,4)); calMonth = Number(state.date.slice(5,7))-1; openCalendar(); });
 $('adminLocalDownloadBtn').addEventListener('click', () => {
   try{
     saveLocalState();
