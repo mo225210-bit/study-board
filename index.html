@@ -1615,9 +1615,6 @@
         <button class="aa-btn" id="adminForcePullBtn" style="background:linear-gradient(180deg,#90CAF9,#42A5F5);border-color:#42A5F5;box-shadow:0 3px 0 #1976D2;color:#fff">⬇️ 强制拉取云端数据</button>
         <button class="aa-btn" id="adminLocalUploadBtn">📤 本地上传</button>
         <button class="aa-btn" id="adminLocalDownloadBtn">📥 本地下载</button>
-        <button class="aa-btn" id="adminToggleSyncBtn" style="background:linear-gradient(180deg,#B0BEC5,#78909C);border-color:#546E7A;box-shadow:0 3px 0 #455A64;color:#fff;flex:1 1 100%">🔌 断开云同步（本机独立运行）</button>
-        <button class="aa-btn" id="adminClearSyncBtn" style="background:linear-gradient(180deg,#FF6B6B,#D32F2F);border-color:#B71C1C;box-shadow:0 3px 0 #B71C1C;color:#fff;flex:1 1 100%">🗑 彻底清除同步任务（需密码）</button>
-        <button class="aa-btn" id="adminClearTasksBtn" style="background:linear-gradient(180deg,#FF9800,#EF6C00);border-color:#E65100;box-shadow:0 3px 0 #E65100;color:#fff;flex:1 1 100%">🧹 强制清除今天之后的任务并断开同步（需密码）</button>
         <input type="file" id="adminLocalUploadFile" accept=".json,application/json" style="display:none">
       </div>
       <div style="font-size:12px;color:#5a7a8a;font-weight:700;margin-top:10px" id="adminSyncInfo">最后同步：—</div>
@@ -2890,10 +2887,6 @@ function applyTabFromLive(){
    ☁️ 云端同步
 ============================================================ */
 let lastPushedUpdatedAt = 0;
-let cloudSyncCleared = false;
-const SYNC_TOGGLE_KEY = 'study_board_sync_enabled_v1';
-function getSyncEnabled(){ try{ return localStorage.getItem(SYNC_TOGGLE_KEY) !== '0'; }catch(e){ return true; } }
-function setSyncEnabled(v){ try{ localStorage.setItem(SYNC_TOGGLE_KEY, v ? '1' : '0'); }catch(e){} cloudSyncCleared = !v; }
 let lastRemoteUpdatedAt = 0;
 let uploadFailedNotified = false;
 
@@ -2901,7 +2894,6 @@ async function uploadToCloud(force){
   if(!dataRef || !fbSet || !fbGet) return false;
   if(isRemoteUpdate && !force) return false;
   if(freshBoot && !force && !lastRemoteUpdatedAt) return false;
-  if(!getSyncEnabled() || cloudSyncCleared) return false;
   const payload = {
     days: state.days, date: state.date, settings: state.settings,
     sun: state.sun, checkins: state.checkins,
@@ -2974,7 +2966,6 @@ function scheduleHistorySnapshot(reason){
   historyTimer = setTimeout(() => { try{ saveHistorySnapshot(reason); }catch(e){} }, 1500);
 }
 async function saveHistorySnapshot(reason){
-  if(!getSyncEnabled() || cloudSyncCleared) return false;
   try{
     const entry = makeHistorySnapshot(reason);
     if(historyRef && fbGet && fbSet){
@@ -3060,13 +3051,8 @@ function applyRemoteState(remote){
   }
 }
 let cloudListener = null;
-function stopCloudSync(){
-  if(typeof cloudListener === 'function'){ try{ cloudListener(); }catch(e){} }
-  cloudListener = null;
-}
 function startCloudSync(){
   if(!dataRef || !fbOnValue || cloudListener) return;
-  if(!getSyncEnabled()) return;
   cloudListener = fbOnValue(dataRef, snapshot => {
     const remote = snapshot.val(); if(!remote) return; applyRemoteState(remote);
   }, err => { console.warn('云端监听失败', err); showSyncStatus('⚠️ 云端连接失败', 'offline'); });
@@ -4629,8 +4615,6 @@ function confirmPassword(){
   pwdPurpose = ''; pendingCheckId = null;
   if(purpose === 'admin') enterAdminMode();
   else if(purpose === 'check'){ if(checkId) doToggleTaskDone(checkId); }
-  else if(purpose === 'clearSync') doClearSyncTask();
-  else if(purpose === 'clearFrom16') doClearTasksAfterToday();
 }
 function requestPause(){
   const L = state.live;
@@ -6325,9 +6309,6 @@ $('adminLocalUploadFile').addEventListener('change', async (e) => {
 });
 $('adminForceSyncBtn').addEventListener('click', async () => {
   if(!dataRef){ toast('⚠️ 云端未连接'); return; }
-  setSyncEnabled(true);
-  if(!cloudListener) startCloudSync();
-  if(typeof updateToggleSyncBtn==='function') updateToggleSyncBtn();
   updateSyncInfo('正在上传…');
   const ok = await uploadToCloud(true);
   toast(ok ? '✅ 已上传本地数据到云端' : '⚠️ 上传失败：请检查网络');
@@ -6343,94 +6324,6 @@ $('adminForcePullBtn').addEventListener('click', async () => {
     toast('✅ 已从云端拉取最新数据');
   } else if(result.state === 'empty'){ toast('⚠️ 云端暂无数据'); updateSyncInfo('云端暂无数据'); }
   else { toast('⚠️ 读取云端失败'); updateSyncInfo('读取云端失败'); }
-});
-
-/* ★★★ 强制清除【今天之后】的所有任务 + 断开云同步关系（家长密码 + 二次确认）
-   删除 date 严格大于今天的全部日子（今天及以前的作业保留），
-   并真正解绑实时监听 + 持久断开同步，本机转为独立运行。 */
-function doClearTasksAfterToday(){
-  const today = todayStr();
-  const keys = Object.keys(state.days || {});
-  const toDel = keys.filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k) && k > today);
-  if(toDel.length){
-    toDel.forEach(k => { delete state.days[k]; });
-    invalidateLinkedIndex();
-  }
-  if(!state.days[today]) state.days[today] = makeDay();
-  state.date = today;
-  saveLocalState();
-  schedulePersist();
-  setSyncEnabled(false); stopCloudSync();
-  if(typeof updateToggleSyncBtn === 'function') updateToggleSyncBtn();
-  if(typeof updateSyncInfo === 'function') updateSyncInfo('📴 已断开云同步，并已清除今天之后的所有任务');
-  if(typeof showSyncStatus === 'function') showSyncStatus('📴 已断开云同步', 'offline');
-  try{ renderBoard(); }catch(e){}
-  try{ refreshAllCards(); }catch(e){}
-  try{ if(typeof renderCalendar === 'function') renderCalendar(); }catch(e){}
-  if(isAdminMode) renderAdminPanel();
-  toast('🧹 已清除 ' + toDel.length + ' 天的任务，并断开云同步（今天 ' + today + ' 及以前的作业已保留）', 4800);
-}
-$('adminClearTasksBtn').addEventListener('click', () => {
-  const today = todayStr();
-  const keys = Object.keys(state.days || {});
-  const toDel = keys.filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k) && k > today).sort();
-  if(!toDel.length){ toast('ℹ️ 今天（' + today + '）之后没有任何任务，无需清除'); return; }
-  if(!confirm('危险操作！\n即将强制删除【今天（' + today + '）之后】的全部任务，共 ' + toDel.length + ' 天：\n' + toDel.join('、') + '\n\n同时会彻底断开云同步关系，本机转为独立运行。\n今天及以前的作业不会被删除。\n\n此操作不可撤销，确定继续吗？')) return;
-  pwdPurpose = 'clearFrom16';
-  openPwdModal('危险操作确认', '强制清除任务并断开同步需要输入家长密码');
-});
-
-/* ★★★ 彻底清除同步任务（需家长密码 + 二次确认，删除该房间号云端数据与历史）★★★ */
-async function doClearSyncTask(){
-  if(!dataRef || !fbSet){ toast('⚠️ 云端未连接，无法清除'); return; }
-  if(!confirm('⚠️ 危险操作！\n即将彻底清除本房间号下的云端同步数据（含全部历史备份）。\n此操作不可撤销，本机数据不会被删除。\n\n确定继续吗？')) return;
-  if(!confirm('请再次确认：真的要彻底清除云端同步任务吗？')) return;
-  updateSyncInfo('正在清除云端…');
-  cloudSyncCleared = true;
-  try{
-    await fbSet(dataRef, null);
-    if(historyRef && fbSet){ try{ await fbSet(historyRef, null); }catch(e){} }
-  }catch(e){
-    cloudSyncCleared = false;
-    toast('⚠️ 清除失败：' + ((e && e.message) || e));
-    updateSyncInfo('清除失败');
-    return;
-  }
-  lastPushedUpdatedAt = 0; lastRemoteUpdatedAt = 0;
-  setSyncEnabled(false); stopCloudSync();
-  if(typeof updateToggleSyncBtn==='function') updateToggleSyncBtn();
-  updateSyncInfo('☁️ 云端同步任务已彻底清除（本机已转为独立运行）');
-  toast('🗑 已彻底清除云端同步任务，后续修改不再自动上云', 3800);
-  if(isAdminMode) renderAdminPanel();
-}
-/* 断开 / 重新连接 云同步（本机独立运行）
-   取消同步时真正解绑实时监听器(fbOnValue 返回的取消订阅)并持久化关闭，
-   解决新加作业被云端旧数据整体覆盖、显示不出来的问题。 */
-function updateToggleSyncBtn(){
-  const b = $('adminToggleSyncBtn'); if(!b) return;
-  b.textContent = getSyncEnabled() ? '🔌 断开云同步（本机独立运行）' : '🔗 重新连接云同步';
-}
-$('adminToggleSyncBtn').addEventListener('click', async () => {
-  if(!dataRef){ toast('⚠️ 云端未连接，无需断开'); return; }
-  if(getSyncEnabled()){
-    setSyncEnabled(false); stopCloudSync();
-    updateSyncInfo('📴 已断开云同步（本机独立运行）');
-    showSyncStatus('📴 已断开云同步', 'offline');
-    toast('🔌 已断开云同步：此后只保存在本机，不再被云端覆盖，可正常单独添加 / 删除作业', 4200);
-  }else{
-    setSyncEnabled(true);
-    lastPushedUpdatedAt = 0; lastRemoteUpdatedAt = 0;
-    const ok = await uploadToCloud(true);
-    cloudListener = null; startCloudSync();
-    toast(ok ? '🔗 已重新连接云同步，并上传本机数据' : '🔗 已重连，但上传失败：请检查网络');
-  }
-  updateToggleSyncBtn();
-  if(isAdminMode) renderAdminPanel();
-});
-$('adminClearSyncBtn').addEventListener('click', () => {
-  if(!dataRef){ toast('⚠️ 云端未连接'); return; }
-  pwdPurpose = 'clearSync';
-  openPwdModal('🔒 危险操作确认', '彻底清除同步任务需要输入家长密码');
 });
 
 /* ============================================================
@@ -6955,12 +6848,7 @@ const familyIdEl = document.getElementById('familyIdText');
 if(familyIdEl) familyIdEl.textContent = FAMILY_ID;
 
 if(dataRef && fbSet && fbGet && fbOnValue){
-  if(typeof updateToggleSyncBtn==='function') updateToggleSyncBtn();
-  if(!getSyncEnabled()){
-    freshBoot = false;
-    updateSyncInfo('📴 已断开云同步（本机独立运行）');
-    showSyncStatus('📴 已断开云同步', 'offline');
-  } else (async () => {
+  (async () => {
     const result = await readCloudOnce();
     if(result.state === 'has-data' && result.data && result.data.days && Object.keys(result.data.days).length){
       applyRemoteState(result.data);
@@ -6975,7 +6863,6 @@ if(dataRef && fbSet && fbGet && fbOnValue){
     freshBoot = false;
     startCloudSync();
     updateSyncInfo();
-    if(typeof updateToggleSyncBtn==='function') updateToggleSyncBtn();
     if(nameMigrated && result.state !== 'error'){
       try{ await uploadToCloud(true); }catch(e){ console.warn('改名回写云端失败', e); }
     }
