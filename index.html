@@ -111,7 +111,7 @@
   .timer-pair .eye-btn{grid-column:1 / -1;justify-self:stretch;padding:6px 8px}
   .timer-pair .eye-time{font-size:20px}
   @media(max-width:460px){.timer-pair{gap:5px}.timer-pair .timer-card{padding:7px}.timer-pair .timer-hint{font-size:10px}.timer-pair .timer-btn{font-size:12px;padding:7px}.timer-pair .eye-card{padding:6px}.timer-pair .eye-time{font-size:17px}}
-  .mizi, #miziActionModal, #miziEditModal, .subject-tab{ -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  #calBtn, .mizi, #miziActionModal, #miziEditModal, .subject-tab{ -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-touch-action:manipulation}
   #paperPrintFrame{pointer-events:none}
 
   .timer-card{
@@ -1189,6 +1189,19 @@
   </div>
 </div>
 
+<div class="modal" id="syncChoiceModal">
+  <div class="modal-card" style="max-width:360px">
+    <h3 id="syncChoiceTitle">同步前一天作业</h3>
+    <p id="syncChoiceSub"></p>
+    <div class="modal-actions">
+      <button class="btn-main" id="syncChoiceA">确认</button>
+      <button class="btn-main" id="syncChoiceB" style="background:linear-gradient(180deg,#FFB74D,#FB8C00);border-color:#FB8C00;box-shadow:0 3px 0 #E65100">叠加</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="syncChoiceCancel" style="flex:1">取消</button>
+    </div>
+  </div>
+</div>
 <div class="modal" id="pwdModal">
   <div class="modal-card">
     <div class="pwd-lock">🔒</div>
@@ -2320,6 +2333,72 @@ function cloneTaskForNewDay(t, syncKey){
   nt.done = !!t.done;
   delete nt.photos;
   return nt;
+}
+
+/* ===== 长按日历日期按钮：手动同步前一天作业（仅家长管理模式触发）===== */
+let _syncCbA=null,_syncCbB=null;
+function mdLabel(ds){ try{ const a=String(ds).split('-'); return (+a[1])+'月'+(+a[2])+'日'; }catch(e){ return ds; } }
+function openSyncChoice(o){
+  const m=$('syncChoiceModal');
+  $('syncChoiceTitle').textContent=o.title||'同步前一天作业';
+  $('syncChoiceSub').innerHTML=o.sub||'';
+  const bA=$('syncChoiceA'), bB=$('syncChoiceB');
+  bA.textContent=o.aText||'确认'; _syncCbA=o.onA||null;
+  if(o.bText){ bB.style.display=''; bB.textContent=o.bText; _syncCbB=o.onB||null; }
+  else { bB.style.display='none'; _syncCbB=null; }
+  m.classList.add('show');
+}
+function writeSyncTasks(targetDate, srcDate, mode){
+  if(!dayHasTasks(srcDate)){ toast('前一天（'+mdLabel(srcDate)+'）无可同步作业'); return; }
+  const src=state.days[srcDate];
+  const keys=['chinese','math','english'];
+  let added=0;
+  if(mode==='merge'){
+    if(!state.days[targetDate]) state.days[targetDate]=makeDay();
+    const day=state.days[targetDate];
+    const exist=new Set();
+    keys.forEach(k => (day[k]||[]).forEach(t => exist.add(t.syncKey||t.id)));
+    keys.forEach(k => {
+      day[k]=day[k]||[];
+      (src[k]||[]).forEach(t => {
+        if(!t.syncKey) t.syncKey=t.id;
+        if(exist.has(t.syncKey)) return;
+        day[k].push(cloneTaskForNewDay(t, t.syncKey)); added++;
+      });
+    });
+  } else {
+    const out=makeDay();
+    keys.forEach(k => {
+      out[k]=(src[k]||[]).map(t => { if(!t.syncKey) t.syncKey=t.id; added++; return cloneTaskForNewDay(t, t.syncKey); });
+    });
+    state.days[targetDate]=out;
+  }
+  invalidateLinkedIndex(); saveLocalState(); uploadToCloud();
+  if(state.date===targetDate){
+    renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
+    if(isAdminMode) renderAdminPanel();
+  }
+  toast(mode==='merge' ? ('已叠加 '+added+' 项作业（含完成状态）') : ('已同步 '+added+' 项作业（含完成状态）'), 2600);
+}
+function trySyncFromPreviousDay(targetDate){
+  const d=new Date(targetDate+'T00:00:00'); d.setDate(d.getDate()-1);
+  const srcDate=fmtDate(d);
+  if(!dayHasTasks(srcDate)){ toast('前一天（'+mdLabel(srcDate)+'）无可同步作业', 2600); return; }
+  if(!dayHasTasks(targetDate)){
+    openSyncChoice({
+      title:'同步前一天作业',
+      sub:'今天暂无任务，确认把 <b>'+mdLabel(srcDate)+'</b> 的作业及其完成状态同步过来吗？',
+      aText:'确认同步',
+      onA:function(){ writeSyncTasks(targetDate, srcDate, 'override'); }
+    });
+  } else {
+    openSyncChoice({
+      title:'同步前一天作业',
+      sub:'今天已有任务，请选择与 <b>'+mdLabel(srcDate)+'</b> 作业的同步方式：<br><b>覆盖</b>＝用前一天任务替换今天全部；<b>叠加</b>＝把今天还没有的任务补充进来（不会重复）。',
+      aText:'覆盖', onA:function(){ writeSyncTasks(targetDate, srcDate, 'override'); },
+      bText:'叠加', onB:function(){ writeSyncTasks(targetDate, srcDate, 'merge'); }
+    });
+  }
 }
 function syncFromPreviousDay(targetDate){
   const d = new Date(targetDate + 'T00:00:00');
@@ -4851,7 +4930,30 @@ function renderCalendar(){
     calGrid.appendChild(cell);
   }
 }
-calBtn.addEventListener('click', openCalendar);
+
+let syncLongPressTimer=null, syncLongPressFired=false, syncPressStart=null;
+function calPressStart(x,y){
+  if(!isAdminMode) return;
+  syncLongPressFired=false; syncPressStart={x:x,y:y};
+  clearTimeout(syncLongPressTimer);
+  syncLongPressTimer=setTimeout(function(){ syncLongPressFired=true; trySyncFromPreviousDay(state.date); }, 2000);
+}
+function calPressCancel(){ clearTimeout(syncLongPressTimer); syncLongPressTimer=null; }
+calBtn.addEventListener('mousedown', function(e){ calPressStart(e.clientX, e.clientY); });
+calBtn.addEventListener('mouseup', calPressCancel);
+calBtn.addEventListener('mouseleave', calPressCancel);
+calBtn.addEventListener('mousemove', function(e){ if(syncPressStart){ var dx=e.clientX-syncPressStart.x, dy=e.clientY-syncPressStart.y; if(dx*dx+dy*dy>144) calPressCancel(); } });
+calBtn.addEventListener('touchstart', function(e){ if(e.touches&&e.touches[0]) calPressStart(e.touches[0].clientX, e.touches[0].clientY); }, {passive:true});
+calBtn.addEventListener('touchend', calPressCancel);
+calBtn.addEventListener('touchcancel', calPressCancel);
+calBtn.addEventListener('touchmove', function(e){ if(syncPressStart&&e.touches&&e.touches[0]){ var dx=e.touches[0].clientX-syncPressStart.x, dy=e.touches[0].clientY-syncPressStart.y; if(dx*dx+dy*dy>144) calPressCancel(); } }, {passive:true});
+calBtn.addEventListener('contextmenu', function(e){ if(isAdminMode) e.preventDefault(); });
+calBtn.addEventListener('click', function(){ if(syncLongPressFired){ syncLongPressFired=false; return; } openCalendar(); });
+$('syncChoiceA').addEventListener('click', function(){ $('syncChoiceModal').classList.remove('show'); var f=_syncCbA; _syncCbA=null; _syncCbB=null; if(f) f(); });
+$('syncChoiceB').addEventListener('click', function(){ $('syncChoiceModal').classList.remove('show'); var f=_syncCbB; _syncCbA=null; _syncCbB=null; if(f) f(); });
+$('syncChoiceCancel').addEventListener('click', function(){ $('syncChoiceModal').classList.remove('show'); _syncCbA=null; _syncCbB=null; });
+$('syncChoiceModal').addEventListener('click', function(e){ if(e.target===$('syncChoiceModal')){ $('syncChoiceModal').classList.remove('show'); _syncCbA=null; _syncCbB=null; } });
+
 $('calPrev').addEventListener('click', () => { calMonth--; if(calMonth < 0){ calMonth = 11; calYear--; } renderCalendar(); });
 $('calNext').addEventListener('click', () => { calMonth++; if(calMonth > 11){ calMonth = 0; calYear++; } renderCalendar(); });
 $('calTodayBtn').addEventListener('click', () => { switchDate(todayStr()); calModal.classList.remove('show'); });
