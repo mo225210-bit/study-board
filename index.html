@@ -515,20 +515,65 @@
   .cal-title{font-size:16.5px;font-weight:900;color:#2E7D32;letter-spacing:.5px}
   .cal-week{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:6px}
   .cal-week div{text-align:center;font-size:12px;font-weight:900;color:#8aa88a;padding:4px 0}
-  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
-  .cal-day{position:relative;aspect-ratio:1;border-radius:10px;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;
-    font-size:14.5px;font-weight:800;color:#2b3a2b;
-    background:#F6FBF6;border:2px solid transparent;transition:all .15s}
-  .cal-day:hover{background:#EAF6E6}
-  .cal-day.empty{background:transparent;cursor:default;pointer-events:none}
-  .cal-day.other-month{color:#c8d8c8;background:transparent}
-  .cal-day.today{border-color:#FFC107;box-shadow:inset 0 0 0 1px rgba(255,193,7,.3)}
-  .cal-day.selected{background:linear-gradient(180deg,#8FD14F,#68B32E);color:#fff;box-shadow:0 3px 0 #4E8A22}
-  .cal-day.selected .cal-mark{background:#fff}
-  .cal-mark{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
-    width:5px;height:5px;border-radius:50%;background:#FF9800}
-  .cal-mark.done{background:#4CAF50}
+/* 替换原来的 .cal-grid 与 .cal-day */
+.cal-grid{
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:3px;
+}
+.cal-day{
+  position:relative;
+  width:100%;            /* ★ 撑满整个网格单元 */
+  aspect-ratio:1;
+  min-height:38px;       /* ★ 手机上保证最小点击面积 */
+  box-sizing:border-box;
+  border-radius:10px;
+  cursor:pointer;
+  display:grid;          /* ★ 用 grid 代替 flex，内容居中 */
+  place-items:center;
+  font-size:14.5px;
+  font-weight:800;
+  color:#2b3a2b;
+  background:#F6FBF6;
+  border:2px solid transparent;
+  transition:all .15s;
+  touch-action:manipulation;              /* ★ 触屏快速响应 */
+  -webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-touch-callout:none;
+}
+.cal-day > *{ pointer-events:none; }      /* ★ 子元素（mark点）不抢点击 */
+.cal-day:hover{ background:#EAF6E6; }
+.cal-day.empty{
+  background:transparent;
+  cursor:default;
+  pointer-events:none;
+}
+.cal-day.other-month{
+  color:#c8d8c8;
+  background:transparent;
+  cursor:default;
+  pointer-events:none;     /* ★ 上下月的灰日期不可点 */
+}
+.cal-day.today{ border-color:#FFC107; box-shadow:inset 0 0 0 1px rgba(255,193,7,.3); }
+.cal-day.selected{
+  background:linear-gradient(180deg,#8FD14F,#68B32E);
+  color:#fff;
+  box-shadow:0 3px 0 #4E8A22;
+}
+.cal-day.selected .cal-mark{ background:#fff; }
+.cal-mark{
+  position:absolute;
+  bottom:4px;
+  left:50%;
+  transform:translateX(-50%);
+  width:5px; height:5px;
+  border-radius:50%;
+  background:#FF9800;
+  pointer-events:none;     /* ★ 标记不抢点击 */
+}
+.cal-mark.done{ background:#4CAF50; }
   .cal-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
   .cal-actions button{flex:1;min-width:90px}
 
