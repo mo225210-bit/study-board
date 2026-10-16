@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="学习打卡台">
-<title>学习打卡台10163000</title>
+<title>学习打卡台10161838</title>
 <link rel="manifest" href="manifest.json">
 <script src="hanzi-data.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5.0/dist/hanzi-writer.min.js"></script>
@@ -556,7 +556,11 @@
   cursor:default;
   pointer-events:none;     /* ★ 上下月的灰日期不可点 */
 }
-.cal-day.today{ border-color:#FFC107; box-shadow:inset 0 0 0 1px rgba(255,193,7,.3); }
+.cal-day.today{ border-color:#FFC107; box-shadow:inset 0 0 0 1px rgba(255,193,7,.3); color:#FF3B30 !important; font-weight:900; }
+.cal-day.sync-on{ background:linear-gradient(180deg,#FFF6D9,#FFE7A6); border-color:#F5B301; }
+.cal-day.sync-on::after{ content:'🔄'; position:absolute; top:2px; right:3px; font-size:9px; line-height:1; }
+.cal-day.today.selected{ color:#fff !important; }
+.cal-day.today.sync-on{ color:#E03131 !important; }
 .cal-day.selected{
   background:linear-gradient(180deg,#8FD14F,#68B32E);
   color:#fff;
@@ -4989,6 +4993,7 @@ function renderCalendar(){
     cell.className = 'cal-day'; cell.textContent = d;
     if(dateStr === today) cell.classList.add('today');
     if(dateStr === state.date) cell.classList.add('selected');
+    if(state.syncDays && state.syncDays[dateStr]) cell.classList.add('sync-on');
     const day = state.days[dateStr];
     if(day){
       const all = [...(day.chinese||[]), ...(day.math||[]), ...(day.english||[])];
@@ -4999,7 +5004,7 @@ function renderCalendar(){
         cell.appendChild(mark);
       }
     }
-    cell.addEventListener('click', () => { switchDate(dateStr); calModal.classList.remove('show'); });
+    attachDayLongPress(cell, dateStr);
     calGrid.appendChild(cell);
   }
   const totalCells = startWeek + daysInMonth;
@@ -5018,10 +5023,7 @@ let syncPressStart = null;
 let syncLongPressTouchActive = false;
 
 function calPressStart(x, y){
-  if(!isAdminMode){
-    // 非家长模式不触发（不提示，避免学生误触发现）
-    return;
-  }
+  // 长按日历按钮 1 秒：切换"同步/不同步前一天实时任务及完成状态"
   syncLongPressFired = false;
   syncPressStart = { x: x, y: y };
   syncLongPressTouchActive = true;
@@ -5031,8 +5033,8 @@ function calPressStart(x, y){
     syncLongPressFired = true;
     syncLongPressTouchActive = false;
     try{ if(navigator.vibrate) navigator.vibrate(30); }catch(e){}
-    trySyncFromPreviousDay(state.date);
-  }, 2000);
+    toggleSyncPrevDay(state.date);
+  }, 1000);
 }
 
 function calPressCancel(){
@@ -5104,6 +5106,57 @@ function attachCalLongPress(el, openOnClick){
 
 attachCalLongPress(calBtn, true);
 attachCalLongPress($('adminCalDay'), false);
+
+/* ===== 长按日历某一天 1 秒：切换该天"同步/不同步"前一天实时任务及完成状态 ===== */
+function toggleSyncPrevDay(targetDate){
+  if(!state.syncDays) state.syncDays = {};
+  const d = new Date(targetDate + 'T00:00:00'); d.setDate(d.getDate() - 1);
+  const srcDate = fmtDate(d);
+  if(state.syncDays[targetDate]){
+    delete state.syncDays[targetDate];
+    saveLocalState(); uploadToCloud();
+    renderCalendar();
+    toast('🔓 已取消同步：' + mdLabel(targetDate) + ' 不再同步前一天实时任务', 2600);
+  } else {
+    if(!dayHasTasks(srcDate)){ toast('前一天（' + mdLabel(srcDate) + '）暂无可同步任务', 2600); return; }
+    state.syncDays[targetDate] = true;
+    writeSyncTasks(targetDate, srcDate, 'override');
+    saveLocalState(); uploadToCloud();
+    renderCalendar();
+    toast('🔄 已开启同步：' + mdLabel(targetDate) + ' 已同步前一天实时任务及完成状态', 2800);
+  }
+}
+
+/* 给月历某一天绑定：轻点=切换日期；长按满 1 秒=切换同步/不同步 */
+function attachDayLongPress(cell, dateStr){
+  var timer = null, fired = false, ps = null;
+  function start(x, y){
+    fired = false; ps = { x: x, y: y };
+    clearTimeout(timer);
+    timer = setTimeout(function(){
+      timer = null; fired = true;
+      try{ if(navigator.vibrate) navigator.vibrate(30); }catch(e){}
+      toggleSyncPrevDay(dateStr);
+    }, 1000);
+  }
+  function cancel(){ clearTimeout(timer); timer = null; }
+  cell.addEventListener('mousedown', function(e){ if(e.button !== 0) return; start(e.clientX, e.clientY); });
+  cell.addEventListener('mouseup', cancel);
+  cell.addEventListener('mouseleave', cancel);
+  cell.addEventListener('mousemove', function(e){ if(!ps) return; var dx=e.clientX-ps.x, dy=e.clientY-ps.y; if(dx*dx+dy*dy>900) cancel(); });
+  cell.addEventListener('touchstart', function(e){ if(e.touches && e.touches[0]) start(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+  cell.addEventListener('touchmove', function(e){ if(!ps||!e.touches||!e.touches[0]) return; var dx=e.touches[0].clientX-ps.x, dy=e.touches[0].clientY-ps.y; if(dx*dx+dy*dy>400) cancel(); }, { passive: true });
+  cell.addEventListener('touchend', function(e){
+    if(timer){ cancel(); }
+    else if(fired){ e.preventDefault(); e.stopPropagation(); setTimeout(function(){ fired=false; }, 300); }
+  });
+  cell.addEventListener('touchcancel', cancel);
+  cell.addEventListener('contextmenu', function(e){ if(fired) e.preventDefault(); });
+  cell.addEventListener('click', function(e){
+    if(fired){ e.preventDefault(); e.stopImmediatePropagation(); fired = false; return; }
+    switchDate(dateStr); calModal.classList.remove('show');
+  });
+}
 
 /* ============================================================
    笔顺
