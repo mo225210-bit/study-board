@@ -4930,6 +4930,36 @@ setTimeout(maybeNightlyReset, 800);
    日历
 ============================================================ */
 let calYear = 0, calMonth = 0;
+
+/* ===== 日历弹窗按钮绑定（之前缺失） ===== */
+$('calPrev').addEventListener('click', () => {
+  calMonth--;
+  if(calMonth < 0){ calMonth = 11; calYear--; }
+  renderCalendar();
+});
+
+$('calNext').addEventListener('click', () => {
+  calMonth++;
+  if(calMonth > 11){ calMonth = 0; calYear++; }
+  renderCalendar();
+});
+
+$('calTodayBtn').addEventListener('click', () => {
+  const d = new Date();
+  calYear = d.getFullYear();
+  calMonth = d.getMonth();
+  renderCalendar();
+});
+
+$('calCloseBtn').addEventListener('click', () => {
+  calModal.classList.remove('show');
+});
+
+// 点遮罩空白处也能关闭
+calModal.addEventListener('click', e => {
+  if(e.target === calModal) calModal.classList.remove('show');
+});
+  
 function openCalendar(){
   const d = new Date(state.date + 'T00:00:00');
   calYear = d.getFullYear(); calMonth = d.getMonth();
@@ -4943,9 +4973,14 @@ function renderCalendar(){
   const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
   const prevMonthDays = new Date(calYear, calMonth, 0).getDate();
   const today = todayStr();
-  for(let i = startWeek - 1; i >= 0; i--){
+// 后月补格
+  for(let i = 1; i <= remain; i++){
     const cell = document.createElement('div');
-    cell.className = 'cal-day other-month'; cell.textContent = prevMonthDays - i;
+    cell.className = 'cal-day other-month';
+    cell.textContent = i;
+    const d = new Date(calYear, calMonth + 1, i);
+    const ds = fmtDate(d);
+    cell.addEventListener('click', () => { switchDate(ds); calModal.classList.remove('show'); });
     calGrid.appendChild(cell);
   }
   for(let d = 1; d <= daysInMonth; d++){
