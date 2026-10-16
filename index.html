@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="学习打卡台">
-<title>学习打卡台10161950</title>
+<title>学习打卡台10163000</title>
 <link rel="manifest" href="manifest.json">
 <script src="hanzi-data.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5.0/dist/hanzi-writer.min.js"></script>
@@ -1113,6 +1113,39 @@
   .home-compact .card-list.shop-grid{gap:6px}
   .home-compact .char-grid{gap:5px}
   .home-compact .timer-hint{font-size:11px;min-height:11px;line-height:1.35}
+  /* ===== 修订：总倒计时占 2/3、护眼计时占 1/3 ===== */
+  .timer-pair{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+  @media (max-width:460px){.timer-pair{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}}
+
+  /* ===== 修订：金币/打卡与家长端「今天」「关闭」同高同形（与学生页「今天」= 36px 圆角矩形一致） ===== */
+  .stats .pill,.home-compact .stats .pill{height:36px;padding:0 11px;gap:4px;border-radius:10px;
+    font-size:14px;line-height:1;display:inline-flex;align-items:center}
+  #adminGoToday,.admin-header .admin-close,.admin-header-date .aa-btn{height:36px;padding:0 14px;
+    border-radius:10px;font-size:13px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+
+  /* ===== 修订：预习生字下「偏旁 / 笔画 / 页码」字号加大 ===== */
+  .char-info{font-size:15.5px}
+  @media (max-width:500px){.char-info{font-size:14px}}
+
+  /* ===== 新增：作业内容中的（ ）填空输入框 ===== */
+  .blank-input{display:inline-block;width:64px;max-width:100%;height:1.7em;margin:0 3px;padding:0 6px;
+    font-family:inherit;font-size:1em;font-weight:900;color:#0D47A1;text-align:center;vertical-align:middle;
+    background:rgba(255,255,255,.92);border:0;border-bottom:2px dashed #78909C;border-radius:7px 7px 0 0;
+    outline:none;transition:background .15s,border-color .15s}
+  .blank-input:focus{background:#FFFDE7;border-bottom-color:#FB8C00;box-shadow:0 0 0 2px rgba(255,179,0,.28)}
+  .task-card.done .blank-input{color:#9aad9a;border-bottom-color:#B0BEC5}
+
+  /* ===== 新增：课程表长按单元格修改 ===== */
+  .tt-table td[data-tt-cell]{cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  .tt-table td.tt-cell-press{background:#FFF3C4!important;outline:2px solid #FFB300;outline-offset:-2px}
+  .tt-edit-tip{font-size:11.5px;font-weight:800;color:#7a6a9a;margin-top:6px;text-align:center}
+
+  /* ===== 新增：课文字词库拖动排序 ===== */
+  .lib-row .lib-handle{flex:none;width:26px;text-align:center;font-size:17px;font-weight:900;color:#7a9aaa;
+    cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none;padding:2px 0;line-height:1.1}
+  .lib-row .lib-handle:active{cursor:grabbing;color:#FFD54F}
+  .lib-row.dragging{opacity:.55;background:rgba(255,213,79,.14);box-shadow:inset 0 0 0 1px rgba(255,213,79,.5)}
+
 </style>
 </head>
 
@@ -1304,6 +1337,18 @@
   </div>
 </div>
 
+<div class="modal" id="ttCellEditModal">
+  <div class="modal-card" style="max-width:340px">
+    <h3 id="ttCellEditTitle">✏️ 修改课程</h3>
+    <p id="ttCellEditSub">修改后会立即生效，并保存到本机与云端</p>
+    <div class="form-field"><input type="text" id="ttCellEditInput" maxlength="30" autocomplete="off" placeholder="留空并保存可清除该格"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="ttCellEditCancel">取消</button>
+      <button class="btn-main" id="ttCellEditSave">保存</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="syncChoiceModal">
   <div class="modal-card" style="max-width:360px">
     <h3 id="syncChoiceTitle">同步前一天作业</h3>
@@ -1467,7 +1512,7 @@
 
     <div class="admin-section" id="adminPanelChinese">
       <h3>📖 语文作业 <span class="badge" id="adminChineseBadge">0</span><button type="button" class="aa-btn" id="uploadChinesePaperBtn" title="上传并永久保存作业纸" aria-label="上传作业纸" style="margin-left:auto;order:9;width:32px;height:32px;padding:0;display:grid;place-items:center;font-size:17px;line-height:1;border-radius:9px">📄</button><input type="file" id="chinesePaperInput" accept="image/*,.pdf,application/pdf" style="display:none"></h3>
-      <p style="font-size:12.5px;color:#5a7a8a;font-weight:700;margin-bottom:8px">💡 双击作业条目可重新编辑</p>
+      <p style="font-size:12.5px;color:#5a7a8a;font-weight:700;margin-bottom:8px">💡 双击作业条目可重新编辑 · 内容里写「（ ）」括号中间留空格，学生端会显示成可点击填写的填空格</p>
       <div id="adminChineseList"></div>
       <div class="admin-sub-label">➕ 添加预习生字</div>
       <div class="admin-add-row inline-row">
@@ -1616,7 +1661,7 @@
     <div class="admin-section collapsed" id="adminPanelLibrary">
       <h3>📚 课文字词库 <span class="badge" id="adminLibBadge">0 条</span></h3>
       <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
-        <b style="color:#FFD54F">双击条目可重新编辑。</b><br>
+        <b style="color:#FFD54F">按住左侧 ☰ 可上下拖动调整顺序</b>，<b style="color:#FFD54F">双击条目可重新编辑。</b><br>
         田字格修改/删除后，原文会自动保存为「会写字-旧」「会识字-旧」「抄写词语-旧」，新内容保存在「会写字」等字段。
       </p>
       <div class="admin-add-row"><button class="aa-btn" id="adminLibSyncBtn">📤 上传写字表 / 识字表</button></div>
@@ -1737,7 +1782,7 @@
 /* ============================================================
    ★★★ 版本号：每次修改界面/功能后请把这里 +1
 ============================================================ */
-const APP_VERSION = '2026.10.16.1';
+const APP_VERSION = '2026.10.16.2';
 
 /* ============================================================
    🔄 自动更新
@@ -2314,6 +2359,7 @@ function normalizeDay(day){
       if((type === 'wordgroup' || type === 'copy') && Array.isArray(t.words)) item.words = t.words.slice(0,60);
       if(Array.isArray(t.checkedChars)) item.checkedChars = t.checkedChars.slice(0,300).map(String);
       if(t.strokeCounts && typeof t.strokeCounts === 'object') item.strokeCounts = t.strokeCounts;
+      if(Array.isArray(t.blanks)) item.blanks = t.blanks.slice(0,20).map(v => String(v == null ? '' : v).slice(0,20));
       const photos = normalizePhotos(t.photos);
       if(photos.length) item.photos = photos;
       return item;
@@ -2359,6 +2405,8 @@ function loadLocalState(){
   if(typeof s.parentPassword !== 'string' || !/^\d{4}$/.test(s.parentPassword)) s.parentPassword = MASTER_PASSWORD;
   s.settings = normalizeSettings(s.settings);
   s.lessonLibrary = normalizeLessonLibrary(s.lessonLibrary);
+  if(!Array.isArray(s.lessonLibOrder)) s.lessonLibOrder = [];
+  s.lessonLibOrder = s.lessonLibOrder.map(String).slice(0,400);
   if(!Object.keys(s.lessonLibrary).length) s.lessonLibrary = JSON.parse(JSON.stringify(DEFAULT_LESSON_LIBRARY));
   const shopNorm = normalizeShop(s.shop);
   let savedRewards = null;
@@ -2453,6 +2501,7 @@ function cloneTaskForNewDay(t, syncKey){
   nt.syncKey = syncKey || t.syncKey || t.id;
   nt.done = !!t.done;
   delete nt.photos;
+  delete nt.blanks;
   return nt;
 }
 function getSyncAnchor(dateStr){
@@ -3090,6 +3139,18 @@ function getSyncEnabled(){ try{ return localStorage.getItem(SYNC_TOGGLE_KEY) !==
 function setSyncEnabled(v){ try{ localStorage.setItem(SYNC_TOGGLE_KEY, v ? '1' : '0'); }catch(e){} cloudSyncCleared = !v; }
 let lastRemoteUpdatedAt = 0;
 let uploadFailedNotified = false;
+/* ★ 云端补传：上传失败 / 断网期间的数据改动，联网或定时后自动重传 */
+var cloudRetryTimer = null;
+function scheduleCloudRetry(delay){
+  if(cloudRetryTimer) return;
+  cloudRetryTimer = setTimeout(() => {
+    cloudRetryTimer = null;
+    uploadFailedNotified = false;
+    uploadToCloud(true);
+  }, delay == null ? 15000 : delay);
+}
+window.addEventListener('online', () => { uploadFailedNotified = false; uploadToCloud(true); });
+window.addEventListener('beforeunload', () => { if(persistPending) flushPersist(); });
 
 async function uploadToCloud(force){
   if(!dataRef || !fbSet || !fbGet) return false;
@@ -3100,7 +3161,8 @@ async function uploadToCloud(force){
     days: state.days, date: state.date, settings: state.settings,
     sun: state.sun, checkins: state.checkins,
     sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
-    lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword, chinesePaper: state.chinesePaper || null,
+    lessonLibrary: state.lessonLibrary, lessonLibOrder: Array.isArray(state.lessonLibOrder) ? state.lessonLibOrder : [],
+    parentPassword: state.parentPassword, chinesePaper: state.chinesePaper || null,
     shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
     lastNightReset: state.lastNightReset || '',
     eyeSoundOffDate: state.eyeSoundOffDate || '',
@@ -3113,7 +3175,8 @@ async function uploadToCloud(force){
   catch(e){
     console.warn('云端上传失败', e);
     lastPushedUpdatedAt = prevPushed;
-    if(!uploadFailedNotified){ uploadFailedNotified = true; showSyncStatus('⚠️ 云端上传失败，请检查网络', 'offline'); }
+    if(!uploadFailedNotified){ uploadFailedNotified = true; showSyncStatus('⚠️ 云端上传失败，稍后自动重试', 'offline'); }
+    scheduleCloudRetry();
     return false;
   }
 }
@@ -3122,7 +3185,8 @@ function getEditableStateForCompare(){
   return JSON.stringify({
     days: state.days, date: state.date, settings: state.settings,
     sun: state.sun, checkins: state.checkins, sunLog: state.sunLog,
-    lessonLibrary: state.lessonLibrary, parentPassword: state.parentPassword, chinesePaper: state.chinesePaper || null,
+    lessonLibrary: state.lessonLibrary, lessonLibOrder: Array.isArray(state.lessonLibOrder) ? state.lessonLibOrder : [],
+    parentPassword: state.parentPassword, chinesePaper: state.chinesePaper || null,
     shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
     lastNightReset: state.lastNightReset || '', eyeSoundOffDate: state.eyeSoundOffDate || ''
   });
@@ -3152,6 +3216,7 @@ function makeHistorySnapshot(reason){
       checkins: JSON.parse(JSON.stringify(state.checkins || [])),
       sunLog: JSON.parse(JSON.stringify(state.sunLog || [])),
       lessonLibrary: JSON.parse(JSON.stringify(state.lessonLibrary || {})),
+      lessonLibOrder: Array.isArray(state.lessonLibOrder) ? state.lessonLibOrder.slice() : [],
       parentPassword: state.parentPassword, shop: JSON.parse(JSON.stringify(state.shop || [])),
       wordBank: JSON.parse(JSON.stringify(state.wordBank || {})),
       charPages: JSON.parse(JSON.stringify(state.charPages || {})),
@@ -3210,6 +3275,8 @@ function applyRemoteState(remote){
   if(Array.isArray(remote.checkins)) state.checkins = remote.checkins;
   if(Array.isArray(remote.sunLog)) state.sunLog = remote.sunLog.slice(0, 60);
   if(remote.lessonLibrary) state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary);
+  if(Array.isArray(remote.lessonLibOrder)) state.lessonLibOrder = remote.lessonLibOrder.map(String).slice(0,400);
+  else state.lessonLibOrder = [];
   if('chinesePaper' in remote) state.chinesePaper = remote.chinesePaper || null;
   if(remote.wordBank) state.wordBank = normalizeWordBank(remote.wordBank);
   if(remote.charPages && typeof remote.charPages === 'object') state.charPages = remote.charPages;
@@ -3734,7 +3801,7 @@ function renderSubjectCards(subject, listEl){
     const body = document.createElement('div'); body.className = 'card-body';
     const textEl = document.createElement('div');
     textEl.className = 'task-text' + (task.type === 'custom' ? ' custom-task-text' : '');
-    textEl.textContent = task.text;
+    renderTaskText(task, textEl);
 
     const info = document.createElement('div'); info.className = 'task-info';
     const stars = document.createElement('span'); stars.className = 'stars-mini';
@@ -4096,24 +4163,26 @@ function renderTimetable(){
     html += '<th' + (i === hlCol ? ' class="tt-th-now"' : '') + '>' + escapeHtml(h.label || '') + '</th>';
   });
   html += '</tr></thead><tbody>';
-  tt.rows.forEach(r => {
+  tt.rows.forEach((r, ri) => {
     html += '<tr>';
-    html += '<td class="tt-time">' + escapeHtml(r.time || '') + '</td>';
-    html += '<td class="tt-item">' + escapeHtml(r.item || '') + '</td>';
+    html += '<td class="tt-time" data-tt-cell="r' + ri + ':time">' + escapeHtml(r.time || '') + '</td>';
+    html += '<td class="tt-item" data-tt-cell="r' + ri + ':item">' + escapeHtml(r.item || '') + '</td>';
     (r.cells || []).forEach((c, i) => {
       if(c.skip) return;
-      const cls = [];
+      const cls = ['tt-cell'];
       if(c.merged) cls.push('tt-merged');
       if(i === hlCol && c.text && !c.merged) cls.push('tt-now');
       let span = '';
       if(Number(c.colspan) > 1) span += ' colspan="' + c.colspan + '"';
       if(Number(c.rowspan) > 1) span += ' rowspan="' + c.rowspan + '"';
-      html += '<td' + (cls.length ? ' class="' + cls.join(' ') + '"' : '') + span + '>' + escapeHtml(c.text || '') + '</td>';
+      html += '<td class="' + cls.join(' ') + '" data-tt-cell="r' + ri + ':c' + i + '"' + span + '>' + escapeHtml(c.text || '') + '</td>';
     });
     html += '</tr>';
   });
   html += '</tbody></table></div>';
+  html += '<div class="tt-edit-tip">💡 长按任意格子（时间 / 项目 / 课程）可直接修改，改完自动存到本机与云端</div>';
   wrap.innerHTML = html;
+  bindTtLongPress(wrap);
   if(cntEl) cntEl.textContent = tt.rows.length;
   if(tipEl){
     if(tgt.isWeekend){
@@ -4936,8 +5005,24 @@ $('paperPrintBtn').addEventListener('click', () => {
   if(paper.type === 'application/pdf' || paper.data.startsWith('data:application/pdf')){ const w=window.open(paper.data,'_blank'); if(w) setTimeout(()=>{try{w.focus();w.print()}catch(e){}},500); return; }
   let frame=document.getElementById('paperPrintFrame'); if(frame) frame.remove();
   frame=document.createElement('iframe'); frame.id='paperPrintFrame'; frame.style.cssText='position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0';
-  frame.onload=()=>{ setTimeout(()=>{ try{frame.contentWindow.focus();frame.contentWindow.print();}catch(e){window.print();} },180); }; document.body.appendChild(frame);
-  const doc=frame.contentDocument; doc.open(); doc.write('<!doctype html><html><head><title>语文作业纸</title><style>@page{size:A4 portrait;margin:0}html,body{margin:0;padding:0;width:210mm;height:297mm}img{display:block;width:105mm;height:auto;max-height:297mm;object-fit:contain;object-position:top left}</style></head><body><img src="'+paper.data+'"></body></html>'); doc.close();
+  let printed=false;
+  const doPrint=()=>{ if(printed) return; printed=true;
+    try{ frame.contentWindow.focus(); frame.contentWindow.print(); }catch(e){ console.warn('打印失败', e); }
+    setTimeout(()=>{ try{ frame.remove(); }catch(err){} }, 1500);
+  };
+  frame.onload=()=>{
+    const im = frame.contentDocument && frame.contentDocument.images && frame.contentDocument.images[0];
+    if(im && !im.complete){ im.addEventListener('load', ()=>setTimeout(doPrint,120), {once:true}); im.addEventListener('error', ()=>setTimeout(doPrint,120), {once:true}); setTimeout(doPrint, 4000); }
+    else setTimeout(doPrint, 150);
+  };
+  document.body.appendChild(frame);
+  const doc=frame.contentDocument; doc.open();
+  doc.write('<!doctype html><html><head><title>语文作业纸</title><style>'
+    + '@page{size:A4 portrait;margin:6mm}'
+    + 'html,body{margin:0;padding:0;width:auto;height:auto;background:#fff}'
+    + 'img{display:block;width:198mm;max-width:198mm;height:auto;max-height:283mm;object-fit:contain;object-position:top left;margin:0 auto;page-break-after:avoid;page-break-inside:avoid;break-inside:avoid}'
+    + '</style></head><body><img src="'+paper.data+'"></body></html>');
+  doc.close();
 });
 $('uploadChinesePaperBtn').addEventListener('click', () => $('chinesePaperInput').click());
 $('chinesePaperInput').addEventListener('change', async e => {
@@ -6112,7 +6197,7 @@ function renderLessonLibrary(){
   const list = $('adminLibList');
   const badge = $('adminLibBadge');
   const lib = state.lessonLibrary || {};
-  const keys = Object.keys(lib);
+  const keys = libKeys();
   if(badge) badge.textContent = keys.length + ' 条';
   if(!list) return;
   if(!keys.length){ list.innerHTML = '<div class="admin-empty">还没有课文库，在下方添加</div>'; return; }
@@ -6122,7 +6207,8 @@ function renderLessonLibrary(){
     const oldChars = item.oldChars ? `<div><b class="old">会写字-旧：</b>${escapeHtml(preview(item.oldChars))}</div>` : '';
     const oldWgs = item.oldWordgroups ? `<div><b class="old">会识字-旧：</b>${escapeHtml(preview(item.oldWordgroups))}</div>` : '';
     const oldWords = item.oldWords ? `<div><b class="old">抄写词语-旧：</b>${escapeHtml(preview(item.oldWords))}</div>` : '';
-    return `<div class="lib-row" data-lib-edit="${escapeAttr(name)}" title="双击编辑">
+    return `<div class="lib-row" data-lib-edit="${escapeAttr(name)}" data-lib-name="${escapeAttr(name)}" title="双击编辑">
+      <span class="lib-handle" title="按住上下拖动调整顺序">☰</span>
       <div class="lib-lesson">📖 ${escapeHtml(name)}</div>
       <div class="lib-info">
         <div><b>会写字：</b>${escapeHtml(preview(item.chars))}</div>
@@ -6138,6 +6224,7 @@ function renderLessonLibrary(){
       const name = el.dataset.libDel;
       if(!confirm('确定要删除课文「'+name+'」吗？')) return;
       delete state.lessonLibrary[name];
+      if(Array.isArray(state.lessonLibOrder)) state.lessonLibOrder = state.lessonLibOrder.filter(k => k !== name);
       saveLocalState(); uploadToCloud();
       renderLessonLibrary(); populateLessonSelects();
       toast('已删除课文库条目');
@@ -6146,6 +6233,7 @@ function renderLessonLibrary(){
   list.querySelectorAll('[data-lib-edit]').forEach(el => {
     el.addEventListener('dblclick', () => openLibEdit(el.dataset.libEdit));
   });
+  bindLibDrag(list);
 }
 function saveLessonPick(kind, value){
   if(!state.settings) state.settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
@@ -6155,7 +6243,7 @@ function saveLessonPick(kind, value){
 }
 function populateLessonSelects(){
   const lib = state.lessonLibrary || {};
-  const keys = Object.keys(lib).sort();
+  const keys = libKeys();
   if(!state.settings.lessonPick) state.settings.lessonPick = { preview:'', wordgroup:'', copy:'' };
   const lp = state.settings.lessonPick;
   const fill = (sel, placeholder, wanted) => {
@@ -7442,6 +7530,229 @@ if(dataRef && fbSet && fbGet && fbOnValue){
   updateSyncInfo('未连接（纯本地模式）');
   showSyncStatus('📴 纯本地模式', 'offline');
 }
+
+/* ============================================================
+   ★ 新增能力：作业填空 / 课程表长按修改 / 课文库拖动排序
+   ============================================================ */
+
+/* ---------- 1) 课文字词库：自定义顺序 + 拖动排序 ---------- */
+function libKeys(){
+  const lib = (state && state.lessonLibrary) || {};
+  const keys = Object.keys(lib);
+  const order = Array.isArray(state && state.lessonLibOrder) ? state.lessonLibOrder : [];
+  const out = [];
+  order.forEach(k => { const name = String(k); if(keys.indexOf(name) >= 0 && out.indexOf(name) < 0) out.push(name); });
+  keys.forEach(k => { if(out.indexOf(k) < 0) out.push(k); });
+  return out;
+}
+function reorderLibDom(list, names){
+  const map = {};
+  Array.prototype.forEach.call(list.querySelectorAll('.lib-row'), r => { map[r.dataset.libName] = r; });
+  names.forEach(n => { if(map[n]) list.appendChild(map[n]); });
+}
+function bindLibDrag(list){
+  let drag = null;
+  Array.prototype.forEach.call(list.querySelectorAll('.lib-row'), row => {
+    const handle = row.querySelector('.lib-handle');
+    if(!handle) return;
+    handle.addEventListener('pointerdown', e => {
+      e.preventDefault(); e.stopPropagation();
+      drag = { row: row, moved: false };
+      row.classList.add('dragging');
+      try{ handle.setPointerCapture(e.pointerId); }catch(err){}
+    });
+    handle.addEventListener('pointermove', e => {
+      if(!drag || drag.row !== row) return;
+      const rows = Array.prototype.slice.call(list.querySelectorAll('.lib-row'));
+      const me = rows.indexOf(row);
+      if(me < 0) return;
+      let target = -1;
+      rows.forEach((r, i) => {
+        if(r === row) return;
+        const b = r.getBoundingClientRect();
+        if(e.clientY >= b.top && e.clientY <= b.bottom) target = i;
+      });
+      if(target >= 0 && target !== me){
+        drag.moved = true;
+        const names = rows.map(r => r.dataset.libName);
+        const movedName = names.splice(me, 1)[0];
+        names.splice(target, 0, movedName);
+        state.lessonLibOrder = names;
+        reorderLibDom(list, names);
+      }
+    });
+    const end = () => {
+      if(!drag) return;
+      const moved = drag.moved;
+      row.classList.remove('dragging');
+      drag = null;
+      if(moved){
+        state.lessonLibOrder = libKeys();
+        saveLocalState(); uploadToCloud(true);
+        populateLessonSelects();
+        toast('✅ 已保存课文库顺序');
+      }
+    };
+    handle.addEventListener('pointerup', end);
+    handle.addEventListener('pointercancel', end);
+    handle.addEventListener('lostpointercapture', end);
+    /* 拖动把手上的双击/长按不触发编辑 */
+    handle.addEventListener('dblclick', e => { e.stopPropagation(); e.preventDefault(); });
+  });
+}
+
+/* ---------- 2) 课程表：长按单元格修改 ---------- */
+var ttPress = null;
+function bindTtLongPress(scope){
+  if(!scope) return;
+  if(!ttPress) ttPress = { timer: null, fired: false, x: 0, y: 0 };
+  Array.prototype.forEach.call(scope.querySelectorAll('[data-tt-cell]'), td => {
+    const start = e => {
+      clearTimeout(ttPress.timer); ttPress.fired = false;
+      const p = (e.touches && e.touches[0]) ? e.touches[0] : e;
+      ttPress.x = p.clientX || 0; ttPress.y = p.clientY || 0;
+      td.classList.add('tt-cell-press');
+      ttPress.timer = setTimeout(() => {
+        ttPress.fired = true;
+        td.classList.remove('tt-cell-press');
+        try{ if(navigator.vibrate) navigator.vibrate(35); }catch(err){}
+        openTtCellEditor(td.dataset.ttCell);
+      }, 550);
+    };
+    const cancel = () => { clearTimeout(ttPress.timer); ttPress.timer = null; td.classList.remove('tt-cell-press'); };
+    td.addEventListener('touchstart', start, {passive:true});
+    td.addEventListener('touchmove', e => {
+      const p = e.touches && e.touches[0];
+      if(p && (Math.abs(p.clientX - ttPress.x) > 10 || Math.abs(p.clientY - ttPress.y) > 10)) cancel();
+    }, {passive:true});
+    td.addEventListener('touchend', e => { if(ttPress.fired){ e.preventDefault(); ttPress.fired = false; } cancel(); });
+    td.addEventListener('touchcancel', cancel);
+    td.addEventListener('mousedown', start);
+    td.addEventListener('mouseup', () => { ttPress.fired = false; cancel(); });
+    td.addEventListener('mouseleave', cancel);
+    td.addEventListener('contextmenu', e => e.preventDefault());
+  });
+}
+function ttCellText(key){
+  const tt = state.timetable; if(!tt || !tt.rows) return '';
+  const m = /^r(\d+):(time|item|c(\d+))$/.exec(String(key || '')); if(!m) return '';
+  const row = tt.rows[Number(m[1])]; if(!row) return '';
+  if(m[2] === 'time') return String(row.time || '');
+  if(m[2] === 'item') return String(row.item || '');
+  const c = (row.cells || [])[Number(m[3])];
+  return c ? String(c.text || '') : '';
+}
+function ttCellLabel(key){
+  const tt = state.timetable; if(!tt) return '课程';
+  const m = /^r(\d+):(time|item|c(\d+))$/.exec(String(key || '')); if(!m) return '课程';
+  const row = tt.rows[Number(m[1])] || {};
+  if(m[2] === 'time') return '上课时间';
+  if(m[2] === 'item') return '项目名称';
+  const hi = Number(m[3]);
+  const day = (tt.headers && tt.headers[hi] && tt.headers[hi].label) ? tt.headers[hi].label : ('第' + (hi+1) + '列');
+  return day + ' · ' + (row.item || row.time || '课程');
+}
+function ttCellWrite(key, val){
+  const tt = state.timetable; if(!tt || !tt.rows) return false;
+  const m = /^r(\d+):(time|item|c(\d+))$/.exec(String(key || '')); if(!m) return false;
+  const ri = Number(m[1]); const row = tt.rows[ri]; if(!row) return false;
+  const v = String(val == null ? '' : val).trim().slice(0, 30);
+  if(m[2] === 'time'){ row.time = v; return true; }
+  if(m[2] === 'item'){ row.item = v; return true; }
+  const ci = Number(m[3]); const cell = (row.cells || [])[ci]; if(!cell) return false;
+  cell.text = v;
+  const fillSkips = r => {
+    for(let j = ci + 1; j < (r.cells || []).length; j++){
+      if(r.cells[j] && r.cells[j].skip) r.cells[j].text = v; else break;
+    }
+  };
+  fillSkips(row);
+  for(let r2 = ri + 1; r2 < tt.rows.length; r2++){
+    const cc = (tt.rows[r2].cells || [])[ci];
+    if(cc && cc.skip){ cc.text = v; fillSkips(tt.rows[r2]); } else break;
+  }
+  return true;
+}
+let ttCellEditing = '';
+function openTtCellEditor(key){
+  if(!state.timetable) { toast('还没有课程表'); return; }
+  ttCellEditing = String(key || '');
+  const title = $('ttCellEditTitle'), sub = $('ttCellEditSub'), inp = $('ttCellEditInput');
+  if(title) title.textContent = '✏️ 修改：' + ttCellLabel(ttCellEditing);
+  if(sub) sub.textContent = '修改后立即生效，自动保存到本机与云端';
+  if(inp){ inp.value = ttCellText(ttCellEditing); }
+  $('ttCellEditModal').classList.add('show');
+  setTimeout(() => { try{ inp && inp.focus(); inp && inp.select(); }catch(e){} }, 120);
+}
+function closeTtCellEditor(){ const m = $('ttCellEditModal'); if(m) m.classList.remove('show'); ttCellEditing = ''; }
+function saveTtCellEdit(){
+  if(!ttCellEditing) return;
+  const inp = $('ttCellEditInput');
+  const v = inp ? String(inp.value || '') : '';
+  if(!ttCellWrite(ttCellEditing, v)){ toast('没找到要修改的格子'); closeTtCellEditor(); return; }
+  state.timetable = normalizeTimetable(state.timetable);
+  saveLocalState(); uploadToCloud(true);
+  renderTimetable(); renderAdminTimetable();
+  closeTtCellEditor();
+  toast('✅ 课程表已修改并同步');
+}
+$('ttCellEditSave').addEventListener('click', saveTtCellEdit);
+$('ttCellEditCancel').addEventListener('click', closeTtCellEditor);
+(function(){
+  const m = $('ttCellEditModal');
+  if(m) m.addEventListener('click', e => { if(e.target === m) closeTtCellEditor(); });
+  const inp = $('ttCellEditInput');
+  if(inp) inp.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); saveTtCellEdit(); } });
+})();
+
+/* ---------- 3) 作业内容中的「（ ）」= 可点击填写的填空格 ---------- */
+function findTaskBlanks(text){
+  const re = /[（(\[]([\s\u3000\u00a0]+)[）)\]]/g;
+  const out = []; const str = String(text || '');
+  let m;
+  while((m = re.exec(str)) !== null){
+    out.push({ start: m.index, len: m[0].length, spaces: m[1].length });
+    if(out.length >= 20) break;
+  }
+  return out;
+}
+function renderTaskText(task, el){
+  const text = String((task && task.text) || '');
+  const marks = findTaskBlanks(text);
+  if(!marks.length){ el.textContent = text; return; }
+  el.textContent = '';
+  const vals = Array.isArray(task.blanks) ? task.blanks : [];
+  let pos = 0;
+  marks.forEach((mk, i) => {
+    if(mk.start > pos) el.appendChild(document.createTextNode(text.slice(pos, mk.start)));
+    const inp = document.createElement('input');
+    inp.type = 'text'; inp.className = 'blank-input';
+    inp.dataset.blankIdx = String(i);
+    inp.value = String(vals[i] == null ? '' : vals[i]);
+    inp.maxLength = 20;
+    inp.autocomplete = 'off';
+    inp.setAttribute('inputmode', 'text');
+    inp.title = '点这里填写，会自动保存';
+    inp.style.width = Math.min(220, Math.max(56, mk.spaces * 17 + 22)) + 'px';
+    inp.addEventListener('pointerdown', e => e.stopPropagation());
+    inp.addEventListener('click', e => { e.stopPropagation(); try{ inp.focus(); }catch(err){} });
+    inp.addEventListener('input', () => saveTaskBlank(task, i, inp.value, true));
+    inp.addEventListener('change', () => saveTaskBlank(task, i, inp.value, false));
+    inp.addEventListener('blur', () => saveTaskBlank(task, i, inp.value, false));
+    el.appendChild(inp);
+    pos = mk.start + mk.len;
+  });
+  if(pos < text.length) el.appendChild(document.createTextNode(text.slice(pos)));
+}
+function saveTaskBlank(task, idx, value, soft){
+  if(!task) return;
+  if(!Array.isArray(task.blanks)) task.blanks = [];
+  while(task.blanks.length <= idx) task.blanks.push('');
+  task.blanks[idx] = String(value == null ? '' : value).slice(0, 20);
+  if(soft){ schedulePersist(800); }
+  else { saveLocalState(); uploadToCloud(); }
+}
+
 </script>
 
 </body></html>
