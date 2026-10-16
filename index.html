@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="学习打卡台">
-<title>学习打卡台10161854</title>
+<title>学习打卡台10161913</title>
 <link rel="manifest" href="manifest.json">
 <script src="hanzi-data.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5.0/dist/hanzi-writer.min.js"></script>
@@ -559,6 +559,8 @@
 .cal-day.today{ border-color:#FFC107; box-shadow:inset 0 0 0 1px rgba(255,193,7,.3); color:#FF3B30 !important; font-weight:900; }
 .cal-day.sync-on{ background:linear-gradient(180deg,#FFF6D9,#FFE7A6); border-color:#F5B301; }
 .cal-day.sync-on::after{ content:'🔄'; position:absolute; top:2px; right:3px; font-size:9px; line-height:1; }
+.cal-day.sync-group{ outline:3px solid var(--grp,#7C4DFF); outline-offset:-2px; }
+.cal-day.sync-group.today{ outline-offset:-2px; }
 .cal-day.today.selected{ color:#fff !important; }
 .cal-day.today.sync-on{ color:#E03131 !important; }
 .cal-day.selected{
@@ -713,15 +715,15 @@
   .admin-section h3 .badge{font-size:11.5px;background:rgba(255,213,79,.2);color:#FFD54F;
     padding:2px 10px;border-radius:999px;font-weight:900}
 
-  .admin-task-row{display:flex;align-items:center;gap:10px;padding:10px 12px;
-    background:rgba(255,255,255,.05);border-radius:12px;margin-bottom:6px;
-    transition:all .15s;cursor:pointer}
+  .admin-task-row{display:flex;align-items:center;gap:8px;padding:5px 10px;
+    background:rgba(255,255,255,.05);border-radius:10px;margin-bottom:4px;
+    transition:all .15s;cursor:pointer;line-height:1.2}
   .admin-task-row:hover{background:rgba(255,255,255,.1)}
-  .admin-task-row .at-check{width:22px;height:22px;border-radius:6px;border:2px solid rgba(255,255,255,.3);
+  .admin-task-row .at-check{width:20px;height:20px;border-radius:6px;border:2px solid rgba(255,255,255,.3);
     background:transparent;display:grid;place-items:center;flex:none;
     font-size:14px;color:transparent;cursor:pointer;transition:all .2s}
   .admin-task-row .at-check.done{background:#43A047;border-color:#43A047;color:#fff}
-  .admin-task-row .at-text{flex:1;font-size:14px;font-weight:800;color:#E0E8F0;
+  .admin-task-row .at-text{flex:1;font-size:13.5px;font-weight:800;color:#E0E8F0;line-height:1.2;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .admin-task-row .at-text.done{text-decoration:line-through;color:#6a8a6a}
   .admin-task-row .at-meta{font-size:12px;font-weight:700;color:#7a9aaa;white-space:nowrap}
@@ -756,6 +758,12 @@
     color:#8aa8c8;cursor:pointer}
   .admin-add-row textarea.aa-text{flex:1 1 100%;width:100%;min-height:76px;
     resize:vertical;line-height:1.6;font-size:14.5px;font-family:inherit}
+  .admin-add-row.custom-add-row{flex-wrap:nowrap}
+  .admin-add-row.custom-add-row textarea.aa-text{flex:1 1 auto;width:auto;min-width:0;min-height:46px;
+    line-height:1.4;font-size:14px;resize:none}
+  .admin-add-row.custom-add-row .aa-num{width:52px;flex:none;padding-left:4px;padding-right:4px}
+  .admin-add-row.custom-add-row .aa-unit{font-size:11.5px;flex:none}
+  .admin-add-row.custom-add-row .aa-btn{padding:10px 12px;flex:none;font-size:13.5px}
   #adminSunReason{flex:0 0 auto;width:126px;min-width:0}
   #adminSunAmount{width:96px;flex:none;font-size:17.5px;font-weight:900;
     text-align:center;padding:10px 6px;letter-spacing:.5px}
@@ -930,7 +938,7 @@
   }
   .task-card.done .custom-task-text{color:#9aad9a}
 
-  .admin-section.collapsed{padding-bottom:8px}
+  .admin-section.collapsed{padding-top:6px;padding-bottom:6px;margin-bottom:10px}
   .admin-section>h3{cursor:pointer;user-select:none}
   .admin-section>h3::after{content:'⌃';margin-left:auto;color:#7a9aaa;font-size:15px}
   .admin-section.collapsed>h3::after{content:'⌄'}
@@ -1441,7 +1449,7 @@
       </div>
       <div class="aa-hint" id="quickAddHint">每行独立设置内容、分钟和金币；＋增加一行，－删除最后一行。设置自动保存。</div>
       <div class="admin-sub-label">🧩 添加自定义作业（支持换行）</div>
-      <div class="admin-add-row">
+      <div class="admin-add-row custom-add-row">
         <textarea class="aa-text" id="adminAddChineseText" rows="3" placeholder="作业内容（可换行）"></textarea>
         <input class="aa-num" id="adminAddChineseMin" type="number" value="10" min="1" max="120">
         <span class="aa-unit">分钟</span>
@@ -1458,7 +1466,7 @@
       <h3>🔢 数学作业 <span class="badge" id="adminMathBadge">0</span></h3>
       <div id="adminMathList"></div>
       <div class="admin-sub-label">➗ 添加数学作业（支持换行）</div>
-      <div class="admin-add-row">
+      <div class="admin-add-row custom-add-row">
         <textarea class="aa-text" id="adminAddMathText" rows="3" placeholder="作业内容（可换行）"></textarea>
         <input class="aa-num" id="adminAddMathMin" type="number" value="10" min="1" max="120">
         <span class="aa-unit">分钟</span>
@@ -1475,7 +1483,7 @@
       <h3>🔤 英语作业 <span class="badge" id="adminEnglishBadge">0</span></h3>
       <div id="adminEnglishList"></div>
       <div class="admin-sub-label">🔤 添加英语作业（支持换行）</div>
-      <div class="admin-add-row">
+      <div class="admin-add-row custom-add-row">
         <textarea class="aa-text" id="adminAddEnglishText" rows="3" placeholder="作业内容（可换行）"></textarea>
         <input class="aa-num" id="adminAddEnglishMin" type="number" value="10" min="1" max="120">
         <span class="aa-unit">分钟</span>
@@ -2329,7 +2337,22 @@ function loadLocalState(){
 }
 function attachSubjectsProxy(s){
   Object.defineProperty(s, 'subjects', {
-    get(){ if(!s.days[s.date]) s.days[s.date] = makeDay(); return s.days[s.date]; },
+    get(){
+      if(!s.days[s.date]) s.days[s.date] = makeDay();
+      let ref = s.date;
+      if(s.syncDays && s.syncDays[ref]){
+        let cur = ref, g = 0; const seen = {};
+        while(s.syncDays[cur] && g < 400){
+          if(seen[cur]) break; seen[cur] = 1;
+          const d = new Date(cur + 'T00:00:00'); d.setDate(d.getDate() - 1);
+          cur = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+          g++;
+        }
+        ref = cur;
+      }
+      if(!s.days[ref]) s.days[ref] = makeDay();
+      return s.days[ref];
+    },
     configurable: true, enumerable: false
   });
   return s;
@@ -2382,6 +2405,20 @@ function cloneTaskForNewDay(t, syncKey){
   nt.done = !!t.done;
   delete nt.photos;
   return nt;
+}
+function getSyncAnchor(dateStr){
+  if(!state.syncDays || !state.syncDays[dateStr]) return dateStr;
+  let cur = dateStr, g = 0; const seen = {};
+  while(state.syncDays[cur] && g < 400){
+    if(seen[cur]) break; seen[cur] = 1;
+    const d = new Date(cur + 'T00:00:00'); d.setDate(d.getDate() - 1);
+    cur = fmtDate(d); g++;
+  }
+  return cur;
+}
+function getEffectiveDay(dateStr){
+  const a = getSyncAnchor(dateStr);
+  return state.days[a] || makeDay();
 }
 
 /* ===== 长按日历日期按钮：手动同步前一天作业（仅家长管理模式触发）===== */
@@ -4981,6 +5018,19 @@ function renderCalendar(){
   const today = todayStr();
   const totalCells0 = startWeek + daysInMonth;
   const remain = (7 - totalCells0 % 7) % 7;
+  // ★ 计算同步分组：任务相同的几天（链头 + 其同步成员）用同色边框框起来
+  const syncGroups = {};
+  if(state.syncDays){
+    Object.keys(state.syncDays).forEach(dd => {
+      if(state.syncDays[dd]){ const a = getSyncAnchor(dd); if(a !== dd) syncGroups[a] = true; }
+    });
+  }
+  const grpColor = {};
+  const grpPalette = ['#7C4DFF','#0288D1','#D81B60','#00897B','#F4511E','#5E35B1','#2E7D32','#C2185B'];
+  function grpColorFor(a){
+    if(grpColor[a] == null) grpColor[a] = grpPalette[Object.keys(grpColor).length % grpPalette.length];
+    return grpColor[a];
+  }
   // 上月补格（使 1 号对齐到正确的星期列，可点选）
   for(let i = prevMonthDays - startWeek + 1; i <= prevMonthDays; i++){
     const cell = document.createElement('div');
@@ -4997,7 +5047,10 @@ function renderCalendar(){
     if(dateStr === today) cell.classList.add('today');
     if(dateStr === state.date) cell.classList.add('selected');
     if(state.syncDays && state.syncDays[dateStr]) cell.classList.add('sync-on');
-    const day = state.days[dateStr];
+    let anchorOf = dateStr;
+    if(state.syncDays && state.syncDays[dateStr]) anchorOf = getSyncAnchor(dateStr);
+    if(syncGroups[anchorOf]){ cell.classList.add('sync-group'); cell.style.setProperty('--grp', grpColorFor(anchorOf)); }
+    const day = (state.syncDays && state.syncDays[dateStr]) ? state.days[getSyncAnchor(dateStr)] : state.days[dateStr];
     if(day){
       const all = [...(day.chinese||[]), ...(day.math||[]), ...(day.english||[])];
       if(all.length > 0){
@@ -5114,21 +5167,28 @@ attachCalLongPress($('adminCalDay'), false);
 
 /* ===== 长按日历某一天 1 秒：切换该天"同步/不同步"前一天实时任务及完成状态 ===== */
 function toggleSyncPrevDay(targetDate){
+  // 同步功能仅在家长端日历可用
+  if(!isAdminMode){ toast('🔒 同步功能仅家长端可用', 2200); return; }
   if(!state.syncDays) state.syncDays = {};
-  const d = new Date(targetDate + 'T00:00:00'); d.setDate(d.getDate() - 1);
-  const srcDate = fmtDate(d);
   if(state.syncDays[targetDate]){
+    // 取消同步：同步的任务同步删除，该天转为独立的空白日期
     delete state.syncDays[targetDate];
+    state.days[targetDate] = makeDay();
+    if(state.date === targetDate){ renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn(); }
+    invalidateLinkedIndex();
     saveLocalState(); uploadToCloud();
     renderCalendar();
-    toast('🔓 已取消同步：' + mdLabel(targetDate) + ' 不再同步前一天实时任务', 2600);
+    toast('🔓 已取消同步：' + mdLabel(targetDate) + ' 的同步任务已删除，转为独立日期', 3000);
   } else {
-    if(!dayHasTasks(srcDate)){ toast('前一天（' + mdLabel(srcDate) + '）暂无可同步任务', 2600); return; }
+    // 开启实时同步（可提前设置，即使当天任务为空）：该天与链头共用同一批任务
     state.syncDays[targetDate] = true;
-    writeSyncTasks(targetDate, srcDate, 'override');
+    const anchor = getSyncAnchor(targetDate);
+    state.days[targetDate] = makeDay();
+    if(state.date === targetDate){ renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn(); if(isAdminMode) renderAdminPanel(); }
+    invalidateLinkedIndex();
     saveLocalState(); uploadToCloud();
     renderCalendar();
-    toast('🔄 已开启同步：' + mdLabel(targetDate) + ' 已同步前一天实时任务及完成状态', 2800);
+    toast('🔄 已开启实时同步：' + mdLabel(targetDate) + ' 与 ' + mdLabel(anchor) + ' 共用同一批任务（实时，含完成状态）', 3200);
   }
 }
 
