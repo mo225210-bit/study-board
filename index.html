@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="学习打卡台">
-<title>学习打卡台10161838</title>
+<title>学习打卡台10163000</title>
 <link rel="manifest" href="manifest.json">
 <script src="hanzi-data.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5.0/dist/hanzi-writer.min.js"></script>
@@ -4967,7 +4967,9 @@ calModal.addEventListener('click', e => {
 function openCalendar(){
   const d = new Date(state.date + 'T00:00:00');
   calYear = d.getFullYear(); calMonth = d.getMonth();
-  renderCalendar(); calModal.classList.add('show');
+  try{ renderCalendar(); }
+  catch(err){ console.error('日历渲染异常:', err); }
+  calModal.classList.add('show');
 }
 function renderCalendar(){
   calTitle.textContent = `${calYear}年${calMonth+1}月`;
@@ -4977,14 +4979,15 @@ function renderCalendar(){
   const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
   const prevMonthDays = new Date(calYear, calMonth, 0).getDate();
   const today = todayStr();
-// 后月补格
-  for(let i = 1; i <= remain; i++){
+  const totalCells0 = startWeek + daysInMonth;
+  const remain = (7 - totalCells0 % 7) % 7;
+  // 上月补格（使 1 号对齐到正确的星期列，可点选）
+  for(let i = prevMonthDays - startWeek + 1; i <= prevMonthDays; i++){
     const cell = document.createElement('div');
-    cell.className = 'cal-day other-month';
-    cell.textContent = i;
-    const d = new Date(calYear, calMonth + 1, i);
-    const ds = fmtDate(d);
-    cell.addEventListener('click', () => { switchDate(ds); calModal.classList.remove('show'); });
+    cell.className = 'cal-day other-month'; cell.textContent = i;
+    const pd = new Date(calYear, calMonth - 1, i);
+    const ps = fmtDate(pd);
+    attachDayLongPress(cell, ps);
     calGrid.appendChild(cell);
   }
   for(let d = 1; d <= daysInMonth; d++){
@@ -5007,11 +5010,13 @@ function renderCalendar(){
     attachDayLongPress(cell, dateStr);
     calGrid.appendChild(cell);
   }
-  const totalCells = startWeek + daysInMonth;
-  const remain = (7 - totalCells % 7) % 7;
+  // 后月补格（可点选，不显示任务标记）
   for(let i = 1; i <= remain; i++){
     const cell = document.createElement('div');
     cell.className = 'cal-day other-month'; cell.textContent = i;
+    const nd = new Date(calYear, calMonth + 1, i);
+    const ns = fmtDate(nd);
+    attachDayLongPress(cell, ns);
     calGrid.appendChild(cell);
   }
 }
@@ -5156,6 +5161,7 @@ function attachDayLongPress(cell, dateStr){
     if(fired){ e.preventDefault(); e.stopImmediatePropagation(); fired = false; return; }
     switchDate(dateStr); calModal.classList.remove('show');
   });
+  cell.style.cursor = 'pointer';
 }
 
 /* ============================================================
