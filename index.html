@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="学习打卡台">
-<title>学习打卡台10161913</title>
+<title>学习打卡台10163000</title>
 <link rel="manifest" href="manifest.json">
 <script src="hanzi-data.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5.0/dist/hanzi-writer.min.js"></script>
@@ -1055,6 +1055,64 @@
   @media (max-width:700px){
     .dict-entry-list{grid-template-columns:1fr}
   }
+
+  /* ===== 修订：家长端 语文/数学/英语 类目行距紧凑 ===== */
+  #adminPanelChinese h3, #adminPanelMath h3, #adminPanelEnglish h3{margin-bottom:7px}
+  #adminPanelChinese .admin-task-row, #adminPanelMath .admin-task-row, #adminPanelEnglish .admin-task-row{
+    padding:3px 8px;margin-bottom:2px;line-height:1.15}
+  #adminPanelChinese .admin-sub-label, #adminPanelMath .admin-sub-label, #adminPanelEnglish .admin-sub-label{
+    margin:7px 0 3px;font-size:12.5px}
+  #adminPanelChinese .admin-sub-label:first-of-type, #adminPanelMath .admin-sub-label:first-of-type,
+  #adminPanelEnglish .admin-sub-label:first-of-type{margin-top:4px}
+  #adminPanelChinese .admin-add-row, #adminPanelMath .admin-add-row, #adminPanelEnglish .admin-add-row{margin-top:4px}
+  #adminPanelChinese .admin-add-row input, #adminPanelMath .admin-add-row input, #adminPanelEnglish .admin-add-row input,
+  #adminPanelChinese .admin-add-row select, #adminPanelMath .admin-add-row select, #adminPanelEnglish .admin-add-row select,
+  #adminPanelChinese .admin-add-row textarea, #adminPanelMath .admin-add-row textarea, #adminPanelEnglish .admin-add-row textarea{
+    padding:6px 9px;font-size:13.5px}
+  #adminPanelChinese .admin-add-row .aa-btn, #adminPanelMath .admin-add-row .aa-btn, #adminPanelEnglish .admin-add-row .aa-btn{
+    padding:6px 12px;font-size:13px}
+  #adminPanelChinese .admin-add-row textarea.aa-text, #adminPanelMath .admin-add-row textarea.aa-text,
+  #adminPanelEnglish .admin-add-row textarea.aa-text{min-height:52px;line-height:1.4}
+  #adminPanelChinese .aa-hint, #adminPanelMath .aa-hint, #adminPanelEnglish .aa-hint{
+    font-size:11.5px;line-height:1.5;margin:3px 2px 6px}
+  #adminPanelChinese .admin-empty, #adminPanelMath .admin-empty, #adminPanelEnglish .admin-empty{padding:10px}
+
+  /* ===== 修订：兑换管理 项目两列 ===== */
+  #adminShopList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  #adminShopList > .admin-empty{grid-column:1 / -1}
+  #adminShopList .shop-admin-row{margin-bottom:0;gap:4px;padding:5px 6px}
+  #adminShopList .sa-handle{font-size:13px;padding:0 1px}
+  #adminShopList .sa-icon{width:34px;font-size:16px;padding:5px 1px}
+  #adminShopList .sa-name{font-size:13px;min-width:0}
+  #adminShopList .sa-min{width:46px;padding:5px 1px;font-size:12.5px}
+  #adminShopList .sa-sun{width:50px;padding:5px 1px;font-size:12.5px}
+  #adminShopList .sa-del{width:26px;height:26px;font-size:12px}
+  @media (max-width: 640px){
+    #adminShopList{grid-template-columns:1fr}
+  }
+
+  /* ===== 修订：学生端页面更紧凑 ===== */
+  .app.home-compact{gap:5px;padding:4px 6px}
+  .home-compact .topbar{gap:6px}
+  .home-compact .brand{gap:6px}
+  .home-compact .brand-sub{margin-top:0;font-size:11px}
+  .home-compact .stats{gap:5px}
+  .home-compact .pill{font-size:13px;padding:2px 8px}
+  .home-compact .timer-pair{gap:5px;margin-bottom:1px}
+  .home-compact .timer-card{padding:5px 7px}
+  .home-compact .timer-hint{margin-top:2px}
+  .home-compact .eye-card{padding:5px 7px;gap:4px}
+  .home-compact .subject-tabs{margin-top:1px}
+  .home-compact .subject-tab{padding:5px 3px;font-size:13px}
+  .home-compact .subject-tab .tab-count{font-size:11px;padding:0 5px}
+  .home-compact .subject-col{padding:4px}
+  .home-compact .col-head{padding:1px 3px;margin-bottom:3px}
+  .home-compact .card-list{gap:3px;min-height:44px}
+  .home-compact .task-card{padding:5px 7px 4px}
+  .home-compact .task-info{margin-top:4px;gap:6px}
+  .home-compact .card-list.shop-grid{gap:6px}
+  .home-compact .char-grid{gap:5px}
+  .home-compact .timer-hint{font-size:11px;min-height:11px;line-height:1.35}
 </style>
 </head>
 
@@ -1191,7 +1249,7 @@
       <div class="cal-title" id="calTitle">2026年9月</div>
       <button id="calNext">▶</button>
     </div>
-    <div class="cal-week"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div>
+    <div class="cal-week"><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div></div>
     <div class="cal-grid" id="calGrid"></div>
     <div class="cal-actions">
       <button class="btn-ghost" id="calTodayBtn">📌 回到今天</button>
@@ -1408,7 +1466,7 @@
     </div>
 
     <div class="admin-section" id="adminPanelChinese">
-      <h3>📖 语文作业 <span class="badge" id="adminChineseBadge">0</span><button type="button" class="aa-btn" id="uploadChinesePaperBtn" title="上传并永久保存作业纸" style="margin-left:auto;padding:5px 10px">📄 上传作业纸</button><input type="file" id="chinesePaperInput" accept="image/*,.pdf,application/pdf" style="display:none"></h3>
+      <h3>📖 语文作业 <span class="badge" id="adminChineseBadge">0</span><button type="button" class="aa-btn" id="uploadChinesePaperBtn" title="上传并永久保存作业纸" aria-label="上传作业纸" style="margin-left:auto;order:9;width:32px;height:32px;padding:0;display:grid;place-items:center;font-size:17px;line-height:1;border-radius:9px">📄</button><input type="file" id="chinesePaperInput" accept="image/*,.pdf,application/pdf" style="display:none"></h3>
       <p style="font-size:12.5px;color:#5a7a8a;font-weight:700;margin-bottom:8px">💡 双击作业条目可重新编辑</p>
       <div id="adminChineseList"></div>
       <div class="admin-sub-label">➕ 添加预习生字</div>
@@ -1497,7 +1555,7 @@
     </div>
 
     <div class="admin-section collapsed" id="adminPanelShop">
-      <h3>🎁 兑换项目管理 <span class="badge" id="adminShopBadge">0 项</span></h3>
+      <h3>🎁 兑换管理 <span class="badge" id="adminShopBadge">0 项</span></h3>
       <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
         孩子点「兑换」时会按这里的设置扣/加金币，并自动生成 1 张兑换券。<br>
         <b style="color:#FFD54F">金币填负数 = 扣除（消耗金币）；填正数 = 增加（奖励金币）。</b><br>
@@ -1534,15 +1592,6 @@
       <div class="sun-log" id="adminSunLog"></div>
     </div>
 
-    <div class="admin-section collapsed" id="adminPanelProgress">
-      <h3>📊 进度总览 <span class="badge" id="adminTodayBadge"></span></h3>
-      <div class="admin-stats">
-        <div class="admin-stat-card"><div class="asc-num" id="adminStatSun">0</div><div class="asc-label">💰 当前金币（个）</div></div>
-        <div class="admin-stat-card"><div class="asc-num" id="adminStatDone">0/0</div><div class="asc-label">✅ 已完成作业</div></div>
-        <div class="admin-stat-card"><div class="asc-num" id="adminStatStreak">0</div><div class="asc-label">🔥 连续打卡天数</div></div>
-      </div>
-    </div>
-
     <div class="admin-section collapsed" id="adminPanelEye">
       <h3>👁️ 护眼提醒</h3>
       <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
@@ -1565,7 +1614,7 @@
     </div>
 
     <div class="admin-section collapsed" id="adminPanelLibrary">
-      <h3>📚 课文生字 / 组词 / 词语库 <span class="badge" id="adminLibBadge">0 条</span></h3>
+      <h3>📚 课文字词库 <span class="badge" id="adminLibBadge">0 条</span></h3>
       <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
         <b style="color:#FFD54F">双击条目可重新编辑。</b><br>
         田字格修改/删除后，原文会自动保存为「会写字-旧」「会识字-旧」「抄写词语-旧」，新内容保存在「会写字」等字段。
@@ -3078,7 +3127,7 @@ function getEditableStateForCompare(){
     lastNightReset: state.lastNightReset || '', eyeSoundOffDate: state.eyeSoundOffDate || ''
   });
 }
-const HISTORY_MAX = 20;
+const HISTORY_MAX = 100;
 function stripPhotosFromDays(days){
   const out = {};
   Object.keys(days || {}).forEach(d => {
@@ -5012,7 +5061,7 @@ function renderCalendar(){
   calTitle.textContent = `${calYear}年${calMonth+1}月`;
   calGrid.innerHTML = '';
   const firstDay = new Date(calYear, calMonth, 1);
-  const startWeek = firstDay.getDay();
+  const startWeek = (firstDay.getDay() + 6) % 7;
   const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
   const prevMonthDays = new Date(calYear, calMonth, 0).getDate();
   const today = todayStr();
@@ -5475,10 +5524,11 @@ function renderAdminPanel(){
   if(!isAdminMode) return;
   const all = allTasks();
   const doneCount = all.filter(t => t.done).length;
-  $('adminStatSun').textContent = state.sun;
-  $('adminStatDone').textContent = doneCount + '/' + all.length;
-  $('adminStatStreak').textContent = calcStreak();
-  $('adminTodayBadge').textContent = state.date;
+  const setStatTxt = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  setStatTxt('adminStatSun', state.sun);
+  setStatTxt('adminStatDone', doneCount + '/' + all.length);
+  setStatTxt('adminStatStreak', calcStreak());
+  setStatTxt('adminTodayBadge', state.date);
   $('adminSyncStatus').textContent = '☁️ 已连接云端';
   updateAdminCalendarDate();
   const st = state.settings || DEFAULT_SETTINGS;
@@ -5975,7 +6025,7 @@ function rememberText(key, value){
 function applyAdminPanelStates(){
   const pc = state.settings.panelCollapsed || DEFAULT_SETTINGS.panelCollapsed;
   const map = {
-    adminPanelProgress: pc.progress, adminPanelSun: pc.sun, adminPanelDate: pc.date,
+    adminPanelSun: pc.sun, adminPanelDate: pc.date,
     adminPanelLibrary: pc.library, adminPanelSync: pc.sync, adminPanelPassword: pc.password,
     adminPanelEye: pc.eye, adminPanelMath: pc.math, adminPanelEnglish: pc.english,
     adminPanelShop: pc.shop, adminPanelTimetable: pc.timetable, adminPanelFont: pc.font
@@ -5986,7 +6036,7 @@ function applyAdminPanelStates(){
 }
 function setupAdminPanelToggles(){
   const map = {
-    adminPanelProgress:'progress', adminPanelSun:'sun', adminPanelDate:'date',
+    adminPanelSun:'sun', adminPanelDate:'date',
     adminPanelMath:'math', adminPanelEnglish:'english',
     adminPanelLibrary:'library', adminPanelSync:'sync',
     adminPanelPassword:'password', adminPanelEye:'eye', adminPanelShop:'shop',
