@@ -1889,23 +1889,6 @@ const DEFAULT_LIVE = {
   tab:'chinese', updatedAt:0
 };
 
-const DEFAULT_DATA = {
-  chinese:[
-    {text:'抄写第3课生字',minutes:10,sun:30},
-    {text:'背诵《静夜思》',minutes:15,sun:45},
-    {text:'朗读课文3遍',minutes:5,sun:15},
-    {text:'课外阅读20分钟',minutes:20,sun:60}
-  ],
-  math:[
-    {text:'口算练习30题',minutes:10,sun:30},
-    {text:'数学书第15页',minutes:15,sun:45},
-    {text:'订正昨天错题',minutes:10,sun:30}
-  ],
-  english:[
-    {text:'英语单词朗读20分钟',minutes:10,sun:30},
-    {text:'抄写英语单词',minutes:15,sun:45}
-  ]
-};
 
 /* ============================================================
    字体设置（家长端可分类设置字号；字体统一为楷体）
@@ -2390,12 +2373,15 @@ function loadLocalState(){
       lastNightReset: '', eyeSoundOffDate: '',
       live: JSON.parse(JSON.stringify(DEFAULT_LIVE))
     };
-    s.days[todayStr()] = normalizeDay(DEFAULT_DATA);
+    s.days[todayStr()] = makeDay();
   }
   const newDays = {};
   Object.keys(s.days).forEach(k => { newDays[k] = normalizeDay(s.days[k]); });
   s.days = newDays;
   if(!s.days[s.date]) s.days[s.date] = makeDay();
+  if(!s.syncDays || typeof s.syncDays !== 'object' || Array.isArray(s.syncDays)) s.syncDays = {};
+  if(!s.papersByDate || typeof s.papersByDate !== 'object' || Array.isArray(s.papersByDate)) s.papersByDate = {};
+  if(s.chinesePaper && s.chinesePaper.data && !s.papersByDate[s.date]) s.papersByDate[s.date] = s.chinesePaper;
   if(!Array.isArray(s.checkins)) s.checkins = [];
   if(!Array.isArray(s.sunLog)) s.sunLog = [];
   if(typeof s.sun !== 'number') s.sun = 0;
@@ -3159,6 +3145,7 @@ async function uploadToCloud(force){
   if(!getSyncEnabled() || cloudSyncCleared) return false;
   const payload = {
     days: state.days, date: state.date, settings: state.settings,
+    syncDays: state.syncDays || {}, papersByDate: state.papersByDate || {},
     sun: state.sun, checkins: state.checkins,
     sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
     lessonLibrary: state.lessonLibrary, lessonLibOrder: Array.isArray(state.lessonLibOrder) ? state.lessonLibOrder : [],
@@ -3184,6 +3171,7 @@ let adminEntrySnapshot = null;
 function getEditableStateForCompare(){
   return JSON.stringify({
     days: state.days, date: state.date, settings: state.settings,
+    syncDays: state.syncDays || {}, papersByDate: state.papersByDate || {},
     sun: state.sun, checkins: state.checkins, sunLog: state.sunLog,
     lessonLibrary: state.lessonLibrary, lessonLibOrder: Array.isArray(state.lessonLibOrder) ? state.lessonLibOrder : [],
     parentPassword: state.parentPassword, chinesePaper: state.chinesePaper || null,
@@ -3212,6 +3200,7 @@ function makeHistorySnapshot(reason){
     savedAt: Date.now(), reason: reason || '数据修改',
     data: {
       days: stripPhotosFromDays(state.days), date: state.date,
+      syncDays: JSON.parse(JSON.stringify(state.syncDays || {})), papersByDate: JSON.parse(JSON.stringify(state.papersByDate || {})),
       settings: JSON.parse(JSON.stringify(state.settings)), sun: state.sun,
       checkins: JSON.parse(JSON.stringify(state.checkins || [])),
       sunLog: JSON.parse(JSON.stringify(state.sunLog || [])),
@@ -3271,6 +3260,8 @@ function applyRemoteState(remote){
   invalidateLinkedIndex();
   if(!state.days[state.date]) state.days[state.date] = makeDay();
   if(remote.settings) state.settings = normalizeSettings(remote.settings);
+  if(remote.syncDays && typeof remote.syncDays === 'object') state.syncDays = remote.syncDays;
+  if(remote.papersByDate && typeof remote.papersByDate === 'object') state.papersByDate = remote.papersByDate;
   if(typeof remote.sun === 'number') state.sun = remote.sun;
   if(Array.isArray(remote.checkins)) state.checkins = remote.checkins;
   if(Array.isArray(remote.sunLog)) state.sunLog = remote.sunLog.slice(0, 60);
@@ -3278,6 +3269,10 @@ function applyRemoteState(remote){
   if(Array.isArray(remote.lessonLibOrder)) state.lessonLibOrder = remote.lessonLibOrder.map(String).slice(0,400);
   else state.lessonLibOrder = [];
   if('chinesePaper' in remote) state.chinesePaper = remote.chinesePaper || null;
+  if(!(remote.papersByDate && typeof remote.papersByDate === 'object') && remote.chinesePaper && remote.chinesePaper.data && state.date && !(state.papersByDate || {})[state.date]){
+    if(!state.papersByDate) state.papersByDate = {};
+    state.papersByDate[state.date] = remote.chinesePaper;
+  }
   if(remote.wordBank) state.wordBank = normalizeWordBank(remote.wordBank);
   if(remote.charPages && typeof remote.charPages === 'object') state.charPages = remote.charPages;
   if('timetable' in remote) state.timetable = normalizeTimetable(remote.timetable);
@@ -3831,6 +3826,53 @@ function renderSubjectCards(subject, listEl){
       redoBtn.disabled = !canRedoMizi(task.id);
       redoBtn.addEventListener('click', e => { e.stopPropagation(); redoMizi(task.id); });
       actions.appendChild(redoBtn);
+    }
+
+    // 学生端可直接切换这三类字词作业对应的课文；控件放在拍照按钮左侧
+    if(['preview','wordgroup','copy'].includes(task.type)){
+      const lessonSel = document.createElement('select');
+      lessonSel.className = 'student-lesson-pick';
+      lessonSel.title = '点击更改课文';
+      lessonSel.setAttribute('aria-label','更改课文');
+      lessonSel.style.cssText = 'max-width:96px;min-width:64px;height:34px;align-self:center;border:1px solid #b7d9b0;border-radius:9px;background:#f4fbf1;color:#2e7d32;font:700 12px inherit;padding:0 3px;';
+      const placeholder = document.createElement('option');
+      placeholder.value = ''; placeholder.textContent = task.lessonName || '课文';
+      lessonSel.appendChild(placeholder);
+      const lessonNames = (typeof libKeys === 'function' ? libKeys() : Object.keys(state.lessonLibrary || {}));
+      lessonNames.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name; opt.textContent = name;
+        lessonSel.appendChild(opt);
+      });
+      lessonSel.value = '';
+      lessonSel.addEventListener('click', e => e.stopPropagation());
+      lessonSel.addEventListener('change', e => {
+        e.stopPropagation();
+        const name = lessonSel.value;
+        const entry = (state.lessonLibrary || {})[name];
+        if(!name || !entry) return;
+        let items = [];
+        if(task.type === 'preview') items = [...new Set(parseChars(String(entry.chars || '')))].slice(0,60);
+        else if(task.type === 'wordgroup') items = [...new Set(parseChars(String(entry.chars || '')))].slice(0,60);
+        else items = parseWords(String(entry.words || '')).slice(0,60);
+        if(!items.length){ toast('该课文没有对应的字词内容'); lessonSel.value=''; return; }
+        task.lessonName = name;
+        if(task.type === 'preview'){
+          task.chars = items; task.text = '预习生字（' + items.length + '字）';
+        }else if(task.type === 'wordgroup'){
+          task.words = items; task.text = '抄写并组词（' + items.length + '字）';
+        }else{
+          task.words = items; task.text = '抄写词语（' + items.length + '组）';
+        }
+        const cfg = getUnitCfg(task.type);
+        task.minutes = clamp(Math.round(items.length * cfg.min), 1, 120);
+        task.sun = clamp(Math.round(items.length * cfg.sun), 1, 500);
+        saveLocalState(); uploadToCloud();
+        renderBoard(); refreshAllCards(); updateDogBar(); updateMainBtn();
+        if(isAdminMode) renderAdminPanel();
+        toast('已切换到「' + escapeHtml(name) + '」');
+      });
+      actions.appendChild(lessonSel);
     }
 
     const camBtn = document.createElement('button');
@@ -4989,20 +5031,28 @@ if(chineseTabButton){
   chineseTabButton.addEventListener('mousedown', startPaperPress); chineseTabButton.addEventListener('mouseup', cancelPaperPress); chineseTabButton.addEventListener('mouseleave', cancelPaperPress);
   chineseTabButton.addEventListener('click', e => { if(paperPressFired){ e.preventDefault(); e.stopImmediatePropagation(); paperPressFired=false; } }, true);
 }
+function getChinesePaperForDate(dateStr){ return (state && state.papersByDate && state.papersByDate[dateStr]) || null; }
 function openChinesePaperPreview(){
-  const paper = state && state.chinesePaper;
+  const paper = getChinesePaperForDate(state.date);
   if(!paper || !paper.data){ toast('还没有上传语文作业纸'); return; }
   const box = $('paperPreviewContent'); box.innerHTML = '';
   if(paper.type === 'application/pdf' || paper.data.startsWith('data:application/pdf')){
     const link = document.createElement('a'); link.href = paper.data; link.target='_blank'; link.rel='noopener'; link.textContent='打开作业纸 PDF'; box.appendChild(link);
     const note=document.createElement('p'); note.textContent='PDF 将在新页面打开，可使用浏览器打印。'; box.appendChild(note);
   } else { const img=document.createElement('img'); img.src=paper.data; img.alt='语文作业纸'; img.style.cssText='display:block;width:50%;height:auto;object-fit:contain;object-position:top left;margin:0 auto 0 0;'; box.appendChild(img); }
+  const title = $('paperPreviewModal').querySelector('h3'); if(title) title.textContent = '📄 语文作业纸（' + state.date + '）';
   $('paperPreviewModal').classList.add('show');
 }
 $('paperPreviewClose').addEventListener('click', () => $('paperPreviewModal').classList.remove('show'));
 $('paperPrintBtn').addEventListener('click', () => {
-  const paper=state && state.chinesePaper; if(!paper || !paper.data) return;
-  if(paper.type === 'application/pdf' || paper.data.startsWith('data:application/pdf')){ const w=window.open(paper.data,'_blank'); if(w) setTimeout(()=>{try{w.focus();w.print()}catch(e){}},500); return; }
+  const printDate = state.date;
+  const paper=getChinesePaperForDate(printDate); if(!paper || !paper.data) return;
+  if(paper.type === 'application/pdf' || paper.data.startsWith('data:application/pdf')){
+    const w=window.open(paper.data,'_blank');
+    if(w) setTimeout(()=>{try{w.focus();w.print();}catch(e){}},500);
+    $('paperPreviewModal').classList.remove('show');
+    return;
+  }
   let frame=document.getElementById('paperPrintFrame'); if(frame) frame.remove();
   frame=document.createElement('iframe'); frame.id='paperPrintFrame'; frame.style.cssText='position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0';
   let printed=false;
