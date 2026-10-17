@@ -1123,9 +1123,14 @@
   #adminGoToday,.admin-header .admin-close,.admin-header-date .aa-btn{height:36px;padding:0 14px;
     border-radius:10px;font-size:13px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
 
-  /* ===== 修订：预习生字下「偏旁 / 笔画 / 页码」字号加大 ===== */
-  .char-info{font-size:15.5px}
-  @media (max-width:500px){.char-info{font-size:14px}}
+  /* 预习生字元信息：字号更大、行距加宽，降低误触 */
+  .char-card .char-info{font-size:16px;line-height:1.7;margin-top:7px;margin-bottom:7px;min-height:29px;
+    display:flex;align-items:center;justify-content:center;gap:5px;padding:2px 0;touch-action:manipulation}
+  .char-card .char-info.char-stroke,.char-card .char-info.char-page{padding:4px 0;min-height:34px}
+  .student-lesson-pick{width:clamp(128px,34vw,176px);min-width:128px;max-width:176px;height:36px;flex:none;
+    align-self:center;border:1px solid #b7d9b0;border-radius:9px;background:#f4fbf1;color:#2e7d32;
+    font:700 14px/1.2 sans-serif;font-family:inherit;padding:0 7px;}
+  @media (max-width:500px){.char-card .char-info{font-size:15.5px;margin-top:8px;margin-bottom:8px;min-height:31px}}
 
   /* ===== 新增：作业内容中的（ ）填空输入框 ===== */
   .blank-input{display:inline-block;width:64px;max-width:100%;height:1.7em;margin:0 3px;padding:0 6px;
@@ -2380,8 +2385,9 @@ function loadLocalState(){
   s.days = newDays;
   if(!s.days[s.date]) s.days[s.date] = makeDay();
   if(!s.syncDays || typeof s.syncDays !== 'object' || Array.isArray(s.syncDays)) s.syncDays = {};
-  if(!s.papersByDate || typeof s.papersByDate !== 'object' || Array.isArray(s.papersByDate)) s.papersByDate = {};
-  if(s.chinesePaper && s.chinesePaper.data && !s.papersByDate[s.date]) s.papersByDate[s.date] = s.chinesePaper;
+  // 作业纸只保留最新一份；旧版按日期保存的数据不再继续累积。
+  s.papersByDate = {};
+  if(s.chinesePaper && s.chinesePaper.data && !s.chinesePaper.date) s.chinesePaper.date = s.date || todayStr();
   if(!Array.isArray(s.checkins)) s.checkins = [];
   if(!Array.isArray(s.sunLog)) s.sunLog = [];
   if(typeof s.sun !== 'number') s.sun = 0;
@@ -3200,7 +3206,7 @@ function makeHistorySnapshot(reason){
     savedAt: Date.now(), reason: reason || '数据修改',
     data: {
       days: stripPhotosFromDays(state.days), date: state.date,
-      syncDays: JSON.parse(JSON.stringify(state.syncDays || {})), papersByDate: JSON.parse(JSON.stringify(state.papersByDate || {})),
+      syncDays: JSON.parse(JSON.stringify(state.syncDays || {})), chinesePaper: JSON.parse(JSON.stringify(state.chinesePaper || null)),
       settings: JSON.parse(JSON.stringify(state.settings)), sun: state.sun,
       checkins: JSON.parse(JSON.stringify(state.checkins || [])),
       sunLog: JSON.parse(JSON.stringify(state.sunLog || [])),
@@ -3261,7 +3267,7 @@ function applyRemoteState(remote){
   if(!state.days[state.date]) state.days[state.date] = makeDay();
   if(remote.settings) state.settings = normalizeSettings(remote.settings);
   if(remote.syncDays && typeof remote.syncDays === 'object') state.syncDays = remote.syncDays;
-  if(remote.papersByDate && typeof remote.papersByDate === 'object') state.papersByDate = remote.papersByDate;
+  state.papersByDate = {};
   if(typeof remote.sun === 'number') state.sun = remote.sun;
   if(Array.isArray(remote.checkins)) state.checkins = remote.checkins;
   if(Array.isArray(remote.sunLog)) state.sunLog = remote.sunLog.slice(0, 60);
@@ -3269,10 +3275,7 @@ function applyRemoteState(remote){
   if(Array.isArray(remote.lessonLibOrder)) state.lessonLibOrder = remote.lessonLibOrder.map(String).slice(0,400);
   else state.lessonLibOrder = [];
   if('chinesePaper' in remote) state.chinesePaper = remote.chinesePaper || null;
-  if(!(remote.papersByDate && typeof remote.papersByDate === 'object') && remote.chinesePaper && remote.chinesePaper.data && state.date && !(state.papersByDate || {})[state.date]){
-    if(!state.papersByDate) state.papersByDate = {};
-    state.papersByDate[state.date] = remote.chinesePaper;
-  }
+  if(state.chinesePaper && state.chinesePaper.data && !state.chinesePaper.date) state.chinesePaper.date = remote.date || state.date;
   if(remote.wordBank) state.wordBank = normalizeWordBank(remote.wordBank);
   if(remote.charPages && typeof remote.charPages === 'object') state.charPages = remote.charPages;
   if('timetable' in remote) state.timetable = normalizeTimetable(remote.timetable);
@@ -3832,19 +3835,21 @@ function renderSubjectCards(subject, listEl){
     if(['preview','wordgroup','copy'].includes(task.type)){
       const lessonSel = document.createElement('select');
       lessonSel.className = 'student-lesson-pick';
-      lessonSel.title = '点击更改课文';
+      lessonSel.title = '当前课文：' + (task.lessonName || '未设置') + '；展开后可直接定位并选择其他课文';
       lessonSel.setAttribute('aria-label','更改课文');
-      lessonSel.style.cssText = 'max-width:96px;min-width:64px;height:34px;align-self:center;border:1px solid #b7d9b0;border-radius:9px;background:#f4fbf1;color:#2e7d32;font:700 12px inherit;padding:0 3px;';
-      const placeholder = document.createElement('option');
-      placeholder.value = ''; placeholder.textContent = task.lessonName || '课文';
-      lessonSel.appendChild(placeholder);
       const lessonNames = (typeof libKeys === 'function' ? libKeys() : Object.keys(state.lessonLibrary || {}));
-      lessonNames.forEach(name => {
+      // 当前课文作为已选中项，打开下拉菜单时会自动滚动定位到它。
+      const allNames = lessonNames.slice();
+      if(task.lessonName && !allNames.includes(task.lessonName)) allNames.unshift(task.lessonName);
+      allNames.forEach(name => {
         const opt = document.createElement('option');
         opt.value = name; opt.textContent = name;
+        if(name === task.lessonName) opt.selected = true;
         lessonSel.appendChild(opt);
       });
-      lessonSel.value = '';
+      if(!task.lessonName){
+        const opt = document.createElement('option'); opt.value=''; opt.textContent='选择课文'; opt.selected=true; lessonSel.insertBefore(opt,lessonSel.firstChild);
+      }
       lessonSel.addEventListener('click', e => e.stopPropagation());
       lessonSel.addEventListener('change', e => {
         e.stopPropagation();
@@ -5031,7 +5036,15 @@ if(chineseTabButton){
   chineseTabButton.addEventListener('mousedown', startPaperPress); chineseTabButton.addEventListener('mouseup', cancelPaperPress); chineseTabButton.addEventListener('mouseleave', cancelPaperPress);
   chineseTabButton.addEventListener('click', e => { if(paperPressFired){ e.preventDefault(); e.stopImmediatePropagation(); paperPressFired=false; } }, true);
 }
-function getChinesePaperForDate(dateStr){ return (state && state.papersByDate && state.papersByDate[dateStr]) || null; }
+function getChinesePaperForDate(dateStr){
+  if(!state || !state.chinesePaper || !state.chinesePaper.data) return null;
+  const paper = state.chinesePaper;
+  const paperDate = paper.date || state.date;
+  const requestedAnchor = typeof getSyncAnchor === 'function' ? getSyncAnchor(dateStr) : dateStr;
+  const paperAnchor = typeof getSyncAnchor === 'function' ? getSyncAnchor(paperDate) : paperDate;
+  // 只显示最新一份作业纸；它随作业日期同步关系共享给同组日期。
+  return (paperDate === dateStr || requestedAnchor === paperAnchor) ? paper : null;
+}
 function openChinesePaperPreview(){
   const paper = getChinesePaperForDate(state.date);
   if(!paper || !paper.data){ toast('还没有上传语文作业纸'); return; }
@@ -5082,7 +5095,9 @@ $('chinesePaperInput').addEventListener('change', async e => {
     let data;
     if(file.type==='application/pdf'){ if(file.size>1800000) {toast('PDF 文件较大，请压缩到 1.8MB 以内'); e.target.value=''; return;} data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file);}); }
     else { data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const scale=Math.min(1,1600/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',0.78));};img.onerror=reject;img.src=r.result;};r.onerror=reject;r.readAsDataURL(file);}); }
-    state.chinesePaper={name:file.name,type:file.type.startsWith('image/')?'image/jpeg':file.type,data,updatedAt:Date.now()};
+    const paperDate = typeof getSyncAnchor === 'function' ? getSyncAnchor(state.date) : state.date;
+    state.chinesePaper={name:file.name,type:file.type.startsWith('image/')?'image/jpeg':file.type,data,date:paperDate,updatedAt:Date.now()};
+    state.papersByDate = {}; // 永远只保留最新作业纸，不按日期累积旧文件
     saveLocalState(); const cloudOK=await uploadToCloud(true);
     toast(cloudOK?'✅ 作业纸已保存并同步云端':'✅ 作业纸已保存在本机（云端同步未确认）',3200);
   }catch(err){console.warn(err);toast('上传失败，请换一张图片或较小的 PDF');}
