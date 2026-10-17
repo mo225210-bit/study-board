@@ -57,6 +57,7 @@
   body{
     font-family:var(--font-body);
     background:linear-gradient(180deg,#78C7F2 0%,#9BD9F7 24%,#BDE8FA 48%,#D8F2FF 70%,#EEF9FF 100%);
+    background-attachment:fixed;
     min-height:100vh;overflow-x:hidden;user-select:none;color:#2b3a2b;
   }
   /* ★ iPad 输入框：必须允许选中，否则点击不弹出输入法 */
@@ -1423,6 +1424,7 @@
     <div class="form-field"><label>预习生字（空格分隔）</label><input type="text" id="libEditChars" maxlength="600"></div>
     <div class="form-field"><label>抄写并组词（空格分隔）</label><input type="text" id="libEditWordgroups" maxlength="600"></div>
     <div class="form-field"><label>抄写词语（空格分隔）</label><input type="text" id="libEditWords" maxlength="600"></div>
+    <div class="form-field" id="libEditOldWordsWrap" style="display:none"><label>抄写词语-旧（空格分隔）</label><input type="text" id="libEditOldWords" maxlength="600"></div>
     <div class="modal-actions">
       <button class="btn-ghost" id="libEditCancel">取消</button>
       <button class="btn-main" id="libEditSave">保存</button>
@@ -6609,6 +6611,8 @@ function openLibEdit(name){
   $('libEditChars').value = item.chars || '';
   $('libEditWordgroups').value = item.wordgroups || '';
   $('libEditWords').value = item.words || '';
+  $('libEditOldWords').value = item.oldWords || '';
+  $('libEditOldWordsWrap').style.display = item.oldWords ? '' : 'none';
   libEditModal.classList.add('show');
   setTimeout(() => $('libEditName').focus(), 120);
 }
@@ -6620,14 +6624,15 @@ $('libEditSave').addEventListener('click', () => {
   const chars = $('libEditChars').value.trim().slice(0,600);
   const wordgroups = $('libEditWordgroups').value.trim().slice(0,600);
   const words = $('libEditWords').value.trim().slice(0,600);
-  if(!chars && !wordgroups && !words){ toast('至少填一项'); return; }
+  const oldWords = $('libEditOldWords').value.trim().slice(0,600);
+  if(!chars && !wordgroups && !words && !oldWords){ toast('至少填一项'); return; }
   const old = (state.lessonLibrary[editingLibName]) || {};
   // 修改课文名时保留它在课文库中的原位置，不能因对象重新赋值而掉到最末尾。
   if(newName !== editingLibName){
     const order = libKeys();
     const oldIndex = order.indexOf(editingLibName);
     delete state.lessonLibrary[editingLibName];
-    state.lessonLibrary[newName] = { chars, wordgroups, words, oldChars: old.oldChars||'', oldWordgroups: old.oldWordgroups||'', oldWords: old.oldWords||'' };
+    state.lessonLibrary[newName] = { chars, wordgroups, words, oldChars: old.oldChars||'', oldWordgroups: old.oldWordgroups||'', oldWords };
     const nextOrder = order.filter(k => k !== editingLibName && k !== newName);
     nextOrder.splice(oldIndex < 0 ? nextOrder.length : Math.min(oldIndex, nextOrder.length), 0, newName);
     state.lessonLibOrder = nextOrder;
@@ -6636,7 +6641,7 @@ $('libEditSave').addEventListener('click', () => {
       ['preview','wordgroup','copy'].forEach(k => { if(state.settings.lessonPick[k] === editingLibName) state.settings.lessonPick[k] = newName; });
     }
   } else {
-    state.lessonLibrary[newName] = { chars, wordgroups, words, oldChars: old.oldChars||'', oldWordgroups: old.oldWordgroups||'', oldWords: old.oldWords||'' };
+    state.lessonLibrary[newName] = { chars, wordgroups, words, oldChars: old.oldChars||'', oldWordgroups: old.oldWordgroups||'', oldWords };
   }
   saveLocalState(); uploadToCloud();
   libEditModal.classList.remove('show');
