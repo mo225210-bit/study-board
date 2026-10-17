@@ -1308,7 +1308,7 @@
   <div class="modal-card" style="max-width:520px">
     <h3>📄 语文作业纸</h3>
     <div id="paperPreviewContent" style="max-height:55vh;overflow:auto;background:#f5f5f5;padding:10px;text-align:left"></div>
-    <div style="display:flex;justify-content:center;margin:10px 0 4px"><button class="btn-main" id="paperPreviewAdd">＋ 添加/更换作业纸</button></div>
+    <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px 0 4px"><button class="btn-main" id="paperPreviewAdd">＋ 添加/更换作业纸</button><button class="btn-main" id="paperPreviewDel" style="background:linear-gradient(180deg,#FF8A80,#EF5350);border-color:#EF5350;box-shadow:0 3px 0 #C62828;color:#fff">🗑️ 删除作业纸</button></div>
     <div class="modal-actions"><button class="btn-ghost" id="paperPreviewClose">关闭</button><button class="btn-main" id="paperPrintBtn">🖨️ 打印</button></div>
   </div>
 </div>
@@ -5145,9 +5145,11 @@ function getChinesePaperForDate(dateStr){
   return null;
 }
 function openChinesePaperPreview(){
-  // 学生端仅查看/打印作业纸；添加或更换入口只在家长端显示。
+  // 学生端仅查看/打印作业纸；添加、更换或删除入口只在家长端显示。
   const addButton = $('paperPreviewAdd');
   if(addButton) addButton.style.display = isAdminMode ? 'inline-flex' : 'none';
+  const delButton = $('paperPreviewDel');
+  if(delButton) delButton.style.display = isAdminMode ? 'inline-flex' : 'none';
   const paper = getChinesePaperForDate(state.date);
   const box = $('paperPreviewContent'); box.innerHTML = '';
   if(!paper || !paper.data){
@@ -5162,6 +5164,30 @@ function openChinesePaperPreview(){
 }
 $('paperPreviewAdd').style.cssText='visibility:visible;opacity:1;position:relative;z-index:5;';
 $('paperPreviewAdd').addEventListener('click', () => { $('paperPreviewModal').classList.remove('show'); $('chinesePaperInput').value=''; $('chinesePaperInput').click(); });
+const delBtnEl = $('paperPreviewDel');
+delBtnEl.style.visibility='visible'; delBtnEl.style.opacity='1'; delBtnEl.style.position='relative'; delBtnEl.style.zIndex='5';
+$('paperPreviewDel').addEventListener('click', async () => {
+  // 删除按钮只服务家长端，删的是当前预览日期正在显示的那一份作业纸。
+  if(!isAdminMode) return;
+  const delDate = state.date;
+  const paper = getChinesePaperForDate(delDate);
+  if(!paper || !paper.data){ toast('当前日期还没有作业纸'); return; }
+  if(!state.papersByDate || typeof state.papersByDate !== 'object') state.papersByDate = {};
+  const byDate = state.papersByDate;
+  // 只删正在显示的这一份（按对象身份匹配），并顺带清理指向它的旧版单份数据。
+  const srcKeys = Object.keys(byDate).filter(d => byDate[d] === paper);
+  const srcDate = srcKeys.length ? srcKeys[0] : '';
+  const fromGroup = srcKeys.length > 0 && !srcKeys.includes(delDate);
+  let tip = '删除后学生端将不再显示这份作业纸。\n\n此操作不可撤销。';
+  if(fromGroup) tip = '这份作业纸来自 ' + srcDate + '，删除后引用它的日期都不会再显示。\n\n此操作不可撤销。';
+  if(!confirm('确定删除' + delDate + '的作业纸「' + (paper.name || '未命名') + '」吗？\n' + tip)) return;
+  srcKeys.forEach(d => { delete byDate[d]; });
+  if(state.chinesePaper === paper || (state.chinesePaper && srcKeys.includes(state.chinesePaper.date || ''))) state.chinesePaper = null;
+  saveLocalState();
+  const cloudOK = await uploadToCloud(true);
+  openChinesePaperPreview();
+  toast(cloudOK ? '🗑️ 作业纸已删除并同步云端' : '🗑️ 作业纸已在本机删除（云端同步未确认）', 3200);
+});
 $('paperPreviewClose').addEventListener('click', () => $('paperPreviewModal').classList.remove('show'));
 $('paperPrintBtn').addEventListener('click', () => {
   const printDate = state.date;
