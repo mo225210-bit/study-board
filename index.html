@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="学习打卡台">
-<title>学习打卡台</title>
+<title>学习打卡台10163000</title>
 <link rel="manifest" href="manifest.json">
 <script src="hanzi-data.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5.0/dist/hanzi-writer.min.js"></script>
@@ -280,6 +280,9 @@
   @keyframes cardDone{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,193,7,.75)}
     50%{transform:scale(1.03);box-shadow:0 0 0 9px rgba(255,193,7,0)}100%{transform:scale(1)}}
   .card-top{display:flex;gap:10px;align-items:flex-start}
+  .task-order-num{flex:0 0 auto;min-width:20px;padding-top:2px;font-size:14px;font-weight:900;color:#5b7a5b;text-align:right;font-variant-numeric:tabular-nums}
+  .task-card.done .task-order-num{font-size:13px;color:#9aad9a}
+  .admin-task-row .task-order-num{flex:0 0 20px;text-align:right;font-size:13px;font-weight:900;color:#8da7ba;font-variant-numeric:tabular-nums}
   .checkbox{flex:none;width:23px;height:23px;border-radius:7px;border:2.5px solid #A5D6A7;
     background:#fff;display:grid;place-items:center;margin-top:1px;cursor:pointer;transition:all .2s}
   .subject-col[data-subject="math"] .checkbox{border-color:#90CAF9}
@@ -3786,11 +3789,12 @@ function renderSubjectCards(subject, listEl){
     listEl.appendChild(tip);
     return;
   }
-  tasks.forEach(task => {
+  tasks.forEach((task, taskIndex) => {
     const card = document.createElement('div');
     card.className = 'task-card' + (task.done?' done':'');
 
     const top = document.createElement('div'); top.className = 'card-top';
+    const orderNum = document.createElement('span'); orderNum.className = 'task-order-num'; orderNum.textContent = (taskIndex + 1) + '.'; orderNum.setAttribute('aria-label', '第' + (taskIndex + 1) + '项作业');
     const cb = document.createElement('div');
     const needPhotoFirst = !['custom','preview','wordgroup','copy'].includes(task.type) && !task.done && getTaskPhotos(task).length === 0;
     cb.className = 'checkbox' + (needPhotoFirst ? ' locked' : '');
@@ -3814,7 +3818,7 @@ function renderSubjectCards(subject, listEl){
     timeEl.textContent = task.done ? '✓ 已完成' : (task.minutes+'分钟');
     info.appendChild(stars); info.appendChild(minEl); info.appendChild(sunEl); info.appendChild(timeEl);
     body.appendChild(textEl); body.appendChild(info);
-    top.appendChild(cb); top.appendChild(body);
+    top.appendChild(orderNum); top.appendChild(cb); top.appendChild(body);
 
     const actions = document.createElement('div'); actions.className = 'card-actions';
 
@@ -6099,9 +6103,9 @@ function renderAdminTaskList(subject, listId, badgeId){
   if(!list || !badge) return;
   badge.textContent = tasks.filter(t => !t.done).length + ' 待完成';
   if(!tasks.length){ list.innerHTML = '<div class="admin-empty">暂无作业，在下方添加</div>'; return; }
-  list.innerHTML = tasks.map(t => `
+  list.innerHTML = tasks.map((t, taskIndex) => `
     <div class="admin-task-row" data-id="${escapeAttr(t.id)}" data-subject="${subject}" draggable="true" title="拖动调整顺序，双击编辑">
-      <span class="drag-handle">☷</span>
+      <span class="task-order-num">${taskIndex + 1}.</span><span class="drag-handle">☷</span>
       <div class="at-check ${t.done?'done':''}" data-toggle="${escapeAttr(t.id)}">✓</div>
       <div class="at-text ${t.done?'done':''}">${escapeHtml(String(t.text).replace(/\n/g, ' ⏎ '))}</div>
       <div class="at-meta">⏱${t.minutes}分钟 · 💰${t.sun}个</div>
