@@ -1792,6 +1792,26 @@
       <input type="file" id="dictionaryFilesInput" accept=".webp,image/webp" multiple webkitdirectory directory style="display:none">
     </div>
 
+    <div class="admin-section collapsed" id="adminPanelOcr">
+      <h3>📋 文字识别（OCR）</h3>
+      <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
+        作业纸「复制识别文字」功能使用<b style="color:#FFD54F">百度智能云 OCR</b>，中文识别准确率接近微信提取文字。<br>
+        通用文字识别每月免费 50,000 次，完全够用。<br>
+        <b style="color:#FFD54F">获取步骤：</b>① 注册 <a href="https://cloud.baidu.com/" target="_blank" style="color:#90CAF9">百度智能云</a> →
+        ② 控制台 → 产品 → 文字识别 → 创建应用 → ③ 获取 API Key 和 Secret Key。
+      </p>
+      <div class="admin-add-row inline-row">
+        <input class="aa-text" id="adminOcrApiKey" placeholder="API Key" maxlength="60" style="flex:2">
+        <input class="aa-text" id="adminOcrSecretKey" placeholder="Secret Key" maxlength="60" style="flex:2">
+        <button class="aa-btn" id="adminOcrSaveBtn">保存</button>
+      </div>
+      <div class="aa-hint" id="adminOcrHint"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+        <button class="aa-btn" id="adminOcrTestBtn" style="background:linear-gradient(180deg,#90CAF9,#42A5F5);border-color:#42A5F5;box-shadow:0 3px 0 #1976D2;color:#fff">🧪 测试识别</button>
+        <button class="aa-btn" id="adminOcrClearBtn" style="background:linear-gradient(180deg,#FF8A80,#EF5350);border-color:#EF5350;box-shadow:0 3px 0 #C62828;color:#fff">清除密钥</button>
+      </div>
+    </div>
+
     <div class="admin-section collapsed" id="adminPanelPassword">
       <h3>🔒 家长密码</h3>
       <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
@@ -2009,10 +2029,11 @@ const DEFAULT_SETTINGS = {
   panelCollapsed: {
     progress: true, sun: true, date: true, library: true, sync: true,
     password: true, eye: true, math: false, english: false, shop: true,
-    timetable: true, font: true, dictionary: true
+    timetable: true, font: true, dictionary: true, ocr: true
   },
   ttFontSize: 13.5,
-  ttLineHeight: 1.4
+  ttLineHeight: 1.4,
+  ocr: { apiKey: '', secretKey: '' }
 };
 
 const DEFAULT_SHOP = [
@@ -2285,10 +2306,18 @@ function normalizeSettings(raw){
       shop: pc.shop !== undefined ? !!pc.shop : true,
       timetable: pc.timetable !== undefined ? !!pc.timetable : true,
       font: pc.font !== undefined ? !!pc.font : true,
-      dictionary: pc.dictionary !== undefined ? !!pc.dictionary : true
+      dictionary: pc.dictionary !== undefined ? !!pc.dictionary : true,
+      ocr: pc.ocr !== undefined ? !!pc.ocr : true
     },
     ttFontSize: num(Number(r.ttFontSize) === 12.5 ? 13.5 : r.ttFontSize, d.ttFontSize, 8, 24),
-    ttLineHeight: num(r.ttLineHeight, d.ttLineHeight, 1, 3)
+    ttLineHeight: num(r.ttLineHeight, d.ttLineHeight, 1, 3),
+    ocr: (function(){
+      const o = (r.ocr && typeof r.ocr === 'object') ? r.ocr : {};
+      return {
+        apiKey: String(o.apiKey || '').slice(0, 60),
+        secretKey: String(o.secretKey || '').slice(0, 60)
+      };
+    })()
   };
 }
 function getUnitCfg(type){
@@ -5169,20 +5198,79 @@ function openChinesePaperPreview(){
   const title = $('paperPreviewModal').querySelector('h3'); if(title) title.textContent = '📄 语文作业纸（' + state.date + '）';
   $('paperPreviewModal').classList.add('show');
 }
-/* ===== 复制识别文字：OCR 识别作业纸并复制到剪贴板 ===== */
-let tesseractLoading = null;
-function loadTesseract(){
-  if(window.Tesseract) return Promise.resolve(window.Tesseract);
-  if(tesseractLoading) return tesseractLoading;
-  tesseractLoading = new Promise((resolve, reject) => {
+/* ===== 复制识别文字：百度智能云 OCR 识别作业纸并复制到剪贴板 ===== */
+let _baiduOcrToken = null;
+let _baiduOcrTokenExpires = 0;
+
+function jsonp(url){
+  return new Promise((resolve, reject) => {
+    const cb = '_ocr_cb_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
     const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
-    s.onload = () => { if(window.Tesseract) resolve(window.Tesseract); else reject(new Error('OCR 组件未就绪')); };
-    s.onerror = () => reject(new Error('OCR 组件加载失败，请检查网络'));
+    let done = false;
+    window[cb] = data => { done = true; delete window[cb]; s.remove(); resolve(data); };
+    s.onerror = () => { if(!done){ done = true; delete window[cb]; s.remove(); reject(new Error('请求失败，请检查网络')); } };
+    s.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + cb;
     document.head.appendChild(s);
+    setTimeout(() => { if(!done){ done = true; delete window[cb]; s.remove(); reject(new Error('请求超时')); } }, 20000);
   });
-  return tesseractLoading;
 }
+
+async function getBaiduOcrToken(){
+  if(_baiduOcrToken && Date.now() < _baiduOcrTokenExpires - 60000) return _baiduOcrToken;
+  const ocr = (state.settings && state.settings.ocr) || {};
+  if(!ocr.apiKey || !ocr.secretKey) throw new Error('未配置百度 OCR 密钥，请在家长管理面板 → 文字识别 中配置');
+  const data = await jsonp('https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id='
+    + encodeURIComponent(ocr.apiKey) + '&client_secret=' + encodeURIComponent(ocr.secretKey));
+  if(!data || data.error) throw new Error('获取 Token 失败：' + ((data && data.error_description) || '请检查 API Key 和 Secret Key 是否正确'));
+  _baiduOcrToken = data.access_token;
+  _baiduOcrTokenExpires = Date.now() + (data.expires_in || 2592000) * 1000;
+  return _baiduOcrToken;
+}
+
+function imgDataToJpegBase64(dataUrl, maxW){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+      const scale = Math.min(1, (maxW || 2000) / Math.max(w, h));
+      w = Math.round(w * scale); h = Math.round(h * scale);
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      const jpeg = c.toDataURL('image/jpeg', 0.85);
+      resolve(jpeg.split(',')[1]);
+    };
+    img.onerror = () => reject(new Error('图片加载失败'));
+    img.src = dataUrl;
+  });
+}
+
+async function baiduOcrRecognize(dataUrl){
+  const token = await getBaiduOcrToken();
+  const b64 = await imgDataToJpegBase64(dataUrl, 2000);
+  const result = await jsonp('https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic?access_token='
+    + encodeURIComponent(token) + '&image=' + encodeURIComponent(b64)
+    + '&detect_direction=false&paragraph=false&probability=false');
+  if(!result || result.error_code) throw new Error('识别失败：' + ((result && result.error_msg) || '未知错误'));
+  const words = (result.words_result || []).map(w => w.words).join('\n');
+  return words;
+}
+
+function copyTextToClipboard(text){
+  return new Promise((resolve) => {
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(() => resolve(true)).catch(() => fallbackCopy(text, resolve));
+    } else { fallbackCopy(text, resolve); }
+  });
+  function fallbackCopy(t, cb){
+    const ta = document.createElement('textarea');
+    ta.value = t; ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); cb(true); }catch(e){ cb(false); }
+    document.body.removeChild(ta);
+  }
+}
+
 $('paperPreviewCopyText').addEventListener('click', async () => {
   const paper = getChinesePaperForDate(state.date);
   if(!paper || !paper.data){ toast('当前日期没有作业纸可识别'); return; }
@@ -5192,39 +5280,23 @@ $('paperPreviewCopyText').addEventListener('click', async () => {
     toast('PDF 作业纸暂不支持文字识别，请上传图片格式的作业纸');
     return;
   }
+  const ocr = (state.settings && state.settings.ocr) || {};
+  if(!ocr.apiKey || !ocr.secretKey){
+    toast('⚠️ 请先在家长管理面板 → 📋 文字识别 中配置百度 OCR 密钥');
+    return;
+  }
   btn.disabled = true;
-  if(progressEl){ progressEl.textContent = '正在加载 OCR 识别组件…'; progressEl.style.color = '#0288D1'; }
+  if(progressEl){ progressEl.textContent = '正在连接百度 OCR…'; progressEl.style.color = '#0288D1'; }
   try{
-    const Tesseract = await loadTesseract();
     if(progressEl){ progressEl.textContent = '正在识别作业纸上的文字…'; progressEl.style.color = '#0288D1'; }
-    const result = await Tesseract.recognize(paper.data, 'chi_sim+eng', {
-      logger: m => {
-        if(progressEl && m.status === 'recognizing text'){
-          const pct = Math.round((m.progress || 0) * 100);
-          progressEl.textContent = '识别中… ' + pct + '%';
-        }
-      }
-    });
-    const text = (result.data && result.data.text) || '';
+    const text = await baiduOcrRecognize(paper.data);
     if(!text.trim()){
       if(progressEl){ progressEl.textContent = '未能识别出文字，请确认作业纸图片清晰'; progressEl.style.color = '#E53935'; }
       toast('未能识别出文字，请确认作业纸图片清晰');
     } else {
-      try{
-        await navigator.clipboard.writeText(text.trim());
-        if(progressEl){ progressEl.textContent = '✅ 已复制 ' + text.trim().length + ' 个字到剪贴板'; progressEl.style.color = '#2E7D32'; }
-        toast('✅ 识别文字已复制到剪贴板（' + text.trim().length + ' 字）');
-      } catch(clipErr){
-        const ta = document.createElement('textarea');
-        ta.value = text.trim();
-        ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px';
-        document.body.appendChild(ta);
-        ta.select();
-        try{ document.execCommand('copy'); }catch(e){}
-        document.body.removeChild(ta);
-        if(progressEl){ progressEl.textContent = '✅ 已复制 ' + text.trim().length + ' 个字到剪贴板'; progressEl.style.color = '#2E7D32'; }
-        toast('✅ 识别文字已复制到剪贴板（' + text.trim().length + ' 字）');
-      }
+      await copyTextToClipboard(text.trim());
+      if(progressEl){ progressEl.textContent = '✅ 已复制 ' + text.trim().length + ' 个字到剪贴板'; progressEl.style.color = '#2E7D32'; }
+      toast('✅ 识别文字已复制到剪贴板（' + text.trim().length + ' 字）');
     }
   } catch(err){
     console.warn('OCR 识别失败', err);
@@ -5232,7 +5304,64 @@ $('paperPreviewCopyText').addEventListener('click', async () => {
     toast('⚠️ 文字识别失败：' + (err && err.message ? err.message : '未知错误'));
   } finally {
     btn.disabled = false;
-    setTimeout(() => { if(progressEl) progressEl.textContent = ''; }, 4000);
+    setTimeout(() => { if(progressEl) progressEl.textContent = ''; }, 5000);
+  }
+});
+
+/* ===== 百度 OCR 配置面板 ===== */
+function renderOcrPanel(){
+  const hint = $('adminOcrHint'); if(!hint) return;
+  const ocr = (state.settings && state.settings.ocr) || {};
+  const apiKeyEl = $('adminOcrApiKey'); const secretKeyEl = $('adminOcrSecretKey');
+  if(apiKeyEl) apiKeyEl.value = ocr.apiKey || '';
+  if(secretKeyEl) secretKeyEl.value = ocr.secretKey || '';
+  if(ocr.apiKey && ocr.secretKey){
+    hint.className = 'aa-hint ok';
+    hint.textContent = '✅ 已配置百度 OCR 密钥（' + (ocr.apiKey || '').slice(0, 8) + '…），可直接使用「复制识别文字」功能';
+  } else {
+    hint.className = 'aa-hint';
+    hint.textContent = '请在上方填写百度智能云 API Key 和 Secret Key，保存后即可使用高精度文字识别';
+  }
+}
+$('adminOcrSaveBtn').addEventListener('click', async () => {
+  const apiKey = ($('adminOcrApiKey').value || '').trim();
+  const secretKey = ($('adminOcrSecretKey').value || '').trim();
+  if(!apiKey || !secretKey){ toast('请填写 API Key 和 Secret Key'); return; }
+  if(!state.settings) state.settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+  if(!state.settings.ocr) state.settings.ocr = {};
+  state.settings.ocr.apiKey = apiKey;
+  state.settings.ocr.secretKey = secretKey;
+  _baiduOcrToken = null; _baiduOcrTokenExpires = 0;
+  saveLocalState(); uploadToCloud();
+  renderOcrPanel();
+  toast('✅ 百度 OCR 密钥已保存');
+});
+$('adminOcrClearBtn').addEventListener('click', () => {
+  if(!confirm('确定清除百度 OCR 密钥吗？清除后「复制识别文字」功能将不可用。')) return;
+  if(state.settings && state.settings.ocr) state.settings.ocr = {};
+  _baiduOcrToken = null; _baiduOcrTokenExpires = 0;
+  saveLocalState(); uploadToCloud();
+  renderOcrPanel();
+  toast('已清除百度 OCR 密钥');
+});
+$('adminOcrTestBtn').addEventListener('click', async () => {
+  const apiKey = ($('adminOcrApiKey').value || '').trim();
+  const secretKey = ($('adminOcrSecretKey').value || '').trim();
+  if(!apiKey || !secretKey){ toast('请先填写 API Key 和 Secret Key'); return; }
+  const hint = $('adminOcrHint');
+  if(hint){ hint.className = 'aa-hint warn'; hint.textContent = '正在测试密钥是否有效…'; }
+  try{
+    if(!state.settings) state.settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+    if(!state.settings.ocr) state.settings.ocr = {};
+    state.settings.ocr.apiKey = apiKey;
+    state.settings.ocr.secretKey = secretKey;
+    _baiduOcrToken = null; _baiduOcrTokenExpires = 0;
+    await getBaiduOcrToken();
+    if(hint){ hint.className = 'aa-hint ok'; hint.textContent = '✅ 密钥验证通过！百度 OCR 已就绪。'; }
+    toast('✅ 百度 OCR 密钥有效');
+  } catch(err){
+    if(hint){ hint.className = 'aa-hint warn'; hint.textContent = '⚠️ 密钥无效：' + (err && err.message ? err.message : '请检查'); }
+    toast('⚠️ 密钥验证失败：' + (err && err.message ? err.message : '请检查'));
   }
 });
 $('paperPreviewCopyText').style.cssText='visibility:visible;opacity:1;position:relative;z-index:5;';
@@ -5903,7 +6032,7 @@ function renderAdminPanel(){
   renderLessonLibrary(); populateLessonSelects();
   renderAdminShop();
   renderAdminTimetable();
-  renderSunPanel(); renderPwdPanel(); renderEyePanel(); renderFontPanel();
+  renderSunPanel(); renderPwdPanel(); renderEyePanel(); renderFontPanel(); renderOcrPanel();
   applyAdminPanelStates(); syncLastInputFields();
 }
 function renderEyePanel(){
@@ -6388,7 +6517,7 @@ function applyAdminPanelStates(){
     adminPanelLibrary: pc.library, adminPanelSync: pc.sync, adminPanelPassword: pc.password,
     adminPanelEye: pc.eye, adminPanelMath: pc.math, adminPanelEnglish: pc.english,
     adminPanelShop: pc.shop, adminPanelTimetable: pc.timetable, adminPanelFont: pc.font,
-    adminPanelDictionary: pc.dictionary
+    adminPanelDictionary: pc.dictionary, adminPanelOcr: pc.ocr
   };
   Object.entries(map).forEach(([id,collapsed]) => {
     const el=$(id); if(el) el.classList.toggle('collapsed', !!collapsed);
@@ -6400,7 +6529,8 @@ function setupAdminPanelToggles(){
     adminPanelMath:'math', adminPanelEnglish:'english',
     adminPanelLibrary:'library', adminPanelSync:'sync',
     adminPanelPassword:'password', adminPanelEye:'eye', adminPanelShop:'shop',
-    adminPanelTimetable:'timetable', adminPanelFont:'font', adminPanelDictionary:'dictionary'
+    adminPanelTimetable:'timetable', adminPanelFont:'font', adminPanelDictionary:'dictionary',
+    adminPanelOcr:'ocr'
   };
   Object.entries(map).forEach(([id,key]) => {
     const panel=$(id); if(!panel) return;
