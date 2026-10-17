@@ -1279,6 +1279,7 @@
   <div class="modal-card" style="max-width:520px">
     <h3>📄 语文作业纸</h3>
     <div id="paperPreviewContent" style="max-height:55vh;overflow:auto;background:#f5f5f5;padding:10px;text-align:left"></div>
+    <div style="display:flex;justify-content:center;margin:10px 0 4px"><button class="btn-main" id="paperPreviewAdd">＋ 添加/更换作业纸</button></div>
     <div class="modal-actions"><button class="btn-ghost" id="paperPreviewClose">关闭</button><button class="btn-main" id="paperPrintBtn">🖨️ 打印</button></div>
   </div>
 </div>
@@ -5087,15 +5088,18 @@ function getChinesePaperForDate(dateStr){
 }
 function openChinesePaperPreview(){
   const paper = getChinesePaperForDate(state.date);
-  if(!paper || !paper.data){ toast('还没有上传语文作业纸'); return; }
   const box = $('paperPreviewContent'); box.innerHTML = '';
-  if(paper.type === 'application/pdf' || paper.data.startsWith('data:application/pdf')){
+  if(!paper || !paper.data){
+    const empty=document.createElement('div'); empty.textContent='暂无作业纸，点击下方“添加/更换作业纸”上传。';
+    empty.style.cssText='padding:24px 8px;text-align:center;color:#78909c;font-weight:700'; box.appendChild(empty);
+  } else if(paper.type === 'application/pdf' || paper.data.startsWith('data:application/pdf')){
     const link = document.createElement('a'); link.href = paper.data; link.target='_blank'; link.rel='noopener'; link.textContent='打开作业纸 PDF'; box.appendChild(link);
     const note=document.createElement('p'); note.textContent='PDF 将在新页面打开，可使用浏览器打印。'; box.appendChild(note);
   } else { const img=document.createElement('img'); img.src=paper.data; img.alt='语文作业纸'; img.style.cssText='display:block;width:100%;max-width:100%;height:auto;object-fit:contain;object-position:top left;margin:0;'; box.appendChild(img); }
   const title = $('paperPreviewModal').querySelector('h3'); if(title) title.textContent = '📄 语文作业纸（' + state.date + '）';
   $('paperPreviewModal').classList.add('show');
 }
+$('paperPreviewAdd').addEventListener('click', () => { $('paperPreviewModal').classList.remove('show'); $('chinesePaperInput').click(); });
 $('paperPreviewClose').addEventListener('click', () => $('paperPreviewModal').classList.remove('show'));
 $('paperPrintBtn').addEventListener('click', () => {
   const printDate = state.date;
@@ -5121,13 +5125,13 @@ $('paperPrintBtn').addEventListener('click', () => {
   document.body.appendChild(frame);
   const doc=frame.contentDocument; doc.open();
   doc.write('<!doctype html><html><head><title>语文作业纸</title><style>'
-    + '@page{size:A4 portrait;margin:6mm}'
-    + 'html,body{margin:0;padding:0;width:198mm;min-height:0;background:#fff;overflow:visible}'
-    + 'img{display:block;width:198mm!important;max-width:none!important;height:auto!important;max-height:none!important;object-fit:fill;object-position:top left;margin:0!important;padding:0;border:0;page-break-after:avoid;page-break-inside:avoid;break-inside:avoid}'
+    + '@page{size:A4 portrait;margin:0}'
+    + 'html,body{margin:0!important;padding:0!important;width:210mm;height:auto;min-height:0;background:#fff;overflow:visible;position:relative}'
+    + 'img{display:block;width:105mm!important;max-width:105mm!important;height:auto!important;max-height:none!important;object-fit:contain;object-position:top left;margin:0!important;padding:0;border:0;page-break-after:avoid;page-break-inside:avoid;break-inside:avoid;position:absolute;left:0;top:0}'
     + '</style></head><body><img src="'+paper.data+'"></body></html>');
   doc.close();
 });
-$('uploadChinesePaperBtn').addEventListener('click', () => $('chinesePaperInput').click());
+$('uploadChinesePaperBtn').addEventListener('click', openChinesePaperPreview);
 $('chinesePaperInput').addEventListener('change', async e => {
   const file=e.target.files && e.target.files[0]; if(!file) return;
   if(!file.type.startsWith('image/') && file.type!=='application/pdf'){ toast('请上传图片或 PDF 作业纸'); e.target.value=''; return; }
@@ -6123,8 +6127,9 @@ function renderAdminTaskList(subject, listId, badgeId){
   if(!tasks.length){ list.innerHTML = '<div class="admin-empty">暂无作业，在下方添加</div>'; return; }
   list.innerHTML = tasks.map((t, taskIndex) => `
     <div class="admin-task-row" data-id="${escapeAttr(t.id)}" data-subject="${subject}" draggable="true" title="拖动调整顺序，双击编辑">
-      <span class="task-order-num">${taskIndex + 1}.</span><span class="drag-handle">☷</span>
+      <span class="drag-handle">☷</span>
       <div class="at-check ${t.done?'done':''}" data-toggle="${escapeAttr(t.id)}">✓</div>
+      <span class="task-order-num">${taskIndex + 1}.</span>
       <div class="at-text ${t.done?'done':''}">${escapeHtml(String(t.text).replace(/\n/g, ' ⏎ '))}</div>
       <div class="at-meta">⏱${t.minutes}分钟 · 💰${t.sun}个</div>
       <button class="at-del" data-del="${escapeAttr(t.id)}" data-subject="${subject}">删除</button>
