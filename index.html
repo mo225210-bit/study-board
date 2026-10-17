@@ -5132,10 +5132,13 @@ function getChinesePaperForDate(dateStr){
   return null;
 }
 function openChinesePaperPreview(){
+  // 学生端仅查看/打印作业纸；添加或更换入口只在家长端显示。
+  const addButton = $('paperPreviewAdd');
+  if(addButton) addButton.style.display = isAdminMode ? 'inline-flex' : 'none';
   const paper = getChinesePaperForDate(state.date);
   const box = $('paperPreviewContent'); box.innerHTML = '';
   if(!paper || !paper.data){
-    const empty=document.createElement('div'); empty.textContent='暂无作业纸，点击下方“添加/更换作业纸”上传。';
+    const empty=document.createElement('div'); empty.textContent = isAdminMode ? '暂无作业纸，点击下方“添加/更换作业纸”上传。' : '暂无作业纸。';
     empty.style.cssText='padding:24px 8px;text-align:center;color:#78909c;font-weight:700'; box.appendChild(empty);
   } else if(paper.type === 'application/pdf' || paper.data.startsWith('data:application/pdf')){
     const link = document.createElement('a'); link.href = paper.data; link.target='_blank'; link.rel='noopener'; link.textContent='打开作业纸 PDF'; box.appendChild(link);
@@ -5144,7 +5147,7 @@ function openChinesePaperPreview(){
   const title = $('paperPreviewModal').querySelector('h3'); if(title) title.textContent = '📄 语文作业纸（' + state.date + '）';
   $('paperPreviewModal').classList.add('show');
 }
-$('paperPreviewAdd').style.cssText='display:inline-flex!important;visibility:visible!important;opacity:1!important;position:relative;z-index:5;';
+$('paperPreviewAdd').style.cssText='visibility:visible;opacity:1;position:relative;z-index:5;';
 $('paperPreviewAdd').addEventListener('click', () => { $('paperPreviewModal').classList.remove('show'); $('chinesePaperInput').value=''; $('chinesePaperInput').click(); });
 $('paperPreviewClose').addEventListener('click', () => $('paperPreviewModal').classList.remove('show'));
 $('paperPrintBtn').addEventListener('click', () => {
