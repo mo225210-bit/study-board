@@ -6,7 +6,35 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="学习打卡台">
-<title>学习打卡台10163000</title>
+<title>学习打卡台</title>
+<script>
+// 根据 GitHub 上 index.html 最近一次提交时间，自动生成“学习打卡台MMDDHHmm”标题。
+(function () {
+  const baseTitle = '学习打卡台';
+  document.title = baseTitle;
+  const apiUrl = 'https://api.github.com/repos/mo225210-bit/study-board/commits?path=index.html&per_page=1';
+  fetch(apiUrl, { headers: { Accept: 'application/vnd.github+json' }, cache: 'no-store' })
+    .then(function (response) {
+      if (!response.ok) throw new Error('GitHub API HTTP ' + response.status);
+      return response.json();
+    })
+    .then(function (commits) {
+      if (!Array.isArray(commits) || !commits.length) return;
+      const commit = commits[0];
+      const dateText = commit && commit.commit && commit.commit.committer && commit.commit.committer.date;
+      if (!dateText) return;
+      const date = new Date(dateText);
+      if (Number.isNaN(date.getTime())) return;
+      const pad = function (n) { return String(n).padStart(2, '0'); };
+      const stamp = pad(date.getMonth() + 1) + pad(date.getDate()) + pad(date.getHours()) + pad(date.getMinutes());
+      document.title = baseTitle + stamp;
+    })
+    .catch(function (error) {
+      // 网络不可用或 GitHub API 限流时，保留基础标题，不影响网页其他功能。
+      console.warn('读取 GitHub 更新时间失败：', error);
+    });
+})();
+</script>
 <link rel="manifest" href="manifest.json">
 <script src="hanzi-data.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5.0/dist/hanzi-writer.min.js"></script>
@@ -6335,7 +6363,7 @@ function renderLessonLibrary(){
     const oldChars = item.oldChars ? `<div><b class="old">会写字-旧：</b>${escapeHtml(preview(item.oldChars))}</div>` : '';
     const oldWgs = item.oldWordgroups ? `<div><b class="old">会识字-旧：</b>${escapeHtml(preview(item.oldWordgroups))}</div>` : '';
     const oldWords = item.oldWords ? `<div><b class="old">抄写词语-旧：</b>${escapeHtml(preview(item.oldWords))}</div>` : '';
-    return `<div class="lib-row" data-lib-edit="${escapeAttr(name)}" data-lib-name="${escapeAttr(name)}" title="双击编辑">
+    return `<div class="lib-row" data-lib-edit="${escapeAttr(name)}" data-lib-name="${escapeAttr(name)}" draggable="true" title="双击编辑；拖动调整顺序">
       <span class="lib-handle" title="按住上下拖动调整顺序">☰</span>
       <div class="lib-lesson">📖 ${escapeHtml(name)}</div>
       <div class="lib-info">
@@ -6593,9 +6621,23 @@ $('libEditSave').addEventListener('click', () => {
   const wordgroups = $('libEditWordgroups').value.trim().slice(0,600);
   const words = $('libEditWords').value.trim().slice(0,600);
   if(!chars && !wordgroups && !words){ toast('至少填一项'); return; }
-  if(newName !== editingLibName) delete state.lessonLibrary[editingLibName];
   const old = (state.lessonLibrary[editingLibName]) || {};
-  state.lessonLibrary[newName] = { chars, wordgroups, words, oldChars: old.oldChars||'', oldWordgroups: old.oldWordgroups||'', oldWords: old.oldWords||'' };
+  // 修改课文名时保留它在课文库中的原位置，不能因对象重新赋值而掉到最末尾。
+  if(newName !== editingLibName){
+    const order = libKeys();
+    const oldIndex = order.indexOf(editingLibName);
+    delete state.lessonLibrary[editingLibName];
+    state.lessonLibrary[newName] = { chars, wordgroups, words, oldChars: old.oldChars||'', oldWordgroups: old.oldWordgroups||'', oldWords: old.oldWords||'' };
+    const nextOrder = order.filter(k => k !== editingLibName && k !== newName);
+    nextOrder.splice(oldIndex < 0 ? nextOrder.length : Math.min(oldIndex, nextOrder.length), 0, newName);
+    state.lessonLibOrder = nextOrder;
+    // 同步保存已选课文的名称，避免重命名后选择项失效。
+    if(state.settings && state.settings.lessonPick){
+      ['preview','wordgroup','copy'].forEach(k => { if(state.settings.lessonPick[k] === editingLibName) state.settings.lessonPick[k] = newName; });
+    }
+  } else {
+    state.lessonLibrary[newName] = { chars, wordgroups, words, oldChars: old.oldChars||'', oldWordgroups: old.oldWordgroups||'', oldWords: old.oldWords||'' };
+  }
   saveLocalState(); uploadToCloud();
   libEditModal.classList.remove('show');
   renderLessonLibrary(); populateLessonSelects();
@@ -7735,54 +7777,56 @@ function reorderLibDom(list, names){
   names.forEach(n => { if(map[n]) list.appendChild(map[n]); });
 }
 function bindLibDrag(list){
-  let drag = null;
-  Array.prototype.forEach.call(list.querySelectorAll('.lib-row'), row => {
-    const handle = row.querySelector('.lib-handle');
-    if(!handle) return;
-    handle.addEventListener('pointerdown', e => {
-      if(e.button !== undefined && e.button !== 0) return;
-      e.preventDefault(); e.stopPropagation();
-      drag = { row, pointerId:e.pointerId, moved:false };
+  let dragRow = null;
+  list.querySelectorAll('.lib-row').forEach(row => {
+    row.setAttribute('draggable', 'true');
+    row.addEventListener('dragstart', e => {
+      // 拖动课文条目任意位置均可开始，删除按钮不触发拖动。
+      if(e.target.closest('button')){ e.preventDefault(); return; }
+      dragRow = row;
       row.classList.add('dragging');
-      try{ handle.setPointerCapture(e.pointerId); }catch(err){}
+      e.dataTransfer.effectAllowed = 'move';
+      try{ e.dataTransfer.setData('text/plain', row.dataset.libName); }catch(err){}
     });
-    handle.addEventListener('pointermove', e => {
-      if(!drag || drag.row !== row || (drag.pointerId !== undefined && e.pointerId !== drag.pointerId)) return;
-      const rows = Array.from(list.querySelectorAll('.lib-row')).filter(r => r !== row);
-      // 以每行中线判断插入位置；指针越过最后一行时直接插到列表末尾。
-      let before = null;
-      for(const r of rows){
-        const b = r.getBoundingClientRect();
-        if(e.clientY < b.top + b.height / 2){ before = r; break; }
-      }
-      const currentNext = row.nextElementSibling;
-      if(before){
-        if(currentNext !== before){ list.insertBefore(row, before); drag.moved = true; }
-      }else if(currentNext){
-        list.appendChild(row); drag.moved = true;
-      }else if(rows.length && row !== list.lastElementChild){
-        list.appendChild(row); drag.moved = true;
-      }
-      if(drag.moved){
-        state.lessonLibOrder = Array.from(list.querySelectorAll('.lib-row')).map(r => r.dataset.libName);
-      }
-    });
-    const end = () => {
-      if(!drag || drag.row !== row) return;
-      const moved = drag.moved;
+    row.addEventListener('dragend', () => {
       row.classList.remove('dragging');
-      drag = null;
-      if(moved){
-        state.lessonLibOrder = Array.from(list.querySelectorAll('.lib-row')).map(r => r.dataset.libName);
-        saveLocalState(); uploadToCloud(true);
-        populateLessonSelects();
-        toast('✅ 已保存课文库顺序');
+      list.querySelectorAll('.drag-over').forEach(x => x.classList.remove('drag-over'));
+      if(dragRow){
+        const order = Array.from(list.querySelectorAll('.lib-row')).map(r => r.dataset.libName);
+        const before = JSON.stringify(state.lessonLibOrder || []);
+        state.lessonLibOrder = order;
+        dragRow = null;
+        if(JSON.stringify(order) !== before){
+          saveLocalState(); uploadToCloud(true);
+          toast('✅ 已保存课文库顺序');
+        }
       }
-    };
-    handle.addEventListener('pointerup', end);
-    handle.addEventListener('pointercancel', end);
-    handle.addEventListener('lostpointercapture', end);
-    handle.addEventListener('dblclick', e => { e.stopPropagation(); e.preventDefault(); });
+    });
+    row.addEventListener('dragover', e => {
+      e.preventDefault();
+      if(!dragRow || dragRow === row) return;
+      e.dataTransfer.dropEffect = 'move';
+      row.classList.add('drag-over');
+    });
+    row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
+    row.addEventListener('drop', e => {
+      e.preventDefault();
+      row.classList.remove('drag-over');
+      const fromName = (dragRow && dragRow.dataset.libName) || e.dataTransfer.getData('text/plain');
+      if(!fromName || fromName === row.dataset.libName) return;
+      const source = list.querySelector(`[data-lib-name="${CSS.escape(fromName)}"]`);
+      if(!source) return;
+      const rect = row.getBoundingClientRect();
+      const insertAfter = e.clientY >= rect.top + rect.height / 2;
+      if(insertAfter){
+        if(row.nextElementSibling !== source) list.insertBefore(source, row.nextElementSibling);
+      } else {
+        if(source.nextElementSibling !== row) list.insertBefore(source, row);
+      }
+    });
+    // 保留原有的双击编辑功能；拖动把手双击不打开编辑。
+    const handle = row.querySelector('.lib-handle');
+    if(handle) handle.addEventListener('dblclick', e => { e.stopPropagation(); e.preventDefault(); });
   });
 }
 
