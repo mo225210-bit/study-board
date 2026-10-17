@@ -3163,7 +3163,21 @@ async function uploadToCloud(force){
     shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
     lastNightReset: state.lastNightReset || '',
     eyeSoundOffDate: state.eyeSoundOffDate || '',
-    live: state.live, updatedAt: Date.now()
+    live: state.live,
+    // 完整配置快照：确保新增或遗漏的可配置参数也随云端一起保存
+    configSnapshot: {
+      settings: state.settings,
+      lessonLibrary: state.lessonLibrary,
+      lessonLibOrder: Array.isArray(state.lessonLibOrder) ? state.lessonLibOrder : [],
+      shop: state.shop,
+      wordBank: state.wordBank,
+      charPages: state.charPages || {},
+      timetable: state.timetable,
+      syncDays: state.syncDays || {},
+      papersByDate: state.papersByDate || {},
+      parentPassword: state.parentPassword
+    },
+    updatedAt: Date.now()
   };
   const prevPushed = lastPushedUpdatedAt;
   lastPushedUpdatedAt = payload.updatedAt;
@@ -3210,7 +3224,7 @@ function makeHistorySnapshot(reason){
     savedAt: Date.now(), reason: reason || '数据修改',
     data: {
       days: stripPhotosFromDays(state.days), date: state.date,
-      syncDays: JSON.parse(JSON.stringify(state.syncDays || {})), chinesePaper: JSON.parse(JSON.stringify(state.chinesePaper || null)),
+      syncDays: JSON.parse(JSON.stringify(state.syncDays || {})), papersByDate: JSON.parse(JSON.stringify(state.papersByDate || {})), chinesePaper: JSON.parse(JSON.stringify(state.chinesePaper || null)),
       settings: JSON.parse(JSON.stringify(state.settings)), sun: state.sun,
       checkins: JSON.parse(JSON.stringify(state.checkins || [])),
       sunLog: JSON.parse(JSON.stringify(state.sunLog || [])),
@@ -3259,6 +3273,7 @@ async function saveHistorySnapshot(reason){
 }
 function applyRemoteState(remote){
   if(!remote || !remote.days) return;
+  const cfg = (remote.configSnapshot && typeof remote.configSnapshot === 'object') ? remote.configSnapshot : {};
   const rAt = Number(remote.updatedAt) || 0;
   if(rAt && rAt === lastPushedUpdatedAt) return;
   if(rAt && rAt < lastRemoteUpdatedAt) return;
@@ -3269,24 +3284,27 @@ function applyRemoteState(remote){
   state.days = newDays;
   invalidateLinkedIndex();
   if(!state.days[state.date]) state.days[state.date] = makeDay();
-  if(remote.settings) state.settings = normalizeSettings(remote.settings);
+  if(remote.settings || cfg.settings) state.settings = normalizeSettings(remote.settings || cfg.settings);
   if(remote.syncDays && typeof remote.syncDays === 'object') state.syncDays = remote.syncDays;
-  state.papersByDate = {};
+  else if(cfg.syncDays && typeof cfg.syncDays === 'object') state.syncDays = cfg.syncDays;
+  const remotePapers = remote.papersByDate || cfg.papersByDate;
+  state.papersByDate = (remotePapers && typeof remotePapers === 'object' && !Array.isArray(remotePapers)) ? remotePapers : {};
   if(typeof remote.sun === 'number') state.sun = remote.sun;
   if(Array.isArray(remote.checkins)) state.checkins = remote.checkins;
   if(Array.isArray(remote.sunLog)) state.sunLog = remote.sunLog.slice(0, 60);
-  if(remote.lessonLibrary) state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary);
-  if(Array.isArray(remote.lessonLibOrder)) state.lessonLibOrder = remote.lessonLibOrder.map(String).slice(0,400);
+  if(remote.lessonLibrary || cfg.lessonLibrary) state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary || cfg.lessonLibrary);
+  if(Array.isArray(remote.lessonLibOrder) || Array.isArray(cfg.lessonLibOrder)) state.lessonLibOrder = (remote.lessonLibOrder || cfg.lessonLibOrder).map(String).slice(0,400);
   else state.lessonLibOrder = [];
   if('chinesePaper' in remote) state.chinesePaper = remote.chinesePaper || null;
   if(state.chinesePaper && state.chinesePaper.data && !state.chinesePaper.date) state.chinesePaper.date = remote.date || state.date;
-  if(remote.wordBank) state.wordBank = normalizeWordBank(remote.wordBank);
-  if(remote.charPages && typeof remote.charPages === 'object') state.charPages = remote.charPages;
-  if('timetable' in remote) state.timetable = normalizeTimetable(remote.timetable);
-  if(typeof remote.parentPassword === 'string' && /^\d{4}$/.test(remote.parentPassword)) state.parentPassword = remote.parentPassword;
+  if(remote.wordBank || cfg.wordBank) state.wordBank = normalizeWordBank(remote.wordBank || cfg.wordBank);
+  if((remote.charPages || cfg.charPages) && typeof (remote.charPages || cfg.charPages) === 'object') state.charPages = remote.charPages || cfg.charPages;
+  if('timetable' in remote || 'timetable' in cfg) state.timetable = normalizeTimetable(('timetable' in remote) ? remote.timetable : cfg.timetable);
+  const remotePassword = remote.parentPassword || cfg.parentPassword;
+  if(typeof remotePassword === 'string' && /^\d{4}$/.test(remotePassword)) state.parentPassword = remotePassword;
   if(typeof remote.lastNightReset === 'string') state.lastNightReset = remote.lastNightReset;
   if(typeof remote.eyeSoundOffDate === 'string') state.eyeSoundOffDate = remote.eyeSoundOffDate;
-  const shopNorm = normalizeShop(remote.shop);
+  const shopNorm = normalizeShop(remote.shop !== undefined ? remote.shop : cfg.shop);
   if(shopNorm !== null){ state.shop = shopNorm; try{ localStorage.setItem(REWARD_STORAGE_KEY, JSON.stringify(state.shop)); }catch(e){} }
   if(remote.live && typeof remote.live === 'object'){
     const remoteLiveAt = Number(remote.live.updatedAt) || 0;
@@ -3818,7 +3836,7 @@ function renderSubjectCards(subject, listEl){
     timeEl.textContent = task.done ? '✓ 已完成' : (task.minutes+'分钟');
     info.appendChild(stars); info.appendChild(minEl); info.appendChild(sunEl); info.appendChild(timeEl);
     body.appendChild(textEl); body.appendChild(info);
-    top.appendChild(orderNum); top.appendChild(cb); top.appendChild(body);
+    top.appendChild(cb); top.appendChild(orderNum); top.appendChild(body);
 
     const actions = document.createElement('div'); actions.className = 'card-actions';
 
