@@ -1,4 +1,4 @@
-const CACHE_NAME = 'study-board-v1';
+const CACHE_NAME = 'study-board-v2';
 const PRECACHE = [
   './',
   './index.html',
@@ -25,9 +25,32 @@ self.addEventListener('activate', event => {
   );
 });
 
-// 拦截请求：缓存优先，未命中再走网络
+// 拦截请求：
+// - 页面本身（index.html）→ 网络优先：每次都拿最新版，断网时才用缓存，
+//   这样以后更新 index.html 不需要再改这个文件里的版本号。
+// - 其他资源 → 缓存优先（和原来一样）。
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
+  const url = new URL(event.request.url);
+  let scopePath = '/';
+  try { scopePath = new URL(self.registration.scope).pathname; } catch (e) {}
+  const isPage = event.request.mode === 'navigate' ||
+    url.pathname === scopePath ||
+    url.pathname.endsWith('index.html');
+  if (isPage) {
+    event.respondWith(
+      fetch(event.request).then(response => {
+        if (response && response.status === 200) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        }
+        return response;
+      }).catch(() =>
+        caches.match(event.request).then(cached => cached || caches.match('./index.html'))
+      )
+    );
+    return;
+  }
   event.respondWith(
     caches.match(event.request).then(cached => {
       if (cached) return cached;

@@ -5166,6 +5166,39 @@ function openChinesePaperPreview(){
 }
 $('paperPreviewAdd').style.cssText='visibility:visible;opacity:1;position:relative;z-index:5;';
 // 作业纸 OCR：识别图片或 PDF 中的中文，并将识别结果复制到剪贴板。
+// ===== 云端文字识别（接口部署在 EdgeOne Pages，配套代码在 edgeone-ocr-api 文件夹）=====
+// 部署好后，把下面引号里填上你的接口地址，例如：
+//   const OCR_API_URL = 'https://xxxx.edgeone.app/api/ocr';
+// 留空 '' 则不启用云端识别，和以前一样只用本机识别（云端失败也会自动退回本机识别）。
+const OCR_API_URL = '';
+async function cloudOcrImage(dataUrl){
+  const res=await fetch(OCR_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:dataUrl})});
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok || !data.ok) throw new Error(data.error || ('接口 HTTP '+res.status));
+  return (data.text||'').trim();
+}
+// 把图片压到最长 1600px 再上传识别，避免超过接口的 7MB 限制。
+function shrinkImageForOcr(src,quality){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=()=>{
+      const scale=Math.min(1,1600/(img.width||1));
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.max(1,Math.round((img.width||1)*scale)); canvas.height=Math.max(1,Math.round((img.height||1)*scale));
+      canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+      resolve(canvas.toDataURL('image/jpeg',quality||0.9));
+    };
+    img.onerror=()=>reject(new Error('图片加载失败'));
+    img.src=src;
+  });
+}
+async function copyTextToClipboard(allText){
+  try{ await navigator.clipboard.writeText(allText); }
+  catch(e){
+    const area=document.createElement('textarea'); area.value=allText; area.style.cssText='position:fixed;left:-9999px;top:0'; document.body.appendChild(area); area.select();
+    const ok=document.execCommand('copy'); area.remove(); if(!ok) throw new Error('浏览器不允许复制，请检查网页权限');
+  }
+}
 let tesseractLoading = null;
 function loadTesseract(){
   if(window.Tesseract) return Promise.resolve(window.Tesseract);
@@ -5186,6 +5219,37 @@ async function copyRecognizedPaperText(){
   const btn=$('paperPreviewCopyText');
   btn.disabled=true; const oldText=btn.textContent; btn.textContent='⏳ 正在识别…';
   try{
+    if(OCR_API_URL){
+      try{
+        let cloudText='';
+        if(paper.type==='application/pdf' || paper.data.startsWith('data:application/pdf')){
+          const pdfjs=await loadPdfJs();
+          const raw=atob(paper.data.split(',')[1]); const bytes=new Uint8Array(raw.length);
+          for(let i=0;i<raw.length;i++) bytes[i]=raw.charCodeAt(i);
+          const pdf=await pdfjs.getDocument({data:bytes}).promise;
+          for(let pageNo=1;pageNo<=pdf.numPages;pageNo++){
+            btn.textContent='⏳ 云端识别 PDF '+pageNo+'/'+pdf.numPages;
+            const page=await pdf.getPage(pageNo); const viewport=page.getViewport({scale:2});
+            const canvas=document.createElement('canvas'); canvas.width=Math.ceil(viewport.width); canvas.height=Math.ceil(viewport.height);
+            await page.render({canvasContext:canvas.getContext('2d'),viewport}).promise;
+            const pageText=await cloudOcrImage(canvas.toDataURL('image/jpeg',0.85));
+            cloudText += (cloudText?'\n\n':'')+'【第 '+pageNo+' 页】\n'+pageText;
+            canvas.width=canvas.height=1;
+          }
+        }else{
+          btn.textContent='⏳ 云端识别中…';
+          cloudText=await cloudOcrImage(await shrinkImageForOcr(paper.data,0.9));
+        }
+        if(!cloudText.trim()){ toast('没有识别到文字，请尝试更清晰的作业纸'); return; }
+        await copyTextToClipboard(cloudText);
+        toast('📋 已识别并复制文字（'+cloudText.length+' 个字符）',3000);
+        return;
+      }catch(cloudErr){
+        console.error('云端识别失败，自动改用本机识别：',cloudErr);
+        toast('云端识别失败（'+(cloudErr.message||'未知错误')+'），改用本机识别…',3000);
+        btn.textContent='⏳ 正在识别…';
+      }
+    }
     const Tesseract=await loadTesseract();
     const worker=await Tesseract.createWorker('chi_sim+eng', 1, { logger:m=>{ if(m.status==='recognizing text') btn.textContent='⏳ 识别中 '+Math.round((m.progress||0)*100)+'%'; } });
     let allText='';
@@ -5209,11 +5273,7 @@ async function copyRecognizedPaperText(){
     }
     await worker.terminate();
     if(!allText.trim()){ toast('没有识别到文字，请尝试更清晰的作业纸'); return; }
-    try{ await navigator.clipboard.writeText(allText); }
-    catch(e){
-      const area=document.createElement('textarea'); area.value=allText; area.style.cssText='position:fixed;left:-9999px;top:0'; document.body.appendChild(area); area.select();
-      const ok=document.execCommand('copy'); area.remove(); if(!ok) throw new Error('浏览器不允许复制，请检查网页权限');
-    }
+    await copyTextToClipboard(allText);
     toast('📋 已识别并复制文字（'+allText.length+' 个字符）',3000);
   }catch(err){ console.error('作业纸文字识别失败：',err); toast('识别失败：'+(err.message||'请检查网络后重试'),3500); }
   finally{ btn.disabled=false; btn.textContent=oldText; }
