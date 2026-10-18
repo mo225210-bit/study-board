@@ -514,8 +514,6 @@
     padding:9px 20px;border-radius:999px;cursor:pointer;box-shadow:0 3px 0 #4E8A22;
     transition:all .15s;white-space:nowrap}
   .btn-main:active{transform:translateY(2px)}
-  .btn-blue{background:linear-gradient(180deg,#4FC3F7,#2196F3);border:2px solid #2196F3;box-shadow:0 3px 0 #1565C0}
-  .btn-blue:active{transform:translateY(2px)}
 
   .form-field{margin-bottom:10px}
   .form-field>label{display:block;font-size:13px;font-weight:800;color:#5b7a5b;margin-bottom:5px;padding-left:2px}
@@ -1310,21 +1308,7 @@
   <div class="modal-card" style="max-width:520px">
     <h3>📄 语文作业纸</h3>
     <div id="paperPreviewContent" style="max-height:55vh;overflow:auto;background:#f5f5f5;padding:10px;text-align:left"></div>
-    <div id="paperOcrBox" style="display:none;margin:8px 0">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-        <span style="font-size:12.5px;font-weight:800;color:#5b7a5b">识别结果（百度智能云 OCR）</span>
-        <button id="paperOcrSettings" type="button" style="border:0;background:none;color:#2196F3;font-size:12px;cursor:pointer;font-weight:700;padding:2px 4px">⚙ 设置密钥</button>
-      </div>
-      <textarea id="paperOcrText" readonly placeholder="点击「提取文字」识别作业纸内容…" style="width:100%;height:120px;resize:vertical;font-size:13px;line-height:1.6;padding:8px;border:1px solid #cfd8dc;border-radius:8px;box-sizing:border-box;font-family:inherit"></textarea>
-      <div style="display:flex;gap:8px;margin-top:6px">
-        <button class="btn-main btn-blue" id="paperOcrCopy" type="button" style="padding:7px 14px;font-size:13px">📋 复制到剪贴板</button>
-      </div>
-    </div>
-    <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px 0 4px">
-      <button class="btn-main btn-blue" id="paperOcrBtn" type="button">🔍 提取文字</button>
-      <button class="btn-main" id="paperPreviewAdd" type="button">＋ 添加/更换</button>
-      <button class="btn-main" id="paperPreviewDel" type="button" style="background:linear-gradient(180deg,#FF8A80,#EF5350);border-color:#EF5350;box-shadow:0 3px 0 #C62828;color:#fff">🗑️ 删除</button>
-    </div>
+    <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px 0 4px"><button class="btn-main" id="paperPreviewCopyText" style="background:linear-gradient(180deg,#64B5F6,#1976D2);border-color:#1976D2;box-shadow:0 3px 0 #0D47A1;color:#fff">📋 复制识别文字</button><button class="btn-main" id="paperPreviewAdd">＋ 添加/更换作业纸</button><button class="btn-main" id="paperPreviewDel" style="background:linear-gradient(180deg,#FF8A80,#EF5350);border-color:#EF5350;box-shadow:0 3px 0 #C62828;color:#fff">🗑️ 删除作业纸</button></div>
     <div class="modal-actions"><button class="btn-ghost" id="paperPreviewClose">关闭</button><button class="btn-main" id="paperPrintBtn">🖨️ 打印</button></div>
   </div>
 </div>
@@ -5164,18 +5148,14 @@ function openChinesePaperPreview(){
   // 学生端仅查看/打印作业纸；添加、更换或删除入口只在家长端显示。
   const addButton = $('paperPreviewAdd');
   if(addButton) addButton.style.display = isAdminMode ? 'inline-flex' : 'none';
+  const copyTextButton = $('paperPreviewCopyText');
+  if(copyTextButton) copyTextButton.style.display = isAdminMode ? 'inline-flex' : 'none';
   const delButton = $('paperPreviewDel');
   if(delButton) delButton.style.display = isAdminMode ? 'inline-flex' : 'none';
-  const ocrButton = $('paperOcrBtn');
-  if(ocrButton) ocrButton.style.display = isAdminMode ? 'inline-flex' : 'none';
-  const ocrBox = $('paperOcrBox');
-  if(ocrBox) ocrBox.style.display = 'none';
-  const ocrText = $('paperOcrText');
-  if(ocrText) ocrText.value = '';
   const paper = getChinesePaperForDate(state.date);
   const box = $('paperPreviewContent'); box.innerHTML = '';
   if(!paper || !paper.data){
-    const empty=document.createElement('div'); empty.textContent = isAdminMode ? '暂无作业纸，点击下方“添加/更换”上传。' : '暂无作业纸。';
+    const empty=document.createElement('div'); empty.textContent = isAdminMode ? '暂无作业纸，点击下方“添加/更换作业纸”上传。' : '暂无作业纸。';
     empty.style.cssText='padding:24px 8px;text-align:center;color:#78909c;font-weight:700'; box.appendChild(empty);
   } else if(paper.type === 'application/pdf' || paper.data.startsWith('data:application/pdf')){
     const link = document.createElement('a'); link.href = paper.data; link.target='_blank'; link.rel='noopener'; link.textContent='打开作业纸 PDF'; box.appendChild(link);
@@ -5185,6 +5165,60 @@ function openChinesePaperPreview(){
   $('paperPreviewModal').classList.add('show');
 }
 $('paperPreviewAdd').style.cssText='visibility:visible;opacity:1;position:relative;z-index:5;';
+// 作业纸 OCR：识别图片或 PDF 中的中文，并将识别结果复制到剪贴板。
+let tesseractLoading = null;
+function loadTesseract(){
+  if(window.Tesseract) return Promise.resolve(window.Tesseract);
+  if(tesseractLoading) return tesseractLoading;
+  tesseractLoading = new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+    script.onload=()=>window.Tesseract?resolve(window.Tesseract):reject(new Error('文字识别组件加载失败'));
+    script.onerror=()=>reject(new Error('文字识别组件加载失败，请检查网络'));
+    document.head.appendChild(script);
+  });
+  return tesseractLoading;
+}
+async function copyRecognizedPaperText(){
+  if(!isAdminMode) return;
+  const paper=getChinesePaperForDate(state.date);
+  if(!paper || !paper.data){ toast('当前日期没有作业纸'); return; }
+  const btn=$('paperPreviewCopyText');
+  btn.disabled=true; const oldText=btn.textContent; btn.textContent='⏳ 正在识别…';
+  try{
+    const Tesseract=await loadTesseract();
+    const worker=await Tesseract.createWorker('chi_sim+eng', 1, { logger:m=>{ if(m.status==='recognizing text') btn.textContent='⏳ 识别中 '+Math.round((m.progress||0)*100)+'%'; } });
+    let allText='';
+    if(paper.type==='application/pdf' || paper.data.startsWith('data:application/pdf')){
+      const pdfjs=await loadPdfJs();
+      const raw=atob(paper.data.split(',')[1]); const bytes=new Uint8Array(raw.length);
+      for(let i=0;i<raw.length;i++) bytes[i]=raw.charCodeAt(i);
+      const pdf=await pdfjs.getDocument({data:bytes}).promise;
+      for(let pageNo=1;pageNo<=pdf.numPages;pageNo++){
+        btn.textContent='⏳ 识别 PDF '+pageNo+'/'+pdf.numPages;
+        const page=await pdf.getPage(pageNo); const viewport=page.getViewport({scale:2});
+        const canvas=document.createElement('canvas'); canvas.width=Math.ceil(viewport.width); canvas.height=Math.ceil(viewport.height);
+        await page.render({canvasContext:canvas.getContext('2d'),viewport}).promise;
+        const result=await worker.recognize(canvas);
+        allText += (allText?'\n\n':'')+'【第 '+pageNo+' 页】\n'+(result.data.text||'').trim();
+        canvas.width=canvas.height=1;
+      }
+    }else{
+      btn.textContent='⏳ 正在识别图片…';
+      const result=await worker.recognize(paper.data); allText=(result.data.text||'').trim();
+    }
+    await worker.terminate();
+    if(!allText.trim()){ toast('没有识别到文字，请尝试更清晰的作业纸'); return; }
+    try{ await navigator.clipboard.writeText(allText); }
+    catch(e){
+      const area=document.createElement('textarea'); area.value=allText; area.style.cssText='position:fixed;left:-9999px;top:0'; document.body.appendChild(area); area.select();
+      const ok=document.execCommand('copy'); area.remove(); if(!ok) throw new Error('浏览器不允许复制，请检查网页权限');
+    }
+    toast('📋 已识别并复制文字（'+allText.length+' 个字符）',3000);
+  }catch(err){ console.error('作业纸文字识别失败：',err); toast('识别失败：'+(err.message||'请检查网络后重试'),3500); }
+  finally{ btn.disabled=false; btn.textContent=oldText; }
+}
+$('paperPreviewCopyText').addEventListener('click',copyRecognizedPaperText);
 $('paperPreviewAdd').addEventListener('click', () => { $('paperPreviewModal').classList.remove('show'); $('chinesePaperInput').value=''; $('chinesePaperInput').click(); });
 const delBtnEl = $('paperPreviewDel');
 delBtnEl.style.visibility='visible'; delBtnEl.style.opacity='1'; delBtnEl.style.position='relative'; delBtnEl.style.zIndex='5';
@@ -5210,104 +5244,6 @@ $('paperPreviewDel').addEventListener('click', async () => {
   openChinesePaperPreview();
   toast(cloudOK ? '🗑️ 作业纸已删除并同步云端' : '🗑️ 作业纸已在本机删除（云端同步未确认）', 3200);
 });
-
-/* ===== 百度智能云 OCR 文字提取 ===== */
-function baiduOcrKeys(){
-  return {
-    ak: (localStorage.getItem('xxt_ocr_ak') || '').trim(),
-    sk: (localStorage.getItem('xxt_ocr_sk') || '').trim()
-  };
-}
-function baiduOcrPromptKeys(){
-  const ak = window.prompt('请输入百度智能云 OCR 的 API Key（在「文字识别」控制台创建应用后获取）：', '');
-  if(ak === null) return false;
-  const sk = window.prompt('请输入百度智能云 OCR 的 Secret Key：', '');
-  if(sk === null) return false;
-  localStorage.setItem('xxt_ocr_ak', ak.trim());
-  localStorage.setItem('xxt_ocr_sk', sk.trim());
-  localStorage.removeItem('xxt_ocr_token');
-  return true;
-}
-async function baiduOcrToken(force){
-  const keys = baiduOcrKeys();
-  if(!keys.ak || !keys.sk){ if(!baiduOcrPromptKeys()) return null; }
-  const k = baiduOcrKeys();
-  if(!force){
-    try{ const c = JSON.parse(localStorage.getItem('xxt_ocr_token') || 'null'); if(c && c.token && c.exp > Date.now() + 60000) return c.token; }catch(e){}
-  }
-  const url = 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=' + encodeURIComponent(k.ak) + '&client_secret=' + encodeURIComponent(k.sk);
-  const resp = await fetch(url);
-  const data = await resp.json();
-  if(!data.access_token){ toast('获取百度 Token 失败：' + (data.error_description || data.error || '未知错误')); return null; }
-  const exp = Date.now() + (data.expires_in ? data.expires_in * 1000 : 2592000000);
-  localStorage.setItem('xxt_ocr_token', JSON.stringify({ token: data.access_token, exp }));
-  return data.access_token;
-}
-async function baiduOcrRecognize(dataUrl){
-  let token = await baiduOcrToken(false);
-  if(!token) return null;
-  const base64 = dataUrl.split(',')[1] || '';
-  const body = 'image=' + encodeURIComponent(base64);
-  const callOcr = async (tk) => {
-    const resp = await fetch('https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic?access_token=' + tk, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body
-    });
-    return resp.json();
-  };
-  let data = await callOcr(token);
-  // access_token 失效（110/111）→ 清缓存强制换发并重试一次
-  if(data && (data.error_code === 110 || data.error_code === 111)){
-    token = await baiduOcrToken(true);
-    if(token) data = await callOcr(token);
-  }
-  if(data && data.error_code){
-    toast('OCR 失败：' + (data.error_msg || data.error_code));
-    return null;
-  }
-  return (data.words_result || []).map(w => w.words).join('\n');
-}
-function legacyCopyText(text){
-  try{ const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.focus(); ta.select(); const ok = document.execCommand('copy'); document.body.removeChild(ta); return ok; }catch(e){ return false; }
-}
-function copyTextToClipboard(text){
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    return navigator.clipboard.writeText(text).catch(() => legacyCopyText(text));
-  }
-  return Promise.resolve(legacyCopyText(text));
-}
-const paperOcrBtn = $('paperOcrBtn');
-if(paperOcrBtn){
-  paperOcrBtn.style.visibility = 'visible'; paperOcrBtn.style.opacity = '1'; paperOcrBtn.style.position = 'relative'; paperOcrBtn.style.zIndex = '5';
-  paperOcrBtn.addEventListener('click', async () => {
-    if(!isAdminMode) return;
-    const paper = getChinesePaperForDate(state.date);
-    if(!paper || !paper.data){ toast('当前日期还没有作业纸'); return; }
-    if(paper.type === 'application/pdf' || paper.data.startsWith('data:application/pdf')){ toast('PDF 暂不支持 OCR，请用图片作业纸'); return; }
-    const box = $('paperOcrBox'); const ta = $('paperOcrText');
-    paperOcrBtn.disabled = true; const oldText = paperOcrBtn.textContent; paperOcrBtn.textContent = '🔍 识别中…';
-    try{
-      const text = await baiduOcrRecognize(paper.data);
-      if(text !== null){
-        box.style.display = 'block';
-        ta.value = text || '（未识别到文字）';
-        if(text){ const ok = await copyTextToClipboard(text); toast(ok ? '✅ 已识别并复制到剪贴板' : '✅ 已识别（请手动复制）', 3200); }
-        else toast('未识别到文字');
-      }
-    }catch(e){
-      console.warn('OCR 异常', e);
-      toast('OCR 请求失败（可能为网络/CORS 限制），请检查密钥或网络');
-    }finally{
-      paperOcrBtn.disabled = false; paperOcrBtn.textContent = oldText;
-    }
-  });
-}
-const paperOcrCopyBtn = $('paperOcrCopy');
-if(paperOcrCopyBtn){ paperOcrCopyBtn.addEventListener('click', async () => { const t = $('paperOcrText').value; if(!t){ return; } const ok = await copyTextToClipboard(t); toast(ok ? '📋 已复制' : '复制失败，请手动选择', 2600); }); }
-const paperOcrSettingsBtn = $('paperOcrSettings');
-if(paperOcrSettingsBtn){ paperOcrSettingsBtn.addEventListener('click', () => { if(baiduOcrPromptKeys()) toast('✅ 已保存百度 OCR 密钥', 2200); }); }
-
 $('paperPreviewClose').addEventListener('click', () => $('paperPreviewModal').classList.remove('show'));
 $('paperPrintBtn').addEventListener('click', () => {
   const printDate = state.date;
