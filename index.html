@@ -5168,7 +5168,7 @@ $('paperPreviewAdd').style.cssText='visibility:visible;opacity:1;position:relati
 // 作业纸 OCR：识别图片或 PDF 中的中文，并将识别结果复制到剪贴板。
 // ===== 云端文字识别（接口部署在 EdgeOne Pages，配套代码在 edgeone-ocr-api 文件夹）=====
 // 部署好后，把下面引号里填上你的接口地址，例如：
-//   const OCR_API_URL = 'https://xxxx.edgeone.app/api/ocr';
+//   const OCR_API_URL = 'https://homework-ocr-api-dpwptoz0c1wh.edgeone.cool/api/ocr';
 // 留空 '' 则不启用云端识别，和以前一样只用本机识别（云端失败也会自动退回本机识别）。
 const OCR_API_URL = '';
 async function cloudOcrImage(dataUrl){
