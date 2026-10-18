@@ -5170,7 +5170,7 @@ $('paperPreviewAdd').style.cssText='visibility:visible;opacity:1;position:relati
 // 部署好后，把下面引号里填上你的接口地址，例如：
 //   const OCR_API_URL = 'https://homework-ocr-api-dpwptoz0c1wh.edgeone.cool/api/ocr';
 // 留空 '' 则不启用云端识别，和以前一样只用本机识别（云端失败也会自动退回本机识别）。
-const OCR_API_URL = 'https://homework-ocr-api-cwzzarht.edgeone.cool?eo_token=6b19488e7d59db9d3a85b043a065b74f&eo_time=1792308595';
+const OCR_API_URL = 'https://homework-ocr-api-cwzzarht.edgeone.cool?eo_token=6b19488e7d59db9d3a85b043a065b74f&eo_time=1792308595/api/ocr';
 async function cloudOcrImage(dataUrl){
   const res=await fetch(OCR_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:dataUrl})});
   const data=await res.json().catch(()=>({}));
