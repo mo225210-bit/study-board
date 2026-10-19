@@ -3243,8 +3243,9 @@ function removeCharWord(char, index){
 function refreshWordBankInCards(char){
   document.querySelectorAll('[data-word-after="' + char + '"]').forEach(el => {
     const words = (state.wordBank && state.wordBank[char]) ? state.wordBank[char] : [];
+    // 不依赖未定义的外部 task 变量，避免本机卡片刷新时报 ReferenceError。
     el.innerHTML = words.length
-      ? words.map(w => renderSmallWord(w, task)).join('')
+      ? words.map(w => renderSmallWord(w, null)).join('')
       : '<span class="word-empty">点击田字格组词</span>';
   });
 }
@@ -6422,9 +6423,10 @@ $('pwdConfirm').addEventListener('click', confirmPassword);
 $('pwdCancel').addEventListener('click', closePwdModal);
 pwdInput.addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); confirmPassword(); } });
 pwdInput.addEventListener('input', () => {
-  pwdInput.classList.remove('error'); pwdTip.textContent=''; pwdTip.classList.remove('err');
-  const v = pwdInput.value.trim();
-  if(v.length >= 4) confirmPassword();
+  // 由“确认”按钮或回车触发验证，不在输入第 4 位时自动提交。
+  pwdInput.classList.remove('error');
+  pwdTip.textContent = '';
+  pwdTip.classList.remove('err');
 });
 pwdModalEl.addEventListener('click', e => { if(e.target===pwdModalEl) closePwdModal(); });
 
@@ -6441,7 +6443,12 @@ function enterAdminMode(){
   adminBar.classList.add('show');
   adminPanel.classList.add('show');
   document.body.style.paddingBottom = '70px';
-  renderAdminPanel();
+  try{
+    renderAdminPanel();
+  }catch(e){
+    console.error('家长管理面板渲染异常', e);
+    toast('已验证密码，但管理面板部分内容加载失败，请刷新网页再试', 3500);
+  }
   toast('🔓 已进入家长管理模式', 2500);
 }
 function exitAdminMode(){
