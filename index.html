@@ -812,6 +812,9 @@
   .attachment-modal-card #taskAttachmentTitle,.attachment-modal-card .attachment-list{display:none!important}
   .attachment-modal-card .modal-actions{display:flex!important;position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:20;margin:0;padding:4px;background:rgba(0,0,0,.4);border-radius:24px}
   .attachment-modal-card .modal-actions button{flex:none;padding:7px 14px;font-size:13px}
+  .task-attachment-close{position:fixed;top:calc(12px + env(safe-area-inset-top));right:12px;z-index:30;width:42px;height:42px;border:0;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:24px;font-weight:900;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+  .task-attachment-close:active{background:rgba(70,70,70,.85);transform:scale(.95)}
+  .word-after .word-item > .mizi-speaker{top:calc(50% + 7px)!important}
   .attachment-layout{display:block;min-height:0;flex:1;margin:0;overflow:hidden}
   .attachment-preview{width:100%;height:100%;min-height:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;border:0;border-radius:0;padding:0;overflow:hidden;background:#000;color:#fff}
   .attachment-preview img,.attachment-preview video{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain}
@@ -823,6 +826,12 @@
   #adminSunAmount{width:96px;flex:none;font-size:17.5px;font-weight:900;
     text-align:center;padding:10px 6px;letter-spacing:.5px}
 
+  .custom-tools-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 10px;margin:8px 0 4px}
+  .custom-tool-btn{min-width:0;min-height:48px;border:1px solid #c8e6c9;border-radius:12px;background:linear-gradient(180deg,#f7fff6,#e8f5e9);color:#285b35;font-family:inherit;font-weight:800;font-size:14px;line-height:1.3;padding:8px 4px;overflow-wrap:anywhere;cursor:pointer;touch-action:manipulation;box-shadow:0 2px 5px rgba(40,80,40,.08)}
+  .custom-tool-btn.add{font-size:26px;color:#2e7d32;background:#f5fff5;border-style:dashed}
+  .custom-tool-btn:active{transform:scale(.98)}
+  .custom-tool-note{font-size:10px;color:#789078;font-weight:600;display:block;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  @media(max-width:480px){.custom-tools-grid{gap:10px 7px}.custom-tool-btn{min-height:44px;font-size:12px;padding:7px 3px}}
   .aa-hint{font-size:12.5px;font-weight:700;color:#7a9aaa;line-height:1.7;
     margin:6px 2px 12px;word-break:break-all}
   .aa-hint.ok{color:#9CCC65}
@@ -1553,7 +1562,21 @@
       <div class="attachment-list" id="taskAttachmentList"></div>
       <div class="attachment-preview" id="taskAttachmentPreview">选择附件查看</div>
     </div>
-    <div class="modal-actions"><button class="btn-main" id="taskAttachmentClose">关闭</button></div>
+    <button class="task-attachment-close" id="taskAttachmentClose" type="button" aria-label="关闭附件">✕</button>
+  </div>
+</div>
+
+<div class="modal" id="customToolEditModal">
+  <div class="modal-card" style="max-width:420px;width:100%">
+    <h3 id="customToolEditTitle">🧰 设置自定义工具</h3>
+    <div class="form-field"><label for="customToolName">名称（显示在按钮上）</label><input id="customToolName" type="text" maxlength="30" placeholder="例如：英语听力"></div>
+    <div class="form-field"><label for="customToolUrl">链接</label><input id="customToolUrl" type="url" maxlength="1000" placeholder="https://..."></div>
+    <div class="form-field"><label for="customToolNote">备注</label><textarea id="customToolNote" rows="2" maxlength="300" placeholder="可选"></textarea></div>
+    <div class="modal-actions" style="justify-content:space-between">
+      <button class="btn-ghost" id="customToolDelete" type="button" style="display:none;color:#c62828">删除</button>
+      <button class="btn-ghost" id="customToolCancel" type="button">取消</button>
+      <button class="btn-main" id="customToolSave" type="button">保存</button>
+    </div>
   </div>
 </div>
 
@@ -1750,6 +1773,12 @@
       <div class="admin-add-row" style="margin-top:2px">
         <label class="chk-label"><input type="checkbox" id="adminAddEnglishPenalty"> 超时扣金币（每超时 1 分钟扣 1 个，默认不勾选）</label>
       </div>
+    </div>
+
+    <div class="admin-section" id="adminPanelCustomTools">
+      <h3>🧰 自定义工具</h3>
+      <div class="custom-tools-grid" id="adminCustomToolsGrid"></div>
+      <div class="aa-hint">长按任意按钮 1 秒可设置名称、链接和备注；点击按钮打开链接。设置会保存到云端。</div>
     </div>
 
     <div class="admin-section collapsed" id="adminPanelShop">
@@ -2581,6 +2610,7 @@ function loadLocalState(){
       shop: JSON.parse(JSON.stringify(DEFAULT_SHOP)),
       wordBank: {}, charPages: {}, timetable: null,
       parentPassword: MASTER_PASSWORD,
+      customTools: [],
       chinesePaper: null,
       lastNightReset: '', eyeSoundOffDate: '',
       live: JSON.parse(JSON.stringify(DEFAULT_LIVE))
@@ -2591,6 +2621,8 @@ function loadLocalState(){
   Object.keys(s.days).forEach(k => { newDays[k] = normalizeDay(s.days[k]); });
   s.days = newDays;
   if(!s.days[s.date]) s.days[s.date] = makeDay();
+  if(!Array.isArray(s.customTools)) s.customTools = [];
+  s.customTools = s.customTools.slice(0,80).map(t => ({id:String(t && t.id || newId()),name:String(t && t.name || '').slice(0,30),url:String(t && t.url || '').slice(0,1000),note:String(t && t.note || '').slice(0,300)})).filter(t => t.name && t.url);
   if(!s.syncDays || typeof s.syncDays !== 'object' || Array.isArray(s.syncDays)) s.syncDays = {};
   // 作业纸按日期保存：每个日期只保留该日最新一份。兼容旧版单份作业纸。
   if(!s.papersByDate || typeof s.papersByDate !== 'object' || Array.isArray(s.papersByDate)) s.papersByDate = {};
@@ -4110,7 +4142,9 @@ function attachmentKind(a){
   return 'document';
 }
 function renderTaskAttachmentPreview(a){
-  const host = $('taskAttachmentPreview'); if(!host || !a) return;
+  const host = $('taskAttachmentPreview'); if(!host) return;
+  host.querySelectorAll('audio,video').forEach(media => { try{ media.pause(); }catch(e){} });
+  host.querySelectorAll('iframe').forEach(frame => { try{ frame.src = 'about:blank'; }catch(e){} });
   const kind = attachmentKind(a); const src = escapeAttr(a.data || ''); const name = escapeHtml(a.name || '附件');
   if(kind === 'video-link'){
     const url = String(a.url || '');
@@ -4157,9 +4191,15 @@ $('taskAttachmentPreview').addEventListener('touchend', e => {
   taskAttachmentIndex = (taskAttachmentIndex + (dx < 0 ? 1 : -1) + taskAttachmentItems.length) % taskAttachmentItems.length;
   renderTaskAttachmentPreview(taskAttachmentItems[taskAttachmentIndex]);
 }, {passive:true});
-$('taskAttachmentClose').addEventListener('click', () => $('taskAttachmentModal').classList.remove('show'));
-$('taskAttachmentModal').addEventListener('click', e => { if(e.target === $('taskAttachmentModal')) $('taskAttachmentModal').classList.remove('show'); });
-document.addEventListener('keydown', e => { if(e.key === 'Escape' && $('taskAttachmentModal').classList.contains('show')) $('taskAttachmentModal').classList.remove('show'); });
+function pauseTaskAttachmentMedia(){
+  const preview = $('taskAttachmentPreview'); if(!preview) return;
+  preview.querySelectorAll('audio,video').forEach(media => { try{ media.pause(); media.currentTime = 0; }catch(e){} });
+  preview.querySelectorAll('iframe').forEach(frame => { try{ frame.src = 'about:blank'; }catch(e){} });
+}
+function closeTaskAttachmentModal(){ pauseTaskAttachmentMedia(); $('taskAttachmentModal').classList.remove('show'); }
+$('taskAttachmentClose').addEventListener('click', closeTaskAttachmentModal);
+$('taskAttachmentModal').addEventListener('click', e => { if(e.target === $('taskAttachmentModal')) closeTaskAttachmentModal(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && $('taskAttachmentModal').classList.contains('show')) closeTaskAttachmentModal(); });
 
 const pendingCustomAttachments = { chinese: [], math: [], english: [] };
 const customAttachmentSubjectConfig = [
@@ -6498,6 +6538,63 @@ $('eyeRestBtn').addEventListener('click', () => {
 /* ============================================================
    管理面板
 ============================================================ */
+/* ================= 自定义工具：长按设置、点击打开、云端同步 ================= */
+let customToolEditingId = null;
+let customToolPressTimer = null;
+let customToolPressTarget = null;
+function renderCustomTools(){
+  const grid = $('adminCustomToolsGrid'); if(!grid) return;
+  const tools = Array.isArray(state.customTools) ? state.customTools : [];
+  grid.innerHTML = '';
+  tools.forEach(tool => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'custom-tool-btn';
+    b.textContent = tool.name; b.title = tool.note || tool.url;
+    if(tool.note){ const note = document.createElement('span'); note.className = 'custom-tool-note'; note.textContent = tool.note; b.appendChild(note); }
+    b.addEventListener('click', () => {
+      if(b.dataset.longPressed === '1'){ b.dataset.longPressed = '0'; return; }
+      try{ const u = new URL(tool.url, location.href); if(!/^https?:$/.test(u.protocol)){toast('仅支持 http/https 链接');return;} window.open(u.href,'_blank','noopener,noreferrer'); }
+      catch(e){toast('链接格式不正确，请长按按钮修改');}
+    });
+    bindCustomToolLongPress(b, tool.id); grid.appendChild(b);
+  });
+  const add = document.createElement('button'); add.type='button'; add.className='custom-tool-btn add'; add.textContent='+'; add.title='长按 1 秒添加工具';
+  bindCustomToolLongPress(add, null); grid.appendChild(add);
+}
+function bindCustomToolLongPress(button, id){
+  const start = e => {
+    if(e.type === 'mousedown' && e.button !== 0) return;
+    clearTimeout(customToolPressTimer); customToolPressTarget = button; button.dataset.longPressed='0';
+    customToolPressTimer = setTimeout(() => { if(customToolPressTarget !== button) return; button.dataset.longPressed='1'; openCustomToolEditor(id); },1000);
+  };
+  const cancel = () => { clearTimeout(customToolPressTimer); if(customToolPressTarget===button) customToolPressTarget=null; };
+  button.addEventListener('pointerdown', start); button.addEventListener('pointerup', cancel); button.addEventListener('pointerleave', cancel); button.addEventListener('pointercancel', cancel);
+  button.addEventListener('contextmenu', e => e.preventDefault());
+}
+function openCustomToolEditor(id){
+  customToolEditingId = id;
+  const tool = (state.customTools || []).find(t=>t.id===id);
+  $('customToolEditTitle').textContent = tool ? '🧰 修改自定义工具' : '🧰 添加自定义工具';
+  $('customToolName').value = tool ? tool.name : ''; $('customToolUrl').value = tool ? tool.url : ''; $('customToolNote').value = tool ? tool.note : '';
+  $('customToolDelete').style.display = tool ? '' : 'none'; $('customToolEditModal').classList.add('show');
+  setTimeout(()=>$('customToolName').focus(),80);
+}
+function closeCustomToolEditor(){ $('customToolEditModal').classList.remove('show'); customToolEditingId=null; }
+$('customToolCancel').addEventListener('click',closeCustomToolEditor);
+$('customToolEditModal').addEventListener('click',e=>{if(e.target===$('customToolEditModal'))closeCustomToolEditor();});
+$('customToolSave').addEventListener('click',async()=>{
+  const name=$('customToolName').value.trim(), rawUrl=$('customToolUrl').value.trim(), note=$('customToolNote').value.trim();
+  if(!name){toast('请填写工具名称');return;} if(!rawUrl){toast('请填写工具链接');return;}
+  let url; try{url=new URL(rawUrl,location.href);if(!/^https?:$/.test(url.protocol))throw new Error();}catch(e){toast('请输入有效的 http/https 链接');return;}
+  if(!Array.isArray(state.customTools))state.customTools=[];
+  if(customToolEditingId){const t=state.customTools.find(x=>x.id===customToolEditingId);if(t)Object.assign(t,{name,url:url.href,note});else state.customTools.push({id:newId(),name,url:url.href,note});}
+  else {if(state.customTools.length>=79){toast('最多添加 79 个自定义工具');return;}state.customTools.push({id:newId(),name,url:url.href,note});}
+  saveLocalState(); renderCustomTools(); closeCustomToolEditor(); const ok=await uploadToCloud(true); toast(ok?'✅ 自定义工具已保存并同步云端':'已保存到本机，云端同步稍后重试');
+});
+$('customToolDelete').addEventListener('click',async()=>{
+  if(!customToolEditingId)return; state.customTools=(state.customTools||[]).filter(t=>t.id!==customToolEditingId);
+  saveLocalState(); renderCustomTools(); closeCustomToolEditor(); const ok=await uploadToCloud(true); toast(ok?'已删除自定义工具':'已在本机删除，云端同步稍后重试');
+});
+
 function renderAdminPanel(){
   if(!isAdminMode) return;
   const all = allTasks();
@@ -6520,6 +6617,7 @@ function renderAdminPanel(){
   renderAdminTaskList('chinese', 'adminChineseList', 'adminChineseBadge');
   renderAdminTaskList('math', 'adminMathList', 'adminMathBadge');
   renderAdminTaskList('english', 'adminEnglishList', 'adminEnglishBadge');
+  renderCustomTools();
   renderLessonLibrary(); populateLessonSelects();
   renderAdminShop();
   renderAdminTimetable();
