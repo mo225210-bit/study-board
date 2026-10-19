@@ -1684,7 +1684,11 @@
         <span id="adminAddChineseFilesName" class="attachment-file-name">未选择附件</span>
         <label class="chk-label"><input type="checkbox" id="adminAddChineseShowMedia"> 学生端显示多媒体图标</label>
       </div>
-      <div class="aa-hint">支持音频、视频、图片和常见文档；为保证云端同步，每项作业附件总大小不超过 4MB，单个文件不超过 2MB。</div>
+      <div class="admin-add-row custom-attachment-row" style="margin-top:6px;gap:8px;align-items:center;flex-wrap:wrap">
+        <label for="adminAddChineseVideoUrl" style="font-weight:700">🔗 B站/抖音分享链接</label>
+        <input id="adminAddChineseVideoUrl" type="url" class="aa-text" style="min-width:240px;flex:1" placeholder="粘贴 B站或抖音视频分享链接（可选）">
+      </div>
+      <div class="aa-hint">支持音频、视频、图片和常见文档；每项作业最多 4 个附件、单个不超过 2MB、附件总大小不超过 4MB。B站链接优先使用独立播放器；抖音是否能内嵌播放取决于平台限制，页面会限制播放器跳出到其他推荐内容。</div>
       <div class="admin-add-row" style="margin-top:2px">
         <label class="chk-label"><input type="checkbox" id="adminAddChinesePenalty"> 超时扣金币（每超时 1 分钟扣 1 个，默认不勾选）</label>
       </div>
@@ -1708,7 +1712,11 @@
         <span id="adminAddMathFilesName" class="attachment-file-name">未选择附件</span>
         <label class="chk-label"><input type="checkbox" id="adminAddMathShowMedia"> 学生端显示多媒体图标</label>
       </div>
-      <div class="aa-hint">支持音频、视频、图片和常见文档；为保证云端同步，每项作业附件总大小不超过 4MB，单个文件不超过 2MB。</div>
+      <div class="admin-add-row custom-attachment-row" style="margin-top:6px;gap:8px;align-items:center;flex-wrap:wrap">
+        <label for="adminAddMathVideoUrl" style="font-weight:700">🔗 B站/抖音分享链接</label>
+        <input id="adminAddMathVideoUrl" type="url" class="aa-text" style="min-width:240px;flex:1" placeholder="粘贴 B站或抖音视频分享链接（可选）">
+      </div>
+      <div class="aa-hint">支持音频、视频、图片和常见文档；每项作业最多 4 个附件、单个不超过 2MB、附件总大小不超过 4MB。B站链接优先使用独立播放器；抖音是否能内嵌播放取决于平台限制，页面会限制播放器跳出到其他推荐内容。</div>
       <div class="admin-add-row" style="margin-top:2px">
         <label class="chk-label"><input type="checkbox" id="adminAddMathPenalty"> 超时扣金币（每超时 1 分钟扣 1 个，默认不勾选）</label>
       </div>
@@ -1732,7 +1740,11 @@
         <span id="adminAddEnglishFilesName" class="attachment-file-name">未选择附件</span>
         <label class="chk-label"><input type="checkbox" id="adminAddEnglishShowMedia"> 学生端显示多媒体图标</label>
       </div>
-      <div class="aa-hint">支持音频、视频、图片和常见文档；为保证云端同步，每项作业附件总大小不超过 4MB，单个文件不超过 2MB。</div>
+      <div class="admin-add-row custom-attachment-row" style="margin-top:6px;gap:8px;align-items:center;flex-wrap:wrap">
+        <label for="adminAddEnglishVideoUrl" style="font-weight:700">🔗 B站/抖音分享链接</label>
+        <input id="adminAddEnglishVideoUrl" type="url" class="aa-text" style="min-width:240px;flex:1" placeholder="粘贴 B站或抖音视频分享链接（可选）">
+      </div>
+      <div class="aa-hint">支持音频、视频、图片和常见文档；每项作业最多 4 个附件、单个不超过 2MB、附件总大小不超过 4MB。B站链接优先使用独立播放器；抖音是否能内嵌播放取决于平台限制，页面会限制播放器跳出到其他推荐内容。</div>
       <div class="admin-add-row" style="margin-top:2px">
         <label class="chk-label"><input type="checkbox" id="adminAddEnglishPenalty"> 超时扣金币（每超时 1 分钟扣 1 个，默认不勾选）</label>
       </div>
@@ -2509,9 +2521,10 @@ function normalizeTaskAttachments(raw){
     name: String(a && a.name || '附件').slice(0,180),
     mime: String(a && a.mime || 'application/octet-stream').slice(0,120),
     data: String(a && a.data || ''),
+    url: String(a && a.url || ''),
     size: Math.max(0, Number(a && a.size) || 0),
     ts: Number(a && a.ts) || Date.now()
-  })).filter(a => a.data);
+  })).filter(a => a.data || a.url);
 }
 function normalizeDay(day){
   const out = makeDay();
@@ -4082,6 +4095,7 @@ $('photoViewer').addEventListener('click', e => { if(e.target === $('photoViewer
 
 let taskAttachmentViewId = null;
 function attachmentKind(a){
+  if(a && a.url) return 'video-link';
   const mime = String(a && a.mime || '').toLowerCase();
   const name = String(a && a.name || '').toLowerCase();
   if(mime.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|svg)$/.test(name)) return 'image';
@@ -4093,7 +4107,17 @@ function attachmentKind(a){
 function renderTaskAttachmentPreview(a){
   const host = $('taskAttachmentPreview'); if(!host || !a) return;
   const kind = attachmentKind(a); const src = escapeAttr(a.data || ''); const name = escapeHtml(a.name || '附件');
-  if(kind === 'image') host.innerHTML = '<img src="' + src + '" alt="' + name + '"><a download="' + escapeAttr(a.name || 'attachment') + '" href="' + src + '">下载图片</a>';
+  if(kind === 'video-link'){
+    const url = String(a.url || '');
+    const bvid = (url.match(/\b(BV[0-9A-Za-z]{10})\b/i) || [])[1];
+    const avid = (url.match(/[?&]aid=(\d+)/i) || url.match(/\/av(\d+)/i) || [])[1];
+    let playerUrl = '';
+    if(bvid) playerUrl = 'https://player.bilibili.com/player.html?bvid=' + encodeURIComponent(bvid) + '&page=1&danmaku=0&high_quality=1';
+    else if(avid) playerUrl = 'https://player.bilibili.com/player.html?aid=' + encodeURIComponent(avid) + '&page=1&danmaku=0&high_quality=1';
+    else playerUrl = url;
+    host.innerHTML = '<div>▶️ ' + name + '</div><iframe title="仅播放指定分享视频" src="' + escapeAttr(playerUrl) + '" sandbox="allow-scripts allow-same-origin allow-presentation" referrerpolicy="no-referrer" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe><div style="font-size:12px;color:#607d8b">为避免学生跳转到其他推荐内容，播放器已限制顶层跳转。若平台禁止嵌入播放，请家长改为上传视频文件。</div>';
+  }
+  else if(kind === 'image') host.innerHTML = '<img src="' + src + '" alt="' + name + '"><a download="' + escapeAttr(a.name || 'attachment') + '" href="' + src + '">下载图片</a>';
   else if(kind === 'audio') host.innerHTML = '<div>🎵 ' + name + '</div><audio controls preload="metadata" src="' + src + '"></audio><a download="' + escapeAttr(a.name || 'attachment') + '" href="' + src + '">下载音频</a>';
   else if(kind === 'video') host.innerHTML = '<div>🎬 ' + name + '</div><video controls playsinline preload="metadata" src="' + src + '"></video><a download="' + escapeAttr(a.name || 'attachment') + '" href="' + src + '">下载视频</a>';
   else if(kind === 'pdf') host.innerHTML = '<div>📄 ' + name + '</div><iframe title="' + name + '" src="' + src + '"></iframe><a download="' + escapeAttr(a.name || 'attachment.pdf') + '" href="' + src + '">下载 PDF</a>';
@@ -4108,7 +4132,7 @@ function openTaskAttachments(taskId){
   const list = $('taskAttachmentList'); list.innerHTML = '';
   attachments.forEach((a, i) => {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'attachment-choice' + (i===0?' active':'');
-    const kind = attachmentKind(a); const ico = kind==='image'?'🖼️':kind==='audio'?'🎵':kind==='video'?'🎬':kind==='pdf'?'📕':'📄';
+    const kind = attachmentKind(a); const ico = kind==='video-link'?'▶️':kind==='image'?'🖼️':kind==='audio'?'🎵':kind==='video'?'🎬':kind==='pdf'?'📕':'📄';
     b.textContent = ico + ' ' + a.name; b.title = a.name;
     b.addEventListener('click', () => { list.querySelectorAll('.attachment-choice').forEach(x=>x.classList.remove('active')); b.classList.add('active'); renderTaskAttachmentPreview(a); });
     list.appendChild(b);
@@ -4148,6 +4172,16 @@ function guessAttachmentMime(name){
   const ext = String(name||'').split('.').pop().toLowerCase();
   return ({pdf:'application/pdf',txt:'text/plain',rtf:'application/rtf',doc:'application/msword',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',xls:'application/vnd.ms-excel',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',ppt:'application/vnd.ms-powerpoint',pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation',csv:'text/csv'})[ext] || 'application/octet-stream';
 }
+function parseVideoShareLink(raw){
+  const text = String(raw || '').trim();
+  if(!text) return null;
+  let url; try{ url = new URL(text); }catch(e){ throw new Error('请粘贴完整的 B站或抖音分享链接'); }
+  const host = url.hostname.toLowerCase().replace(/^www\./,'');
+  const isBili = host === 'bilibili.com' || host.endsWith('.bilibili.com') || host === 'b23.tv';
+  const isDouyin = host === 'douyin.com' || host.endsWith('.douyin.com');
+  if(url.protocol !== 'https:' || (!isBili && !isDouyin)) throw new Error('目前只接受 HTTPS 的 B站或抖音链接');
+  return {id:newId(), name:isBili?'B站分享视频':'抖音分享视频', mime:'application/x-video-share-link', data:'', url:url.href, size:0, ts:Date.now()};
+}
 async function collectCustomAttachments(subject, prefix){
   const files = pendingCustomAttachments[subject] || [];
   if(files.length > 4 || files.some(f => f.size > 2*1024*1024) || files.reduce((n,f)=>n+f.size,0) > 4*1024*1024){
@@ -4155,12 +4189,19 @@ async function collectCustomAttachments(subject, prefix){
   }
   const attachments = [];
   for(const file of files) attachments.push(await readAttachmentFile(file));
+  const linkInput = $('adminAdd' + prefix + 'VideoUrl');
+  const linkAttachment = parseVideoShareLink(linkInput ? linkInput.value : '');
+  if(linkAttachment){
+    if(attachments.length >= 4) { toast('附件最多4个，请减少一个文件或只保留分享链接'); throw new Error('附件数量超限'); }
+    attachments.push(linkAttachment);
+  }
   return {attachments, showAttachmentIcon: !!($( 'adminAdd' + prefix + 'ShowMedia') && $('adminAdd' + prefix + 'ShowMedia').checked)};
 }
 function clearCustomAttachmentInput(subject, prefix){
   pendingCustomAttachments[subject] = [];
   const input = $('adminAdd' + prefix + 'Files'); if(input) input.value = '';
   const nameEl = $('adminAdd' + prefix + 'FilesName'); if(nameEl) nameEl.textContent = '未选择附件';
+  const linkInput = $('adminAdd' + prefix + 'VideoUrl'); if(linkInput) linkInput.value = '';
 }
 
 /* 田字格长按弹窗事件 */
