@@ -444,11 +444,11 @@
     -webkit-touch-callout:none;touch-action:manipulation}
   .mizi:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.14)}
   .mizi:active{transform:scale(.95)}
-  .mizi-row{display:flex;align-items:center;justify-content:center;gap:3px;flex:none}
+  .mizi-row{display:flex;align-items:center;justify-content:center;gap:0;flex:none;position:relative}
   .mizi-speaker{width:20px;height:26px;flex:none;border:0;border-radius:7px;background:#E3F2FD;color:#1565C0;
     display:inline-flex;align-items:center;justify-content:center;padding:0;font-size:14px;line-height:1;cursor:pointer;
-    -webkit-tap-highlight-color:transparent}
-  .mizi-speaker:active{background:#BBDEFB;transform:scale(.94)}
+    -webkit-tap-highlight-color:transparent;position:absolute;left:calc(100% + 2px);top:50%;transform:translateY(-50%);z-index:2}
+  .mizi-speaker:active{background:#BBDEFB;transform:translateY(-50%) scale(.94)}
   .mizi-speaker svg{width:14px;height:14px;display:block}
   .mizi-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
   .mizi-svg line{stroke:rgba(229,115,115,.55);stroke-width:1;stroke-dasharray:4 3;vector-effect:non-scaling-stroke}
@@ -487,7 +487,8 @@
     margin-top:3px;padding:2px 3px;max-width:190px;min-height:30px;
     border-top:1px dashed #DCEED4;
   }
-  .word-after .word-item{display:flex;gap:2px;align-items:center}
+  .word-after .word-item{display:flex;gap:2px;align-items:flex-start;position:relative;padding-right:22px}
+  .word-after .word-item > .mizi-speaker{position:absolute;left:auto;right:0;top:50%;transform:translateY(-50%)}
   .word-after .word-empty{
     font-size:11px;color:#9aad9a;font-weight:700;white-space:nowrap;
   }
@@ -804,6 +805,18 @@
   .admin-add-row.custom-add-row .aa-num{width:52px;flex:none;padding-left:4px;padding-right:4px}
   .admin-add-row.custom-add-row .aa-unit{font-size:11.5px;flex:none}
   .admin-add-row.custom-add-row .aa-btn{padding:10px 12px;flex:none;font-size:13.5px}
+  .custom-attachment-row .attachment-pick-label{display:inline-flex;align-items:center;justify-content:center;cursor:pointer;white-space:nowrap}
+  .attachment-file-name{font-size:12px;color:#54705a;font-weight:700;overflow-wrap:anywhere;max-width:280px}
+  .attachment-modal-card{width:min(900px,96vw);max-height:90vh;overflow:auto}
+  .attachment-layout{display:grid;grid-template-columns:minmax(140px,220px) minmax(0,1fr);gap:12px;margin-top:10px}
+  .attachment-list{display:flex;flex-direction:column;gap:6px;max-height:55vh;overflow:auto}
+  .attachment-choice{border:1px solid #d5e5d5;border-radius:9px;background:#f7fbf7;padding:9px;text-align:left;font-weight:700;overflow-wrap:anywhere;cursor:pointer}
+  .attachment-choice.active{background:#e3f2fd;border-color:#64b5f6}
+  .attachment-preview{min-height:220px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;border:1px solid #e1ebe1;border-radius:12px;padding:10px;overflow:hidden}
+  .attachment-preview img,.attachment-preview video{max-width:100%;max-height:55vh;object-fit:contain}
+  .attachment-preview audio{width:min(100%,500px)}
+  .attachment-preview iframe{width:100%;height:55vh;border:0}
+  @media(max-width:600px){.attachment-layout{grid-template-columns:1fr}.attachment-list{max-height:130px}.attachment-preview{min-height:180px}}
   #adminSunReason{flex:0 0 auto;width:126px;min-width:0}
   #adminSunAmount{width:96px;flex:none;font-size:17.5px;font-weight:900;
     text-align:center;padding:10px 6px;letter-spacing:.5px}
@@ -1531,6 +1544,17 @@
   <img id="photoViewerImg" alt="作业照片">
 </div>
 
+<div class="modal" id="taskAttachmentModal">
+  <div class="modal-card attachment-modal-card">
+    <h3 id="taskAttachmentTitle">📎 作业附件</h3>
+    <div class="attachment-layout">
+      <div class="attachment-list" id="taskAttachmentList"></div>
+      <div class="attachment-preview" id="taskAttachmentPreview">选择附件查看</div>
+    </div>
+    <div class="modal-actions"><button class="btn-main" id="taskAttachmentClose">关闭</button></div>
+  </div>
+</div>
+
 <div class="modal" id="dictModal">
   <div class="modal-card dict-card">
     <div class="dict-head">
@@ -1654,6 +1678,13 @@
         <span class="aa-unit">金币</span>
         <button class="aa-btn" id="adminAddChineseBtn">添加</button>
       </div>
+      <div class="admin-add-row custom-attachment-row" style="margin-top:6px;gap:8px;align-items:center;flex-wrap:wrap">
+        <label class="aa-btn attachment-pick-label" for="adminAddChineseFiles">📎 选择附件</label>
+        <input type="file" id="adminAddChineseFiles" class="custom-attachment-input" accept="audio/*,video/*,image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv" multiple style="display:none">
+        <span id="adminAddChineseFilesName" class="attachment-file-name">未选择附件</span>
+        <label class="chk-label"><input type="checkbox" id="adminAddChineseShowMedia"> 学生端显示多媒体图标</label>
+      </div>
+      <div class="aa-hint">支持音频、视频、图片和常见文档；为保证云端同步，每项作业附件总大小不超过 4MB，单个文件不超过 2MB。</div>
       <div class="admin-add-row" style="margin-top:2px">
         <label class="chk-label"><input type="checkbox" id="adminAddChinesePenalty"> 超时扣金币（每超时 1 分钟扣 1 个，默认不勾选）</label>
       </div>
@@ -1671,6 +1702,13 @@
         <span class="aa-unit">金币</span>
         <button class="aa-btn" id="adminAddMathBtn">添加</button>
       </div>
+      <div class="admin-add-row custom-attachment-row" style="margin-top:6px;gap:8px;align-items:center;flex-wrap:wrap">
+        <label class="aa-btn attachment-pick-label" for="adminAddMathFiles">📎 选择附件</label>
+        <input type="file" id="adminAddMathFiles" class="custom-attachment-input" accept="audio/*,video/*,image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv" multiple style="display:none">
+        <span id="adminAddMathFilesName" class="attachment-file-name">未选择附件</span>
+        <label class="chk-label"><input type="checkbox" id="adminAddMathShowMedia"> 学生端显示多媒体图标</label>
+      </div>
+      <div class="aa-hint">支持音频、视频、图片和常见文档；为保证云端同步，每项作业附件总大小不超过 4MB，单个文件不超过 2MB。</div>
       <div class="admin-add-row" style="margin-top:2px">
         <label class="chk-label"><input type="checkbox" id="adminAddMathPenalty"> 超时扣金币（每超时 1 分钟扣 1 个，默认不勾选）</label>
       </div>
@@ -1688,6 +1726,13 @@
         <span class="aa-unit">金币</span>
         <button class="aa-btn" id="adminAddEnglishBtn">添加</button>
       </div>
+      <div class="admin-add-row custom-attachment-row" style="margin-top:6px;gap:8px;align-items:center;flex-wrap:wrap">
+        <label class="aa-btn attachment-pick-label" for="adminAddEnglishFiles">📎 选择附件</label>
+        <input type="file" id="adminAddEnglishFiles" class="custom-attachment-input" accept="audio/*,video/*,image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv" multiple style="display:none">
+        <span id="adminAddEnglishFilesName" class="attachment-file-name">未选择附件</span>
+        <label class="chk-label"><input type="checkbox" id="adminAddEnglishShowMedia"> 学生端显示多媒体图标</label>
+      </div>
+      <div class="aa-hint">支持音频、视频、图片和常见文档；为保证云端同步，每项作业附件总大小不超过 4MB，单个文件不超过 2MB。</div>
       <div class="admin-add-row" style="margin-top:2px">
         <label class="chk-label"><input type="checkbox" id="adminAddEnglishPenalty"> 超时扣金币（每超时 1 分钟扣 1 个，默认不勾选）</label>
       </div>
@@ -2457,6 +2502,17 @@ function normalizePhotos(raw){
     ts: Number((p && p.ts) || 0) || Date.now()
   })).filter(p => p.data);
 }
+function normalizeTaskAttachments(raw){
+  if(!Array.isArray(raw)) return [];
+  return raw.slice(0,4).map(a => ({
+    id: a && a.id ? String(a.id) : newId(),
+    name: String(a && a.name || '附件').slice(0,180),
+    mime: String(a && a.mime || 'application/octet-stream').slice(0,120),
+    data: String(a && a.data || ''),
+    size: Math.max(0, Number(a && a.size) || 0),
+    ts: Number(a && a.ts) || Date.now()
+  })).filter(a => a.data);
+}
 function normalizeDay(day){
   const out = makeDay();
   ['chinese','math','english'].forEach(k => {
@@ -2471,6 +2527,10 @@ function normalizeDay(day){
         sun: clamp(Math.round(Number(t.sun)||30), 1, 500)
       };
       if(type === 'custom' && t.penalty === true) item.penalty = true;
+      const attachments = normalizeTaskAttachments(t.attachments);
+      if(attachments.length) item.attachments = attachments;
+      if(t.showAttachmentIcon === true) item.showAttachmentIcon = true;
+      else if(t.showAttachmentIcon === false) item.showAttachmentIcon = false;
       if(typeof t.syncKey === 'string' && t.syncKey) item.syncKey = t.syncKey;
       if(typeof t.lessonName === 'string' && t.lessonName) item.lessonName = t.lessonName.slice(0,60);
       if(t.recognize === true) item.recognize = true;
@@ -3881,9 +3941,9 @@ function renderWordGroup(word, showInfo, task){
 function renderSmallWord(word, task){
   const chars = [...word].filter(c => /[\u4e00-\u9fa5]/.test(c));
   const spoken = chars.join('');
-  return '<span class="word-item">' + chars.map(c =>
-    '<span class="wg-item"><span class="char-pinyin">' + escapeHtml(getPinyin(c) || '') + '</span><span class="mizi-row"><span class="mizi small" aria-label="' + escapeAttr(c) + '">' + miziSvg() + '<span class="mizi-char">' + escapeHtml(c) + '</span></span>' + speakerButton(spoken, spoken) + '</span></span>'
-  ).join('') + '</span>';
+  return '<span class="word-item" aria-label="词语：' + escapeAttr(spoken) + '">' + chars.map(c =>
+    '<span class="wg-item"><span class="char-pinyin">' + escapeHtml(getPinyin(c) || '') + '</span><span class="mizi-row"><span class="mizi small" aria-label="' + escapeAttr(c) + '">' + miziSvg() + '<span class="mizi-char">' + escapeHtml(c) + '</span></span></span></span>'
+  ).join('') + speakerButton(spoken, spoken) + '</span>';
 }
 function renderWordGroupWithWords(char, task){
   const py = getPinyin(char);
@@ -4019,6 +4079,89 @@ photoModal.addEventListener('click', e => { if(e.target === photoModal) photoMod
 $('photoModalCam').addEventListener('click', () => { if(photoViewTaskId) openCameraForTask(photoViewTaskId); });
 $('photoViewerClose').addEventListener('click', () => $('photoViewer').classList.remove('show'));
 $('photoViewer').addEventListener('click', e => { if(e.target === $('photoViewer')) $('photoViewer').classList.remove('show'); });
+
+let taskAttachmentViewId = null;
+function attachmentKind(a){
+  const mime = String(a && a.mime || '').toLowerCase();
+  const name = String(a && a.name || '').toLowerCase();
+  if(mime.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|svg)$/.test(name)) return 'image';
+  if(mime.startsWith('audio/') || /\.(mp3|wav|m4a|aac|ogg|flac|opus)$/.test(name)) return 'audio';
+  if(mime.startsWith('video/') || /\.(mp4|webm|mov|m4v|ogv|avi)$/.test(name)) return 'video';
+  if(mime === 'application/pdf' || name.endsWith('.pdf')) return 'pdf';
+  return 'document';
+}
+function renderTaskAttachmentPreview(a){
+  const host = $('taskAttachmentPreview'); if(!host || !a) return;
+  const kind = attachmentKind(a); const src = escapeAttr(a.data || ''); const name = escapeHtml(a.name || '附件');
+  if(kind === 'image') host.innerHTML = '<img src="' + src + '" alt="' + name + '"><a download="' + escapeAttr(a.name || 'attachment') + '" href="' + src + '">下载图片</a>';
+  else if(kind === 'audio') host.innerHTML = '<div>🎵 ' + name + '</div><audio controls preload="metadata" src="' + src + '"></audio><a download="' + escapeAttr(a.name || 'attachment') + '" href="' + src + '">下载音频</a>';
+  else if(kind === 'video') host.innerHTML = '<div>🎬 ' + name + '</div><video controls playsinline preload="metadata" src="' + src + '"></video><a download="' + escapeAttr(a.name || 'attachment') + '" href="' + src + '">下载视频</a>';
+  else if(kind === 'pdf') host.innerHTML = '<div>📄 ' + name + '</div><iframe title="' + name + '" src="' + src + '"></iframe><a download="' + escapeAttr(a.name || 'attachment.pdf') + '" href="' + src + '">下载 PDF</a>';
+  else host.innerHTML = '<div style="font-size:42px">📎</div><div style="font-weight:800;text-align:center;overflow-wrap:anywhere">' + name + '</div><div style="color:#607d60;text-align:center">此文档格式可能无法在浏览器内直接预览，可下载后打开。</div><a download="' + escapeAttr(a.name || 'attachment') + '" href="' + src + '">下载/打开文档</a>';
+}
+function openTaskAttachments(taskId){
+  const info = findTask(taskId); if(!info) return;
+  const attachments = normalizeTaskAttachments(info.task.attachments);
+  if(!attachments.length){ toast('这项作业没有附件'); return; }
+  taskAttachmentViewId = taskId;
+  $('taskAttachmentTitle').textContent = '📎 作业附件：' + String(info.task.text || '').split('\n')[0].slice(0,40);
+  const list = $('taskAttachmentList'); list.innerHTML = '';
+  attachments.forEach((a, i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'attachment-choice' + (i===0?' active':'');
+    const kind = attachmentKind(a); const ico = kind==='image'?'🖼️':kind==='audio'?'🎵':kind==='video'?'🎬':kind==='pdf'?'📕':'📄';
+    b.textContent = ico + ' ' + a.name; b.title = a.name;
+    b.addEventListener('click', () => { list.querySelectorAll('.attachment-choice').forEach(x=>x.classList.remove('active')); b.classList.add('active'); renderTaskAttachmentPreview(a); });
+    list.appendChild(b);
+  });
+  renderTaskAttachmentPreview(attachments[0]);
+  $('taskAttachmentModal').classList.add('show');
+}
+$('taskAttachmentClose').addEventListener('click', () => $('taskAttachmentModal').classList.remove('show'));
+$('taskAttachmentModal').addEventListener('click', e => { if(e.target === $('taskAttachmentModal')) $('taskAttachmentModal').classList.remove('show'); });
+
+const pendingCustomAttachments = { chinese: [], math: [], english: [] };
+const customAttachmentSubjectConfig = [
+  {subject:'chinese', prefix:'Chinese'}, {subject:'math', prefix:'Math'}, {subject:'english', prefix:'English'}
+];
+customAttachmentSubjectConfig.forEach(cfg => {
+  const input = $('adminAdd' + cfg.prefix + 'Files');
+  const nameEl = $('adminAdd' + cfg.prefix + 'FilesName');
+  if(!input) return;
+  input.addEventListener('change', () => {
+    pendingCustomAttachments[cfg.subject] = Array.from(input.files || []);
+    const files = pendingCustomAttachments[cfg.subject];
+    if(nameEl) nameEl.textContent = files.length ? files.map(f=>f.name).join('、') : '未选择附件';
+    if(files.length > 4 || files.some(f => f.size > 2*1024*1024) || files.reduce((n,f)=>n+f.size,0) > 4*1024*1024){
+      toast('附件限制：最多4个文件，单个不超过2MB，合计不超过4MB');
+    }
+  });
+});
+function readAttachmentFile(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = () => resolve({id:newId(),name:String(file.name||'附件').slice(0,180),mime:file.type||guessAttachmentMime(file.name),data:String(reader.result||''),size:file.size||0,ts:Date.now()});
+    reader.onerror = () => reject(new Error('读取附件失败：' + (file.name||'')));
+    reader.readAsDataURL(file);
+  });
+}
+function guessAttachmentMime(name){
+  const ext = String(name||'').split('.').pop().toLowerCase();
+  return ({pdf:'application/pdf',txt:'text/plain',rtf:'application/rtf',doc:'application/msword',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',xls:'application/vnd.ms-excel',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',ppt:'application/vnd.ms-powerpoint',pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation',csv:'text/csv'})[ext] || 'application/octet-stream';
+}
+async function collectCustomAttachments(subject, prefix){
+  const files = pendingCustomAttachments[subject] || [];
+  if(files.length > 4 || files.some(f => f.size > 2*1024*1024) || files.reduce((n,f)=>n+f.size,0) > 4*1024*1024){
+    toast('附件太大，请最多选择4个文件，单个不超过2MB，合计不超过4MB'); throw new Error('附件大小超限');
+  }
+  const attachments = [];
+  for(const file of files) attachments.push(await readAttachmentFile(file));
+  return {attachments, showAttachmentIcon: !!($( 'adminAdd' + prefix + 'ShowMedia') && $('adminAdd' + prefix + 'ShowMedia').checked)};
+}
+function clearCustomAttachmentInput(subject, prefix){
+  pendingCustomAttachments[subject] = [];
+  const input = $('adminAdd' + prefix + 'Files'); if(input) input.value = '';
+  const nameEl = $('adminAdd' + prefix + 'FilesName'); if(nameEl) nameEl.textContent = '未选择附件';
+}
 
 /* 田字格长按弹窗事件 */
 (function bindMiziActionEvents(){
@@ -4182,6 +4325,16 @@ function renderSubjectCards(subject, listEl){
     camBtn.type = 'button'; camBtn.className = 'mini-btn'; camBtn.textContent = '📷'; camBtn.title = '拍照';
     camBtn.addEventListener('click', e => { e.stopPropagation(); openCameraForTask(task.id); });
     actions.appendChild(camBtn);
+
+    const taskAttachments = normalizeTaskAttachments(task.attachments);
+    if(task.type === 'custom' && task.showAttachmentIcon === true && taskAttachments.length){
+      const mediaBtn = document.createElement('button');
+      mediaBtn.type = 'button'; mediaBtn.className = 'mini-btn task-media-btn'; mediaBtn.textContent = '🎬';
+      mediaBtn.title = '查看作业多媒体附件（' + taskAttachments.length + '）';
+      mediaBtn.setAttribute('aria-label','查看作业多媒体附件');
+      mediaBtn.addEventListener('click', e => { e.stopPropagation(); openTaskAttachments(task.id); });
+      actions.appendChild(mediaBtn);
+    }
 
     const photoCount = getTaskPhotos(task).length;
     const viewBtn = document.createElement('button');
@@ -7425,7 +7578,7 @@ $('quickRowMinus').addEventListener('click',()=>{
   const rows=getQuickRows(); if(rows.length<=1){toast('至少保留一行');return;}
   rows.pop(); renderQuickRows(rows); saveQuickRows();
 });
-$('adminAddChineseBtn').addEventListener('click', () => {
+$('adminAddChineseBtn').addEventListener('click', async () => {
   const textEl = $('adminAddChineseText');
   const minEl = $('adminAddChineseMin');
   const sunEl = $('adminAddChineseSun');
@@ -7435,16 +7588,21 @@ $('adminAddChineseBtn').addEventListener('click', () => {
   const minutes = clamp(parseFloat(minEl.value)||10, 1, 120);
   const sun = clamp(parseInt(sunEl.value,10)||10, 1, 500);
   rememberInput('chineseMin', minutes); rememberInput('chineseSun', sun);
+  let attachmentConfig;
+  try{ attachmentConfig = await collectCustomAttachments('chinese', 'Chinese'); }catch(err){ return; }
   const task = makeTask(text, minutes, sun, { penalty: !!(penEl && penEl.checked) });
+  if(attachmentConfig.attachments.length) task.attachments = attachmentConfig.attachments;
+  task.showAttachmentIcon = attachmentConfig.showAttachmentIcon;
   state.subjects.chinese.push(task);
   saveLocalState(); uploadToCloud();
   textEl.value = '';
+  clearCustomAttachmentInput('chinese', 'Chinese');
   if(penEl) penEl.checked = false;
   resetMinSunSync('adminAddChineseSun');
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加任务：「'+escapeHtml(text.split('\n')[0])+'」');
 });
-$('adminAddMathBtn').addEventListener('click', () => {
+$('adminAddMathBtn').addEventListener('click', async () => {
   const textEl = $('adminAddMathText');
   const minEl = $('adminAddMathMin');
   const sunEl = $('adminAddMathSun');
@@ -7454,16 +7612,21 @@ $('adminAddMathBtn').addEventListener('click', () => {
   const minutes = clamp(parseFloat(minEl.value)||10, 1, 120);
   const sun = clamp(parseInt(sunEl.value,10)||10, 1, 500);
   rememberInput('mathMin', minutes); rememberInput('mathSun', sun);
+  let attachmentConfig;
+  try{ attachmentConfig = await collectCustomAttachments('math', 'Math'); }catch(err){ return; }
   const task = makeTask(text, minutes, sun, { penalty: !!(penEl && penEl.checked) });
+  if(attachmentConfig.attachments.length) task.attachments = attachmentConfig.attachments;
+  task.showAttachmentIcon = attachmentConfig.showAttachmentIcon;
   state.subjects.math.push(task);
   saveLocalState(); uploadToCloud();
   textEl.value = '';
+  clearCustomAttachmentInput('math', 'Math');
   if(penEl) penEl.checked = false;
   resetMinSunSync('adminAddMathSun');
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加任务：「'+escapeHtml(text.split('\n')[0])+'」');
 });
-$('adminAddEnglishBtn').addEventListener('click', () => {
+$('adminAddEnglishBtn').addEventListener('click', async () => {
   const textEl = $('adminAddEnglishText');
   const minEl = $('adminAddEnglishMin');
   const sunEl = $('adminAddEnglishSun');
@@ -7472,11 +7635,16 @@ $('adminAddEnglishBtn').addEventListener('click', () => {
   if(!text){ toast('请输入英语作业内容'); return; }
   const minutes = clamp(parseFloat(minEl.value)||10, 1, 120);
   const sun = clamp(parseInt(sunEl.value,10)||10, 1, 500);
+  let attachmentConfig;
+  try{ attachmentConfig = await collectCustomAttachments('english', 'English'); }catch(err){ return; }
   const task = makeTask(text, minutes, sun, { penalty: !!(penEl && penEl.checked) });
+  if(attachmentConfig.attachments.length) task.attachments = attachmentConfig.attachments;
+  task.showAttachmentIcon = attachmentConfig.showAttachmentIcon;
   state.subjects.english.push(task);
   rememberInput('englishMin', minutes); rememberInput('englishSun', sun);
   saveLocalState(); uploadToCloud();
   textEl.value = '';
+  clearCustomAttachmentInput('english', 'English');
   if(penEl) penEl.checked = false;
   resetMinSunSync('adminAddEnglishSun');
   renderBoard(); refreshAllCards(); renderAdminPanel();
