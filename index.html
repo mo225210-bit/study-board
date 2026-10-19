@@ -3258,6 +3258,7 @@ async function uploadToCloud(force){
     syncDays: state.syncDays || {}, papersByDate: state.papersByDate || {},
     sun: state.sun, checkins: state.checkins,
     sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
+    shopDateData: state.shopDateData || {},
     lessonLibrary: state.lessonLibrary, lessonLibOrder: Array.isArray(state.lessonLibOrder) ? state.lessonLibOrder : [],
     parentPassword: state.parentPassword, chinesePaper: state.chinesePaper || null,
     shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
@@ -3275,6 +3276,7 @@ async function uploadToCloud(force){
       timetable: state.timetable,
       syncDays: state.syncDays || {},
       papersByDate: state.papersByDate || {},
+      shopDateData: state.shopDateData || {},
       parentPassword: state.parentPassword
     },
     updatedAt: Date.now()
@@ -3296,7 +3298,7 @@ function getEditableStateForCompare(){
   return JSON.stringify({
     days: state.days, date: state.date, settings: state.settings,
     syncDays: state.syncDays || {}, papersByDate: state.papersByDate || {},
-    sun: state.sun, checkins: state.checkins, sunLog: state.sunLog,
+    sun: state.sun, checkins: state.checkins, sunLog: state.sunLog, shopDateData: state.shopDateData || {},
     lessonLibrary: state.lessonLibrary, lessonLibOrder: Array.isArray(state.lessonLibOrder) ? state.lessonLibOrder : [],
     parentPassword: state.parentPassword, chinesePaper: state.chinesePaper || null,
     shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
@@ -3328,6 +3330,7 @@ function makeHistorySnapshot(reason){
       settings: JSON.parse(JSON.stringify(state.settings)), sun: state.sun,
       checkins: JSON.parse(JSON.stringify(state.checkins || [])),
       sunLog: JSON.parse(JSON.stringify(state.sunLog || [])),
+      shopDateData: JSON.parse(JSON.stringify(state.shopDateData || {})),
       lessonLibrary: JSON.parse(JSON.stringify(state.lessonLibrary || {})),
       lessonLibOrder: Array.isArray(state.lessonLibOrder) ? state.lessonLibOrder.slice() : [],
       parentPassword: state.parentPassword, shop: JSON.parse(JSON.stringify(state.shop || [])),
@@ -3392,6 +3395,9 @@ function applyRemoteState(remote){
   if(typeof remote.sun === 'number') state.sun = remote.sun;
   if(Array.isArray(remote.checkins)) state.checkins = remote.checkins;
   if(Array.isArray(remote.sunLog)) state.sunLog = remote.sunLog.slice(0, 100);
+  const remoteShopDateData = remote.shopDateData || cfg.shopDateData;
+  if(remoteShopDateData && typeof remoteShopDateData === 'object' && !Array.isArray(remoteShopDateData)) state.shopDateData = remoteShopDateData;
+  if(!state.shopDateData || typeof state.shopDateData !== 'object') state.shopDateData = {};
   if(remote.lessonLibrary || cfg.lessonLibrary) state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary || cfg.lessonLibrary);
   if(Array.isArray(remote.lessonLibOrder) || Array.isArray(cfg.lessonLibOrder)) state.lessonLibOrder = (remote.lessonLibOrder || cfg.lessonLibOrder).map(String).slice(0,400);
   else state.lessonLibOrder = [];
@@ -3940,7 +3946,7 @@ function renderSubjectCards(subject, listEl){
 
     const actions = document.createElement('div'); actions.className = 'card-actions';
 
-    if(task.type === 'copy'){
+    if(task.type === 'copy' && task.recognize !== true){
       const undoBtn = document.createElement('button');
       undoBtn.type = 'button'; undoBtn.className = 'mini-btn undo'; undoBtn.textContent = '↶'; undoBtn.title = '撤销';
       undoBtn.disabled = !canUndoMizi(task.id);
@@ -5153,6 +5159,7 @@ function doToggleTaskDone(id){
   const linked = getLinkedTasks(task);
   if(linked.some(t => t.done)){
     linked.forEach(t => { t.done = false; });
+    restoreLessonPickAfterUndo(task, linked);
     const reward = Number(task.sun) || 0;
     state.sun -= reward;
     pushSunLog(-reward, '取消完成：' + task.text);
@@ -5169,21 +5176,47 @@ function doToggleTaskDone(id){
   completeTask(id);
   if(!isAdminMode) scheduleHistorySnapshot('学生勾选作业完成');
 }
+function lessonPickKindForTask(task){
+  if(!task) return '';
+  if(task.recognize === true) return 'recognize';
+  return ['preview','wordgroup','copy'].includes(task.type) ? task.type : '';
+}
+function refreshLessonPickUI(kind){
+  try{ populateLessonSelects(); }catch(e){}
+  try{ renderLessonHint(kind); }catch(e){}
+  // 让另外三个选择框的提示也与云端配置保持一致
+  ['preview','wordgroup','copy','recognize'].forEach(k => { if(k !== kind) { try{ renderLessonHint(k); }catch(e){} } });
+}
 function advanceLessonPickAfterCompletion(task, linkedTasks){
-  if(!task || !task.lessonName || !['preview','wordgroup','copy'].includes(task.type)) return;
+  const kind = lessonPickKindForTask(task);
+  if(!kind || !task.lessonName) return;
   const targets = Array.isArray(linkedTasks) && linkedTasks.length ? linkedTasks : [task];
-  // 同一份作业即使取消勾选后再次完成，也只推进一次课文。
+  // 同一份关联作业只推进一次；取消完成时会撤销该标记。
   if(targets.some(t => t && t.lessonAdvanced)) return;
   const names = typeof libKeys === 'function' ? libKeys() : Object.keys(state.lessonLibrary || {});
   const idx = names.indexOf(task.lessonName);
   if(idx < 0 || !names.length) return;
   targets.forEach(t => { if(t) t.lessonAdvanced = true; });
-  const nextName = names[(idx + 1) % names.length];
+  // 到最后一课时停在最后一课，不循环回第一课。
+  const nextName = (idx + 1 < names.length) ? names[idx + 1] : task.lessonName;
   if(!state.settings) state.settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
-  if(!state.settings.lessonPick) state.settings.lessonPick = {preview:'',wordgroup:'',copy:''};
-  state.settings.lessonPick[task.type] = nextName;
-  try { populateLessonSelects(); } catch(e) {}
+  if(!state.settings.lessonPick) state.settings.lessonPick = {preview:'',wordgroup:'',copy:'',recognize:''};
+  state.settings.lessonPick[kind] = nextName;
+  refreshLessonPickUI(kind);
 }
+function restoreLessonPickAfterUndo(task, linkedTasks){
+  const kind = lessonPickKindForTask(task);
+  if(!kind || !task.lessonName) return;
+  const targets = Array.isArray(linkedTasks) && linkedTasks.length ? linkedTasks : [task];
+  if(!targets.some(t => t && t.lessonAdvanced)) return;
+  if(!state.settings) state.settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+  if(!state.settings.lessonPick) state.settings.lessonPick = {preview:'',wordgroup:'',copy:'',recognize:''};
+  // 取消完成时把家长端对应课文选择恢复为这份作业原来的课文。
+  state.settings.lessonPick[kind] = task.lessonName;
+  targets.forEach(t => { if(t) delete t.lessonAdvanced; });
+  refreshLessonPickUI(kind);
+}
+
 function completeTask(id){
   const info = findTask(id);
   if(!info || info.task.done) return;
