@@ -378,7 +378,7 @@
   .shop-meta{display:flex;gap:9px;margin-top:5px;font-size:13px;font-weight:900;flex-wrap:wrap}
   .shop-meta .shop-cost{color:#D84315}
   .shop-meta .shop-gain{color:#2E7D32}
-  .shop-actions{display:flex;gap:16px;margin-top:auto}
+  .shop-history-wrap{grid-column:1/-1;margin-top:8px;background:rgba(255,255,255,.88);border:1px solid #fff;border-radius:12px;padding:10px}.shop-history-title{font-size:14px;font-weight:900;color:#5b7a5b;margin-bottom:7px}.shop-history{display:flex;flex-direction:column;gap:6px}.shop-history-item{font-size:12.5px;font-weight:800;color:#526652;line-height:1.6;padding:7px 8px;background:#f5faf3;border-radius:8px;overflow-wrap:anywhere}.shop-history-empty{font-size:12px;color:#91a391;text-align:center;padding:8px}\n  .shop-actions{display:flex;gap:16px;margin-top:auto}
   .shop-btn{flex:1;min-width:0;font-family:inherit;font-size:14.5px;font-weight:900;color:#fff;
     background:linear-gradient(180deg,#FFB74D,#F57C00);
     border:2px solid #F57C00;padding:11px 6px;border-radius:12px;
@@ -1297,6 +1297,10 @@
     <section class="subject-col" data-subject="shop">
       <div class="col-head"><div><span class="col-title">🎁 兑换中心</span><span class="col-count" id="shopCount">0</span></div></div>
       <div class="card-list shop-grid" id="shopList"></div>
+      <div class="shop-history-wrap">
+        <div class="shop-history-title">📜 兑换记录</div>
+        <div id="shopHistory" class="shop-history"><div class="shop-history-empty">暂无兑换记录</div></div>
+      </div>
     </section>
   </div>
 
@@ -1583,6 +1587,16 @@
         <button class="aa-btn" id="adminAddCopyBtn">添加</button>
       </div>
       <div class="aa-hint" id="copyLessonHint">选好课文直接点「添加」即可</div>
+      <div class="admin-sub-label">🔤 添加会识字</div>
+      <div class="admin-add-row inline-row">
+        <select class="aa-select" id="adminRecognizeLessonSelect"><option value="">— 选择课文 —</option></select>
+        <input class="aa-num" id="unitRecognizeMin" type="number" step="0.5" min="0.5" max="20" placeholder="分钟">
+        <span class="aa-unit">分钟/组</span>
+        <input class="aa-num" id="unitRecognizeSun" type="number" step="0.5" min="0.5" max="50" placeholder="金币">
+        <span class="aa-unit">金币/组</span>
+        <button class="aa-btn" id="adminAddRecognizeBtn">添加</button>
+      </div>
+      <div class="aa-hint" id="recognizeLessonHint">选好课文直接点「添加」即可</div>
       <div class="admin-sub-label">📝 添加日常作业</div>
       <div id="quickRows" class="quick-rows"></div>
       <div class="admin-add-row inline-row quick-row-controls" style="margin-top:5px">
@@ -4085,6 +4099,7 @@ function renderShop(){
   if(countEl) countEl.textContent = items.length;
   if(!items.length){
     listEl.innerHTML = '<div class="empty-tip" style="grid-column:1/-1">还没有兑换项目<br>请家长点左上角 🌻 添加</div>';
+    renderShopHistory();
     return;
   }
   listEl.innerHTML = items.map(item => {
@@ -4104,15 +4119,26 @@ function renderShop(){
       '</div>' +
       '<div class="shop-actions">' +
         '<button class="shop-btn" data-shop-buy="' + escapeAttr(item.id) + '">' + buyLabel + '</button>' +
-        '<button class="shop-btn use" data-shop-use="' + escapeAttr(item.id) + '">使用</button>' +
       '</div></div>';
   }).join('');
   listEl.querySelectorAll('[data-shop-buy]').forEach(btn => {
     btn.addEventListener('click', () => doRedeem(btn.dataset.shopBuy));
   });
-  listEl.querySelectorAll('[data-shop-use]').forEach(btn => {
-    btn.addEventListener('click', () => doUseTicket(btn.dataset.shopUse));
-  });
+  renderShopHistory();
+}
+function renderShopHistory(){
+  const el = $('shopHistory'); if(!el) return;
+  const logs = (state.sunLog || []).filter(x => /^兑换：/.test(String(x.reason || '')));
+  if(!logs.length){ el.innerHTML = '<div class="shop-history-empty">暂无兑换记录</div>'; return; }
+  el.innerHTML = logs.slice(0,30).map(x => {
+    const after = Math.round(Number(x.after) || 0);
+    const delta = Math.round(Number(x.delta) || 0);
+    const before = after - delta;
+    const reason = String(x.reason || '').replace(/^兑换：/, '').replace(/（.*$/, '');
+    const change = delta < 0 ? '-' + Math.abs(delta) : '+' + delta;
+    const time = x.t ? new Date(x.t).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
+    return '<div class="shop-history-item">' + escapeHtml(time ? time + ' · ' : '') + '<b>' + escapeHtml(reason) + '</b>：' + before + ' ' + change + ' = ' + after + ' 金币</div>';
+  }).join('');
 }
 function doRedeem(id){
   const item = (state.shop || []).find(x => x.id === id);
@@ -6580,6 +6606,7 @@ function populateLessonSelects(){
   const a = fill($('adminPreviewLessonSelect'),   '— 选择课文 —', lp.preview);
   const b = fill($('adminWordgroupLessonSelect'), '— 选择课文 —', lp.wordgroup);
   const c = fill($('adminCopyLessonSelect'),      '— 选择课文 —', lp.copy);
+  fill($('adminRecognizeLessonSelect'), '— 选择课文 —', lp.recognize || '');
   if(a !== lp.preview || b !== lp.wordgroup || c !== lp.copy){
     state.settings.lessonPick = { preview:a, wordgroup:b, copy:c };
     saveLocalState(); uploadToCloud();
@@ -6866,7 +6893,8 @@ $('taskEditSave').addEventListener('click', () => {
 const LESSON_PICK = {
   preview:   { sel:'adminPreviewLessonSelect',   hint:'previewLessonHint',   field:'chars', unit:'字', label:'会写字' },
   wordgroup: { sel:'adminWordgroupLessonSelect', hint:'wordgroupLessonHint', field:'chars', unit:'字', label:'会写字' },
-  copy:      { sel:'adminCopyLessonSelect',      hint:'copyLessonHint',      field:'words', unit:'组', label:'抄写词语' }
+  copy:      { sel:'adminCopyLessonSelect',      hint:'copyLessonHint',      field:'words', unit:'组', label:'抄写词语' },
+  recognize: { sel:'adminRecognizeLessonSelect', hint:'recognizeLessonHint', field:'wordgroups', unit:'组', label:'会识字' }
 };
 function lessonPickItems(kind){
   const cfg = LESSON_PICK[kind];
@@ -6934,6 +6962,21 @@ $('adminAddCopyBtn').addEventListener('click', () => {
   saveLocalState(); uploadToCloud();
   renderBoard(); refreshAllCards(); renderAdminPanel();
   toast('✅ 已添加「'+escapeHtml(name)+'」抄写词语');
+});
+$('adminAddRecognizeBtn').addEventListener('click', () => {
+  const { name, items } = lessonPickItems('recognize');
+  if(!name){ toast('请先选择课文'); return; }
+  if(!items.length){ toast('该课文的字词库「会识字」下面没有内容'); return; }
+  const words = items.slice(0, 60);
+  const min = clamp(Number($('unitRecognizeMin').value) || getUnitCfg('copy').min, 0.5, 20);
+  const unitSun = clamp(Number($('unitRecognizeSun').value) || getUnitCfg('copy').sun, 0.5, 50);
+  const minutes = clamp(Math.round(words.length * min), 1, 120);
+  const sun = clamp(Math.round(words.length * unitSun), 1, 500);
+  const task = makeTask(`会识字（${words.length}组）`, minutes, sun, { type:'copy', words, lessonName: name });
+  state.subjects.chinese.push(task);
+  saveLocalState(); uploadToCloud();
+  renderBoard(); refreshAllCards(); renderAdminPanel();
+  toast('✅ 已添加「'+escapeHtml(name)+'」会识字');
 });
 function readQuickRowsBackup(){
   try{
