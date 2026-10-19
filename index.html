@@ -3297,49 +3297,79 @@ function scheduleCloudRetry(delay){
 window.addEventListener('online', () => { uploadFailedNotified = false; uploadToCloud(true); });
 window.addEventListener('beforeunload', () => { if(persistPending) flushPersist(); });
 
+let cloudUploadInFlight = false;
+let cloudUploadQueued = false;
+let cloudUploadQueuedForce = false;
 async function uploadToCloud(force){
   if(!dataRef || !fbSet || !fbGet) return false;
   if(isRemoteUpdate && !force) return false;
   if(freshBoot && !force && !lastRemoteUpdatedAt) return false;
   if(!getSyncEnabled() || cloudSyncCleared) return false;
-  const payload = {
-    days: state.days, date: state.date, settings: state.settings,
-    syncDays: state.syncDays || {}, papersByDate: state.papersByDate || {},
-    sun: state.sun, checkins: state.checkins,
-    sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
-    shopDateData: state.shopDateData || {},
-    lessonLibrary: state.lessonLibrary, lessonLibOrder: Array.isArray(state.lessonLibOrder) ? state.lessonLibOrder : [],
-    parentPassword: state.parentPassword, chinesePaper: state.chinesePaper || null,
-    shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
-    lastNightReset: state.lastNightReset || '',
-    eyeSoundOffDate: state.eyeSoundOffDate || '',
-    live: state.live,
-    // 完整配置快照：确保新增或遗漏的可配置参数也随云端一起保存
-    configSnapshot: {
-      settings: state.settings,
-      lessonLibrary: state.lessonLibrary,
-      lessonLibOrder: Array.isArray(state.lessonLibOrder) ? state.lessonLibOrder : [],
-      shop: state.shop,
-      wordBank: state.wordBank,
-      charPages: state.charPages || {},
-      timetable: state.timetable,
-      syncDays: state.syncDays || {},
-      papersByDate: state.papersByDate || {},
-      shopDateData: state.shopDateData || {},
-      parentPassword: state.parentPassword
-    },
-    updatedAt: Date.now()
-  };
-  const prevPushed = lastPushedUpdatedAt;
-  lastPushedUpdatedAt = payload.updatedAt;
-  updateSyncInfo();
-  try{ await fbSet(dataRef, payload); uploadFailedNotified = false; return true; }
-  catch(e){
-    console.warn('云端上传失败', e);
-    lastPushedUpdatedAt = prevPushed;
-    if(!uploadFailedNotified){ uploadFailedNotified = true; showSyncStatus('⚠️ 云端上传失败，稍后自动重试', 'offline'); }
-    scheduleCloudRetry();
+
+  // Firebase 全量写入必须串行执行。连续勾选时只保留“再上传一次最新状态”的标记，
+  // 避免多个旧快照并发写入，造成后写入的旧数据覆盖新数据。
+  if(cloudUploadInFlight){
+    cloudUploadQueued = true;
+    cloudUploadQueuedForce = cloudUploadQueuedForce || !!force;
     return false;
+  }
+  cloudUploadInFlight = true;
+  let succeeded = false;
+  let attemptedAt = 0;
+  const previousPushedAt = lastPushedUpdatedAt;
+  try{
+    const payload = {
+      days: state.days, date: state.date, settings: state.settings,
+      syncDays: state.syncDays || {}, papersByDate: state.papersByDate || {},
+      sun: state.sun, checkins: state.checkins,
+      sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
+      shopDateData: state.shopDateData || {},
+      lessonLibrary: state.lessonLibrary, lessonLibOrder: Array.isArray(state.lessonLibOrder) ? state.lessonLibOrder : [],
+      parentPassword: state.parentPassword, chinesePaper: state.chinesePaper || null,
+      shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
+      lastNightReset: state.lastNightReset || '',
+      eyeSoundOffDate: state.eyeSoundOffDate || '',
+      live: state.live,
+      configSnapshot: {
+        settings: state.settings,
+        lessonLibrary: state.lessonLibrary,
+        lessonLibOrder: Array.isArray(state.lessonLibOrder) ? state.lessonLibOrder : [],
+        shop: state.shop,
+        wordBank: state.wordBank,
+        charPages: state.charPages || {},
+        timetable: state.timetable,
+        syncDays: state.syncDays || {},
+        papersByDate: state.papersByDate || {},
+        shopDateData: state.shopDateData || {},
+        parentPassword: state.parentPassword
+      },
+      updatedAt: Date.now()
+    };
+    const prevPushed = lastPushedUpdatedAt;
+    attemptedAt = payload.updatedAt;
+    lastPushedUpdatedAt = payload.updatedAt;
+    updateSyncInfo('☁️ 正在上传最新数据…');
+    await fbSet(dataRef, payload);
+    succeeded = true;
+    uploadFailedNotified = false;
+    updateSyncInfo();
+    return true;
+  }catch(e){
+    console.warn('云端上传失败', e);
+    if(attemptedAt && lastPushedUpdatedAt === attemptedAt) lastPushedUpdatedAt = previousPushedAt;
+    uploadFailedNotified = true;
+    showSyncStatus('⚠️ 云端上传失败，联网后自动重试', 'offline');
+    scheduleCloudRetry(15000);
+    return false;
+  }finally{
+    cloudUploadInFlight = false;
+    if(cloudUploadQueued){
+      const queuedForce = cloudUploadQueuedForce;
+      cloudUploadQueued = false;
+      cloudUploadQueuedForce = false;
+      // 上一次写入结束后再取当前 state，确保补传的是最新状态，而非旧快照。
+      setTimeout(() => { uploadToCloud(queuedForce); }, succeeded ? 120 : 15000);
+    }
   }
 }
 let adminEntrySnapshot = null;
