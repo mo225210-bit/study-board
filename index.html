@@ -1213,6 +1213,7 @@
 
   .admin-clear-head{display:flex!important;align-items:center!important;gap:7px!important;flex-wrap:nowrap!important;width:100%!important}
   .admin-clear-head .badge{flex:0 0 auto!important}
+  .admin-clear-records-row{display:flex!important;justify-content:flex-end!important;align-items:center!important;width:100%!important;margin:2px 0 8px!important}
   .admin-clear-records-btn{margin-left:auto!important;flex:0 0 auto!important;white-space:nowrap!important;border:1px solid #c62828!important;border-radius:8px!important;background:linear-gradient(180deg,#ff8a80,#ef5350)!important;color:#fff!important;font-size:12px!important;font-weight:900!important;padding:6px 10px!important;cursor:pointer!important;box-shadow:0 2px 0 #b71c1c!important}
   .admin-clear-records-btn:active{transform:translateY(1px)!important;box-shadow:0 1px 0 #b71c1c!important}
   @media(max-width:480px){.admin-clear-head{gap:4px!important;font-size:15px!important}.admin-clear-records-btn{font-size:11px!important;padding:5px 6px!important}}
@@ -1686,7 +1687,8 @@
     </div>
 
     <div class="admin-section collapsed" id="adminPanelShop">
-      <h3 class="admin-clear-head">🎁 兑换管理 <span class="badge" id="adminShopBadge">0 项</span><button type="button" class="admin-clear-records-btn" id="adminClearShopRecordsBtn">清除记录</button></h3>
+      <h3 class="admin-clear-head">🎁 兑换管理 <span class="badge" id="adminShopBadge">0 项</span></h3>
+      <div class="admin-clear-records-row"><button type="button" class="admin-clear-records-btn" id="adminClearShopRecordsBtn">清除记录</button></div>
       <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
         孩子点「兑换」时会按这里的设置扣/加金币，并自动生成 1 张兑换券。<br>
         <b style="color:#FFD54F">金币填负数 = 扣除（消耗金币）；填正数 = 增加（奖励金币）。</b><br>
@@ -1707,7 +1709,8 @@
     </div>
 
     <div class="admin-section collapsed" id="adminPanelSun">
-      <h3 class="admin-clear-head">💰 金币调整 <span class="badge" id="adminSunBadge">0 个 💰</span><button type="button" class="admin-clear-records-btn" id="adminClearSunRecordsBtn">清除记录</button></h3>
+      <h3 class="admin-clear-head">💰 金币调整 <span class="badge" id="adminSunBadge">0 个 💰</span></h3>
+      <div class="admin-clear-records-row"><button type="button" class="admin-clear-records-btn" id="adminClearSunRecordsBtn">清除记录</button></div>
       <div class="admin-add-row inline-row">
         <select class="aa-select" id="adminSunReason">
           <option value="兑换奖励">🎁 兑换奖励</option>
@@ -3397,6 +3400,30 @@ async function saveHistorySnapshot(reason){
     return false;
   }
 }
+// 修复云端残留的“玩手机”兑换券默认值：若没有该项目真实的兑换/调整记录，清除所有日期上的幽灵数量。
+function repairPhoneTicketCloudData(){
+  const phoneItem = (state.shop || []).find(x => String(x.id) === 'sh_phone' || /玩手机/.test(String(x.name || '')));
+  if(!phoneItem) return false;
+  const phoneId = String(phoneItem.id || 'sh_phone');
+  const hasPhoneTicketHistory = (state.sunLog || []).some(x => {
+    if(!x || !/玩手机/.test(String(x.reason || ''))) return false;
+    return Number(x.ticketDelta) !== 0;
+  });
+  if(hasPhoneTicketHistory) return false;
+  let changed = false;
+  if(!state.shopDateData || typeof state.shopDateData !== 'object' || Array.isArray(state.shopDateData)) state.shopDateData = {};
+  Object.keys(state.shopDateData).forEach(day => {
+    const d = state.shopDateData[day];
+    if(d && d.tickets && Object.prototype.hasOwnProperty.call(d.tickets, phoneId) && Number(d.tickets[phoneId]) !== 0){
+      d.tickets[phoneId] = 0; changed = true;
+    }
+  });
+  if(Number(phoneItem.tickets) !== 0){ phoneItem.tickets = 0; changed = true; }
+  // 标记版本，避免旧客户端残留数据被误认为新记录；实际清零结果会回传云端。
+  state.shopPhoneTicketCloudFixV2 = true;
+  return changed;
+}
+
 function applyRemoteState(remote){
   if(!remote || !remote.days) return;
   const cfg = (remote.configSnapshot && typeof remote.configSnapshot === 'object') ? remote.configSnapshot : {};
@@ -3435,6 +3462,7 @@ function applyRemoteState(remote){
   if(typeof remote.eyeSoundOffDate === 'string') state.eyeSoundOffDate = remote.eyeSoundOffDate;
   const shopNorm = normalizeShop(remote.shop !== undefined ? remote.shop : cfg.shop);
   if(shopNorm !== null){ state.shop = shopNorm; try{ localStorage.setItem(REWARD_STORAGE_KEY, JSON.stringify(state.shop)); }catch(e){} }
+  const phoneTicketCloudDataRepaired = repairPhoneTicketCloudData();
   if(remote.live && typeof remote.live === 'object'){
     const remoteLiveAt = Number(remote.live.updatedAt) || 0;
     const localLiveAt = Number(state.live && state.live.updatedAt) || 0;
@@ -3459,6 +3487,7 @@ function applyRemoteState(remote){
   if(charTimer.active) paintCharBarsFromLive();
   if(isAdminMode) renderAdminPanel();
   isRemoteUpdate = false;
+  if(phoneTicketCloudDataRepaired){ uploadToCloud(true); toast('已修复云端「玩手机」兑换券异常数量，并同步修复结果'); }
   showSyncStatus('☁️ 已从云端更新', 'online');
   updateSyncInfo();
   if(state.live && (state.live.activeId || state.live.eyeActive)){
