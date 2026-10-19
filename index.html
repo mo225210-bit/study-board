@@ -1210,6 +1210,12 @@
     .shop-meta{font-size:11px!important;gap:3px!important;}
     .shop-btn{width:49px!important;font-size:11px!important;padding:5px 2px!important;}
   }
+
+  .admin-clear-head{display:flex!important;align-items:center!important;gap:7px!important;flex-wrap:nowrap!important;width:100%!important}
+  .admin-clear-head .badge{flex:0 0 auto!important}
+  .admin-clear-records-btn{margin-left:auto!important;flex:0 0 auto!important;white-space:nowrap!important;border:1px solid #c62828!important;border-radius:8px!important;background:linear-gradient(180deg,#ff8a80,#ef5350)!important;color:#fff!important;font-size:12px!important;font-weight:900!important;padding:6px 10px!important;cursor:pointer!important;box-shadow:0 2px 0 #b71c1c!important}
+  .admin-clear-records-btn:active{transform:translateY(1px)!important;box-shadow:0 1px 0 #b71c1c!important}
+  @media(max-width:480px){.admin-clear-head{gap:4px!important;font-size:15px!important}.admin-clear-records-btn{font-size:11px!important;padding:5px 6px!important}}
 </style>
 </head>
 
@@ -1680,7 +1686,7 @@
     </div>
 
     <div class="admin-section collapsed" id="adminPanelShop">
-      <h3>🎁 兑换管理 <span class="badge" id="adminShopBadge">0 项</span></h3>
+      <h3 class="admin-clear-head">🎁 兑换管理 <span class="badge" id="adminShopBadge">0 项</span><button type="button" class="admin-clear-records-btn" id="adminClearShopRecordsBtn">清除记录</button></h3>
       <p style="font-size:13px;color:#7a9aaa;font-weight:700;line-height:1.8;margin-bottom:12px">
         孩子点「兑换」时会按这里的设置扣/加金币，并自动生成 1 张兑换券。<br>
         <b style="color:#FFD54F">金币填负数 = 扣除（消耗金币）；填正数 = 增加（奖励金币）。</b><br>
@@ -1701,7 +1707,7 @@
     </div>
 
     <div class="admin-section collapsed" id="adminPanelSun">
-      <h3>💰 金币调整 <span class="badge" id="adminSunBadge">0 个 💰</span></h3>
+      <h3 class="admin-clear-head">💰 金币调整 <span class="badge" id="adminSunBadge">0 个 💰</span><button type="button" class="admin-clear-records-btn" id="adminClearSunRecordsBtn">清除记录</button></h3>
       <div class="admin-add-row inline-row">
         <select class="aa-select" id="adminSunReason">
           <option value="兑换奖励">🎁 兑换奖励</option>
@@ -5163,6 +5169,8 @@ function confirmPassword(){
   else if(purpose === 'clearFrom16') doClearTasksAfterToday();
   else if(purpose === 'clearToday') doClearTodayTasks();
   else if(purpose === 'shopTicketAdjust') adjustShopTicketsAfterPassword();
+  else if(purpose === 'clearShopRecords') clearShopRecordsAfterPassword();
+  else if(purpose === 'clearSunRecords') clearSunRecordsAfterPassword();
 }
 function requestPause(){
   const L = state.live;
@@ -6396,6 +6404,35 @@ function renderSunPanel(){
   }).join('');
   logEl.querySelectorAll('[data-del-sunlog]').forEach(btn=>btn.addEventListener('click',()=>{const idx=Number(btn.dataset.delSunlog);const entry=state.sunLog[idx];if(!entry||!/^兑换：/.test(String(entry.reason||'')))return;if(!confirm('确定单独删除这条兑换记录吗？金币和兑换券数量不会回滚。'))return;state.sunLog.splice(idx,1);saveLocalState();uploadToCloud();renderSunPanel();renderShopHistory();toast('已删除这条兑换记录');}));
 }
+function requestClearShopRecords(){
+  pwdPurpose = 'clearShopRecords';
+  openPwdModal('🔒 清除兑换记录', '请输入家长密码，确认后清除兑换相关记录');
+}
+function clearShopRecordsAfterPassword(){
+  const count = (state.sunLog || []).filter(e => /^兑换：/.test(String(e && e.reason || ''))).length;
+  if(!count){ toast('暂无兑换记录可清除'); return; }
+  if(!confirm('确定清除全部 ' + count + ' 条兑换记录吗？此操作不可撤销，但不会改变金币余额或兑换券数量。')) return;
+  state.sunLog = (state.sunLog || []).filter(e => !/^兑换：/.test(String(e && e.reason || '')));
+  saveLocalState(); uploadToCloud();
+  renderSunPanel(); renderShopHistory();
+  toast('已清除兑换记录');
+}
+function requestClearSunRecords(){
+  pwdPurpose = 'clearSunRecords';
+  openPwdModal('🔒 清除金币调整记录', '请输入家长密码，确认后清除金币调整流水');
+}
+function clearSunRecordsAfterPassword(){
+  const count = (state.sunLog || []).filter(e => !/^兑换：/.test(String(e && e.reason || ''))).length;
+  if(!count){ toast('暂无金币调整记录可清除'); return; }
+  if(!confirm('确定清除全部 ' + count + ' 条金币调整记录吗？此操作不可撤销，不会改变当前金币余额，也不会清除兑换记录。')) return;
+  state.sunLog = (state.sunLog || []).filter(e => /^兑换：/.test(String(e && e.reason || '')));
+  saveLocalState(); uploadToCloud();
+  renderSunPanel(); renderShopHistory();
+  toast('已清除金币调整记录');
+}
+$('adminClearShopRecordsBtn')?.addEventListener('click', requestClearShopRecords);
+$('adminClearSunRecordsBtn')?.addEventListener('click', requestClearSunRecords);
+
 function adminSunAdjust(sign){
   const amtEl = $('adminSunAmount');
   const reasonEl = $('adminSunReason');
