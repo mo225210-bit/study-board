@@ -378,13 +378,14 @@
   .shop-meta{display:flex;gap:9px;margin-top:5px;font-size:13px;font-weight:900;flex-wrap:wrap}
   .shop-meta .shop-cost{color:#D84315}
   .shop-meta .shop-gain{color:#2E7D32}
-  .shop-history-wrap{grid-column:1/-1;margin-top:8px;background:rgba(255,255,255,.88);border:1px solid #fff;border-radius:12px;padding:10px}.shop-history-title{font-size:14px;font-weight:900;color:#5b7a5b;margin-bottom:7px}.shop-history{display:flex;flex-direction:column;gap:6px}.shop-history-item{font-size:12.5px;font-weight:800;color:#526652;line-height:1.6;padding:7px 8px;background:#f5faf3;border-radius:8px;overflow-wrap:anywhere}.shop-history-empty{font-size:12px;color:#91a391;text-align:center;padding:8px}\n  .shop-actions{display:flex;gap:16px;margin-top:auto}
+  .shop-history-wrap{grid-column:1/-1;margin-top:8px;background:rgba(255,255,255,.88);border:1px solid #fff;border-radius:12px;padding:10px}.shop-history-title{font-size:14px;font-weight:900;color:#5b7a5b;margin-bottom:7px}.shop-history{display:flex;flex-direction:column;gap:6px;max-height:440px;overflow-y:auto;-webkit-overflow-scrolling:touch}.shop-history-item{font-size:12.5px;font-weight:800;color:#526652;line-height:1.6;padding:7px 8px;background:#f5faf3;border-radius:8px;overflow-wrap:anywhere}.shop-history-empty{font-size:12px;color:#91a391;text-align:center;padding:8px}.shop-history-change.plus{color:#2E7D32;font-weight:1000}.shop-history-change.minus{color:#D32F2F;font-weight:1000}.shop-actions{justify-content:flex-end}.shop-btn{flex:0 0 70%;font-size:29px;padding:18px 10px;min-height:62px}.shop-history-date{font-size:11px;color:#829182;margin-right:4px}.sun-log{max-height:440px;overflow-y:auto;-webkit-overflow-scrolling:touch}.sun-log-row{min-height:39px}.sun-log-delete{border:0;border-radius:7px;background:#ffebee;color:#c62828;font-weight:900;padding:4px 7px;cursor:pointer;margin-left:5px;flex:none}.shop-ticket-count{font-size:12px;font-weight:900;color:#607d60;text-align:right;margin-top:2px}\n  .shop-actions{display:flex;gap:16px;margin-top:auto}
   .shop-btn{flex:1;min-width:0;font-family:inherit;font-size:14.5px;font-weight:900;color:#fff;
     background:linear-gradient(180deg,#FFB74D,#F57C00);
     border:2px solid #F57C00;padding:11px 6px;border-radius:12px;
     box-shadow:0 3px 0 #E65100;cursor:pointer;white-space:nowrap;transition:all .15s;}
   .shop-btn.use{background:linear-gradient(180deg,#81C784,#43A047);border-color:#43A047;box-shadow:0 3px 0 #2E7D32}
   .shop-btn:active{transform:translateY(2px)}
+  .shop-btn{flex:0 0 70%!important;font-size:29px!important;padding:18px 10px!important;min-height:62px}
   .shop-btn .ticket-num{font-size:14.5px;margin-left:2px;
     background:rgba(255,255,255,.28);padding:0 6px;border-radius:999px;display:inline-block}
 
@@ -2363,6 +2364,7 @@ function makeTask(text, minutes, sun, extra){
   if(extra && extra.chars) task.chars = extra.chars.slice(0, 60);
   if(extra && extra.words) task.words = extra.words.slice(0, 60);
   if(extra && extra.lessonName) task.lessonName = String(extra.lessonName).slice(0,60);
+  if(extra && extra.recognize === true) task.recognize = true;
   if(task.type === 'custom' && extra && extra.penalty === true) task.penalty = true;
   return task;
 }
@@ -2404,6 +2406,7 @@ function normalizeDay(day){
       if(type === 'custom' && t.penalty === true) item.penalty = true;
       if(typeof t.syncKey === 'string' && t.syncKey) item.syncKey = t.syncKey;
       if(typeof t.lessonName === 'string' && t.lessonName) item.lessonName = t.lessonName.slice(0,60);
+      if(t.recognize === true) item.recognize = true;
       if(t.lessonAdvanced === true) item.lessonAdvanced = true;
       if(type === 'preview' && Array.isArray(t.chars)) item.chars = t.chars.slice(0,60);
       if((type === 'wordgroup' || type === 'copy') && Array.isArray(t.words)) item.words = t.words.slice(0,60);
@@ -2455,6 +2458,8 @@ function loadLocalState(){
   }
   if(!Array.isArray(s.checkins)) s.checkins = [];
   if(!Array.isArray(s.sunLog)) s.sunLog = [];
+  s.sunLog = s.sunLog.map(x => { if(!x || typeof x !== 'object') return x; if(!x.date) { const d = new Date(Number(x.t)||Date.now()); x.date = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); } return x; }).filter(Boolean).slice(0,100);
+  if(!s.shopDateData || typeof s.shopDateData !== 'object' || Array.isArray(s.shopDateData)) s.shopDateData = {}; 
   if(typeof s.sun !== 'number') s.sun = 0;
   if(!('chinesePaper' in s)) s.chinesePaper = null;
   if(typeof s.lastNightReset !== 'string') s.lastNightReset = '';
@@ -2471,6 +2476,13 @@ function loadLocalState(){
   if(savedRewards && (freshBoot || shopNorm === null)) s.shop = savedRewards;
   else if(shopNorm === null) s.shop = JSON.parse(JSON.stringify(DEFAULT_SHOP));
   else s.shop = shopNorm;
+  if(!s.shopDateDataMigrated){
+    const ticketMap = {};
+    (s.shop || []).forEach(it => { ticketMap[it.id] = clamp(Number(it.tickets)||0,0,9999); it.tickets = 0; });
+    s.shopDateData[s.date || todayStr()] = Object.assign({tickets:{}}, s.shopDateData[s.date || todayStr()] || {});
+    s.shopDateData[s.date || todayStr()].tickets = Object.assign(ticketMap, s.shopDateData[s.date || todayStr()].tickets || {});
+    s.shopDateDataMigrated = true;
+  }
   try{ localStorage.setItem(REWARD_STORAGE_KEY, JSON.stringify(s.shop)); }catch(e){}
   s.wordBank = normalizeWordBank(s.wordBank);
   if(!s.charPages || typeof s.charPages !== 'object' || Array.isArray(s.charPages)) s.charPages = {};
@@ -2841,7 +2853,7 @@ function commitMiziChange(taskId){
 }
 function openMiziActionModal(ctx){
   const info = findTask(ctx.taskId);
-  if(!info) return;
+  if(!info || info.task.recognize === true) return;
   const task = info.task;
   const value = (ctx.kind === 'char') ? (task.chars || [])[ctx.index] : (task.words || [])[ctx.index];
   if(!value) return;
@@ -2950,7 +2962,7 @@ function bindMiziClicks(container, task){
     el.__lpFired = false;
     const cancelLp = () => { if(lpTimer){ clearTimeout(lpTimer); lpTimer = null; } };
     const startLp = (ev) => {
-      if(!task || task.type !== 'copy') return;
+      if(!task || task.type !== 'copy' || task.recognize === true) return;
       const p = ev.touches ? ev.touches[0] : ev;
       if(!p) return;
       lpX = p.clientX; lpY = p.clientY;
@@ -3352,7 +3364,7 @@ function applyRemoteState(remote){
   state.papersByDate = (remotePapers && typeof remotePapers === 'object' && !Array.isArray(remotePapers)) ? remotePapers : {};
   if(typeof remote.sun === 'number') state.sun = remote.sun;
   if(Array.isArray(remote.checkins)) state.checkins = remote.checkins;
-  if(Array.isArray(remote.sunLog)) state.sunLog = remote.sunLog.slice(0, 60);
+  if(Array.isArray(remote.sunLog)) state.sunLog = remote.sunLog.slice(0, 100);
   if(remote.lessonLibrary || cfg.lessonLibrary) state.lessonLibrary = normalizeLessonLibrary(remote.lessonLibrary || cfg.lessonLibrary);
   if(Array.isArray(remote.lessonLibOrder) || Array.isArray(cfg.lessonLibOrder)) state.lessonLibOrder = (remote.lessonLibOrder || cfg.lessonLibOrder).map(String).slice(0,400);
   else state.lessonLibOrder = [];
@@ -4104,7 +4116,7 @@ function renderShop(){
   }
   listEl.innerHTML = items.map(item => {
     const cost = Number(item.sun) || 0;
-    const tk = Number(item.tickets) || 0;
+    const tk = getShopTickets(item.id, state.date);
     const costLabel = cost < 0
       ? '<span class="shop-cost">💰 需要 ' + Math.abs(cost) + ' 个</span>'
       : (cost > 0 ? '<span class="shop-gain">💰 获得 ' + cost + ' 个</span>' : '<span class="shop-cost">💰 免费</span>');
@@ -4117,29 +4129,86 @@ function renderShop(){
           '<div class="shop-meta"><span>⏱ ' + item.minutes + ' 分钟</span>' + costLabel + '</div>' +
         '</div>' +
       '</div>' +
+      '<div class="shop-ticket-count">本日兑换券：' + tk + ' 张（长按按钮可调整）</div>' +
       '<div class="shop-actions">' +
         '<button class="shop-btn" data-shop-buy="' + escapeAttr(item.id) + '">' + buyLabel + '</button>' +
-      '</div></div>';
+      '</div></div>'; 
   }).join('');
   listEl.querySelectorAll('[data-shop-buy]').forEach(btn => {
-    btn.addEventListener('click', () => doRedeem(btn.dataset.shopBuy));
+    btn.addEventListener('click', () => { if(btn.__shopLongFired){btn.__shopLongFired=false;return;} doRedeem(btn.dataset.shopBuy); });
+    attachShopButtonLongPress(btn, btn.dataset.shopBuy);
   });
   renderShopHistory();
 }
+function getLogDate(x){
+  if(x && x.date) return String(x.date);
+  const d = new Date(Number(x && x.t) || 0);
+  if(!Number.isFinite(d.getTime())) return '';
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function getShopDateData(date){
+  if(!state.shopDateData || typeof state.shopDateData !== 'object') state.shopDateData = {};
+  if(!state.shopDateData[date]) state.shopDateData[date] = { tickets:{} };
+  if(!state.shopDateData[date].tickets) state.shopDateData[date].tickets = {};
+  return state.shopDateData[date];
+}
+function getShopTickets(id, date){
+  const data = getShopDateData(date || state.date);
+  if(Object.prototype.hasOwnProperty.call(data.tickets, id)) return clamp(Number(data.tickets[id])||0,0,9999);
+  const legacy = (state.shop || []).find(x=>x.id===id);
+  const n = legacy ? clamp(Number(legacy.tickets)||0,0,9999) : 0;
+  data.tickets[id] = n;
+  return n;
+}
+function setShopTickets(id, value, date){
+  const data = getShopDateData(date || state.date);
+  data.tickets[id] = clamp(Math.round(Number(value)||0),0,9999);
+}
 function renderShopHistory(){
   const el = $('shopHistory'); if(!el) return;
-  const logs = (state.sunLog || []).filter(x => /^兑换：/.test(String(x.reason || '')));
-  if(!logs.length){ el.innerHTML = '<div class="shop-history-empty">暂无兑换记录</div>'; return; }
-  el.innerHTML = logs.slice(0,30).map(x => {
+  const logs = (state.sunLog || []).filter(x => /^兑换：/.test(String(x.reason || '')) && getLogDate(x) === state.date);
+  if(!logs.length){ el.innerHTML = '<div class="shop-history-empty">' + escapeHtml(state.date) + ' 暂无兑换记录</div>'; return; }
+  el.innerHTML = logs.slice(0,100).map(x => {
     const after = Math.round(Number(x.after) || 0);
     const delta = Math.round(Number(x.delta) || 0);
     const before = after - delta;
     const reason = String(x.reason || '').replace(/^兑换：/, '').replace(/（.*$/, '');
     const change = delta < 0 ? '-' + Math.abs(delta) : '+' + delta;
-    const time = x.t ? new Date(x.t).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
-    return '<div class="shop-history-item">' + escapeHtml(time ? time + ' · ' : '') + '<b>' + escapeHtml(reason) + '</b>：' + before + ' ' + change + ' = ' + after + ' 金币</div>';
+    const cls = delta < 0 ? 'minus' : 'plus';
+    const time = x.t ? new Date(x.t).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}) : '';
+    const ticketText = Number(x.ticketDelta) ? '；兑换券 ' + (Number.isFinite(Number(x.ticketBefore)) ? x.ticketBefore : ' ') + ' ' + (x.ticketDelta>0?'+':'') + x.ticketDelta + ' = ' + (Number.isFinite(Number(x.ticketAfter)) ? x.ticketAfter : ' ') + ' 张' : '';
+    return '<div class="shop-history-item"><span class="shop-history-date">' + escapeHtml(time) + '</span><b>' + escapeHtml(reason) + '</b>：' + before + ' <span class="shop-history-change ' + cls + '">' + change + '</span> = ' + after + ' 金币' + escapeHtml(ticketText) + '</div>';
   }).join('');
 }
+function attachShopButtonLongPress(btn, id){
+  let timer=null, fired=false, sx=0, sy=0;
+  const cancel=()=>{if(timer){clearTimeout(timer);timer=null;}};
+  const start=(x,y)=>{sx=x;sy=y;fired=false;cancel();timer=setTimeout(()=>{timer=null;fired=true;btn.__shopLongFired=true;pendingShopTicketId=id;pwdPurpose='shopTicketAdjust';openPwdModal('🔒 调整兑换券','请输入家长密码，再输入要增加或扣除的张数');},800);};
+  btn.addEventListener('touchstart',e=>{if(e.touches&&e.touches[0])start(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+  btn.addEventListener('touchmove',e=>{if(timer&&e.touches&&e.touches[0]&&(Math.abs(e.touches[0].clientX-sx)>12||Math.abs(e.touches[0].clientY-sy)>12))cancel();},{passive:true});
+  btn.addEventListener('touchend',()=>{if(timer)cancel();if(fired){setTimeout(()=>{btn.__shopLongFired=false;},400);}});
+  btn.addEventListener('mousedown',e=>{if(e.button===0)start(e.clientX,e.clientY);});
+  btn.addEventListener('mousemove',e=>{if(timer&&(Math.abs(e.clientX-sx)>12||Math.abs(e.clientY-sy)>12))cancel();});
+  btn.addEventListener('mouseup',cancel);btn.addEventListener('mouseleave',cancel);
+  btn.addEventListener('contextmenu',e=>{e.preventDefault();if(!fired){pendingShopTicketId=id;pwdPurpose='shopTicketAdjust';openPwdModal('🔒 调整兑换券','请输入家长密码，再输入要增加或扣除的张数');btn.__shopLongFired=true;}});
+}
+function adjustShopTicketsAfterPassword(){
+  const id=pendingShopTicketId; pendingShopTicketId=null;
+  const item=(state.shop||[]).find(x=>x.id===id); if(!item) return;
+  const raw=prompt('请输入兑换券调整数量：例如 +3 增加 3 张，-2 扣除 2 张');
+  if(raw===null) return;
+  const amount=Number(String(raw).trim());
+  if(!Number.isInteger(amount)||amount===0||Math.abs(amount)>9999){toast('请输入非零整数，范围为 -9999 到 9999');return;}
+  const before=getShopTickets(id,state.date), after=clamp(before+amount,0,9999), actual=after-before;
+  if(!actual){toast('兑换券数量未改变');return;}
+  setShopTickets(id,after,state.date);
+  if(!Array.isArray(state.sunLog))state.sunLog=[];
+  state.sunLog.unshift({id:newId(),t:Date.now(),date:state.date,delta:0,after:Math.round(Number(state.sun)||0),ticketDelta:actual,ticketBefore:before,ticketAfter:after,reason:'兑换：'+item.name+'（兑换券调整）'});
+  state.sunLog=state.sunLog.slice(0,100);
+  saveLocalState();uploadToCloud();renderShop();renderAdminPanel();
+  toast('已调整「'+item.name+'」兑换券：'+(actual>0?'+':'')+actual+' 张');
+}
+
 function doRedeem(id){
   const item = (state.shop || []).find(x => x.id === id);
   if(!item) return;
@@ -4149,8 +4218,11 @@ function doRedeem(id){
   const costText = cost < 0 ? '消耗 ' + Math.abs(cost) + ' 个金币' : (cost > 0 ? '获得 ' + cost + ' 个金币' : '不消耗金币');
   if(!confirm('确定兑换「' + item.name + '」（' + item.minutes + ' 分钟）吗？\n' + costText + '\n兑换后获得 1 张兑换券')) return;
   state.sun = now + cost;
-  item.tickets = clamp((Number(item.tickets) || 0) + 1, 0, 9999);
+  setShopTickets(item.id, getShopTickets(item.id,state.date) + 1, state.date);
   pushSunLog(cost, '兑换：' + item.name + '（' + item.minutes + '分钟）');
+  state.sunLog[0].ticketDelta = 1;
+  state.sunLog[0].ticketBefore = getShopTickets(item.id,state.date) - 1;
+  state.sunLog[0].ticketAfter = getShopTickets(item.id,state.date);
   saveLocalState(); uploadToCloud();
   renderStats(); bumpPill(sunPillEl);
   if(cost < 0) flySunAway(Math.abs(cost));
@@ -4164,11 +4236,14 @@ function doRedeem(id){
 function doUseTicket(id){
   const item = (state.shop || []).find(x => x.id === id);
   if(!item) return;
-  const tk = clamp(Number(item.tickets) || 0, 0, 9999);
+  const tk = getShopTickets(item.id, state.date);
   if(tk <= 0){ toast('还没有「' + escapeHtml(item.name) + '」兑换券<br>先点「兑换」获取吧', 2800); playSound('fail'); return; }
   if(!confirm('确定使用 1 张「' + item.name + '」兑换券吗？\n剩余 ' + (tk - 1) + ' 张')) return;
-  item.tickets = tk - 1;
-  pushSunLog(0, '使用兑换券：' + item.name);
+  setShopTickets(item.id, tk - 1, state.date);
+  pushSunLog(0, '兑换：' + item.name + '（使用兑换券）');
+  state.sunLog[0].ticketDelta = -1;
+  state.sunLog[0].ticketBefore = tk;
+  state.sunLog[0].ticketAfter = tk - 1;
   saveLocalState(); uploadToCloud();
   renderShop();
   if(isAdminMode) renderAdminPanel();
@@ -4988,6 +5063,7 @@ function onMainBtnClick(){
 /* 密码 */
 let pwdPurpose = '';
 let pendingCheckId = null;
+let pendingShopTicketId = null;
 function currentParentPassword(){
   return (state && typeof state.parentPassword === 'string' && /^\d{4}$/.test(state.parentPassword))
     ? state.parentPassword : MASTER_PASSWORD;
@@ -5027,6 +5103,7 @@ function confirmPassword(){
   else if(purpose === 'clearSync') doClearSyncTask();
   else if(purpose === 'clearFrom16') doClearTasksAfterToday();
   else if(purpose === 'clearToday') doClearTodayTasks();
+  else if(purpose === 'shopTicketAdjust') adjustShopTicketsAfterPassword();
 }
 function requestPause(){
   const L = state.live;
@@ -6200,10 +6277,10 @@ $('adminResetPwdBtn').addEventListener('click', () => {
 function pushSunLog(delta, reason){
   if(!Array.isArray(state.sunLog)) state.sunLog = [];
   state.sunLog.unshift({
-    t: Date.now(), delta: Math.round(delta), after: Math.round(Number(state.sun) || 0),
+    id: newId(), t: Date.now(), date: state.date, delta: Math.round(delta), after: Math.round(Number(state.sun) || 0),
     reason: reason || (delta < 0 ? '手动扣除' : '手动增加')
   });
-  if(state.sunLog.length > 60) state.sunLog.length = 60;
+  if(state.sunLog.length > 100) state.sunLog.length = 100;
 }
 function changeSun(delta, reason){
   const d = Math.round(Number(delta) || 0);
@@ -6220,7 +6297,7 @@ function renderSunPanel(){
   const logEl = $('adminSunLog'); if(!logEl) return;
   const log = Array.isArray(state.sunLog) ? state.sunLog : [];
   if(!log.length){ logEl.innerHTML = '<div class="sun-log-empty">还没有金币调整记录</div>'; return; }
-  logEl.innerHTML = log.slice(0, 8).map(e => {
+  logEl.innerHTML = log.slice(0, 100).map((e, idx) => {
     const d = Math.round(Number(e.delta) || 0);
     const cls = d < 0 ? 'minus' : (d > 0 ? 'plus' : 'zero');
     const text = d === 0 ? '—' : ((d > 0 ? '+' : '') + d + ' 个');
@@ -6229,8 +6306,9 @@ function renderSunPanel(){
     return '<div class="sun-log-row">' +
       '<span class="sl-time">' + escapeHtml(time) + '</span>' +
       '<span class="sl-reason">' + escapeHtml(String(e.reason || '')) + '</span>' +
-      '<span class="sl-delta ' + cls + '">' + text + '</span></div>';
+      '<span class="sl-delta ' + cls + '">' + text + '</span>' + (/^兑换：/.test(String(e.reason||'')) ? '<button class="sun-log-delete" data-del-sunlog="'+idx+'" title="单独删除这条兑换记录">删除</button>' : '') + '</div>';
   }).join('');
+  logEl.querySelectorAll('[data-del-sunlog]').forEach(btn=>btn.addEventListener('click',()=>{const idx=Number(btn.dataset.delSunlog);const entry=state.sunLog[idx];if(!entry||!/^兑换：/.test(String(entry.reason||'')))return;if(!confirm('确定单独删除这条兑换记录吗？金币和兑换券数量不会回滚。'))return;state.sunLog.splice(idx,1);saveLocalState();uploadToCloud();renderSunPanel();renderShopHistory();toast('已删除这条兑换记录');}));
 }
 function adminSunAdjust(sign){
   const amtEl = $('adminSunAmount');
@@ -6972,7 +7050,7 @@ $('adminAddRecognizeBtn').addEventListener('click', () => {
   const unitSun = clamp(Number($('unitRecognizeSun').value) || getUnitCfg('copy').sun, 0.5, 50);
   const minutes = clamp(Math.round(words.length * min), 1, 120);
   const sun = clamp(Math.round(words.length * unitSun), 1, 500);
-  const task = makeTask(`会识字（${words.length}组）`, minutes, sun, { type:'copy', words, lessonName: name });
+  const task = makeTask(`会识字（${words.length}组）`, minutes, sun, { type:'copy', words, lessonName: name, recognize: true });
   state.subjects.chinese.push(task);
   saveLocalState(); uploadToCloud();
   renderBoard(); refreshAllCards(); renderAdminPanel();
