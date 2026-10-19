@@ -2227,22 +2227,45 @@ let miziEditCtx = null;
    ★ 性能优化：保存/上传防抖 + 关联任务缓存
 ============================================================ */
 let persistTimer = null;
+let persistIdleId = null;
 let persistPending = false;
+function cancelPersistIdle(){
+  if(persistIdleId == null) return;
+  try{
+    if(typeof window.cancelIdleCallback === 'function') window.cancelIdleCallback(persistIdleId);
+    else clearTimeout(persistIdleId);
+  }catch(e){}
+  persistIdleId = null;
+}
+function runDeferredPersist(){
+  persistIdleId = null;
+  if(!persistPending) return;
+  persistPending = false;
+  // 延后到浏览器空闲时段执行，避免勾选作业的点击处理与大体积本地/云端保存抢占主线程。
+  try{ saveLocalState(); }catch(e){ console.warn('本地保存失败', e); }
+  // 云端上传放到下一轮任务队列，避免与本地序列化连续占用主线程。
+  setTimeout(() => { try{ uploadToCloud(); }catch(e){ console.warn('云端保存失败', e); } }, 0);
+}
 function schedulePersist(delay){
   persistPending = true;
   clearTimeout(persistTimer);
+  cancelPersistIdle();
   persistTimer = setTimeout(() => {
     persistTimer = null;
     if(!persistPending) return;
-    persistPending = false;
-    saveLocalState();
-    uploadToCloud();
+    if(typeof window.requestIdleCallback === 'function'){
+      persistIdleId = window.requestIdleCallback(runDeferredPersist, {timeout: 1800});
+    }else{
+      // iPad/Safari 等不支持 requestIdleCallback 的浏览器使用短暂延后方案。
+      persistIdleId = setTimeout(runDeferredPersist, 80);
+    }
   }, delay == null ? 500 : delay);
 }
 function flushPersist(){
   if(!persistPending) return;
   persistPending = false;
   clearTimeout(persistTimer); persistTimer = null;
+  cancelPersistIdle();
   try{ saveLocalState(); uploadToCloud(); }catch(e){}
 }
 document.addEventListener('visibilitychange', () => {
