@@ -444,6 +444,12 @@
     -webkit-touch-callout:none;touch-action:manipulation}
   .mizi:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.14)}
   .mizi:active{transform:scale(.95)}
+  .mizi-row{display:flex;align-items:center;justify-content:center;gap:3px;flex:none}
+  .mizi-speaker{width:20px;height:26px;flex:none;border:0;border-radius:7px;background:#E3F2FD;color:#1565C0;
+    display:inline-flex;align-items:center;justify-content:center;padding:0;font-size:14px;line-height:1;cursor:pointer;
+    -webkit-tap-highlight-color:transparent}
+  .mizi-speaker:active{background:#BBDEFB;transform:scale(.94)}
+  .mizi-speaker svg{width:14px;height:14px;display:block}
   .mizi-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
   .mizi-svg line{stroke:rgba(229,115,115,.55);stroke-width:1;stroke-dasharray:4 3;vector-effect:non-scaling-stroke}
   .mizi-char{position:relative;z-index:2;font-size:var(--fs-mizi);line-height:1;
@@ -472,6 +478,7 @@
   .word-group{display:flex;gap:5px;align-items:flex-start;
     padding:4px;border-radius:6px;background:transparent}
   .wg-item{display:flex;flex-direction:column;align-items:center;gap:1px;flex:none}
+  .wg-item .mizi-row{gap:2px}
 
   .wordgroup-grid{gap:12px 10px}
   .wordgroup-card{width:auto;min-width:78px;align-items:center}
@@ -3113,7 +3120,7 @@ function renderWordMizi(word){
   return '<div class="word-group">' + chars.map(c =>
     '<div class="wg-item">' +
       '<div class="char-pinyin">' + (getPinyin(c) || '&nbsp;') + '</div>' +
-      '<div class="mizi">' + miziSvg() + '<span class="mizi-char">' + escapeHtml(c) + '</span></div>' +
+      '<div class="mizi-row"><div class="mizi">' + miziSvg() + '<span class="mizi-char">' + escapeHtml(c) + '</span></div>' + speakerButton(c, c) + '</div>' +
     '</div>'
   ).join('') + '</div>';
 }
@@ -3164,7 +3171,7 @@ function refreshWordBankInCards(char){
   document.querySelectorAll('[data-word-after="' + char + '"]').forEach(el => {
     const words = (state.wordBank && state.wordBank[char]) ? state.wordBank[char] : [];
     el.innerHTML = words.length
-      ? words.map(w => renderSmallWord(w)).join('')
+      ? words.map(w => renderSmallWord(w, task)).join('')
       : '<span class="word-empty">点击田字格组词</span>';
   });
 }
@@ -3284,17 +3291,26 @@ function getSyncEnabled(){ try{ return localStorage.getItem(SYNC_TOGGLE_KEY) !==
 function setSyncEnabled(v){ try{ localStorage.setItem(SYNC_TOGGLE_KEY, v ? '1' : '0'); }catch(e){} cloudSyncCleared = !v; }
 let lastRemoteUpdatedAt = 0;
 let uploadFailedNotified = false;
-/* ★ 云端补传：上传失败 / 断网期间的数据改动，联网或定时后自动重传 */
+/* 云端补传：用版本号标记待上传状态，避免写入过程中产生的新修改被漏掉。 */
 var cloudRetryTimer = null;
+var cloudPending = false;
+var cloudChangeSeq = 0;
+var cloudRetryDelay = 5000;
 function scheduleCloudRetry(delay){
-  if(cloudRetryTimer) return;
+  if(cloudRetryTimer || !getSyncEnabled() || cloudSyncCleared) return;
   cloudRetryTimer = setTimeout(() => {
     cloudRetryTimer = null;
     uploadFailedNotified = false;
-    uploadToCloud(true);
-  }, delay == null ? 15000 : delay);
+    if(cloudPending && navigator.onLine !== false) uploadToCloud(true);
+  }, delay == null ? cloudRetryDelay : delay);
 }
-window.addEventListener('online', () => { uploadFailedNotified = false; uploadToCloud(true); });
+window.addEventListener('online', () => {
+  uploadFailedNotified = false;
+  if(cloudPending || getSyncEnabled()) uploadToCloud(true);
+});
+window.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible' && cloudPending && navigator.onLine !== false) uploadToCloud(true);
+});
 window.addEventListener('beforeunload', () => { if(persistPending) flushPersist(); });
 
 let cloudUploadInFlight = false;
@@ -3305,9 +3321,10 @@ async function uploadToCloud(force){
   if(isRemoteUpdate && !force) return false;
   if(freshBoot && !force && !lastRemoteUpdatedAt) return false;
   if(!getSyncEnabled() || cloudSyncCleared) return false;
+  cloudPending = true;
+  cloudChangeSeq++;
 
-  // Firebase 全量写入必须串行执行。连续勾选时只保留“再上传一次最新状态”的标记，
-  // 避免多个旧快照并发写入，造成后写入的旧数据覆盖新数据。
+  // 全量写入严格串行；上传期间有新修改时，结束后一定再写最新快照。
   if(cloudUploadInFlight){
     cloudUploadQueued = true;
     cloudUploadQueuedForce = cloudUploadQueuedForce || !!force;
@@ -3316,6 +3333,7 @@ async function uploadToCloud(force){
   cloudUploadInFlight = true;
   let succeeded = false;
   let attemptedAt = 0;
+  const uploadSeq = cloudChangeSeq;
   const previousPushedAt = lastPushedUpdatedAt;
   try{
     const payload = {
@@ -3352,14 +3370,25 @@ async function uploadToCloud(force){
     await fbSet(dataRef, payload);
     succeeded = true;
     uploadFailedNotified = false;
+    cloudRetryDelay = 5000;
+    // 只有上传期间没有新的修改，才能清除待上传标记。
+    if(cloudChangeSeq === uploadSeq){
+      cloudPending = false;
+      showSyncStatus('☁️ 云端已保存', 'online');
+    } else {
+      cloudPending = true;
+      cloudUploadQueued = true;
+    }
     updateSyncInfo();
     return true;
   }catch(e){
     console.warn('云端上传失败', e);
     if(attemptedAt && lastPushedUpdatedAt === attemptedAt) lastPushedUpdatedAt = previousPushedAt;
+    cloudPending = true;
     uploadFailedNotified = true;
-    showSyncStatus('⚠️ 云端上传失败，联网后自动重试', 'offline');
-    scheduleCloudRetry(15000);
+    showSyncStatus('⚠️ 云端未保存，稍后自动重试', 'offline');
+    scheduleCloudRetry(cloudRetryDelay);
+    cloudRetryDelay = Math.min(Math.round(cloudRetryDelay * 1.8), 60000);
     return false;
   }finally{
     cloudUploadInFlight = false;
@@ -3367,11 +3396,18 @@ async function uploadToCloud(force){
       const queuedForce = cloudUploadQueuedForce;
       cloudUploadQueued = false;
       cloudUploadQueuedForce = false;
-      // 上一次写入结束后再取当前 state，确保补传的是最新状态，而非旧快照。
-      setTimeout(() => { uploadToCloud(queuedForce); }, succeeded ? 120 : 15000);
+      // 成功后快速补传最新快照；失败时由统一重试计时器负责，避免多个计时器互相抢占。
+      if(succeeded) setTimeout(() => { if(cloudPending) uploadToCloud(queuedForce); }, 120);
+      else scheduleCloudRetry(cloudRetryDelay);
     }
   }
 }
+// 兜底巡检：页面仍打开且存在未确认写入时，每 30 秒再尝试一次。
+setInterval(() => {
+  if(cloudPending && !cloudUploadInFlight && navigator.onLine !== false && getSyncEnabled() && !cloudSyncCleared){
+    uploadToCloud(true);
+  }
+}, 30000);
 let adminEntrySnapshot = null;
 function getEditableStateForCompare(){
   return JSON.stringify({
@@ -3776,6 +3812,41 @@ function miziSvg(){
     <line x1="100" y1="0" x2="0" y2="100"/>
   </svg>`;
 }
+function speakerButton(text, label){
+  const spoken = String(text || '').trim();
+  return `<button type="button" class="mizi-speaker" data-speak-text="${escapeAttr(spoken)}" aria-label="朗读${escapeAttr(label || spoken)}" title="朗读${escapeAttr(label || spoken)}">🔊</button>`;
+}
+function miziWithSpeaker(char, spokenText){
+  return `<div class="mizi-row"><div class="mizi" data-char="${escapeAttr(char)}" title="单击看笔顺 · 双击打勾">${miziSvg()}<span class="mizi-char">${escapeHtml(char)}</span></div>${speakerButton(spokenText || char, spokenText || char)}</div>`;
+}
+function speakHomeworkText(text){
+  const value = String(text || '').trim();
+  if(!value || !('speechSynthesis' in window)) { toast('当前浏览器不支持语音播报'); return; }
+  try{
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(value);
+    utterance.lang = 'zh-CN'; utterance.rate = 0.85; utterance.pitch = 1; utterance.volume = 1;
+    window.speechSynthesis.speak(utterance);
+  }catch(e){ console.warn('语音播报失败', e); }
+}
+document.addEventListener('click', function(e){
+  const btn = e.target.closest('.mizi-speaker[data-speak-text]');
+  if(!btn) return;
+  e.preventDefault(); e.stopPropagation();
+  speakHomeworkText(btn.dataset.speakText || '');
+});
+document.addEventListener('click', function(e){
+  const cell = e.target.closest('.word-after .mizi[data-word-stroke-char]');
+  if(!cell) return;
+  e.preventDefault(); e.stopPropagation();
+  const ch = cell.dataset.wordStrokeChar || '';
+  const taskEl = cell.closest('[data-task-id]');
+  const taskId = taskEl && taskEl.dataset.taskId;
+  const found = taskId ? findTask(taskId) : null;
+  const task = found ? found.task : null;
+  if(ch) showStroke(ch, task, task && (task.type === 'wordgroup' || task.type === 'copy') ? 'wordgroup' : 'plain');
+});
+
 function renderCharCard(char, task){
   const info = HZ_INFO[char] || ['—','—'];
   const py = getPinyin(char);
@@ -3785,10 +3856,7 @@ function renderCharCard(char, task){
   const strokeTip = strokeCount ? '点击查看笔顺动画' : '点击手写确认笔画';
   return `<div class="char-card">
     <div class="char-pinyin">${py ? escapeHtml(py) : '&nbsp;'}</div>
-    <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(char)}" title="单击看笔顺 · 双击打勾">
-      ${miziSvg()}
-      <span class="mizi-char">${escapeHtml(char)}</span>
-    </div>
+    <div class="mizi-row"><div class="mizi${checked?' checked':''}" data-char="${escapeAttr(char)}" title="单击看笔顺 · 双击打勾">${miziSvg()}<span class="mizi-char">${escapeHtml(char)}</span></div>${speakerButton(char, char)}</div>
     <div class="char-info">偏旁：${escapeHtml(info[0])}</div>
     <div class="char-info char-stroke" data-stroke-char="${escapeAttr(char)}" title="${strokeTip}">笔画：<span class="stroke-count" data-char="${escapeAttr(char)}">${strokeCount || '—'}</span></div>
     <div class="char-info char-page" data-dict-char="${escapeAttr(char)}" title="点击打开查字典">页码：<span class="page-num" data-page-char="${escapeAttr(char)}">${pageNum || '—'}</span></div>
@@ -3806,17 +3874,15 @@ function renderWordGroup(word, showInfo, task){
     const checked = !!(task && Array.isArray(task.checkedChars) && task.checkedChars.indexOf(c) >= 0);
     return `<div class="wg-item">
       <div class="char-pinyin">${py ? escapeHtml(py) : '&nbsp;'}</div>
-      <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(c)}" title="单击看笔顺 · 双击打勾">
-        ${miziSvg()}
-        <span class="mizi-char">${escapeHtml(c)}</span>
-      </div>
+      <div class="mizi-row"><div class="mizi${checked?' checked':''}" data-char="${escapeAttr(c)}" title="单击看笔顺 · 双击打勾">${miziSvg()}<span class="mizi-char">${escapeHtml(c)}</span></div>${speakerButton(c, c)}</div>
     </div>`;
   }).join('')}</div>`;
 }
-function renderSmallWord(word){
+function renderSmallWord(word, task){
   const chars = [...word].filter(c => /[\u4e00-\u9fa5]/.test(c));
+  const spoken = chars.join('');
   return '<span class="word-item">' + chars.map(c =>
-    '<span class="mizi small">' + miziSvg() + '<span class="mizi-char">' + escapeHtml(c) + '</span></span>'
+    '<span class="wg-item"><span class="char-pinyin">' + escapeHtml(getPinyin(c) || '') + '</span><span class="mizi-row"><span class="mizi small" aria-label="' + escapeAttr(c) + '">' + miziSvg() + '<span class="mizi-char">' + escapeHtml(c) + '</span></span>' + speakerButton(spoken, spoken) + '</span></span>'
   ).join('') + '</span>';
 }
 function renderWordGroupWithWords(char, task){
@@ -3824,14 +3890,11 @@ function renderWordGroupWithWords(char, task){
   const checked = !!(task && Array.isArray(task.checkedChars) && task.checkedChars.indexOf(char) >= 0);
   const words = (state.wordBank && state.wordBank[char]) ? state.wordBank[char] : [];
   const wordsHtml = words.length
-    ? words.map(w => renderSmallWord(w)).join('')
+    ? words.map(w => renderSmallWord(w, task)).join('')
     : '<span class="word-empty">点击田字格组词</span>';
   return `<div class="char-card wordgroup-card" data-char="${escapeAttr(char)}">
     <div class="char-pinyin">${py ? escapeHtml(py) : '&nbsp;'}</div>
-    <div class="mizi${checked?' checked':''}" data-char="${escapeAttr(char)}" title="单击组词 · 双击打勾">
-      ${miziSvg()}
-      <span class="mizi-char">${escapeHtml(char)}</span>
-    </div>
+    <div class="mizi-row"><div class="mizi${checked?' checked':''}" data-char="${escapeAttr(char)}" title="单击组词 · 双击打勾">${miziSvg()}<span class="mizi-char">${escapeHtml(char)}</span></div>${speakerButton(char, char)}</div>
     <div class="word-after" data-word-after="${escapeAttr(char)}">${wordsHtml}</div>
   </div>`;
 }
