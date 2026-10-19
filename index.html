@@ -827,7 +827,9 @@
     text-align:center;padding:10px 6px;letter-spacing:.5px}
 
   .custom-tools-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 10px;margin:8px 0 4px}
-  .custom-tool-btn{min-width:0;min-height:48px;border:1px solid #c8e6c9;border-radius:12px;background:linear-gradient(180deg,#f7fff6,#e8f5e9);color:#285b35;font-family:inherit;font-weight:800;font-size:14px;line-height:1.3;padding:8px 4px;overflow-wrap:anywhere;cursor:pointer;touch-action:manipulation;box-shadow:0 2px 5px rgba(40,80,40,.08)}
+  .custom-tool-btn{min-width:0;min-height:48px;border:1px solid #c8e6c9;border-radius:12px;background:linear-gradient(180deg,#f7fff6,#e8f5e9);color:#285b35;font-family:inherit;font-weight:800;font-size:14px;line-height:1.3;padding:8px 4px;overflow-wrap:anywhere;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 2px 5px rgba(40,80,40,.08)}
+  .custom-tool-btn.dragging{opacity:.45;transform:scale(.97);cursor:grabbing}
+  .custom-tool-btn.add{touch-action:manipulation}
   .custom-tool-btn.add{font-size:26px;color:#2e7d32;background:#f5fff5;border-style:dashed}
   .custom-tool-btn:active{transform:scale(.98)}
   .custom-tool-note{font-size:10px;color:#789078;font-weight:600;display:block;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1775,10 +1777,10 @@
       </div>
     </div>
 
-    <div class="admin-section" id="adminPanelCustomTools">
+    <div class="admin-section collapsed" id="adminPanelCustomTools">
       <h3>🧰 自定义工具</h3>
       <div class="custom-tools-grid" id="adminCustomToolsGrid"></div>
-      <div class="aa-hint">长按任意按钮 1 秒可设置名称、链接和备注；点击按钮打开链接。设置会保存到云端。</div>
+      <div class="aa-hint">长按任意按钮 1 秒可设置名称、链接和备注；拖动按钮可调整顺序；点击按钮打开链接。工具内容和排序会同步到云端。</div>
     </div>
 
     <div class="admin-section collapsed" id="adminPanelShop">
@@ -2149,7 +2151,7 @@ const DEFAULT_SETTINGS = {
   },
   panelCollapsed: {
     progress: true, sun: true, date: true, library: true, sync: true,
-    password: true, eye: true, math: false, english: false, shop: true,
+    password: true, eye: true, math: false, english: false, shop: true, customTools: true,
     timetable: true, font: true, dictionary: true
   },
   ttFontSize: 13.5,
@@ -2450,7 +2452,8 @@ function normalizeSettings(raw){
       shop: pc.shop !== undefined ? !!pc.shop : true,
       timetable: pc.timetable !== undefined ? !!pc.timetable : true,
       font: pc.font !== undefined ? !!pc.font : true,
-      dictionary: pc.dictionary !== undefined ? !!pc.dictionary : true
+      dictionary: pc.dictionary !== undefined ? !!pc.dictionary : true,
+      customTools: pc.customTools !== undefined ? !!pc.customTools : true
     },
     ttFontSize: num(Number(r.ttFontSize) === 12.5 ? 13.5 : r.ttFontSize, d.ttFontSize, 8, 24),
     ttLineHeight: num(r.ttLineHeight, d.ttLineHeight, 1, 3)
@@ -3450,6 +3453,7 @@ async function uploadToCloud(force){
       sun: state.sun, checkins: state.checkins,
       sunLog: Array.isArray(state.sunLog) ? state.sunLog : [],
       shopDateData: state.shopDateData || {},
+      customTools: Array.isArray(state.customTools) ? state.customTools : [],
       lessonLibrary: state.lessonLibrary, lessonLibOrder: Array.isArray(state.lessonLibOrder) ? state.lessonLibOrder : [],
       parentPassword: state.parentPassword, chinesePaper: state.chinesePaper || null,
       shop: state.shop, wordBank: state.wordBank, charPages: state.charPages || {}, timetable: state.timetable,
@@ -3467,7 +3471,8 @@ async function uploadToCloud(force){
         syncDays: state.syncDays || {},
         papersByDate: state.papersByDate || {},
         shopDateData: state.shopDateData || {},
-        parentPassword: state.parentPassword
+        parentPassword: state.parentPassword,
+        customTools: Array.isArray(state.customTools) ? state.customTools : []
       },
       updatedAt: Date.now()
     };
@@ -3635,6 +3640,8 @@ function applyRemoteState(remote){
   invalidateLinkedIndex();
   if(!state.days[state.date]) state.days[state.date] = makeDay();
   if(remote.settings || cfg.settings) state.settings = normalizeSettings(remote.settings || cfg.settings);
+  const remoteCustomTools = remote.customTools || cfg.customTools;
+  if(Array.isArray(remoteCustomTools)) state.customTools = remoteCustomTools.slice(0,80).map(t => ({id:String(t && t.id || newId()),name:String(t && t.name || '').slice(0,30),url:String(t && t.url || '').slice(0,1000),note:String(t && t.note || '').slice(0,300)})).filter(t => t.name && t.url);
   if(remote.syncDays && typeof remote.syncDays === 'object') state.syncDays = remote.syncDays;
   else if(cfg.syncDays && typeof cfg.syncDays === 'object') state.syncDays = cfg.syncDays;
   const remotePapers = remote.papersByDate || cfg.papersByDate;
@@ -4151,8 +4158,8 @@ function renderTaskAttachmentPreview(a){
     const bvid = (url.match(/\b(BV[0-9A-Za-z]{10})\b/i) || [])[1];
     const avid = (url.match(/[?&]aid=(\d+)/i) || url.match(/\/av(\d+)/i) || [])[1];
     let playerUrl = '';
-    if(bvid) playerUrl = 'https://player.bilibili.com/player.html?bvid=' + encodeURIComponent(bvid) + '&page=1&danmaku=0&high_quality=1&autoplay=0';
-    else if(avid) playerUrl = 'https://player.bilibili.com/player.html?aid=' + encodeURIComponent(avid) + '&page=1&danmaku=0&high_quality=1&autoplay=0';
+    if(bvid) playerUrl = 'https://player.bilibili.com/player.html?bvid=' + encodeURIComponent(bvid) + '&page=1&danmaku=0&autoplay=0&high_quality=1';
+    else if(avid) playerUrl = 'https://player.bilibili.com/player.html?aid=' + encodeURIComponent(avid) + '&page=1&danmaku=0&autoplay=0&high_quality=1';
     else playerUrl = url;
     host.innerHTML = '<div>▶️ ' + name + '</div><iframe title="仅播放指定分享视频" src="' + escapeAttr(playerUrl) + '" sandbox="allow-scripts allow-same-origin allow-presentation" referrerpolicy="no-referrer" allow="fullscreen; picture-in-picture" allowfullscreen></iframe><div style="font-size:12px;color:#607d8b">为避免学生跳转到其他推荐内容，播放器已限制顶层跳转。若平台禁止嵌入播放，请家长改为上传视频文件。</div>';
   }
@@ -6548,10 +6555,10 @@ function renderCustomTools(){
   grid.innerHTML = '';
   tools.forEach(tool => {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'custom-tool-btn';
-    b.textContent = tool.name; b.title = tool.note || tool.url;
+    b.dataset.toolId = tool.id; b.textContent = tool.name; b.title = tool.note || tool.url;
     if(tool.note){ const note = document.createElement('span'); note.className = 'custom-tool-note'; note.textContent = tool.note; b.appendChild(note); }
     b.addEventListener('click', () => {
-      if(b.dataset.longPressed === '1'){ b.dataset.longPressed = '0'; return; }
+      if(b.dataset.longPressed === '1' || b.dataset.dragMoved === '1'){ b.dataset.longPressed = '0'; b.dataset.dragMoved='0'; return; }
       try{ const u = new URL(tool.url, location.href); if(!/^https?:$/.test(u.protocol)){toast('仅支持 http/https 链接');return;} window.open(u.href,'_blank','noopener,noreferrer'); }
       catch(e){toast('链接格式不正确，请长按按钮修改');}
     });
@@ -6560,11 +6567,44 @@ function renderCustomTools(){
   const add = document.createElement('button'); add.type='button'; add.className='custom-tool-btn add'; add.textContent='+'; add.title='长按 1 秒添加工具';
   bindCustomToolLongPress(add, null); grid.appendChild(add);
 }
+let customToolDrag = null;
+document.addEventListener('pointermove', e => {
+  if(!customToolDrag) return;
+  const dx=e.clientX-customToolDrag.x, dy=e.clientY-customToolDrag.y;
+  if(!customToolDrag.button.dataset.toolId) return;
+  if(!customToolDrag.started && Math.hypot(dx,dy)>8){
+    customToolDrag.started=true; clearTimeout(customToolPressTimer);
+    customToolDrag.button.dataset.dragMoved='1'; customToolDrag.button.classList.add('dragging');
+    customToolDrag.button.style.zIndex='2';
+  }
+  if(!customToolDrag.started) return;
+  e.preventDefault();
+  const target=document.elementFromPoint(e.clientX,e.clientY)?.closest?.('#adminCustomToolsGrid .custom-tool-btn[data-tool-id]');
+  if(!target || target===customToolDrag.button) return;
+  const r=target.getBoundingClientRect();
+  const relX=e.clientX-(r.left+r.width/2), relY=e.clientY-(r.top+r.height/2);
+  const before=Math.abs(relX)>Math.abs(relY)?relX<0:relY<0;
+  target.parentNode.insertBefore(customToolDrag.button, before?target:target.nextSibling);
+},{passive:false});
+document.addEventListener('pointerup', async () => {
+  if(!customToolDrag) return;
+  const drag=customToolDrag; customToolDrag=null;
+  if(drag.started){
+    drag.button.classList.remove('dragging'); drag.button.style.zIndex='';
+    const ids=[...$('adminCustomToolsGrid').querySelectorAll('.custom-tool-btn[data-tool-id]')].map(el=>el.dataset.toolId);
+    const byId=new Map((state.customTools||[]).map(t=>[t.id,t]));
+    state.customTools=ids.map(id=>byId.get(id)).filter(Boolean);
+    saveLocalState();
+    const ok=await uploadToCloud(true); toast(ok?'✅ 工具排序已同步云端':'工具排序已保存到本机，云端同步稍后重试');
+  }
+}, {passive:true});
+document.addEventListener('pointercancel', () => { if(customToolDrag?.started){customToolDrag.button.classList.remove('dragging');customToolDrag.button.style.zIndex='';} customToolDrag=null; });
 function bindCustomToolLongPress(button, id){
   const start = e => {
     if(e.type === 'mousedown' && e.button !== 0) return;
-    clearTimeout(customToolPressTimer); customToolPressTarget = button; button.dataset.longPressed='0';
-    customToolPressTimer = setTimeout(() => { if(customToolPressTarget !== button) return; button.dataset.longPressed='1'; openCustomToolEditor(id); },1000);
+    clearTimeout(customToolPressTimer); customToolPressTarget = button; button.dataset.longPressed='0'; button.dataset.dragMoved='0';
+    customToolDrag = {button, x:e.clientX, y:e.clientY, started:false};
+    customToolPressTimer = setTimeout(() => { if(customToolPressTarget !== button || (customToolDrag && customToolDrag.started)) return; button.dataset.longPressed='1'; openCustomToolEditor(id); },1000);
   };
   const cancel = () => { clearTimeout(customToolPressTimer); if(customToolPressTarget===button) customToolPressTarget=null; };
   button.addEventListener('pointerdown', start); button.addEventListener('pointerup', cancel); button.addEventListener('pointerleave', cancel); button.addEventListener('pointercancel', cancel);
@@ -7132,6 +7172,7 @@ function rememberText(key, value){
 function applyAdminPanelStates(){
   const pc = state.settings.panelCollapsed || DEFAULT_SETTINGS.panelCollapsed;
   const map = {
+    adminPanelCustomTools: pc.customTools !== undefined ? pc.customTools : true,
     adminPanelSun: pc.sun, adminPanelDate: pc.date,
     adminPanelLibrary: pc.library, adminPanelSync: pc.sync, adminPanelPassword: pc.password,
     adminPanelEye: pc.eye, adminPanelMath: pc.math, adminPanelEnglish: pc.english,
@@ -7144,7 +7185,7 @@ function applyAdminPanelStates(){
 }
 function setupAdminPanelToggles(){
   const map = {
-    adminPanelSun:'sun', adminPanelDate:'date',
+    adminPanelCustomTools:'customTools', adminPanelSun:'sun', adminPanelDate:'date',
     adminPanelMath:'math', adminPanelEnglish:'english',
     adminPanelLibrary:'library', adminPanelSync:'sync',
     adminPanelPassword:'password', adminPanelEye:'eye', adminPanelShop:'shop',
