@@ -1185,11 +1185,29 @@
   .lib-row.dragging{opacity:.55;background:rgba(255,213,79,.14);box-shadow:inset 0 0 0 1px rgba(255,213,79,.5)}
 
 
-  /* 本次调整：科目标签靠左，兑换标签固定在最右；兑换按钮高度约减半 */
+  /* 科目标签靠左，兑换标签固定最右；兑换项目采用左侧内容、右侧按钮的紧凑横排 */
   .subject-tabs{justify-content:flex-start!important}
   .subject-tab{flex:0 0 auto!important}
   .subject-tab[data-tab="shop"]{margin-left:auto!important}
-  .shop-btn{font-size:15px!important;padding:7px 10px!important;min-height:31px!important;line-height:1.1!important}
+  .card-list.shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .shop-card{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;column-gap:5px!important;row-gap:3px!important;align-items:center!important;}
+  .shop-top{grid-column:1!important;grid-row:1!important;gap:5px!important;min-width:0!important;}
+  .shop-icon{width:28px!important;font-size:24px!important;}
+  .shop-info{min-width:0!important;}
+  .shop-name{font-size:13px!important;}
+  .shop-meta{font-size:11px!important;gap:4px!important;margin-top:3px!important;}
+  .shop-ticket-count{grid-column:1!important;grid-row:2!important;text-align:left!important;font-size:10px!important;line-height:1.2!important;margin:0!important;overflow-wrap:anywhere!important;}
+  .shop-actions{grid-column:2!important;grid-row:1 / span 2!important;align-self:center!important;justify-content:center!important;margin:0!important;gap:0!important;min-width:0!important;}
+  .shop-btn{flex:0 0 auto!important;width:62px!important;min-width:0!important;font-size:13px!important;padding:4px 4px!important;min-height:26px!important;line-height:1.1!important;border-width:1px!important;border-radius:8px!important;white-space:nowrap!important;}
+  .shop-btn .ticket-num{font-size:10px!important;padding:0 3px!important;margin-left:1px!important;}
+  @media(max-width:640px){
+    .card-list.shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px!important;}
+    .shop-card{padding:6px!important;}
+    .shop-icon{width:22px!important;font-size:20px!important;}
+    .shop-name{font-size:12px!important;}
+    .shop-meta{font-size:10px!important;gap:3px!important;}
+    .shop-btn{width:52px!important;font-size:12px!important;padding:4px 2px!important;}
+  }
 </style>
 </head>
 
@@ -6672,7 +6690,7 @@ function saveLessonPick(kind, value){
 function populateLessonSelects(){
   const lib = state.lessonLibrary || {};
   const keys = libKeys();
-  if(!state.settings.lessonPick) state.settings.lessonPick = { preview:'', wordgroup:'', copy:'' };
+  if(!state.settings.lessonPick) state.settings.lessonPick = { preview:'', wordgroup:'', copy:'', recognize:'' };
   const lp = state.settings.lessonPick;
   const fill = (sel, placeholder, wanted) => {
     if(!sel) return '';
@@ -6697,7 +6715,7 @@ function populateLessonSelects(){
     state.settings.lessonPick = { preview:a, wordgroup:b, copy:c, recognize:r };
     saveLocalState(); uploadToCloud();
   }
-  try{ renderLessonHint('preview'); renderLessonHint('wordgroup'); renderLessonHint('copy'); }catch(e){}
+  try{ renderLessonHint('preview'); renderLessonHint('wordgroup'); renderLessonHint('copy'); renderLessonHint('recognize'); }catch(e){}
 }
 $('adminLibAddBtn').addEventListener('click', () => {
   const nameEl = $('adminLibLesson');
