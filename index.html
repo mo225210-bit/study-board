@@ -1184,6 +1184,12 @@
   .lib-row .lib-handle:active{cursor:grabbing;color:#FFD54F}
   .lib-row.dragging{opacity:.55;background:rgba(255,213,79,.14);box-shadow:inset 0 0 0 1px rgba(255,213,79,.5)}
 
+
+  /* 本次调整：科目标签靠左，兑换标签固定在最右；兑换按钮高度约减半 */
+  .subject-tabs{justify-content:flex-start!important}
+  .subject-tab{flex:0 0 auto!important}
+  .subject-tab[data-tab="shop"]{margin-left:auto!important}
+  .shop-btn{font-size:15px!important;padding:7px 10px!important;min-height:31px!important;line-height:1.1!important}
 </style>
 </head>
 
@@ -1592,9 +1598,9 @@
       <div class="admin-add-row inline-row">
         <select class="aa-select" id="adminRecognizeLessonSelect"><option value="">— 选择课文 —</option></select>
         <input class="aa-num" id="unitRecognizeMin" type="number" step="0.5" min="0.5" max="20" placeholder="分钟">
-        <span class="aa-unit">分钟/组</span>
+        <span class="aa-unit">分钟/词</span>
         <input class="aa-num" id="unitRecognizeSun" type="number" step="0.5" min="0.5" max="50" placeholder="金币">
-        <span class="aa-unit">金币/组</span>
+        <span class="aa-unit">金币/词</span>
         <button class="aa-btn" id="adminAddRecognizeBtn">添加</button>
       </div>
       <div class="aa-hint" id="recognizeLessonHint">选好课文直接点「添加」即可</div>
@@ -2008,7 +2014,7 @@ const DEFAULT_SETTINGS = {
   },
   eyeCare: { useMin: 20, restMin: 2 },
   fonts: DEFAULT_FONTS,
-  lessonPick: { preview: '', wordgroup: '', copy: '' },
+  lessonPick: { preview: '', wordgroup: '', copy: '', recognize: '' },
   lastInputs: {
     chineseMin: 10, chineseSun: 10,
     mathMin: 10, mathSun: 10,
@@ -2260,7 +2266,8 @@ function normalizeSettings(raw){
     lessonPick: {
       preview:   String(lp.preview   || '').slice(0,60),
       wordgroup: String(lp.wordgroup || '').slice(0,60),
-      copy:      String(lp.copy      || '').slice(0,60)
+      copy:      String(lp.copy      || '').slice(0,60),
+      recognize: String(lp.recognize || '').slice(0,60)
     },
     lastInputs: {
       chineseMin: num(li.chineseMin, d.lastInputs.chineseMin, 1, 120),
@@ -6658,7 +6665,7 @@ function renderLessonLibrary(){
 }
 function saveLessonPick(kind, value){
   if(!state.settings) state.settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
-  if(!state.settings.lessonPick) state.settings.lessonPick = { preview:'', wordgroup:'', copy:'' };
+  if(!state.settings.lessonPick) state.settings.lessonPick = { preview:'', wordgroup:'', copy:'', recognize:'' };
   state.settings.lessonPick[kind] = String(value || '').slice(0,60);
   saveLocalState(); uploadToCloud();
 }
@@ -6685,8 +6692,9 @@ function populateLessonSelects(){
   const b = fill($('adminWordgroupLessonSelect'), '— 选择课文 —', lp.wordgroup);
   const c = fill($('adminCopyLessonSelect'),      '— 选择课文 —', lp.copy);
   fill($('adminRecognizeLessonSelect'), '— 选择课文 —', lp.recognize || '');
-  if(a !== lp.preview || b !== lp.wordgroup || c !== lp.copy){
-    state.settings.lessonPick = { preview:a, wordgroup:b, copy:c };
+  const r = $('adminRecognizeLessonSelect') ? $('adminRecognizeLessonSelect').value : '';
+  if(a !== lp.preview || b !== lp.wordgroup || c !== lp.copy || r !== (lp.recognize || '')){
+    state.settings.lessonPick = { preview:a, wordgroup:b, copy:c, recognize:r };
     saveLocalState(); uploadToCloud();
   }
   try{ renderLessonHint('preview'); renderLessonHint('wordgroup'); renderLessonHint('copy'); }catch(e){}
@@ -7050,11 +7058,18 @@ $('adminAddRecognizeBtn').addEventListener('click', () => {
   const unitSun = clamp(Number($('unitRecognizeSun').value) || getUnitCfg('copy').sun, 0.5, 50);
   const minutes = clamp(Math.round(words.length * min), 1, 120);
   const sun = clamp(Math.round(words.length * unitSun), 1, 500);
-  const task = makeTask(`会识字（${words.length}组）`, minutes, sun, { type:'copy', words, lessonName: name, recognize: true });
+  const task = makeTask(`会识字（${words.length}词）`, minutes, sun, { type:'copy', words, lessonName: name, recognize: true });
   state.subjects.chinese.push(task);
+  // 记录当前课文，并自动将下次要添加的课文定位到下一课；选择结果同步到云端。
+  const lessonNames = libKeys();
+  const currentIndex = lessonNames.indexOf(name);
+  const nextName = currentIndex >= 0 && currentIndex + 1 < lessonNames.length ? lessonNames[currentIndex + 1] : name;
+  saveLessonPick('recognize', nextName);
+  if($('adminRecognizeLessonSelect')) $('adminRecognizeLessonSelect').value = nextName;
+  renderLessonHint('recognize');
   saveLocalState(); uploadToCloud();
   renderBoard(); refreshAllCards(); renderAdminPanel();
-  toast('✅ 已添加「'+escapeHtml(name)+'」会识字');
+  toast('✅ 已添加「'+escapeHtml(name)+'」会识字；下次课文：'+escapeHtml(nextName));
 });
 function readQuickRowsBackup(){
   try{
