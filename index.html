@@ -1185,28 +1185,30 @@
   .lib-row.dragging{opacity:.55;background:rgba(255,213,79,.14);box-shadow:inset 0 0 0 1px rgba(255,213,79,.5)}
 
 
-  /* 科目标签靠左，兑换标签固定最右；兑换项目采用左侧内容、右侧按钮的紧凑横排 */
-  .subject-tabs{justify-content:flex-start!important}
-  .subject-tab{flex:0 0 auto!important}
-  .subject-tab[data-tab="shop"]{margin-left:auto!important}
-  .card-list.shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .shop-card{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;column-gap:5px!important;row-gap:3px!important;align-items:center!important;}
-  .shop-top{grid-column:1!important;grid-row:1!important;gap:5px!important;min-width:0!important;}
-  .shop-icon{width:28px!important;font-size:24px!important;}
+  /* 语文、数学、课程表、兑换恢复四等分标签；兑换项目简介放大，按钮仍靠右 */
+  .subject-tabs{display:flex!important;justify-content:stretch!important;gap:6px!important;}
+  .subject-tab{flex:1 1 0!important;min-width:0!important;margin-left:0!important;padding-left:4px!important;padding-right:4px!important;white-space:nowrap!important;}
+  .card-list.shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+  .shop-card{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;column-gap:7px!important;row-gap:4px!important;align-items:center!important;}
+  .shop-top{grid-column:1!important;grid-row:1!important;gap:7px!important;min-width:0!important;}
+  .shop-icon{width:30px!important;font-size:27px!important;flex-shrink:0!important;}
   .shop-info{min-width:0!important;}
-  .shop-name{font-size:13px!important;}
-  .shop-meta{font-size:11px!important;gap:4px!important;margin-top:3px!important;}
-  .shop-ticket-count{grid-column:1!important;grid-row:2!important;text-align:left!important;font-size:10px!important;line-height:1.2!important;margin:0!important;overflow-wrap:anywhere!important;}
+  .shop-name{font-size:15px!important;line-height:1.3!important;overflow-wrap:anywhere!important;}
+  .shop-meta{font-size:12px!important;gap:5px!important;margin-top:4px!important;line-height:1.35!important;flex-wrap:wrap!important;}
+  .shop-ticket-count{grid-column:1!important;grid-row:2!important;text-align:left!important;font-size:11px!important;line-height:1.3!important;margin:0!important;overflow-wrap:anywhere!important;}
   .shop-actions{grid-column:2!important;grid-row:1 / span 2!important;align-self:center!important;justify-content:center!important;margin:0!important;gap:0!important;min-width:0!important;}
-  .shop-btn{flex:0 0 auto!important;width:62px!important;min-width:0!important;font-size:13px!important;padding:4px 4px!important;min-height:26px!important;line-height:1.1!important;border-width:1px!important;border-radius:8px!important;white-space:nowrap!important;}
+  .shop-btn{flex:0 0 auto!important;width:56px!important;min-width:0!important;font-size:12px!important;padding:5px 3px!important;min-height:28px!important;line-height:1.15!important;border-width:1px!important;border-radius:8px!important;white-space:nowrap!important;}
   .shop-btn .ticket-num{font-size:10px!important;padding:0 3px!important;margin-left:1px!important;}
   @media(max-width:640px){
+    .subject-tabs{gap:4px!important;}
+    .subject-tab{font-size:12px!important;}
     .card-list.shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px!important;}
-    .shop-card{padding:6px!important;}
-    .shop-icon{width:22px!important;font-size:20px!important;}
-    .shop-name{font-size:12px!important;}
-    .shop-meta{font-size:10px!important;gap:3px!important;}
-    .shop-btn{width:52px!important;font-size:12px!important;padding:4px 2px!important;}
+    .shop-card{padding:7px!important;column-gap:4px!important;}
+    .shop-icon{width:25px!important;font-size:23px!important;}
+    .shop-top{gap:4px!important;}
+    .shop-name{font-size:13px!important;}
+    .shop-meta{font-size:11px!important;gap:3px!important;}
+    .shop-btn{width:49px!important;font-size:11px!important;padding:5px 2px!important;}
   }
 </style>
 </head>
@@ -7068,8 +7070,26 @@ $('adminAddCopyBtn').addEventListener('click', () => {
   toast('✅ 已添加「'+escapeHtml(name)+'」抄写词语');
 });
 $('adminAddRecognizeBtn').addEventListener('click', () => {
-  const { name, items } = lessonPickItems('recognize');
+  let { name, items } = lessonPickItems('recognize');
   if(!name){ toast('请先选择课文'); return; }
+  // 只有前一天的「会识字」已完成，且当前仍选着同一课时，才自动切到下一课；未完成则继续原课。
+  const prevDateObj = new Date(state.date + 'T12:00:00');
+  prevDateObj.setDate(prevDateObj.getDate() - 1);
+  const prevDate = fmtDate(prevDateObj);
+  const prevTasks = (state.days[prevDate] && Array.isArray(state.days[prevDate].chinese)) ? state.days[prevDate].chinese : [];
+  const prevRecognize = [...prevTasks].reverse().find(t => t && t.recognize === true && t.done === true && t.lessonName);
+  if(prevRecognize && prevRecognize.lessonName === name){
+    const lessonNames = libKeys();
+    const prevIndex = lessonNames.indexOf(name);
+    if(prevIndex >= 0 && prevIndex + 1 < lessonNames.length){
+      name = lessonNames[prevIndex + 1];
+      const sel = $('adminRecognizeLessonSelect');
+      if(sel) sel.value = name;
+      saveLessonPick('recognize', name);
+      renderLessonHint('recognize');
+      items = lessonPickItems('recognize').items;
+    }
+  }
   if(!items.length){ toast('该课文的字词库「会识字」下面没有内容'); return; }
   const words = items.slice(0, 60);
   const min = clamp(Number($('unitRecognizeMin').value) || getUnitCfg('copy').min, 0.5, 20);
@@ -7078,16 +7098,13 @@ $('adminAddRecognizeBtn').addEventListener('click', () => {
   const sun = clamp(Math.round(words.length * unitSun), 1, 500);
   const task = makeTask(`会识字（${words.length}词）`, minutes, sun, { type:'copy', words, lessonName: name, recognize: true });
   state.subjects.chinese.push(task);
-  // 记录当前课文，并自动将下次要添加的课文定位到下一课；选择结果同步到云端。
-  const lessonNames = libKeys();
-  const currentIndex = lessonNames.indexOf(name);
-  const nextName = currentIndex >= 0 && currentIndex + 1 < lessonNames.length ? lessonNames[currentIndex + 1] : name;
-  saveLessonPick('recognize', nextName);
-  if($('adminRecognizeLessonSelect')) $('adminRecognizeLessonSelect').value = nextName;
+  // 保存当前课文选择；只有前一天已完成本课时，下一次布置才自动切到下一课。
+  saveLessonPick('recognize', name);
+  if($('adminRecognizeLessonSelect')) $('adminRecognizeLessonSelect').value = name;
   renderLessonHint('recognize');
   saveLocalState(); uploadToCloud();
   renderBoard(); refreshAllCards(); renderAdminPanel();
-  toast('✅ 已添加「'+escapeHtml(name)+'」会识字；下次课文：'+escapeHtml(nextName));
+  toast('✅ 已添加「'+escapeHtml(name)+'」会识字');
 });
 function readQuickRowsBackup(){
   try{
