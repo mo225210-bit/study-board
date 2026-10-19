@@ -2030,7 +2030,8 @@ const DEFAULT_SETTINGS = {
   unit: {
     preview:   { min: 2,   sun: 6 },
     wordgroup: { min: 2.5, sun: 7.5 },
-    copy:      { min: 2,   sun: 6 }
+    copy:      { min: 2,   sun: 6 },
+    recognize: { min: 2,   sun: 6 }
   },
   eyeCare: { useMin: 20, restMin: 2 },
   fonts: DEFAULT_FONTS,
@@ -2273,7 +2274,7 @@ function normalizeSettings(raw){
   let restRaw = ec.restMin;
   if(Number(restRaw) === 5 && Number(ec.useMin) === 20) restRaw = 2;
   return {
-    unit: { preview: pick('preview'), wordgroup: pick('wordgroup'), copy: pick('copy') },
+    unit: { preview: pick('preview'), wordgroup: pick('wordgroup'), copy: pick('copy'), recognize: pick('recognize') },
     eyeCare: {
       useMin:  num(ec.useMin, d.eyeCare.useMin, 1, 120),
       restMin: num(restRaw,  d.eyeCare.restMin, 1, 60)
@@ -4228,20 +4229,45 @@ function attachShopButtonLongPress(btn, id){
 function adjustShopTicketsAfterPassword(){
   const id=pendingShopTicketId; pendingShopTicketId=null;
   const item=(state.shop||[]).find(x=>x.id===id); if(!item) return;
-  const raw=prompt('请输入兑换券调整数量：例如 +3 增加 3 张，-2 扣除 2 张');
-  if(raw===null) return;
-  const amount=Number(String(raw).trim());
-  if(!Number.isInteger(amount)||amount===0||Math.abs(amount)>9999){toast('请输入非零整数，范围为 -9999 到 9999');return;}
-  const before=getShopTickets(id,state.date), after=clamp(before+amount,0,9999), actual=after-before;
-  if(!actual){toast('兑换券数量未改变');return;}
+  let modal=document.getElementById('shopTicketAdjustModal');
+  if(!modal){
+    modal=document.createElement('div'); modal.id='shopTicketAdjustModal';
+    modal.innerHTML='<div class="shop-ticket-adjust-backdrop"></div><div class="shop-ticket-adjust-box" role="dialog" aria-modal="true"><div class="shop-ticket-adjust-title">调整兑换数量</div><div class="shop-ticket-adjust-name"></div><div class="shop-ticket-adjust-current"></div><label class="shop-ticket-adjust-label">数量</label><input class="shop-ticket-adjust-input" type="number" min="1" max="9999" step="1" value="1" inputmode="numeric"><div class="shop-ticket-adjust-actions"><button type="button" class="shop-ticket-adjust-add">＋ 增加</button><button type="button" class="shop-ticket-adjust-sub">－ 减少</button></div><button type="button" class="shop-ticket-adjust-cancel">取消</button></div>';
+    document.body.appendChild(modal);
+    const style=document.createElement('style');
+    style.textContent='#shopTicketAdjustModal{position:fixed;inset:0;z-index:10050;display:none;align-items:center;justify-content:center;padding:18px}#shopTicketAdjustModal.show{display:flex}.shop-ticket-adjust-backdrop{position:absolute;inset:0;background:rgba(20,30,20,.48)}.shop-ticket-adjust-box{position:relative;width:min(340px,100%);background:#fff;border-radius:18px;padding:20px;box-shadow:0 12px 42px #0003;text-align:center;color:#344834}.shop-ticket-adjust-title{font-size:20px;font-weight:900;margin-bottom:8px}.shop-ticket-adjust-name{font-size:16px;font-weight:800;margin:5px 0}.shop-ticket-adjust-current{font-size:13px;color:#718471;margin-bottom:14px}.shop-ticket-adjust-label{display:block;text-align:left;font-size:13px;font-weight:800;margin-bottom:5px}.shop-ticket-adjust-input{box-sizing:border-box;width:100%;font-size:22px;font-weight:900;text-align:center;padding:10px;border:2px solid #d5e5d1;border-radius:10px;color:#2e5932}.shop-ticket-adjust-actions{display:flex;gap:10px;margin-top:14px}.shop-ticket-adjust-actions button{flex:1;min-height:48px;border:0;border-radius:11px;color:white;font-size:16px;font-weight:900}.shop-ticket-adjust-add{background:#2e9b57}.shop-ticket-adjust-sub{background:#dc5555}.shop-ticket-adjust-cancel{margin-top:10px;border:0;background:transparent;color:#718071;padding:8px 18px;font-weight:800}';
+    document.head.appendChild(style);
+    modal.querySelector('.shop-ticket-adjust-backdrop').addEventListener('click',()=>modal.classList.remove('show'));
+    modal.querySelector('.shop-ticket-adjust-cancel').addEventListener('click',()=>modal.classList.remove('show'));
+    modal.querySelector('.shop-ticket-adjust-add').addEventListener('click',()=>applyShopTicketAdjustment(1));
+    modal.querySelector('.shop-ticket-adjust-sub').addEventListener('click',()=>applyShopTicketAdjustment(-1));
+  }
+  modal.dataset.itemId=id;
+  modal.querySelector('.shop-ticket-adjust-name').textContent=item.name||'兑换项目';
+  modal.querySelector('.shop-ticket-adjust-current').textContent='当前数量：'+getShopTickets(id,state.date)+' 张（'+state.date+'）';
+  modal.querySelector('.shop-ticket-adjust-input').value='1';
+  modal.classList.add('show');
+  setTimeout(()=>modal.querySelector('.shop-ticket-adjust-input').focus(),80);
+}
+function applyShopTicketAdjustment(direction){
+  const modal=document.getElementById('shopTicketAdjustModal'); if(!modal)return;
+  const id=modal.dataset.itemId;
+  const item=(state.shop||[]).find(x=>x.id===id); if(!item)return;
+  const input=modal.querySelector('.shop-ticket-adjust-input');
+  const qty=Number(String(input.value||'').trim());
+  if(!Number.isInteger(qty)||qty<1||qty>9999){toast('请输入 1 到 9999 的整数');input.focus();return;}
+  const before=getShopTickets(id,state.date);
+  const after=clamp(before+direction*qty,0,9999);
+  const actual=after-before;
+  if(!actual){toast(direction<0?'兑换券数量已经是 0':'兑换券数量已达到上限');return;}
   setShopTickets(id,after,state.date);
   if(!Array.isArray(state.sunLog))state.sunLog=[];
   state.sunLog.unshift({id:newId(),t:Date.now(),date:state.date,delta:0,after:Math.round(Number(state.sun)||0),ticketDelta:actual,ticketBefore:before,ticketAfter:after,reason:'兑换：'+item.name+'（兑换券调整）'});
   state.sunLog=state.sunLog.slice(0,100);
+  modal.classList.remove('show');
   saveLocalState();uploadToCloud();renderShop();renderAdminPanel();
-  toast('已调整「'+item.name+'」兑换券：'+(actual>0?'+':'')+actual+' 张');
+  toast('已'+(actual>0?'增加':'减少')+'「'+item.name+'」兑换券 '+Math.abs(actual)+' 张');
 }
-
 function doRedeem(id){
   const item = (state.shop || []).find(x => x.id === id);
   if(!item) return;
@@ -6624,7 +6650,8 @@ setupAdminPanelToggles();
 const UNIT_FIELDS = [
   ['preview','unitPreviewMin','unitPreviewSun'],
   ['wordgroup','unitWordgroupMin','unitWordgroupSun'],
-  ['copy','unitCopyMin','unitCopySun']
+  ['copy','unitCopyMin','unitCopySun'],
+  ['recognize','unitRecognizeMin','unitRecognizeSun']
 ];
 UNIT_FIELDS.forEach(([t, minId, sunId]) => {
   const minEl = document.getElementById(minId);
@@ -7125,8 +7152,8 @@ $('adminAddRecognizeBtn').addEventListener('click', () => {
   }
   if(!items.length){ toast('该课文的字词库「会识字」下面没有内容'); return; }
   const words = items.slice(0, 60);
-  const min = clamp(Number($('unitRecognizeMin').value) || getUnitCfg('copy').min, 0.5, 20);
-  const unitSun = clamp(Number($('unitRecognizeSun').value) || getUnitCfg('copy').sun, 0.5, 50);
+  const min = clamp(Number($('unitRecognizeMin').value) || getUnitCfg('recognize').min, 0.5, 20);
+  const unitSun = clamp(Number($('unitRecognizeSun').value) || getUnitCfg('recognize').sun, 0.5, 50);
   const minutes = clamp(Math.round(words.length * min), 1, 120);
   const sun = clamp(Math.round(words.length * unitSun), 1, 500);
   const task = makeTask(`会识字（${words.length}词）`, minutes, sun, { type:'copy', words, lessonName: name, recognize: true });
