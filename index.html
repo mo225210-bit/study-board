@@ -5991,7 +5991,19 @@ $('paperPrintBtn').addEventListener('click', () => {
     + '@page{size:A4 portrait;margin:0}'
     + 'html,body{margin:0!important;padding:0!important;width:210mm;height:auto;min-height:0;background:#fff;overflow:visible;position:relative}'
     + 'img{display:block;width:105mm!important;max-width:105mm!important;height:auto!important;max-height:none!important;object-fit:contain;object-position:top left;margin:0!important;padding:0;border:0;page-break-after:avoid;page-break-inside:avoid;break-inside:avoid;position:absolute;left:0;top:0}'
-    + '</style></head><body><img src="'+paper.data+'"></body></html>');
+    + '</style></head><body><img src="'+paper.data+'">
+<style id="parent-title-hint-hierarchy-v4">
+  /* 家长页标题更醒目，提示说明降一号并用灰色，减少视觉拥挤 */
+  #adminPanel .admin-header h2 { font-size:23px !important; color:#17212b !important; }
+  #adminPanel .admin-section h3 { font-size:18.5px !important; color:#17212b !important; }
+  #adminPanel .admin-section h3 .badge { font-size:12px !important; }
+  #adminPanel :is(.aa-hint,.empty-tip,.word-empty,.pwd-tip,.tt-tip,.tt-edit-tip,.hint,.tip,.note,.eom-tip,.custom-tool-note,.admin-status,[data-hint]) {
+    font-size:14px !important; color:#7b8790 !important; font-weight:500;
+  }
+  #adminPanel :is(.aa-hint.warn,.aa-hint.ok) { color:#7b8790 !important; }
+</style>
+
+</body></html>');
   doc.close();
 });
 $('uploadChinesePaperBtn').addEventListener('click', openChinesePaperPreview);
@@ -9060,8 +9072,11 @@ function saveTaskBlank(task, idx, value, soft){
 (function(){
   function normalize(root){
     if(!root) return;
+    const hintSelector = '.aa-hint,.empty-tip,.word-empty,.pwd-tip,.tt-tip,.tt-edit-tip,.hint,.tip,.note,.eom-tip,.custom-tool-note,[data-hint],.admin-status';
     root.querySelectorAll('*').forEach(function(el){
       if(el.closest('svg,svg *, [data-icon]')) return;
+      /* 提示/说明文字不参与16px兜底，交由下面的提示样式控制 */
+      if(el.matches(hintSelector) || el.closest(hintSelector)) return;
       let direct=false;
       for(let i=0;i<el.childNodes.length;i++){
         const n=el.childNodes[i];
@@ -9092,6 +9107,18 @@ function saveTaskBlank(task, idx, value, soft){
   #adminPanel svg, #adminPanel svg * { color:inherit; }
   #appRoot.app { max-width:943px; width:100%; box-sizing:border-box; }
   @media (max-width:600px) { #appRoot.app { max-width:100%; } }
+</style>
+
+
+<style id="parent-title-hint-hierarchy-v4">
+  /* 家长页标题更醒目，提示说明降一号并用灰色，减少视觉拥挤 */
+  #adminPanel .admin-header h2 { font-size:23px !important; color:#17212b !important; }
+  #adminPanel .admin-section h3 { font-size:18.5px !important; color:#17212b !important; }
+  #adminPanel .admin-section h3 .badge { font-size:12px !important; }
+  #adminPanel :is(.aa-hint,.empty-tip,.word-empty,.pwd-tip,.tt-tip,.tt-edit-tip,.hint,.tip,.note,.eom-tip,.custom-tool-note,.admin-status,[data-hint]) {
+    font-size:14px !important; color:#7b8790 !important; font-weight:500;
+  }
+  #adminPanel :is(.aa-hint.warn,.aa-hint.ok) { color:#7b8790 !important; }
 </style>
 
 </body></html>
