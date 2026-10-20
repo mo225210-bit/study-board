@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN"><head>
 <meta charset="UTF-8">
@@ -5992,34 +5991,7 @@ $('paperPrintBtn').addEventListener('click', () => {
     + '@page{size:A4 portrait;margin:0}'
     + 'html,body{margin:0!important;padding:0!important;width:210mm;height:auto;min-height:0;background:#fff;overflow:visible;position:relative}'
     + 'img{display:block;width:105mm!important;max-width:105mm!important;height:auto!important;max-height:none!important;object-fit:contain;object-position:top left;margin:0!important;padding:0;border:0;page-break-after:avoid;page-break-inside:avoid;break-inside:avoid;position:absolute;left:0;top:0}'
-    + '</style></head><body><img src="'+paper.data+'">
-<style id="parent-light-theme-and-student-font-v2">
-  /* 家长页改为与学生页协调的浅蓝色背景，面板和栏目改为浅色卡片 */
-  .admin-panel{background:linear-gradient(180deg,#D9F1FF 0%,#EAF8FF 45%,#F4FBFF 100%) !important;color:#2b3a2b}
-  .admin-header h2{color:#276749 !important}
-  .admin-section{background:rgba(255,255,255,.84) !important;border:1px solid #C9E5F3 !important;box-shadow:0 4px 14px rgba(58,112,140,.08)}
-  .admin-section h3{color:#285b72 !important}
-  .admin-section h3 .badge{background:#FFF1C7 !important;color:#8A6200 !important}
-  .admin-task-row{background:rgba(226,245,255,.72) !important}
-  .admin-task-row:hover{background:#D9F0FC !important}
-  .admin-task-row .at-check{border-color:#9CC7D9;background:#fff}
-  .admin-task-row .at-text{color:#304B58 !important}
-  .admin-task-row .at-text.done{color:#6A8A6A !important}
-  .admin-task-row .at-meta,.admin-add-row .aa-unit{color:#587987 !important}
-  .admin-add-row input,.admin-add-row select,.admin-add-row textarea{color:#2B3A3F !important;background:#fff !important;border-color:#C4DDE8 !important}
-  .admin-add-row input::placeholder,.admin-add-row textarea::placeholder{color:#8198A3 !important}
-  .admin-add-row .aa-select option{background:#fff !important;color:#2B3A3F !important}
-  .admin-add-row input:focus,.admin-add-row select:focus,.admin-add-row textarea:focus{border-color:#69B8DD !important;background:#fff !important}
-  .sun-log-row{background:#F1FAFE !important;border-color:#D3EAF4 !important}
-  .sun-log-row .sl-time,.sun-log-row .sl-reason{color:#526F7C !important}
-  .sun-log-empty{color:#647F8A !important}
-  .aa-hint{color:#647F8A !important}
-  .aa-hint.warn{color:#B36A00 !important}
-  .aa-hint.ok{color:#2E7D32 !important}
-  .task-card.done .task-text,.task-card.done .task-order-num{font-size:13px !important}
-</style>
-
-</body></html>');
+    + '</style></head><body><img src="'+paper.data+'"></body></html>');
   doc.close();
 });
 $('uploadChinesePaperBtn').addEventListener('click', openChinesePaperPreview);
