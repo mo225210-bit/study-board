@@ -9028,6 +9028,36 @@ function saveTaskBlank(task, idx, value, soft){
 </script>
 
 
+<script>
+/* parent-font-min-16-v1: 家长页内普通文字小于 16px 时提升到 16px；不影响学生页。 */
+(function(){
+  function normalizeParentText(root){
+    if(!root) return;
+    root.querySelectorAll('*').forEach(function(el){
+      if(el.closest('svg, .icon, [data-hint], .hint, .tip, .aa-hint')) return;
+      let hasDirectText = false;
+      for(let i=0;i<el.childNodes.length;i++){
+        const n = el.childNodes[i];
+        if(n.nodeType === 3 && n.nodeValue.trim()){ hasDirectText = true; break; }
+      }
+      if(!hasDirectText) return;
+      const size = parseFloat(getComputedStyle(el).fontSize);
+      if(Number.isFinite(size) && size < 16) el.style.fontSize = '16px';
+    });
+  }
+  function start(){
+    const roots = Array.from(document.querySelectorAll('.admin-panel'));
+    roots.forEach(function(root){
+      normalizeParentText(root);
+      const observer = new MutationObserver(function(){ normalizeParentText(root); });
+      observer.observe(root,{childList:true,subtree:true,characterData:true});
+    });
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded',start,{once:true});
+  else start();
+})();
+</script>
+
 <style id="parent-light-theme-and-student-font-v2">
   /* 家长页改为与学生页协调的浅蓝色背景，面板和栏目改为浅色卡片 */
   .admin-panel{background:linear-gradient(180deg,#D9F1FF 0%,#EAF8FF 45%,#F4FBFF 100%) !important;color:#2b3a2b}
