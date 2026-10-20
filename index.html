@@ -482,7 +482,8 @@
 
   .wordgroup-grid{gap:12px 10px}
   /* 学生端「抄写词语」：每个词语作为一组，组间距加大；每组只保留右侧一个喇叭 */
-  #appRoot .char-grid.copy-word-grid{column-gap:18px;row-gap:14px}
+  #appRoot .char-grid.copy-word-grid{column-gap:18px;row-gap:14px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));justify-items:center;justify-content:center;width:100%;max-width:100%;}
+  #appRoot .copy-word-grid > .char-card.wordgroup-card{min-width:0;max-width:100%;}
   #appRoot .copy-word-grid > .word-group{gap:5px;align-items:center;margin-right:5px}
   #appRoot .copy-word-grid > .word-group > .mizi-speaker{
     position:static;left:auto;top:auto;transform:none;align-self:center;margin-left:4px;
@@ -835,6 +836,17 @@
   #adminSunAmount{width:96px;flex:none;font-size:17.5px;font-weight:900;
     text-align:center;padding:10px 6px;letter-spacing:.5px}
 
+  .student-resource-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 12px;margin:12px 2px 18px;align-items:stretch}
+  .student-resource-btn{min-width:0;min-height:54px;padding:9px 5px;border:1px solid #c8e6c9;border-radius:13px;background:linear-gradient(180deg,#f7fff6,#e8f5e9);color:#285b35;font-weight:800;font-size:15px;line-height:1.25;font-family:inherit;overflow-wrap:anywhere;word-break:break-word;cursor:pointer;box-shadow:0 2px 5px rgba(40,80,40,.08)}
+  .student-resource-btn:active{transform:scale(.98)}
+  .student-resource-empty{grid-column:1/-1;color:#899789;font-size:14px;text-align:center;padding:18px 8px;background:#f7faf7;border:1px dashed #d4e2d4;border-radius:12px}
+  .admin-resource-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+  .admin-resource-list{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+  .admin-resource-item{display:flex;gap:8px;align-items:center;min-width:0;background:rgba(0,0,0,.04);border:1px solid #dce7dc;border-radius:10px;padding:8px}
+  .admin-resource-item .ari-name{flex:1;min-width:0;overflow-wrap:anywhere;font-weight:800}
+  .admin-resource-item .ari-meta{font-size:12px;color:#7c8c7c}
+  .admin-resource-item button{flex:none;border:0;border-radius:8px;padding:7px 9px;background:#ffebee;color:#b71c1c;font-weight:800}
+  @media(max-width:480px){.student-resource-grid{gap:10px 9px}.student-resource-btn{min-height:48px;font-size:14px;padding:7px 3px}}
   .custom-tools-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 10px;margin:8px 0 4px}
   .custom-tool-btn{min-width:0;min-height:48px;border:1px solid #c8e6c9;border-radius:12px;background:linear-gradient(180deg,#f7fff6,#e8f5e9);color:#285b35;font-family:inherit;font-weight:800;font-size:14px;line-height:1.3;padding:8px 4px;overflow-wrap:anywhere;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 2px 5px rgba(40,80,40,.08)}
   .custom-tool-btn.dragging{opacity:.45;transform:scale(.97);cursor:grabbing}
@@ -1373,6 +1385,14 @@
     <button class="subject-tab" data-tab="math">🔢 数学 <span class="tab-count" id="mathTabCount">0</span></button>
     <button class="subject-tab" data-tab="timetable">📅 课程表</button>
     <button class="subject-tab" data-tab="shop">🎁 兑换</button>
+    <button class="subject-tab" data-tab="attachments">📎 附件</button>
+  </div>
+
+  <div class="tab-panel" id="panel-attachments">
+    <section class="subject-col" data-subject="attachments">
+      <div class="col-head"><div><span class="col-title">📎 附件</span><span class="col-count" id="studentResourceCount">0</span></div></div>
+      <div class="student-resource-grid" id="studentResourceGrid"><div class="student-resource-empty">家长还没有添加附件</div></div>
+    </section>
   </div>
 
   <div class="tab-panel active" id="panel-chinese">
@@ -1825,6 +1845,24 @@
       <div class="aa-hint">长按任意按钮 1 秒可设置名称、链接和备注；拖动按钮可调整顺序；点击按钮打开链接。工具内容和排序会同步到云端。</div>
     </div>
 
+    <div class="admin-section collapsed" id="adminPanelStudentResources">
+      <h3>📎 学生页附件</h3>
+      <div class="aa-hint">添加后会显示在学生页「附件」栏目，每行 4 个按钮。可添加网页链接，或上传图片、视频、音频及常见文档；上传文件建议不超过 2MB/个，以免云端数据过大。</div>
+      <div class="admin-resource-row">
+        <input class="aa-text" id="adminResourceName" maxlength="30" placeholder="按钮名称（必填）" style="flex:1;min-width:140px">
+      </div>
+      <div class="admin-resource-row">
+        <input class="aa-text" id="adminResourceUrl" type="url" maxlength="1500" placeholder="资源链接（可选，如 https://...）" style="flex:1;min-width:220px">
+      </div>
+      <div class="admin-resource-row">
+        <label class="aa-btn attachment-pick-label" for="adminResourceFile">📁 选择资源文件</label>
+        <input type="file" id="adminResourceFile" accept="image/*,audio/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv,.html,.htm" style="display:none">
+        <span id="adminResourceFileName" class="attachment-file-name">未选择文件</span>
+        <button class="aa-btn" id="adminResourceAddBtn" type="button">＋ 添加附件</button>
+      </div>
+      <div id="adminResourceList" class="admin-resource-list"></div>
+    </div>
+
     <div class="admin-section collapsed" id="adminPanelShop">
       <h3 class="admin-clear-head">🎁 兑换管理 <span class="badge" id="adminShopBadge">0 项</span></h3>
       <div class="admin-clear-records-row"><button type="button" class="admin-clear-records-btn" id="adminClearShopRecordsBtn">清除记录</button></div>
@@ -2082,8 +2120,8 @@ const FIREBASE_CONFIG = {
 const FAMILY_ID = 'x7k2m9q4';
 const MASTER_PASSWORD = '0702';
 
-let firebaseApp = null, db = null, dataRef = null;
-let fbSet = null, fbGet = null, fbOnValue = null, fbRef = null, historyRef = null;
+let firebaseApp = null, db = null, dataRef = null, studentAttachmentsRef = null, studentAttachmentsMetaRef = null;
+let fbSet = null, fbGet = null, fbOnValue = null, fbRef = null, fbRemove = null, fbUpdate = null, historyRef = null;
 
 try{
   const appMod = await import('https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js');
@@ -2093,9 +2131,14 @@ try{
   fbRef       = dbMod.ref;
   dataRef     = dbMod.ref(db, 'families/' + FAMILY_ID + '/data');
   historyRef  = dbMod.ref(db, 'families/' + FAMILY_ID + '/history');
+  // 大附件单独存放，避免和全部学习数据打包成一个超大请求。
+  studentAttachmentsRef = dbMod.ref(db, 'families/' + FAMILY_ID + '/studentAttachments');
+  studentAttachmentsMetaRef = dbMod.ref(db, 'families/' + FAMILY_ID + '/studentAttachments/_meta');
   fbSet       = dbMod.set;
   fbGet       = dbMod.get;
   fbOnValue   = dbMod.onValue;
+  fbRemove    = dbMod.remove;
+  fbUpdate    = dbMod.update;
 }catch(e){
   console.warn('Firebase 加载/初始化失败，将使用纯本地模式', e);
 }
@@ -2193,7 +2236,7 @@ const DEFAULT_SETTINGS = {
   },
   panelCollapsed: {
     progress: true, sun: true, date: true, library: true, sync: true,
-    password: true, eye: true, math: false, english: false, shop: true, customTools: true,
+    password: true, eye: true, math: false, english: false, shop: true, customTools: true, studentResources: true,
     timetable: true, font: true, dictionary: true
   },
   ttFontSize: 13.5,
@@ -2495,7 +2538,7 @@ function normalizeSettings(raw){
       timetable: pc.timetable !== undefined ? !!pc.timetable : true,
       font: pc.font !== undefined ? !!pc.font : true,
       dictionary: pc.dictionary !== undefined ? !!pc.dictionary : true,
-      customTools: pc.customTools !== undefined ? !!pc.customTools : true
+      customTools: pc.customTools !== undefined ? !!pc.customTools : true, studentResources: pc.studentResources !== undefined ? !!pc.studentResources : true
     },
     ttFontSize: num(Number(r.ttFontSize) === 12.5 ? 13.5 : r.ttFontSize, d.ttFontSize, 8, 24),
     ttLineHeight: num(r.ttLineHeight, d.ttLineHeight, 1, 3)
@@ -2656,6 +2699,7 @@ function loadLocalState(){
       wordBank: {}, charPages: {}, timetable: null,
       parentPassword: MASTER_PASSWORD,
       customTools: [],
+      studentAttachments: [],
       chinesePaper: null,
       lastNightReset: '', eyeSoundOffDate: '',
       live: JSON.parse(JSON.stringify(DEFAULT_LIVE))
@@ -2668,6 +2712,8 @@ function loadLocalState(){
   if(!s.days[s.date]) s.days[s.date] = makeDay();
   if(!Array.isArray(s.customTools)) s.customTools = [];
   s.customTools = s.customTools.slice(0,80).map(t => ({id:String(t && t.id || newId()),name:String(t && t.name || '').slice(0,30),url:String(t && t.url || '').slice(0,1000),note:String(t && t.note || '').slice(0,300)})).filter(t => t.name && t.url);
+  if(!Array.isArray(s.studentAttachments)) s.studentAttachments = [];
+  s.studentAttachments = s.studentAttachments.slice(0,80).map(a => ({id:String(a && a.id || newId()),name:String(a && a.name || '附件').slice(0,30),url:String(a && a.url || '').slice(0,1500),data:String(a && a.data || ''),mime:String(a && a.mime || '').slice(0,120),size:Math.max(0,Number(a && a.size)||0),ts:Number(a && a.ts)||Date.now()})).filter(a => a.url || a.data);
   if(!s.syncDays || typeof s.syncDays !== 'object' || Array.isArray(s.syncDays)) s.syncDays = {};
   // 作业纸按日期保存：每个日期只保留该日最新一份。兼容旧版单份作业纸。
   if(!s.papersByDate || typeof s.papersByDate !== 'object' || Array.isArray(s.papersByDate)) s.papersByDate = {};
@@ -3466,11 +3512,32 @@ window.addEventListener('visibilitychange', () => {
 });
 window.addEventListener('beforeunload', () => { if(persistPending) flushPersist(); });
 
+let lastCloudUploadError = '';
 let cloudUploadInFlight = false;
 let cloudUploadQueued = false;
 let cloudUploadQueuedForce = false;
+function cloudValuesEqual(a,b){
+  if(a === b) return true;
+  if(a == null || b == null || typeof a !== 'object' || typeof b !== 'object') return false;
+  try{return JSON.stringify(a) === JSON.stringify(b);}catch(e){return false;}
+}
+function buildCloudDiff(remote, local, prefix, updates){
+  if(cloudValuesEqual(remote, local)) return;
+  const bothObjects = remote && local && typeof remote === 'object' && typeof local === 'object' && !Array.isArray(remote) && !Array.isArray(local);
+  if(bothObjects){
+    const keys = new Set([...Object.keys(remote), ...Object.keys(local)]);
+    for(const key of keys){
+      const path = prefix ? prefix + '/' + key : key;
+      if(!Object.prototype.hasOwnProperty.call(local,key)) updates[path] = null;
+      else if(!Object.prototype.hasOwnProperty.call(remote,key)) updates[path] = local[key];
+      else buildCloudDiff(remote[key], local[key], path, updates);
+    }
+  }else{
+    if(prefix) updates[prefix] = local === undefined ? null : local;
+  }
+}
 async function uploadToCloud(force){
-  if(!dataRef || !fbSet || !fbGet) return false;
+  if(!dataRef || !fbSet || !fbGet || !fbUpdate) return false;
   if(isRemoteUpdate && !force) return false;
   if(freshBoot && !force && !lastRemoteUpdatedAt) return false;
   if(!getSyncEnabled() || cloudSyncCleared) return false;
@@ -3489,6 +3556,32 @@ async function uploadToCloud(force){
   const uploadSeq = cloudChangeSeq;
   const previousPushedAt = lastPushedUpdatedAt;
   try{
+    // 附件逐项写入独立路径；元数据只保存名称/链接/大小，主数据不再重复携带 Base64。
+    if(studentAttachmentsRef && studentAttachmentsMetaRef && fbGet && fbSet && fbRef){
+      const metaSnap = await fbGet(studentAttachmentsMetaRef);
+      const oldMeta = metaSnap.exists() && metaSnap.val() && typeof metaSnap.val() === 'object' ? metaSnap.val() : {};
+      const oldItems = Array.isArray(oldMeta.items) ? oldMeta.items : [];
+      const oldByKey = new Map(oldItems.map(x => [String(x && x.key || ''), x]));
+      const wanted = new Set();
+      const metaItems = [];
+      for(const item of (Array.isArray(state.studentAttachments) ? state.studentAttachments : [])){
+        const key = String(item && item.id || newId()).replace(/[.#$\[\]\/]/g, '_');
+        if(!key || key === '_meta') continue;
+        wanted.add(key);
+        const old = oldByKey.get(key);
+        if(!old || Number(old.ts) !== Number(item.ts) || !old.dataStored){
+          if(item.data || item.url) await fbSet(fbRef(db, 'families/' + FAMILY_ID + '/studentAttachments/' + key), item);
+        }
+        metaItems.push({id:String(item.id || key),key,name:String(item.name || '附件').slice(0,30),url:String(item.url || ''),mime:String(item.mime || ''),size:Math.max(0,Number(item.size)||0),ts:Number(item.ts)||0,dataStored:!!item.data});
+      }
+      for(const old of oldItems){
+        const key = String(old && old.key || '');
+        if(key && !wanted.has(key) && fbRemove) await fbRemove(fbRef(db, 'families/' + FAMILY_ID + '/studentAttachments/' + key));
+      }
+      const oldComparable = oldItems.map(x => ({id:String(x && x.id || ''),key:String(x && x.key || ''),name:String(x && x.name || ''),url:String(x && x.url || ''),mime:String(x && x.mime || ''),size:Math.max(0,Number(x && x.size)||0),ts:Number(x && x.ts)||0,dataStored:!!(x && x.dataStored)}));
+      const newComparable = metaItems.map(x => ({id:x.id,key:x.key,name:x.name,url:x.url,mime:x.mime,size:x.size,ts:x.ts,dataStored:x.dataStored}));
+      if(!cloudValuesEqual(oldComparable,newComparable)) await fbSet(studentAttachmentsMetaRef, {updatedAt:Date.now(),items:metaItems});
+    }
     const payload = {
       days: state.days, date: state.date, settings: state.settings,
       syncDays: state.syncDays || {}, papersByDate: state.papersByDate || {},
@@ -3518,26 +3611,40 @@ async function uploadToCloud(force){
       },
       updatedAt: Date.now()
     };
-    const prevPushed = lastPushedUpdatedAt;
+    const remoteSnap = await fbGet(dataRef);
+    const remotePayload = remoteSnap.exists() && remoteSnap.val() && typeof remoteSnap.val() === 'object' ? remoteSnap.val() : {};
+    const updates = {};
+    const remoteComparable = {...remotePayload};
+    const localComparable = {...payload};
+    delete remoteComparable.updatedAt;
+    delete localComparable.updatedAt;
+    buildCloudDiff(remoteComparable, localComparable, '', updates);
+    const changedKeys = Object.keys(updates);
+    // 只有实际内容变化时才更新 updatedAt；强制上传也遵循同一差异比较规则。
+    if(changedKeys.length) updates.updatedAt = payload.updatedAt;
+    const updateKeys = Object.keys(updates);
     attemptedAt = payload.updatedAt;
-    lastPushedUpdatedAt = payload.updatedAt;
-    updateSyncInfo('☁️ 正在上传最新数据…');
-    await fbSet(dataRef, payload);
+    if(updateKeys.length){
+      updateSyncInfo('☁️ 正在上传 ' + changedKeys.length + ' 项变动…');
+      await fbUpdate(dataRef, updates);
+    }
+    lastPushedUpdatedAt = updateKeys.length ? payload.updatedAt : Number(remotePayload.updatedAt)||lastPushedUpdatedAt;
     succeeded = true;
     uploadFailedNotified = false;
     cloudRetryDelay = 5000;
     // 只有上传期间没有新的修改，才能清除待上传标记。
     if(cloudChangeSeq === uploadSeq){
       cloudPending = false;
-      showSyncStatus('☁️ 云端已保存', 'online');
+      showSyncStatus(changedKeys.length ? '☁️ 变动已同步' : '☁️ 云端已是最新', 'online');
     } else {
       cloudPending = true;
       cloudUploadQueued = true;
     }
-    updateSyncInfo();
+    updateSyncInfo(changedKeys.length ? ('已同步 ' + changedKeys.length + ' 项变动') : '本地与云端一致，无需上传');
     return true;
   }catch(e){
-    console.warn('云端上传失败', e);
+    lastCloudUploadError = String((e && e.code ? e.code + ': ' : '') + (e && e.message ? e.message : e || '未知错误')).slice(0,180);
+    console.warn('云端上传失败', {code:e && e.code, message:e && e.message, name:e && e.name, error:e});
     if(attemptedAt && lastPushedUpdatedAt === attemptedAt) lastPushedUpdatedAt = previousPushedAt;
     cloudPending = true;
     uploadFailedNotified = true;
@@ -3684,6 +3791,8 @@ function applyRemoteState(remote){
   if(remote.settings || cfg.settings) state.settings = normalizeSettings(remote.settings || cfg.settings);
   const remoteCustomTools = remote.customTools || cfg.customTools;
   if(Array.isArray(remoteCustomTools)) state.customTools = remoteCustomTools.slice(0,80).map(t => ({id:String(t && t.id || newId()),name:String(t && t.name || '').slice(0,30),url:String(t && t.url || '').slice(0,1000),note:String(t && t.note || '').slice(0,300)})).filter(t => t.name && t.url);
+  const remoteStudentAttachments = remote.studentAttachments || cfg.studentAttachments;
+  if(Array.isArray(remoteStudentAttachments)) state.studentAttachments = remoteStudentAttachments.slice(0,80).map(a => ({id:String(a && a.id || newId()),name:String(a && a.name || '附件').slice(0,30),url:String(a && a.url || '').slice(0,1500),data:String(a && a.data || ''),mime:String(a && a.mime || '').slice(0,120),size:Math.max(0,Number(a && a.size)||0),ts:Number(a && a.ts)||Date.now()})).filter(a => a.url || a.data);
   if(remote.syncDays && typeof remote.syncDays === 'object') state.syncDays = remote.syncDays;
   else if(cfg.syncDays && typeof cfg.syncDays === 'object') state.syncDays = cfg.syncDays;
   const remotePapers = remote.papersByDate || cfg.papersByDate;
@@ -3730,6 +3839,7 @@ function applyRemoteState(remote){
   applyTabFromLive();
   if(currentSubject === 'shop') renderShop();
   if(currentSubject === 'timetable') renderTimetable();
+  if(currentSubject === 'attachments') renderStudentResources();
   if(charTimer.active) paintCharBarsFromLive();
   if(isAdminMode) renderAdminPanel();
   isRemoteUpdate = false;
@@ -3744,9 +3854,12 @@ function applyRemoteState(remote){
   }
 }
 let cloudListener = null;
+let studentAttachmentsCloudListener = null;
 function stopCloudSync(){
   if(typeof cloudListener === 'function'){ try{ cloudListener(); }catch(e){} }
+  if(typeof studentAttachmentsCloudListener === 'function'){ try{ studentAttachmentsCloudListener(); }catch(e){} }
   cloudListener = null;
+  studentAttachmentsCloudListener = null;
 }
 function startCloudSync(){
   if(!dataRef || !fbOnValue || cloudListener) return;
@@ -3754,6 +3867,20 @@ function startCloudSync(){
   cloudListener = fbOnValue(dataRef, snapshot => {
     const remote = snapshot.val(); if(!remote) return; applyRemoteState(remote);
   }, err => { console.warn('云端监听失败', err); showSyncStatus('⚠️ 云端连接失败', 'offline'); });
+  if(studentAttachmentsMetaRef){
+    studentAttachmentsCloudListener = fbOnValue(studentAttachmentsMetaRef, snapshot => {
+      const raw = snapshot.val();
+      if(!raw || typeof raw !== 'object' || !Array.isArray(raw.items)) return;
+      const localById = new Map((Array.isArray(state.studentAttachments) ? state.studentAttachments : []).map(a => [String(a.id), a]));
+      state.studentAttachments = raw.items.slice(0,80).map(a => {
+        const old = localById.get(String(a.id));
+        return {id:String(a.id || a.key || newId()),name:String(a.name || '附件').slice(0,30),url:String(a.url || '').slice(0,1500),data:String(old && old.data || ''),mime:String(a.mime || old && old.mime || '').slice(0,120),size:Math.max(0,Number(a.size)||0),ts:Number(a.ts)||Date.now()};
+      });
+      saveLocalState();
+      renderStudentResources();
+      if(isAdminMode) renderAdminStudentResources();
+    }, err => { console.warn('学生页附件云端监听失败', err); });
+  }
 }
 async function readCloudOnce(){
   if(!dataRef || !fbGet) return { state: 'no-ref', data: null };
@@ -6022,6 +6149,7 @@ function switchSubject(subject, fromRemote){
   appRootEl.classList.toggle('theme-timetable', subject === 'timetable');
   if(subject === 'shop') renderShop();
   if(subject === 'timetable') renderTimetable();
+  if(subject === 'attachments') renderStudentResources();
   if(!fromRemote && state && state.live){
     if(state.live.tab !== subject){ state.live.tab = subject; pushLive(); }
   }
@@ -6591,6 +6719,67 @@ $('eyeRestBtn').addEventListener('click', () => {
 let customToolEditingId = null;
 let customToolPressTimer = null;
 let customToolPressTarget = null;
+function renderStudentResources(){
+  const grid=$('studentResourceGrid'); if(!grid) return;
+  const items=Array.isArray(state.studentAttachments)?state.studentAttachments:[];
+  const count=$('studentResourceCount'); if(count) count.textContent=String(items.length);
+  grid.innerHTML='';
+  if(!items.length){const empty=document.createElement('div');empty.className='student-resource-empty';empty.textContent='家长还没有添加附件';grid.appendChild(empty);return;}
+  items.forEach(item=>{
+    const b=document.createElement('button');b.type='button';b.className='student-resource-btn';b.textContent=item.name||'附件';b.title=item.name||'附件';
+    b.addEventListener('click',async()=>{
+      let target=item.url||item.data;
+      if(!target && item.id && fbGet && fbRef){
+        try{
+          const key=String(item.id).replace(/[.#$\[\]\/]/g,'_');
+          const snap=await fbGet(fbRef(db,'families/'+FAMILY_ID+'/studentAttachments/'+key));
+          const remote=snap.exists()?snap.val():null;
+          if(remote){item.data=String(remote.data||'');item.url=String(remote.url||'');target=item.url||item.data;saveLocalState();}
+        }catch(e){console.warn('读取附件失败',e);}
+      }
+      if(!target){toast('附件资源为空或云端文件读取失败');return;}
+      try{const w=window.open(target,'_blank','noopener,noreferrer');if(!w) toast('浏览器拦截了新窗口，请允许此网页打开新标签页');}
+      catch(e){toast('无法打开此附件');}
+    });
+    grid.appendChild(b);
+  });
+}
+function renderAdminStudentResources(){
+  const list=$('adminResourceList');if(!list)return;
+  const items=Array.isArray(state.studentAttachments)?state.studentAttachments:[];list.innerHTML='';
+  if(!items.length){const empty=document.createElement('div');empty.className='aa-hint';empty.textContent='暂无附件资源';list.appendChild(empty);return;}
+  items.forEach((item,index)=>{
+    const row=document.createElement('div');row.className='admin-resource-item';
+    const name=document.createElement('div');name.className='ari-name';name.textContent=item.name||'附件';
+    const meta=document.createElement('div');meta.className='ari-meta';meta.textContent=item.url?'链接':(item.mime||'文件');
+    const del=document.createElement('button');del.type='button';del.textContent='删除';del.addEventListener('click',async()=>{
+      if(!confirm('确定删除学生页附件「'+(item.name||'附件')+'」吗？'))return;
+      state.studentAttachments=state.studentAttachments.filter(x=>x.id!==item.id);saveLocalState();renderAdminStudentResources();renderStudentResources();const ok=await uploadToCloud(true);toast(ok?'附件已删除并同步云端':'附件已删除并保存在本机');
+    });
+    row.append(name,meta,del);list.appendChild(row);
+  });
+}
+let adminResourceChosenFile=null;
+$('adminResourceFile')?.addEventListener('change',e=>{adminResourceChosenFile=e.target.files&&e.target.files[0]||null;const label=$('adminResourceFileName');if(label)label.textContent=adminResourceChosenFile?adminResourceChosenFile.name:'未选择文件';});
+$('adminResourceAddBtn')?.addEventListener('click',async()=>{
+  const name=$('adminResourceName').value.trim();const rawUrl=$('adminResourceUrl').value.trim();const file=adminResourceChosenFile;
+  if(!name){toast('请先填写按钮名称');$('adminResourceName').focus();return;}
+  if(!rawUrl&&!file){toast('请填写资源链接或选择一个文件');return;}
+  if(file&&file.size>2*1024*1024){toast('单个附件请控制在 2MB 以内');return;}
+  if(rawUrl){try{const u=new URL(rawUrl);if(!/^https?:$/.test(u.protocol))throw new Error();}catch(e){toast('链接格式不正确，请填写 http:// 或 https:// 链接');return;}}
+  if(!Array.isArray(state.studentAttachments))state.studentAttachments=[];
+  if(state.studentAttachments.length>=80){toast('学生页附件最多添加 80 项');return;}
+  try{
+    let data='',mime='',size=0,url='';
+    if(file){data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||''));r.onerror=()=>reject(new Error('读取文件失败'));r.readAsDataURL(file);});mime=file.type||'application/octet-stream';size=file.size||0;}
+    else url=new URL(rawUrl).href;
+    state.studentAttachments.push({id:newId(),name:name.slice(0,30),url,data,mime,size,ts:Date.now()});
+    saveLocalState();renderAdminStudentResources();renderStudentResources();
+    const ok=await uploadToCloud(true);toast(ok?'附件已添加并同步云端':'附件已添加到本机，云端同步未确认');
+    $('adminResourceName').value='';$('adminResourceUrl').value='';$('adminResourceFile').value='';$('adminResourceFileName').textContent='未选择文件';adminResourceChosenFile=null;
+  }catch(err){console.warn(err);toast('添加附件失败，请重试');}
+});
+
 function renderCustomTools(){
   const grid = $('adminCustomToolsGrid'); if(!grid) return;
   const tools = Array.isArray(state.customTools) ? state.customTools : [];
@@ -6700,6 +6889,7 @@ function renderAdminPanel(){
   renderAdminTaskList('math', 'adminMathList', 'adminMathBadge');
   renderAdminTaskList('english', 'adminEnglishList', 'adminEnglishBadge');
   renderCustomTools();
+  renderAdminStudentResources();
   renderLessonLibrary(); populateLessonSelects();
   renderAdminShop();
   renderAdminTimetable();
@@ -7215,6 +7405,7 @@ function applyAdminPanelStates(){
   const pc = state.settings.panelCollapsed || DEFAULT_SETTINGS.panelCollapsed;
   const map = {
     adminPanelCustomTools: pc.customTools !== undefined ? pc.customTools : true,
+    adminPanelStudentResources: pc.studentResources !== undefined ? pc.studentResources : true,
     adminPanelSun: pc.sun, adminPanelDate: pc.date,
     adminPanelLibrary: pc.library, adminPanelSync: pc.sync, adminPanelPassword: pc.password,
     adminPanelEye: pc.eye, adminPanelMath: pc.math, adminPanelEnglish: pc.english,
@@ -7227,7 +7418,7 @@ function applyAdminPanelStates(){
 }
 function setupAdminPanelToggles(){
   const map = {
-    adminPanelCustomTools:'customTools', adminPanelSun:'sun', adminPanelDate:'date',
+    adminPanelCustomTools:'customTools', adminPanelStudentResources:'studentResources', adminPanelSun:'sun', adminPanelDate:'date',
     adminPanelMath:'math', adminPanelEnglish:'english',
     adminPanelLibrary:'library', adminPanelSync:'sync',
     adminPanelPassword:'password', adminPanelEye:'eye', adminPanelShop:'shop',
@@ -7979,8 +8170,8 @@ $('adminForceSyncBtn').addEventListener('click', async () => {
   if(typeof updateToggleSyncBtn==='function') updateToggleSyncBtn();
   updateSyncInfo('正在上传…');
   const ok = await uploadToCloud(true);
-  toast(ok ? '✅ 已上传本地数据到云端' : '⚠️ 上传失败：请检查网络');
-  if(!ok) updateSyncInfo('上传失败');
+  toast(ok ? '✅ 已上传本地数据到云端' : ('⚠️ 上传失败：' + (lastCloudUploadError || '请检查网络、Firebase 权限或请求大小')).slice(0,150));
+  if(!ok) updateSyncInfo('上传失败：' + (lastCloudUploadError || '请检查网络或 Firebase 权限').slice(0,120));
 });
 $('adminForcePullBtn').addEventListener('click', async () => {
   if(!dataRef){ toast('⚠️ 云端未连接'); return; }
@@ -9107,6 +9298,10 @@ function saveTaskBlank(task, idx, value, soft){
     font-size:14px !important; color:#7b8790 !important; font-weight:500;
   }
   #adminPanel :is(.aa-hint.warn,.aa-hint.ok) { color:#7b8790 !important; }
+
+/* 学生端抄写词语：固定每行四组并居中 */
+#appRoot .char-grid.copy-word-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;justify-content:center!important;justify-items:center!important;column-gap:20px!important;row-gap:15px!important;width:100%!important;max-width:100%!important}
+#appRoot .copy-word-grid > .char-card.wordgroup-card{margin:0!important;min-width:0;max-width:100%}
 </style>
 
 </body></html>
