@@ -481,6 +481,16 @@
   .wg-item .mizi-row{gap:2px}
 
   .wordgroup-grid{gap:12px 10px}
+  /* 预习生字作业底部附带显示当课「会识字」，田字格比普通格缩小 25% */
+  #appRoot .preview-recognize-label{font-size:15px;font-weight:800;color:#55734d;margin-top:12px;padding-top:8px;border-top:1px dashed #DCEED4}
+  #appRoot .char-grid.preview-recognize-grid{gap:6px;margin-top:6px;padding-top:4px;border-top:0}
+  #appRoot .preview-recognize-grid .word-group{gap:3px;padding:2px;border-radius:4px}
+  #appRoot .preview-recognize-grid .wg-item{gap:1px}
+  #appRoot .preview-recognize-grid .mizi{width:40.5px;height:40.5px;border-width:1px}
+  #appRoot .preview-recognize-grid .mizi-char{font-size:calc(var(--fs-mizi) * .75)}
+  #appRoot .preview-recognize-grid .char-pinyin{font-size:12px;letter-spacing:0}
+  #appRoot .preview-recognize-grid .mizi-speaker{width:16px;height:21px;font-size:11px}
+  #appRoot .preview-recognize-grid .mizi-speaker svg{width:11px;height:11px}
   /* 学生端「抄写词语」：每个词语作为一组，组间距加大；每组只保留右侧一个喇叭 */
   #appRoot .char-grid.copy-word-grid{column-gap:18px;row-gap:14px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));justify-items:center;justify-content:center;width:100%;max-width:100%;}
   #appRoot .copy-word-grid > .char-card.wordgroup-card{min-width:0;max-width:100%;}
@@ -3553,10 +3563,12 @@ async function uploadToCloud(force){
   cloudUploadInFlight = true;
   let succeeded = false;
   let attemptedAt = 0;
+  let attachmentUploadError = '';
   const uploadSeq = cloudChangeSeq;
   const previousPushedAt = lastPushedUpdatedAt;
   try{
-    // 附件逐项写入独立路径；元数据只保存名称/链接/大小，主数据不再重复携带 Base64。
+    // 附件同步与作业主数据隔离：单个附件失败时，不能阻断作业、打卡和配置同步。
+    try{
     if(studentAttachmentsRef && studentAttachmentsMetaRef && fbGet && fbSet && fbRef){
       const metaSnap = await fbGet(studentAttachmentsMetaRef);
       const oldMeta = metaSnap.exists() && metaSnap.val() && typeof metaSnap.val() === 'object' ? metaSnap.val() : {};
@@ -3581,6 +3593,10 @@ async function uploadToCloud(force){
       const oldComparable = oldItems.map(x => ({id:String(x && x.id || ''),key:String(x && x.key || ''),name:String(x && x.name || ''),url:String(x && x.url || ''),mime:String(x && x.mime || ''),size:Math.max(0,Number(x && x.size)||0),ts:Number(x && x.ts)||0,dataStored:!!(x && x.dataStored)}));
       const newComparable = metaItems.map(x => ({id:x.id,key:x.key,name:x.name,url:x.url,mime:x.mime,size:x.size,ts:x.ts,dataStored:x.dataStored}));
       if(!cloudValuesEqual(oldComparable,newComparable)) await fbSet(studentAttachmentsMetaRef, {updatedAt:Date.now(),items:metaItems});
+    }
+    }catch(attachmentError){
+      attachmentUploadError = String((attachmentError && attachmentError.code ? attachmentError.code + ': ' : '') + (attachmentError && attachmentError.message ? attachmentError.message : attachmentError || '附件同步未知错误')).slice(0,180);
+      console.warn('附件同步失败，继续同步作业主数据', attachmentError);
     }
     const payload = {
       days: state.days, date: state.date, settings: state.settings,
@@ -3640,7 +3656,14 @@ async function uploadToCloud(force){
       cloudPending = true;
       cloudUploadQueued = true;
     }
-    updateSyncInfo(changedKeys.length ? ('已同步 ' + changedKeys.length + ' 项变动') : '本地与云端一致，无需上传');
+    if(attachmentUploadError){
+      lastCloudUploadError = '作业数据已同步，但附件同步失败：' + attachmentUploadError;
+      updateSyncInfo('作业数据已同步；附件失败，请检查附件网络或权限');
+      showSyncStatus('⚠️ 作业已同步，附件待处理', 'offline');
+    }else{
+      lastCloudUploadError = '';
+      updateSyncInfo(changedKeys.length ? ('已同步 ' + changedKeys.length + ' 项变动') : '本地与云端一致，无需上传');
+    }
     return true;
   }catch(e){
     lastCloudUploadError = String((e && e.code ? e.code + ': ' : '') + (e && e.message ? e.message : e || '未知错误')).slice(0,180);
@@ -4629,6 +4652,22 @@ function renderSubjectCards(subject, listEl){
       grid.innerHTML = task.chars.map(c => renderCharCard(c, task)).join('');
       card.appendChild(grid);
       bindMiziClicks(grid, task);
+
+      // 在预习生字最下面附带显示当前课文的「会识字」词语，使用缩小 25% 的田字格。
+      const lessonEntry = task.lessonName && state.lessonLibrary ? state.lessonLibrary[task.lessonName] : null;
+      const recognizeWords = lessonEntry ? parseWords(String(lessonEntry.wordgroups || '')) : [];
+      if(recognizeWords.length){
+        const recognizeLabel = document.createElement('div');
+        recognizeLabel.className = 'preview-recognize-label';
+        recognizeLabel.textContent = '🔤 当课会识字';
+        card.appendChild(recognizeLabel);
+
+        const recognizeGrid = document.createElement('div');
+        recognizeGrid.className = 'char-grid preview-recognize-grid';
+        recognizeGrid.setAttribute('aria-label', '当课会识字');
+        recognizeGrid.innerHTML = recognizeWords.slice(0, 60).map(word => renderWordGroup(word, false, null)).join('');
+        card.appendChild(recognizeGrid);
+      }
     } else if(task.type === 'wordgroup' && Array.isArray(task.words) && task.words.length){
       const grid = document.createElement('div');
       grid.className = 'char-grid wordgroup-grid';
@@ -8170,7 +8209,11 @@ $('adminForceSyncBtn').addEventListener('click', async () => {
   if(typeof updateToggleSyncBtn==='function') updateToggleSyncBtn();
   updateSyncInfo('正在上传…');
   const ok = await uploadToCloud(true);
-  toast(ok ? '✅ 已上传本地数据到云端' : ('⚠️ 上传失败：' + (lastCloudUploadError || '请检查网络、Firebase 权限或请求大小')).slice(0,150));
+  if(ok && lastCloudUploadError.startsWith('作业数据已同步，但附件同步失败：')){
+    toast('⚠️ 作业数据已同步；附件失败：' + lastCloudUploadError.slice('作业数据已同步，但附件同步失败：'.length, 105));
+  }else{
+    toast(ok ? '✅ 已上传本地数据到云端' : ('⚠️ 上传失败：' + (lastCloudUploadError || '请检查网络、Firebase 权限或请求大小')).slice(0,150));
+  }
   if(!ok) updateSyncInfo('上传失败：' + (lastCloudUploadError || '请检查网络或 Firebase 权限').slice(0,120));
 });
 $('adminForcePullBtn').addEventListener('click', async () => {
