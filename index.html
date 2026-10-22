@@ -9347,67 +9347,76 @@ function saveTaskBlank(task, idx, value, soft){
 #appRoot .copy-word-grid > .char-card.wordgroup-card{margin:0!important;min-width:0;max-width:100%}
 </style>
 
-</body></html>
 
-
-/* 学生端字词作业布局修正：完成后保留需要继续查看的字词内容 */
-#appRoot .task-card.task-type-copy.done .char-grid,
-#appRoot .task-card.task-type-preview.done .char-grid,
-#appRoot .task-card.task-type-preview.done .preview-recognize-label,
-#appRoot .task-card.task-type-preview.done .preview-recognize-grid{
-  display: flex !important;
+<style id="student-preview-layout-fix-v2">
+/* 抄写词语勾选后仍保留田字格 */
+#appRoot .task-card.task-type-copy.done .char-grid.copy-word-grid{
+  display:grid !important;
 }
+/* 预习生字：每行两个字，每个字的田字格与偏旁、笔画、页码横向排列 */
 #appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid){
   display:grid !important;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:8px;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:7px !important;
+  width:100% !important;
   border-top:1px dashed #DCEED4;
   padding-top:8px;
+  margin-top:8px;
 }
 #appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card{
-  width:100%;
-  min-width:0;
-  display:flex;
-  flex-direction:row;
-  align-items:center;
-  justify-content:flex-start;
-  gap:5px;
-  padding:4px;
+  box-sizing:border-box;
+  width:100% !important;
+  min-width:0 !important;
+  display:flex !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:5px !important;
+  padding:4px !important;
+  margin:0 !important;
   border:1px solid #e2eee0;
   border-radius:8px;
   background:#fbfef9;
 }
-#appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card > .char-pinyin{
-  display:none;
+#appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card > .char-pinyin,
+#appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card .mizi-speaker{
+  display:none !important;
 }
 #appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card .mizi-row{
-  flex:none;
+  flex:0 0 auto !important;
+  margin:0 !important;
 }
 #appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card .mizi{
-  width:42px;
-  height:42px;
+  width:40px !important;
+  height:40px !important;
+  min-width:40px !important;
 }
 #appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card .mizi-char{
-  font-size:calc(var(--fs-mizi) * .82);
-}
-#appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card .mizi-speaker{
-  display:none;
+  font-size:calc(var(--fs-mizi) * .82) !important;
 }
 #appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card .char-info{
-  font-size:12px;
-  line-height:1.3;
-  white-space:normal;
-  min-width:0;
-  overflow-wrap:anywhere;
+  min-width:0 !important;
+  margin:0 !important;
+  padding:0 !important;
+  font-size:11px !important;
+  line-height:1.35 !important;
+  white-space:nowrap !important;
+  overflow:visible !important;
+  overflow-wrap:normal !important;
 }
-#appRoot .task-card.task-type-preview.done .char-grid:not(.preview-recognize-grid),
-#appRoot .task-card.task-type-preview.done .preview-recognize-grid{
-  display:grid !important;
+/* 预习生字完成后，“会识字”标题和内容也一起折叠 */
+#appRoot .task-card.task-type-preview.done .preview-recognize-label{
+  display:none !important;
 }
-#appRoot .task-card.task-type-preview .preview-recognize-grid{
-  display:flex;
-  flex-wrap:wrap;
+#appRoot .task-card.task-type-preview .preview-recognize-label{
+  margin-top:8px;
 }
-#appRoot .task-card.task-type-copy.done .char-grid{
-  display:grid !important;
+@media(max-width:480px){
+  #appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid){gap:5px !important;}
+  #appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card{gap:3px !important;padding:3px !important;}
+  #appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card .mizi{width:34px !important;height:34px !important;min-width:34px !important;}
+  #appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card .char-info{font-size:10px !important;}
 }
+</style>
+
+</body></html>
