@@ -9380,28 +9380,30 @@ function saveTaskBlank(task, idx, value, soft){
 #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card > .char-pinyin,
 #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .mizi-speaker{display:none !important}
 #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .mizi-row{
-  display:flex !important; flex:0 0 38px !important; width:38px !important; margin:0 !important;
+  display:flex !important; flex:0 0 44px !important; width:44px !important; margin:0 !important;
 }
 #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .mizi{
-  width:38px !important; height:38px !important; min-width:38px !important; box-sizing:border-box !important;
+  width:44px !important; height:44px !important; min-width:44px !important; box-sizing:border-box !important;
 }
 #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .mizi-char{
   font-size:calc(var(--fs-mizi, 24px) * .82) !important;
 }
 #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .char-info{
   display:block !important; flex:0 1 auto !important; min-width:0 !important; margin:0 !important; padding:0 !important;
-  font-size:11px !important; line-height:1.35 !important; white-space:nowrap !important; overflow:visible !important;
+  font-size:13px !important; line-height:1.35 !important; white-space:nowrap !important; overflow:visible !important;
 }
-/* 完成预习生字时，标题与会识字字格同时折叠；默认完成规则负责隐藏字格。 */
+/* 完成预习生字时，预习字格（含田字格、偏旁、笔画、页码）与会识字标题/字格一起折叠。 */
+#appRoot .task-card.task-type-preview.done > .char-grid:not(.preview-recognize-grid){display:none !important}
 #appRoot .task-card.task-type-preview.done > .preview-recognize-label{display:none !important}
-/* 抄写词语完成后仍显示田字格。 */
-#appRoot .task-card.task-type-copy.done > .char-grid.copy-word-grid{display:grid !important}
+#appRoot .task-card.task-type-preview.done > .preview-recognize-grid{display:none !important}
+/* 抄写词语打勾完成后，折叠隐藏整组词语田字格；未完成时仍按原布局显示。 */
+#appRoot .task-card.task-type-copy.done > .char-grid.copy-word-grid{display:none !important}
 @media(max-width:480px){
  #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid){gap:4px !important}
  #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card{gap:3px !important;padding:2px !important}
- #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .mizi-row{flex-basis:32px !important;width:32px !important}
- #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .mizi{width:32px !important;height:32px !important;min-width:32px !important}
- #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .char-info{font-size:10px !important;letter-spacing:-.4px}
+ #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .mizi-row{flex-basis:37px !important;width:37px !important}
+ #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .mizi{width:37px !important;height:37px !important;min-width:37px !important}
+ #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .char-info{font-size:11.5px !important;letter-spacing:-.4px}
 }
 </style>
 
