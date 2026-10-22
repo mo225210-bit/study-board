@@ -4524,7 +4524,7 @@ function renderSubjectCards(subject, listEl){
   }
   tasks.forEach((task, taskIndex) => {
     const card = document.createElement('div');
-    card.className = 'task-card task-type-' + (task.type || 'custom') + (task.done?' done':'');
+    card.className = 'task-card task-type-' + (task.type || 'other') + (task.done ? ' done' : '');
 
     const top = document.createElement('div'); top.className = 'card-top';
     const orderNum = document.createElement('span'); orderNum.className = 'task-order-num'; orderNum.textContent = (taskIndex + 1) + '.'; orderNum.setAttribute('aria-label', '第' + (taskIndex + 1) + '项作业');
@@ -4711,7 +4711,7 @@ function updateCardVisual(id){
   if(task.done){
     if(ref._sig === 'done') return;
     ref._sig = 'done';
-    ref.el.className = 'task-card done';
+    ref.el.className = 'task-card task-type-' + (task.type || 'other') + ' done';
     ref.timeEl.className = 't-time done-t';
     ref.timeEl.textContent = '✓ 已完成';
     ref.progressEl.className = 'card-progress';
@@ -4723,7 +4723,7 @@ function updateCardVisual(id){
   if(!isActive){
     if(ref._sig === 'idle') return;
     ref._sig = 'idle';
-    ref.el.className = 'task-card';
+    ref.el.className = 'task-card task-type-' + (task.type || 'other');
     ref.timeEl.className = 't-time';
     ref.timeEl.textContent = task.minutes+'分钟';
     ref.progressEl.className = 'card-progress';
@@ -9348,74 +9348,60 @@ function saveTaskBlank(task, idx, value, soft){
 </style>
 
 
-<style id="student-preview-layout-fix-v2">
-/* 抄写词语勾选后仍保留田字格 */
-#appRoot .task-card.task-type-copy.done .char-grid.copy-word-grid{
-  display:grid !important;
-}
-/* 预习生字：每行两个字，每个字的田字格与偏旁、笔画、页码横向排列 */
-#appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid){
+<style id="student-preview-layout-js-fix-v3">
+/* 预习生字：无论完成状态如何，任务类型类名都由 JS 保留。每行两个字。 */
+#appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid){
   display:grid !important;
   grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  align-items:stretch !important;
   gap:7px !important;
   width:100% !important;
-  border-top:1px dashed #DCEED4;
-  padding-top:8px;
-  margin-top:8px;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+  margin-top:8px !important;
 }
-#appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card{
-  box-sizing:border-box;
-  width:100% !important;
-  min-width:0 !important;
+#appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card{
   display:flex !important;
   flex-direction:row !important;
+  flex-wrap:nowrap !important;
   align-items:center !important;
   justify-content:flex-start !important;
-  gap:5px !important;
-  padding:4px !important;
-  margin:0 !important;
-  border:1px solid #e2eee0;
-  border-radius:8px;
-  background:#fbfef9;
-}
-#appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card > .char-pinyin,
-#appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card .mizi-speaker{
-  display:none !important;
-}
-#appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card .mizi-row{
-  flex:0 0 auto !important;
-  margin:0 !important;
-}
-#appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card .mizi{
-  width:40px !important;
-  height:40px !important;
-  min-width:40px !important;
-}
-#appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card .mizi-char{
-  font-size:calc(var(--fs-mizi) * .82) !important;
-}
-#appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card .char-info{
+  gap:4px !important;
+  box-sizing:border-box !important;
+  width:100% !important;
   min-width:0 !important;
+  max-width:100% !important;
+  padding:3px !important;
   margin:0 !important;
-  padding:0 !important;
-  font-size:11px !important;
-  line-height:1.35 !important;
-  white-space:nowrap !important;
-  overflow:visible !important;
-  overflow-wrap:normal !important;
+  border:1px solid #e2eee0 !important;
+  border-radius:7px !important;
+  background:#fbfef9 !important;
 }
-/* 预习生字完成后，“会识字”标题和内容也一起折叠 */
-#appRoot .task-card.task-type-preview.done .preview-recognize-label{
-  display:none !important;
+#appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card > .char-pinyin,
+#appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .mizi-speaker{display:none !important}
+#appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .mizi-row{
+  display:flex !important; flex:0 0 38px !important; width:38px !important; margin:0 !important;
 }
-#appRoot .task-card.task-type-preview .preview-recognize-label{
-  margin-top:8px;
+#appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .mizi{
+  width:38px !important; height:38px !important; min-width:38px !important; box-sizing:border-box !important;
 }
+#appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .mizi-char{
+  font-size:calc(var(--fs-mizi, 24px) * .82) !important;
+}
+#appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .char-info{
+  display:block !important; flex:0 1 auto !important; min-width:0 !important; margin:0 !important; padding:0 !important;
+  font-size:11px !important; line-height:1.35 !important; white-space:nowrap !important; overflow:visible !important;
+}
+/* 完成预习生字时，标题与会识字字格同时折叠；默认完成规则负责隐藏字格。 */
+#appRoot .task-card.task-type-preview.done > .preview-recognize-label{display:none !important}
+/* 抄写词语完成后仍显示田字格。 */
+#appRoot .task-card.task-type-copy.done > .char-grid.copy-word-grid{display:grid !important}
 @media(max-width:480px){
-  #appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid){gap:5px !important;}
-  #appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card{gap:3px !important;padding:3px !important;}
-  #appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card .mizi{width:34px !important;height:34px !important;min-width:34px !important;}
-  #appRoot .task-card.task-type-preview .char-grid:not(.preview-recognize-grid) > .char-card .char-info{font-size:10px !important;}
+ #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid){gap:4px !important}
+ #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card{gap:3px !important;padding:2px !important}
+ #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .mizi-row{flex-basis:32px !important;width:32px !important}
+ #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .mizi{width:32px !important;height:32px !important;min-width:32px !important}
+ #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .char-info{font-size:10px !important;letter-spacing:-.4px}
 }
 </style>
 
