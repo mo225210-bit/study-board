@@ -3310,7 +3310,7 @@ function bindMiziClicks(container, task){
       clickTimer = setTimeout(() => {
         lastClickAt = 0;
         if(!task) { showStroke(el.dataset.char, null, 'plain'); return; }
-        if(task.type === 'wordgroup' || task.type === 'copy'){
+        if(task.type === 'wordgroup'){
           showStroke(el.dataset.char, task, 'wordgroup');
         } else {
           showStroke(el.dataset.char, task, 'plain');
@@ -6534,10 +6534,13 @@ function loadHanziData(char, onComplete, onError){
 }
 
 function showStroke(char, task, mode){
+  const canManageWords = !!(task && task.type === 'wordgroup');
   const addWordBtn = $('strokeVoiceAddBtn');
-  if(addWordBtn) addWordBtn.style.display = isAdminMode ? 'inline-flex' : 'none';
+  if(addWordBtn) addWordBtn.style.display = canManageWords ? 'inline-flex' : 'none';
   const voiceInput = $('strokeVoiceInput');
-  if(voiceInput) voiceInput.style.display = isAdminMode ? '' : 'none';
+  if(voiceInput) voiceInput.style.display = canManageWords ? '' : 'none';
+  const wordsBox = $('strokeWords');
+  if(wordsBox) wordsBox.style.display = canManageWords ? '' : 'none';
   if(!char || !/[\u4e00-\u9fa5]/.test(char)) return;
   if(mode === 'quiz'){
     showStrokeQuiz(char, task);
@@ -6563,11 +6566,12 @@ function showStroke(char, task, mode){
   strokeMetaEl.innerHTML = metaHtml;
   strokeStage.innerHTML = '';
 
-  if(currentStrokeMode === 'wordgroup'){
+  if(currentStrokeMode === 'wordgroup' && canManageWords){
     setStrokeToolsVisible(true);
     renderStrokeWords(char);
   } else {
     setStrokeToolsVisible(false);
+    if(wordsBox) wordsBox.innerHTML = '';
   }
 
   const wordInput = $('strokeVoiceInput');
@@ -9365,8 +9369,10 @@ function saveTaskBlank(task, idx, value, soft){
   margin-top:8px !important;
 }
 #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card{
+  position:relative !important;
   display:flex !important;
   flex-direction:row !important;
+  padding-top:24px !important;
   flex-wrap:nowrap !important;
   align-items:center !important;
   justify-content:flex-start !important;
@@ -9382,8 +9388,9 @@ function saveTaskBlank(task, idx, value, soft){
   background:#fbfef9 !important;
 }
 #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card > .char-pinyin{
-  display:block !important; flex:0 0 auto !important; width:auto !important; max-width:none !important;
-  font-size:18px !important; line-height:1.2 !important; white-space:nowrap !important;
+  display:block !important; position:absolute !important; top:2px !important; left:4px !important;
+  width:auto !important; max-width:none !important; margin:0 !important; padding:0 !important;
+  font-size:18px !important; line-height:1.15 !important; white-space:nowrap !important;
 }
 #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .mizi-speaker{display:inline-flex !important}
 #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .mizi-row{
