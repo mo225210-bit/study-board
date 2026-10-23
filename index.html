@@ -6157,34 +6157,7 @@ $('paperPrintBtn').addEventListener('click', () => {
     + '@page{size:A4 portrait;margin:0}'
     + 'html,body{margin:0!important;padding:0!important;width:210mm;height:auto;min-height:0;background:#fff;overflow:visible;position:relative}'
     + 'img{display:block;width:105mm!important;max-width:105mm!important;height:auto!important;max-height:none!important;object-fit:contain;object-position:top left;margin:0!important;padding:0;border:0;page-break-after:avoid;page-break-inside:avoid;break-inside:avoid;position:absolute;left:0;top:0}'
-    + '</style></head><body><img src="'+paper.data+'">
-<style id="student-requested-fixes-v1">
-/* 学生端文字字号不低于18px（保留田字格内部字形的自适应尺寸） */
-#appRoot .task-text,
-#appRoot .task-info,
-#appRoot .task-info .t-min,
-#appRoot .task-info .t-sun,
-#appRoot .task-info .t-time,
-#appRoot .char-pinyin,
-#appRoot .char-info,
-#appRoot .preview-recognize-label,
-#appRoot .empty-tip,
-#appRoot .word-empty,
-#appRoot .student-lesson-pick {font-size:18px !important}
-/* 预习生字大田字格与抄写词语田字格统一为54×54px，拼音显示在格子上方 */
-#appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .mizi {
- width:54px !important;height:54px !important;min-width:54px !important;
-}
-#appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .mizi-char {
- font-size:var(--fs-mizi,38px) !important;
-}
-#appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .char-pinyin {
- display:block !important;font-size:18px !important;
-}
-#appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .char-info {font-size:18px !important}
-</style>
-
-</body></html>');
+    + '</style></head><body><img src="'+paper.data+'"></body></html>');
   doc.close();
 });
 $('uploadChinesePaperBtn').addEventListener('click', openChinesePaperPreview);
@@ -9442,6 +9415,9 @@ function saveTaskBlank(task, idx, value, soft){
 </style>
 
 
+
+
+
 <style id="student-requested-fixes-v1">
 /* 学生端文字字号不低于18px（保留田字格内部字形的自适应尺寸） */
 #appRoot .task-text,
@@ -9467,5 +9443,4 @@ function saveTaskBlank(task, idx, value, soft){
 }
 #appRoot .task-card.task-type-preview > .char-grid:not(.preview-recognize-grid) > .char-card .char-info {font-size:18px !important}
 </style>
-
 </body></html>
